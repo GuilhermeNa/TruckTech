@@ -1,112 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".ui.fragments.nav_travel.freight.freight_editor.FreightEditorFragment">
 
     <include
         android:id="@+id/fragment_freight_editor_toolbar"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        layout="@layout/layout_toolbar"/>
-
-    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp">
+        layout="@layout/layout_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Cliente"
-            android:textStyle="bold"
-            android:textSize="14sp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Embarcador">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Origem">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Destino">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
+    <View
+        android:id="@+id/frag_freight_editor_black_layer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp">
+        android:layout_height="match_parent"
+        android:background="@color/black_layer"
+        android:visibility="gone" />
 
-        <TextView
-            android:layout_width="match_parent"
+    <ScrollView
+        android:fillViewport="true"
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/fragment_freight_editor_toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_height="wrap_content"
-            android:text="Carga"
-            android:textStyle="bold"
-            android:textSize="14sp"/>
+            android:layout_width="match_parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Conteúdo">
-
-            <com.google.android.material.textfield.TextInputEditText
+            <LinearLayout
+                android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:orientation="vertical">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <TextView
+                    android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:id="@+id/frag_freight_editor_date"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="64dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_width="match_parent"
+                    android:padding="8dp"
+                    app:drawableStartCompat="@drawable/icon_calendar"
+                    tools:text="23 de abril de 2024" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Peso">
+                <LinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_width="match_parent"
+                    android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:text="Cliente"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:hint="Embarcador"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Valor">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/frag_freight_editor_company"
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-        </com.google.android.material.textfield.TextInputLayout>
-    </LinearLayout>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:hint="Origem"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
 
-</LinearLayout>
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/frag_freight_editor_origin"
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:hint="Destino"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/frag_freight_editor_destiny"
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_width="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:text="Carga"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:hint="Conteúdo"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/frag_freight_editor_cargo"
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:hint="Peso"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/frag_freight_editor_weight"
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:hint="Valor"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/frag_freight_editor_value"
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+

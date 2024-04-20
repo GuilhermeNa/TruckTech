@@ -115,5 +115,18 @@
     <string name="key">Chave</string>
     <string name="main_acc">Conta principal</string>
     <string name="start">Inicio</string>
+    <string name="full_tank">Tanque cheio</string>
+    <string name="odometer_measure">Quilometragem</string>
+    <string name="amount_liters">Quantidade de litros</string>
+    <string name="value_liter">Valor do litro</string>
+    <string name="total_value">Valor total</string>
+    <string name="diesel">Diesel</string>
+    <string name="general_information">Informações gerais</string>
+    <string name="company">Empresa</string>
+    <string name="description">Descrição</string>
+    <string name="daily">Diárias</string>
+    <string name="freight_value">Valor do frete</string>
+    <string name="daily_value">Valor total das diárias</string>
+    <string name="break_down">Avarias</string>
 
 </resources>

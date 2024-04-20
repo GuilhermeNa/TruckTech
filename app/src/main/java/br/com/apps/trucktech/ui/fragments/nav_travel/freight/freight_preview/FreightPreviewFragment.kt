@@ -2,29 +2,40 @@ package br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_preview
 
 import android.os.Bundle
 import android.text.SpannableString
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
+import br.com.apps.model.model.travel.Freight
+import br.com.apps.repository.CANCEL
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.FAILED_TO_REMOVE
+import br.com.apps.repository.OK
+import br.com.apps.repository.Response
+import br.com.apps.repository.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentFreightPreviewBinding
-import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
+import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
+import br.com.apps.trucktech.expressions.snackBarOrange
+import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toBold
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
-import br.com.apps.trucktech.expressions.toItalic
 import br.com.apps.trucktech.expressions.toUnderline
-import br.com.apps.trucktech.model.freight.Freight
-import br.com.apps.trucktech.sampleFreightList
 import br.com.apps.trucktech.ui.fragments.base_fragments.BasePreviewFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 private const val COLLAPSING_TOOLBAR_URL_IMAGE =
     "https://www.datamex.com.br/blog/wp-content/uploads/2018/10/248950-frete-de-retorno-9-dicas-para-facilitar-esse-processo.jpg"
-
 private const val FREIGHT = "Frete"
+private const val DIALOG_TITLE = "Removendo Frete."
+private const val DIALOG_MESSAGE = "Você realmente deseja apagar este frete permanentemente?"
 
 /**
  * A simple [Fragment] subclass.
@@ -37,7 +48,7 @@ class FreightPreviewFragment : BasePreviewFragment() {
     private val binding get() = _binding!!
 
     private val args: FreightPreviewFragmentArgs by navArgs()
-    private lateinit var freight: Freight
+    private val viewModel: FreightPreviewViewModel by viewModel { parametersOf(args.freightId) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -55,6 +66,11 @@ class FreightPreviewFragment : BasePreviewFragment() {
     // INTERFACE
     //---------------------------------------------------------------------------------------------//
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initStateManager()
+    }
+
     override fun configureBaseFragment(configurator: BasePreviewConfigurator) {
         configurator.collapsingToolbar(
             collapsingToolbar = binding.fragmentFreightPreviewCollapsingToolbar.collapsingToolbar,
@@ -68,38 +84,49 @@ class FreightPreviewFragment : BasePreviewFragment() {
 
     }
 
-    override fun loadData() {
-        freight = sampleFreightList.first { it.id == args.freightId }
+    /**
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *  - Observes freightData to bind the [Freight].
+     *
+     */
+    private fun initStateManager() {
+        viewModel.freightData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                is Response.Success -> {
+                    response.data?.let { bind(it) }
+                }
+            }
+        }
     }
 
-    override fun bind() {
+    private fun bind(freight: Freight) {
         binding.apply {
             fragmentFreightPreviewClient.text = freight.company
-            fragmentFreightPreviewValue.text = freight.value.toCurrencyPtBr()
+            fragmentFreightPreviewValue.text = freight.value?.toCurrencyPtBr()
             fragmentFreightPreviewBreakDown.text = freight.breakDown?.toCurrencyPtBr() ?: "-"
+            fragmentFreightPreviewDaily.text = freight.daily?.toString() ?: "-"
+            fragFreightPreviewDailyValue.text = freight.dailyTotalValue?.toCurrencyPtBr() ?: "-"
 
             val dateFormatted =
-                SpannableString(freight.date.getMonthAndYearInPtBr())
+                SpannableString(freight.loadingDate?.getCompleteDateInPtBr())
                     .toBold()
-                    .toItalic()
                     .toUnderline()
 
             val cargoFormatted =
                 SpannableString(freight.cargo)
                     .toBold()
-                    .toItalic()
                     .toUnderline()
 
             val originFormatted =
                 SpannableString(freight.origin)
                     .toBold()
-                    .toItalic()
                     .toUnderline()
 
             val destinyFormatted =
                 SpannableString(freight.destiny)
                     .toBold()
-                    .toItalic()
                     .toUnderline()
 
             fragmentFreightPreviewDescription.text = buildSpannedString {
@@ -113,19 +140,55 @@ class FreightPreviewFragment : BasePreviewFragment() {
                 append(destinyFormatted)
                 append(".")
             }
+
         }
     }
 
-    override fun onDeleteClick() {
-        requireView().popBackStack()
+    /**
+     * Try to delete the [Freight].
+     *  1. Displays a confirmation dialog to delete the [Freight].
+     *  2. Sends a request to the [viewModel] to delete the [Freight].
+     */
+    override fun onDeleteMenuClick() {
+        showAlertDialog()
     }
 
-    override fun onEditCLickDirection() {
+    private fun showAlertDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setIcon(R.drawable.icon_delete)
+            .setTitle(DIALOG_TITLE)
+            .setMessage(DIALOG_MESSAGE)
+            .setPositiveButton(OK) { _, _ -> deleteFreight() }
+            .setNegativeButton(CANCEL) { _, _ -> }
+            .create().apply {
+                window?.setGravity(Gravity.CENTER)
+                show()
+            }
+    }
+
+    private fun deleteFreight() {
+        viewModel.delete().observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
+                is Response.Success -> {
+                    requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                    requireView().popBackStack()
+                }
+            }
+        }
+    }
+
+    /**
+     * Navigate to the editor fragment.
+     */
+    override fun onEditMenuCLick() {
         requireView()
             .navigateTo(
-                FreightPreviewFragmentDirections.actionFreightPreviewFragmentToFreightEditorFragment(
-                    args.freightId
-                )
+                FreightPreviewFragmentDirections
+                    .actionFreightPreviewFragmentToFreightEditorFragment(
+                        args.freightId,
+                        args.travelId
+                    )
             )
     }
 
@@ -134,8 +197,8 @@ class FreightPreviewFragment : BasePreviewFragment() {
     //---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
-        _binding = null
         super.onDestroyView()
+        _binding = null
     }
 
 }

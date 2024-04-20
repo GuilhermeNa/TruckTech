@@ -1,20 +1,21 @@
 package br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.payroll.Advance
 import br.com.apps.trucktech.databinding.ItemAdvanceBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
-import br.com.apps.trucktech.model.payroll.PayrollAdvance
 
 class AdvanceRecyclerAdapter(
-
     private val context: Context,
-    private val dataSet: List<PayrollAdvance>
-
+    dataSet: List<Advance>
     ) : RecyclerView.Adapter<AdvanceRecyclerAdapter.ViewHolder>() {
+
+    private val dataSet = dataSet.toMutableList()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER
@@ -46,11 +47,18 @@ class AdvanceRecyclerAdapter(
 
     override fun getItemCount(): Int = dataSet.size
 
-    fun bind(holder: ViewHolder, advance: PayrollAdvance) {
+    fun bind(holder: ViewHolder, advance: Advance) {
         holder.apply {
-            date.text = advance.date.getMonthAndYearInPtBr()
-            value.text = advance.value.toCurrencyPtBr()
+            date.text = advance.date?.getMonthAndYearInPtBr()
+            value.text = advance.value?.toCurrencyPtBr()
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun update(dataSet: List<Advance>) {
+        this.dataSet.clear()
+        this.dataSet.addAll(dataSet)
+        notifyDataSetChanged()
     }
 
 

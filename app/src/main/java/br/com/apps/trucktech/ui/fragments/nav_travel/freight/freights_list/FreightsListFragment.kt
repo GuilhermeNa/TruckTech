@@ -1,7 +1,6 @@
 package br.com.apps.trucktech.ui.fragments.nav_travel.freight.freights_list
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,30 +8,29 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.travel.Freight
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.NULL_DATE
+import br.com.apps.repository.Response
 import br.com.apps.trucktech.databinding.FragmentFreightsListBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
-import br.com.apps.trucktech.model.freight.Freight
-import br.com.apps.trucktech.sampleFreightList
+import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.KEY_ID
 import br.com.apps.trucktech.ui.PAGE_FREIGHT
-import br.com.apps.trucktech.ui.fragments.nav_travel.records.RecordsFragmentViewModel
+import br.com.apps.trucktech.ui.fragments.nav_travel.records.RecordsViewModel
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.RecordsItemRecyclerAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import java.security.InvalidParameterException
 
-/**
- * A simple [Fragment] subclass.
- * Use the [FreightsListFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class FreightsListFragment : Fragment() {
 
     private var _binding: FragmentFreightsListBinding? = null
     private val binding get() = _binding!!
 
-    private val sharedViewModel by viewModels<RecordsFragmentViewModel>({requireParentFragment()})
-    private val viewModel: FreightsListFragmentViewModel by viewModel { parametersOf(sharedViewModel.travelId) }
+    private val sharedViewModel by viewModels<RecordsViewModel>({ requireParentFragment() })
+    private val viewModel: FreightsListViewModel by viewModel { parametersOf(sharedViewModel.travelId) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE
@@ -40,7 +38,6 @@ class FreightsListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -61,15 +58,40 @@ class FreightsListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val listSorted = initAdapters()
-        initRecyclerView(listSorted)
+        initStateManager()
     }
 
-    private fun initAdapters(): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
-        return sampleFreightList
-            .sortedBy { it.date }
+    /**
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *   - Observes freightData for bind the recyclerView
+     */
+    private fun initStateManager() {
+        viewModel.freightData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+
+                is Response.Success -> {
+                    val dataSet = response.data ?: emptyList()
+                    initRecyclerView(initAdapters(dataSet))
+                }
+            }
+        }
+    }
+
+    private fun initRecyclerView(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
+        val concatAdapter = ConcatAdapter(adapters)
+        val recyclerView = binding.freightFragmentRecycler
+        recyclerView.adapter = concatAdapter
+    }
+
+    private fun initAdapters(dataSet: List<Freight>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
+        return dataSet
+            .sortedBy { it.loadingDate }
             .reversed()
-            .groupBy { it.date.getMonthAndYearInPtBr() }
+            .groupBy {
+                it.loadingDate?.getMonthAndYearInPtBr() ?: throw InvalidParameterException(NULL_DATE)
+            }
             .map { createAdapters(it) }
             .flatten()
     }
@@ -86,12 +108,6 @@ class FreightsListFragment : Fragment() {
                     parentFragmentManager.setFragmentResult(PAGE_FREIGHT, bundle)
                 })
         )
-
-    private fun initRecyclerView(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
-        val concatAdapter = ConcatAdapter(adapters)
-        val recyclerView = binding.freightFragmentRecycler
-        recyclerView.adapter = concatAdapter
-    }
 
     //---------------------------------------------------------------------------------------------//
     // ON DESTROY VIEW

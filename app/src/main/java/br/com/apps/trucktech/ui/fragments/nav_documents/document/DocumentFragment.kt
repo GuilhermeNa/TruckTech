@@ -33,7 +33,7 @@ class DocumentFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: DocumentFragmentArgs by navArgs()
-    private val viewModel: DocumentFragmentViewModel by viewModel { parametersOf(args.documentId) }
+    private val viewModel: DocumentViewModel by viewModel { parametersOf(args.documentId) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE

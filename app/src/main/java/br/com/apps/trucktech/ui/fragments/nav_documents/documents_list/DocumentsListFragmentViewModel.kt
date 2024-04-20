@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.Document
-import br.com.apps.model.model.Label
-import br.com.apps.model.model.LabelType
+import br.com.apps.model.model.label.Label
+import br.com.apps.model.model.label.LabelType
 import br.com.apps.repository.Response
 import br.com.apps.usecase.DocumentUseCase
 import br.com.apps.usecase.LabelUseCase
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 class DocumentsListFragmentViewModel(
@@ -19,24 +21,47 @@ class DocumentsListFragmentViewModel(
     private val labelUseCase: LabelUseCase
 ) : ViewModel() {
 
-    private val _loadedData = MutableLiveData<Response<List<Document>>>()
-    val loadedData get() = _loadedData
+    private val _documentData = MutableLiveData<Response<List<Document>>>()
+    val documentData get() = _documentData
 
     fun loadData() {
         viewModelScope.launch {
-            documentUseCase.getByTruckId(truckId).asFlow().collect { documentResponse ->
-                when (documentResponse) {
-                    is Response.Success -> {
-                        labelUseCase.getAllByType(LabelType.DOCUMENT, masterUid).asFlow()
-                            .collect { labelResponse ->
-                                mergeData(documentResponse.data, labelResponse)
-                                _loadedData.postValue(Response.Success(data = documentResponse.data))
-                            }
-                    }
+            val documentList = mutableListOf<Document>()
+            val labelList = mutableListOf<Label>()
 
-                    is Response.Error -> throw IllegalArgumentException()
+            val liveDataA = documentUseCase.getByTruckId(truckId)
+            val liveDataB = labelUseCase.getAllByType(LabelType.DOCUMENT, masterUid)
+
+            val deferredA = async {
+                liveDataA.asFlow().collect { responseA ->
+                    when (responseA) {
+                        is Response.Error -> throw IllegalArgumentException()
+
+                        is Response.Success -> {
+                            documentList.clear()
+                            documentList.addAll(responseA.data!!)
+                        }
+                    }
                 }
             }
+
+            val deferredB = async {
+                liveDataB.asFlow().collect { responseB ->
+                    when (responseB) {
+                        is Response.Error -> throw IllegalArgumentException()
+
+                        is Response.Success -> {
+                            labelList.clear()
+                            labelList.addAll(responseB.data!!)
+
+                        }
+                    }
+                }
+            }
+
+            awaitAll(deferredA, deferredB)
+            mergeData(documentList, labelList)
+            _documentData.postValue(Response.Success(data = documentList))
         }
     }
 

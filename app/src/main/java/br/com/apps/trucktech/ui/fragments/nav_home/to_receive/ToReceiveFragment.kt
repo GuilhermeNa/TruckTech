@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import br.com.apps.trucktech.databinding.FragmentToReceiveBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 private const val TOOLBAR_TITLE = "Valores a receber"
 
@@ -23,7 +23,7 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentToReceiveBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: ToReceiveFragmentViewModel by viewModels()
+    private val viewModel: ToReceiveFragmentViewModel by viewModel()
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE
@@ -57,6 +57,17 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
         initDiscountsPanel()
     }
 
+    override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
+        configurator.toolbar(
+            hasToolbar = true,
+            toolbar = binding.fragmentToReceiveToolbar.toolbar,
+            menuId = null,
+            toolbarTextView = binding.fragmentToReceiveToolbar.toolbarText,
+            title = TOOLBAR_TITLE
+        )
+        configurator.bottomNavigation(hasBottomNavigation = false)
+    }
+
     private fun initPaymentsPanel() {
         binding.fragmentToReceivePanelPayments.apply {
             panelToReceiveFragmentPaymentsImage.loadImageThroughUrl(viewModel.paymentsUrlImage, requireContext())
@@ -84,16 +95,7 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
         }
     }
 
-    override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
-        configurator.toolbar(
-            hasToolbar = true,
-            toolbar = binding.fragmentToReceiveToolbar.toolbar,
-            menuId = null,
-            toolbarTextView = binding.fragmentToReceiveToolbar.toolbarText,
-            title = TOOLBAR_TITLE
-        )
-        configurator.bottomNavigation(hasBottomNavigation = true)
-    }
+
 
     //---------------------------------------------------------------------------------------------//
     // ON DESTROY VIEW

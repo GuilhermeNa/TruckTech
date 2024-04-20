@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.factory.RequestItemDtoFactory
 import br.com.apps.model.mapper.toDto
+import br.com.apps.model.model.label.DEFAULT_REFUEL_LABEL_ID
 import br.com.apps.model.model.request.request.RequestItemType
 import br.com.apps.repository.FAILED_TO_SALVE
 import br.com.apps.repository.SUCCESSFULLY_SAVED
@@ -15,7 +16,6 @@ import br.com.apps.trucktech.databinding.FragmentRequestEditorRefuelBinding
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
-import br.com.apps.trucktech.model.label.DEFAULT_REFUEL_LABEL_ID
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf

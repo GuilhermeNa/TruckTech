@@ -2,37 +2,33 @@ package br.com.apps.model.mapper
 
 import br.com.apps.model.dto.FineDto
 import br.com.apps.model.model.Fine
-import java.time.LocalDateTime
-import java.util.Date
-
-class FineMapper {
-
-    companion object {
+import br.com.apps.model.toDate
+import br.com.apps.model.toLocalDateTime
+import java.math.BigDecimal
 
 
-        fun toModel(fineDto: FineDto): Fine {
-            return Fine(
-                uid = fineDto.uid,
-                id = fineDto.id,
-                truckId = fineDto.truckId,
-                driverId = fineDto.driverId,
-                date = fineDto.date?.let { getDate(fineDto.date) },
-                description = fineDto.description ?: "",
-                code = fineDto.code ?: ""
-            )
+fun FineDto.toModel(): Fine {
+    return Fine(
+        masterUid = this.masterUid,
+        id = this.id,
+        truckId = this.truckId,
+        driverId = this.driverId,
+        date = this.date?.toLocalDateTime(),
+        description = this.description,
+        code = this.code,
+        value = this.value?.let { BigDecimal(it) }
+    )
+}
 
-        }
-
-        private fun getDate(date: Date): LocalDateTime {
-            val instant = date.toInstant()
-            return LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault())
-        }
-
-    }
-
-
-
-
-
-
+fun Fine.toDto(): FineDto {
+    return FineDto(
+        masterUid = this.masterUid,
+        id = this.id,
+        truckId = this.truckId,
+        driverId = this.driverId,
+        date = this.date?.toDate(),
+        description = this.description,
+        code = this.code,
+        value = this.value?.toDouble()
+    )
 }

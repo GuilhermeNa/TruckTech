@@ -7,7 +7,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
 import br.com.apps.trucktech.databinding.FragmentRecordsBinding
@@ -19,6 +18,7 @@ import br.com.apps.trucktech.ui.PAGE_REFUEL
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_travel.records.private_adapters.RecordsFragmentViewPagerAdapter
 import com.google.android.material.tabs.TabLayoutMediator
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 private const val NUMBER_OF_PAGES = 3
 private const val TOOLBAR_TITLE = "Registros"
@@ -34,7 +34,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: RecordsFragmentArgs by navArgs()
-    val viewModel by viewModels<RecordsFragmentViewModel>()
+    private val viewModel: RecordsViewModel by viewModel()
 
     private var viewPager2: ViewPager2? = null
     private val onPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
@@ -48,7 +48,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         if (requestKey == PAGE_FREIGHT) {
             val id = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToFreightPreviewFragment(id!!)
+                RecordsFragmentDirections.actionRecordsFragmentToFreightPreviewFragment(id!!, args.travelId)
             )
         }
     }
@@ -56,7 +56,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         if (requestKey == PAGE_REFUEL) {
             val id = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToRefuelPreviewFragment(id!!)
+                RecordsFragmentDirections.actionRecordsFragmentToRefuelPreviewFragment(id!!, args.travelId)
             )
         }
     }
@@ -64,7 +64,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         if (requestKey == PAGE_COST) {
             val id = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToCostPreviewFragment(id!!)
+                RecordsFragmentDirections.actionRecordsFragmentToCostPreviewFragment(id!!, args.travelId)
             )
         }
     }
@@ -76,6 +76,8 @@ class RecordsFragment : BaseFragmentWithToolbar() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.travelId = args.travelId
+        viewModel.masterUid = sharedViewModel.userData.value?.user?.masterUid!!
+        viewModel.loadData()
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -120,17 +122,17 @@ class RecordsFragment : BaseFragmentWithToolbar() {
 
                 0 -> {
                     clearMenu()
-                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToFreightEditorFragment(null))
+                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToFreightEditorFragment(null, args.travelId))
                 }
 
                 1 -> {
                     clearMenu()
-                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToRefuelEditorFragment(null))
+                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToRefuelEditorFragment(null, args.travelId))
                 }
 
                 2 -> {
                     clearMenu()
-                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToCostEditorFragment(null))
+                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToCostEditorFragment(null, args.travelId))
                 }
 
                 else -> throw IllegalArgumentException("Position does not represents any valid fragment")

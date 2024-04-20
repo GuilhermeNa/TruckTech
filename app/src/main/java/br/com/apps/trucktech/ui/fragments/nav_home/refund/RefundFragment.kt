@@ -2,19 +2,19 @@ package br.com.apps.trucktech.ui.fragments.nav_home.refund
 
 import android.os.Bundle
 import android.text.SpannableString
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.finance.Cost
 import br.com.apps.trucktech.databinding.FragmentRefundBinding
 import br.com.apps.trucktech.expressions.toBold
 import br.com.apps.trucktech.expressions.toItalic
 import br.com.apps.trucktech.expressions.toUnderline
-import br.com.apps.trucktech.sampleTravelCostForPaymentList
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.public_adapters.ToReceiveRecyclerAdapter
 
@@ -90,7 +90,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
 
     private fun initRecyclerView() {
         val recyclerView = binding.fragmentRefundRecycler
-        val adapter = ToReceiveRecyclerAdapter(requireContext(), sampleTravelCostForPaymentList)
+        val adapter = ToReceiveRecyclerAdapter(requireContext(), emptyList<Cost>())
         recyclerView.adapter = adapter
 
         val divider = DividerItemDecoration(recyclerView.context, RecyclerView.VERTICAL)

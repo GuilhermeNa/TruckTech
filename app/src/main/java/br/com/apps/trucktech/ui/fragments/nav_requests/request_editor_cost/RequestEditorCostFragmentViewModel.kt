@@ -5,14 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.model.Label
-import br.com.apps.model.model.LabelType
+import br.com.apps.model.model.label.Label
+import br.com.apps.model.model.label.LabelType
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.Resource
 import br.com.apps.usecase.LabelUseCase
 import br.com.apps.usecase.RequestUseCase
 import kotlinx.coroutines.launch
+import java.security.InvalidParameterException
 
 class RequestEditorCostFragmentViewModel(
     private val masterUid: String?,
@@ -49,9 +50,10 @@ class RequestEditorCostFragmentViewModel(
         masterUid?.let {
             viewModelScope.launch {
 
-                labelUseCase.getOperationalLabels(masterUid, LabelType.COST).asFlow()
+                labelUseCase.getOperationalLabels(masterUid, LabelType.COST, true).asFlow()
                     .collect {
-                        _loadedLabelsData.value = it
+                        throw InvalidParameterException()
+                       /* _loadedLabelsData.value = it
 
                         requestUseCase.getRequestAndItemsById(requestId).asFlow()
                             .collect { resource ->
@@ -61,7 +63,7 @@ class RequestEditorCostFragmentViewModel(
                                     }
                                 }
                                 _loadedRequest.value = resource
-                            }
+                            }*/
 
                     }
             }
@@ -77,10 +79,6 @@ class RequestEditorCostFragmentViewModel(
                 _requestItemSaved.value = it
             }
         }
-    }
-
-    fun getListOfTitles(labels: List<Label>): List<String> {
-        return labelUseCase.getListOfTitles(labels)
     }
 
     fun getLabelDescription(): String? {

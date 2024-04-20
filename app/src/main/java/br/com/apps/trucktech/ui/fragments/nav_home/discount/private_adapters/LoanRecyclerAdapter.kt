@@ -1,20 +1,21 @@
 package br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.payroll.Loan
 import br.com.apps.trucktech.databinding.ItemLoanBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
-import br.com.apps.trucktech.model.payroll.PayrollLoan
 
 class LoanRecyclerAdapter(
-
     private val context: Context,
-    private val dataSet: List<PayrollLoan>
-
+    dataSet: List<Loan>
 ) : RecyclerView.Adapter<LoanRecyclerAdapter.ViewHolder>() {
+
+    private val dataSet = dataSet.toMutableList()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER
@@ -24,7 +25,7 @@ class LoanRecyclerAdapter(
         RecyclerView.ViewHolder(binding.root) {
         val date = binding.itemLoanDate
         val total = binding.itemLoanTotalValue
-        val installment = binding.itemLoanInstallment
+        val installmentValue = binding.itemLoanInstallment
         val paid = binding.itemLoanPaid
         val progressBar = binding.itemLoanProgressBar
     }
@@ -52,14 +53,21 @@ class LoanRecyclerAdapter(
 
     override fun getItemCount(): Int = dataSet.size
 
-    private fun bind(holder: ViewHolder, loan: PayrollLoan) {
+    private fun bind(holder: ViewHolder, loan: Loan) {
         holder.apply {
-            date.text = loan.date.getMonthAndYearInPtBr()
-            total.text = loan.value.toCurrencyPtBr()
-            installment.text = loan.installmentsValue.toCurrencyPtBr()
+            date.text = loan.date?.getMonthAndYearInPtBr()
+            total.text = loan.value?.toCurrencyPtBr()
+            installmentValue.text = loan.getInstallmentValue().toCurrencyPtBr()
             paid.text = "1/4"
             progressBar.progress = 25
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun update(dataSet: List<Loan>) {
+        this.dataSet.clear()
+        this.dataSet.addAll(dataSet)
+        notifyDataSetChanged()
     }
 
 }

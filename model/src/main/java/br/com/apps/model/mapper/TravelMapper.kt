@@ -2,6 +2,7 @@ package br.com.apps.model.mapper
 
 import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.model.toLocalDateTime
 
 fun TravelDto.toModel(): Travel {
     return Travel(

@@ -5,24 +5,20 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.model.travel.Freight
+import br.com.apps.model.model.travel.Refuel
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRecordsBinding
 import br.com.apps.trucktech.expressions.getDayFormatted
 import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.trucktech.expressions.isLightTheme
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
-import br.com.apps.trucktech.model.costs.DefaultCost
-import br.com.apps.trucktech.model.freight.Freight
-import br.com.apps.trucktech.model.freight.FreightType
-import br.com.apps.trucktech.model.refuel.ReFuel
-import br.com.apps.trucktech.model.refuel.RefuelType
 
 class RecordsItemRecyclerAdapter<T>(
-
     private val context: Context,
     private val dataSet: List<T>,
-    var itemCLickListener: (id: String) -> Unit = {}
-
+    private val itemCLickListener: (id: String) -> Unit = {}
 ) : RecyclerView.Adapter<RecordsItemRecyclerAdapter<T>.ViewHolder>() {
 
     //--------------------------------------------------------------------------------------------//
@@ -67,9 +63,9 @@ class RecordsItemRecyclerAdapter<T>(
 
     private fun getItemId(item: T): String {
         return when (item) {
-            is Freight -> item.id
-            is ReFuel -> item.id
-            is DefaultCost -> item.id
+            is Freight -> item.id!!
+            is Refuel -> item.id!!
+            is Expend -> item.id!!
             else -> throw IllegalArgumentException("Object not supported")
         }
     }
@@ -77,24 +73,20 @@ class RecordsItemRecyclerAdapter<T>(
     private fun bind(holder: ViewHolder, t: T) {
         when (t) {
             is Freight -> bindFreight(holder, t as Freight)
-            is ReFuel -> bindFuel(holder, t as ReFuel)
-            is DefaultCost -> bindCost(holder, t as DefaultCost)
+            is Refuel -> bindFuel(holder, t as Refuel)
+            is Expend -> bindCost(holder, t as Expend)
         }
     }
 
     private fun bindFreight(holder: ViewHolder, freight: Freight) {
         holder.apply {
-            month.text = freight.date.getMonthInPtBrAbbreviated()
-            day.text = freight.date.getDayFormatted()
+            month.text = freight.loadingDate?.getMonthInPtBrAbbreviated()
+            day.text = freight.loadingDate?.getDayFormatted()
             title.text = freight.company
-            description.text = "Voce carregou para Barcarena"
-            value.text = freight.value.toCurrencyPtBr()
+            description.text = freight.getTextDescription()
+            value.text = freight.value?.toCurrencyPtBr()
             image.run {
-                if (freight.type == FreightType.DEFAULT) {
-                    setImageResource(R.drawable.image_icon_freight)
-                } else {
-                    setImageResource(R.drawable.image_icon_complement)
-                }
+                setImageResource(R.drawable.image_icon_freight)
                 if (image.isLightTheme()) {
                     setBackgroundColor(ContextCompat.getColor(context, R.color.light_green))
                     value.setTextColor(ContextCompat.getColor(context, R.color.dark_green))
@@ -103,31 +95,18 @@ class RecordsItemRecyclerAdapter<T>(
                     value.setTextColor(ContextCompat.getColor(context, R.color.light_green))
                 }
             }
-
         }
     }
 
-    private fun bindFuel(holder: ViewHolder, reFuel: ReFuel) {
+    private fun bindFuel(holder: ViewHolder, refuel: Refuel) {
         holder.apply {
-            month.text = reFuel.date.getMonthInPtBrAbbreviated()
-            day.text = reFuel.date.getDayFormatted()
-            title.text = reFuel.fuelStationName
-            description.text = getDescription(reFuel)
-            value.text = reFuel.getTotalValue()?.toCurrencyPtBr()
+            month.text = refuel.date?.getMonthInPtBrAbbreviated()
+            day.text = refuel.date?.getDayFormatted()
+            title.text = refuel.station
+            description.text = refuel.isCompleteRefuel?.let { getRefuelDescription(it) }
+            value.text = refuel.totalValue?.toCurrencyPtBr()
             image.run {
-                when (reFuel.type) {
-                    RefuelType.COMPLETE -> {
-                        setImageResource(R.drawable.image_icon_fuel_pump)
-                    }
-
-                    RefuelType.DIESEL_ONLY -> {
-                        setImageResource(R.drawable.image_icon_fuel_pump)
-                    }
-
-                    RefuelType.ARLA_ONLY -> {
-                        setImageResource(R.drawable.image_icon_arla)
-                    }
-                }
+                setImageResource(R.drawable.image_icon_fuel_pump)
                 if (image.isLightTheme()) {
                     setBackgroundColor(ContextCompat.getColor(context, R.color.light_cyan))
                     value.setTextColor(ContextCompat.getColor(context, R.color.dark_red))
@@ -139,32 +118,16 @@ class RecordsItemRecyclerAdapter<T>(
         }
     }
 
-    private fun bindCost(holder: ViewHolder, travelCost: DefaultCost) {
+    private fun bindCost(holder: ViewHolder, travelCost: Expend) {
         holder.apply {
-            month.text = travelCost.date.getMonthInPtBrAbbreviated()
-            day.text = travelCost.date.getDayFormatted()
+            month.text = travelCost.date?.getMonthInPtBrAbbreviated()
+            day.text = travelCost.date?.getDayFormatted()
             title.text = travelCost.company
             description.text = travelCost.description
-            value.text = travelCost.value.toCurrencyPtBr()
+            value.text = travelCost.value?.toCurrencyPtBr()
             image.run {
-                when (travelCost.label) {
-                    1L -> {
-                        setImageResource(R.drawable.image_icon_maintenance)
-                    }
+                setImageResource(R.drawable.image_icon_maintenance)
 
-                    2L -> {
-                        setImageResource(R.drawable.image_icon_tire)
-                    }
-
-                    3L -> {
-                        setImageResource(R.drawable.image_icon_unloader)
-                    }
-
-                    4L -> {
-                        setImageResource(R.drawable.image_icon_passage)
-                    }
-
-                }
                 if (image.isLightTheme()) {
                     setBackgroundColor(ContextCompat.getColor(context, R.color.light_red))
                     value.setTextColor(ContextCompat.getColor(context, R.color.dark_red))
@@ -176,9 +139,11 @@ class RecordsItemRecyclerAdapter<T>(
         }
     }
 
-    private fun getDescription(reFuel: ReFuel): String {
-        return "Você abastreceu"
+    private fun getRefuelDescription(isCompleteRefuelling: Boolean): String {
+        return when (isCompleteRefuelling) {
+            true -> "Abastecimento completo."
+            false -> "Abastecimento parcial."
+        }
     }
-
 
 }

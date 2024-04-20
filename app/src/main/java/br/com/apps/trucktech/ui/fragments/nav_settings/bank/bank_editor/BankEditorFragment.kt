@@ -118,6 +118,8 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 }
+
+                else -> {}
             }
         }
     }
@@ -202,6 +204,7 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                 }
 
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
+                else -> {}
             }
         }
     }

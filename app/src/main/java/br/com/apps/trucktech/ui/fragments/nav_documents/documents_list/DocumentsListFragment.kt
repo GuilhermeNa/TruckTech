@@ -93,7 +93,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun initStateManager() {
-        viewModel.loadedData.observe(viewLifecycleOwner) { response ->
+        viewModel.documentData.observe(viewLifecycleOwner) { response ->
             when(response) {
                 is Response.Success -> {
                     response.data?.let { adapter?.update(it) }

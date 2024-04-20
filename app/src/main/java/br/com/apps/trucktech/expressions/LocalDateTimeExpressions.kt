@@ -42,7 +42,7 @@ fun LocalDateTime.getMonthAndYearInPtBr(): String {
     val stringBuilder = StringBuilder()
     return stringBuilder
         .append(month)
-        .append(" ")
+        .append(" de ")
         .append(year)
         .toString()
 }
@@ -82,4 +82,10 @@ fun LocalDateTime.getCompleteDateInPtBr(): String {
         .append(year)
         .toString()
 }
+
+fun String.toLocalDateTime(): LocalDateTime {
+    val formatter = DateTimeFormatter.ISO_DATE_TIME
+    return LocalDateTime.parse(this, formatter)
+}
+
 

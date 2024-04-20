@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import br.com.apps.trucktech.ui.fragments.nav_travel.cost.costs_list.CostsListFragment
+import br.com.apps.trucktech.ui.fragments.nav_travel.cost.costs_list.ExpendListFragment
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freights_list.FreightsListFragment
 import br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuels_list.RefuelsListFragment
 
@@ -25,7 +25,7 @@ class RecordsFragmentViewPagerAdapter(
         return when (position) {
             0 -> FreightsListFragment()
             1 -> RefuelsListFragment()
-            2 -> CostsListFragment()
+            2 -> ExpendListFragment()
             else -> throw IllegalArgumentException("Invalid argument for fragments position")
         }
     }

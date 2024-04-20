@@ -2,21 +2,16 @@ package br.com.apps.trucktech
 
 import br.com.apps.model.model.request.payment_payroll.PaymentPayroll
 import br.com.apps.model.model.request.payment_payroll.PaymentPayrollType
+import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.trucktech.model.Fine
 import br.com.apps.trucktech.model.Performance
 import br.com.apps.trucktech.model.Truck
 import br.com.apps.trucktech.model.costs.DefaultCost
 import br.com.apps.trucktech.model.employee.AuthorizationLevelType
 import br.com.apps.trucktech.model.employee.Driver
 import br.com.apps.trucktech.model.events.TimeLineEvent
-import br.com.apps.trucktech.model.freight.Freight
-import br.com.apps.trucktech.model.freight.FreightType
-import br.com.apps.trucktech.model.label.CostLabel
 import br.com.apps.trucktech.model.payroll.PayrollAdvance
 import br.com.apps.trucktech.model.payroll.PayrollLoan
-import br.com.apps.trucktech.model.refuel.ReFuel
-import br.com.apps.trucktech.model.refuel.RefuelType
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -36,65 +31,6 @@ val sampleTruck = Truck(
     name = "RIF0A17"
 )
 
-val sampleReFuelLists = listOf(
-    ReFuel(
-        id = "1",
-        fuelStationName = "Posto Tigrão",
-        date = LocalDateTime.now(),
-        dieselValue = BigDecimal("1400.00"),
-        dieselAmount = BigDecimal("300.00"),
-        arlaValue = BigDecimal("100.00"),
-        type = RefuelType.COMPLETE
-    ),
-    ReFuel(
-        id = "2",
-        fuelStationName = "Santo Antonio",
-        date = LocalDateTime.parse("2024-01-25T12:30:45", formatter),
-        dieselValue = BigDecimal("1800.00"),
-        dieselAmount = BigDecimal("300.00"),
-        type = RefuelType.DIESEL_ONLY
-    ),
-    ReFuel(
-        id = "3",
-        fuelStationName = "Posto Santo Antonio",
-        arlaValue = BigDecimal("250.00"),
-        type = RefuelType.ARLA_ONLY,
-        date = LocalDateTime.parse("2024-01-05T12:30:45", formatter)
-    ),
-    ReFuel(
-        id = "4",
-        fuelStationName = "Tabocao",
-        dieselValue = BigDecimal("1800.00"),
-        dieselAmount = BigDecimal("300.00"),
-        type = RefuelType.DIESEL_ONLY,
-        date = LocalDateTime.parse("2023-12-25T12:30:45", formatter)
-    ),
-    ReFuel(
-        id = "5",
-        fuelStationName = "Posto Tabocao",
-        dieselValue = BigDecimal("1800.00"),
-        dieselAmount = BigDecimal("300.00"),
-        type = RefuelType.DIESEL_ONLY,
-        date = LocalDateTime.parse("2023-12-20T12:30:45", formatter)
-    ),
-    ReFuel(
-        id = "6",
-        fuelStationName = "Posto 2 Irmãos",
-        dieselValue = BigDecimal("1400.00"),
-        dieselAmount = BigDecimal("300.00"),
-        arlaValue = BigDecimal("100.00"),
-        type = RefuelType.COMPLETE,
-        date = LocalDateTime.parse("2023-12-12T12:30:45", formatter)
-    ),
-    ReFuel(
-        id = "7",
-        fuelStationName = "Posto Tigrão",
-        arlaValue = BigDecimal("250.00"),
-        type = RefuelType.ARLA_ONLY,
-        date = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
-    ),
-)
-
 val sampleFreightList = listOf(
     Freight(
         id = "1",
@@ -104,8 +40,7 @@ val sampleFreightList = listOf(
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
         breakDown = BigDecimal("200.00"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.now()
+        loadingDate = LocalDateTime.now()
     ),
     Freight(
         id = "2",
@@ -114,8 +49,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("500.09"),
-        type = FreightType.COMPLEMENT,
-        date = LocalDateTime.parse("2024-01-25T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2024-01-25T12:30:45", formatter)
     ),
     Freight(
         id = "3",
@@ -124,8 +58,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.parse("2024-01-05T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2024-01-05T12:30:45", formatter)
     ),
     Freight(
         id = "4",
@@ -134,8 +67,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.parse("2023-12-25T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2023-12-25T12:30:45", formatter)
     ),
     Freight(
         id = "5",
@@ -144,8 +76,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.COMPLEMENT,
-        date = LocalDateTime.parse("2023-12-20T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2023-12-20T12:30:45", formatter)
     ),
     Freight(
         id = "6",
@@ -154,8 +85,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.parse("2023-12-12T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2023-12-12T12:30:45", formatter)
     ),
     Freight(
         id = "7",
@@ -164,8 +94,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
     ),
     Freight(
         id = "8",
@@ -174,8 +103,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
     ),
     Freight(
         id = "9",
@@ -184,8 +112,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
     ),
     Freight(
         id = "10",
@@ -194,27 +121,7 @@ val sampleFreightList = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
-    )
-)
-
-val sampleLabelsList = listOf(
-    CostLabel(
-        id = 1,
-        name = "Manutenção"
-    ),
-    CostLabel(
-        id = 2,
-        name = "Chapa"
-    ),
-    CostLabel(
-        id = 3,
-        name = "Pedágio"
-    ),
-    CostLabel(
-        id = 4,
-        name = "Pneus"
+        loadingDate = LocalDateTime.parse("2023-12-18T12:30:45", formatter)
     )
 )
 
@@ -328,37 +235,6 @@ val samplePerformanceList = listOf(
 
 )
 
-val sampleFinesList = listOf(
-    Fine(
-        id = 1,
-        truckId = 1L,
-        driverId = 1L,
-        date = LocalDateTime.now(),
-        description = "Multa por excesso de velocidade",
-        value = BigDecimal("385.80"),
-        code = "0785"
-    ),
-    Fine(
-        id = 1,
-        truckId = 1L,
-        driverId = 1L,
-        date = LocalDateTime.parse("2023-06-18T12:30:45", formatter),
-        description = "Multa por excesso de velocidade",
-        value = BigDecimal("385.80"),
-        code = "06585"
-    ),
-    Fine(
-        id = 1,
-        truckId = 1L,
-        driverId = 1L,
-        date = LocalDateTime.parse("2023-02-25T12:30:45", formatter),
-        description = "Multa por excesso de velocidade",
-        value = BigDecimal("385.80"),
-        code = "0785"
-    )
-
-)
-
 val sampleEventsList = listOf(
     TimeLineEvent(
         id = 1,
@@ -424,8 +300,7 @@ val sampleFreightForCommission = listOf(
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
         breakDown = BigDecimal("200.00"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.now()
+        loadingDate = LocalDateTime.now()
     ),
     Freight(
         id = "2",
@@ -434,8 +309,7 @@ val sampleFreightForCommission = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("500.09"),
-        type = FreightType.COMPLEMENT,
-        date = LocalDateTime.parse("2024-01-25T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2024-01-25T12:30:45", formatter)
     ),
     Freight(
         id = "3",
@@ -444,12 +318,9 @@ val sampleFreightForCommission = listOf(
         destiny = "São paulo",
         cargo = "Amianto",
         value = BigDecimal("1800.09"),
-        type = FreightType.DEFAULT,
-        date = LocalDateTime.parse("2024-01-05T12:30:45", formatter)
+        loadingDate = LocalDateTime.parse("2024-01-05T12:30:45", formatter)
     )
 )
-
-val sampleTravelCostForPaymentList = emptyList<CostLabel>()
 
 val sampleLoanList = listOf(
     PayrollLoan(

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.expressions.getColorById
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
@@ -45,15 +44,10 @@ abstract class BasePreviewFragment : BaseFragmentForMainAct() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configureBaseFragment(configurator)
-        loadData().run { bind() }
         initMenuClickListener()
     }
 
     abstract fun configureBaseFragment(configurator: BasePreviewConfigurator)
-
-    abstract fun loadData()
-
-    abstract fun bind()
 
     private fun initMenuClickListener() {
         toolbar?.apply {
@@ -66,14 +60,13 @@ abstract class BasePreviewFragment : BaseFragmentForMainAct() {
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.menu_preview_edit -> {
-                        toolbar!!.menu.clear()
-                        onEditCLickDirection()
+                        clearMenu()
+                        onEditMenuCLick()
                         true
                     }
 
                     R.id.menu_preview_delete -> {
-                        toolbar!!.menu.clear()
-                        onDeleteClick()
+                        onDeleteMenuClick()
                         true
                     }
 
@@ -84,9 +77,13 @@ abstract class BasePreviewFragment : BaseFragmentForMainAct() {
     }
 }
 
-    abstract fun onDeleteClick()
+    fun clearMenu() {
+        toolbar!!.menu.clear()
+    }
 
-    abstract fun onEditCLickDirection()
+    abstract fun onDeleteMenuClick()
+
+    abstract fun onEditMenuCLick()
 
 //---------------------------------------------------------------------------------------------//
 // ON VIEW CREATED

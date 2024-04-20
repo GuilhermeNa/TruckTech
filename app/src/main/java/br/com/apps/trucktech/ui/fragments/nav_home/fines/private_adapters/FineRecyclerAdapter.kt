@@ -1,20 +1,21 @@
 package br.com.apps.trucktech.ui.fragments.nav_home.fines.private_adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.Fine
 import br.com.apps.trucktech.databinding.ItemFineBinding
-import br.com.apps.trucktech.expressions.getMonthInPtBr
+import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
-import br.com.apps.trucktech.model.Fine
 
 class FineRecyclerAdapter(
-
     private val context: Context,
-    private val dataSet: List<Fine>
-
+    dataSet: List<Fine>
 ) : RecyclerView.Adapter<FineRecyclerAdapter.ViewHolder>() {
+
+    private val dataSet = dataSet.toMutableList()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER
@@ -50,14 +51,21 @@ class FineRecyclerAdapter(
 
     private fun bind(holder: ViewHolder, fine: Fine) {
         holder.apply {
-            date.text = fine.date.getMonthInPtBr()
+            date.text = fine.date?.getMonthAndYearInPtBr()
             code.text = buildString {
                 append("COD. ")
                 append(fine.code)
             }
             description.text = fine.description
-            value.text = fine.value.toCurrencyPtBr()
+            value.text = fine.value?.toCurrencyPtBr()
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun update(dataSet: List<Fine>) {
+        this.dataSet.clear()
+        this.dataSet.addAll(dataSet)
+        notifyDataSetChanged()
     }
 
 }

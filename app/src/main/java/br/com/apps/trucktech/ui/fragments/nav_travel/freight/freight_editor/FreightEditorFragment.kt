@@ -1,30 +1,54 @@
 package br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_editor
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
+import br.com.apps.model.IdHolder
+import br.com.apps.model.model.travel.Freight
+import br.com.apps.model.model.travel.Freight.Companion.TAG_CARGO
+import br.com.apps.model.model.travel.Freight.Companion.TAG_COMPANY
+import br.com.apps.model.model.travel.Freight.Companion.TAG_DESTINY
+import br.com.apps.model.model.travel.Freight.Companion.TAG_ORIGIN
+import br.com.apps.model.model.travel.Freight.Companion.TAG_VALUE
+import br.com.apps.model.model.travel.Freight.Companion.TAG_WEIGHT
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.FAILED_TO_SALVE
+import br.com.apps.repository.Response
+import br.com.apps.repository.SUCCESSFULLY_SAVED
+import br.com.apps.repository.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentFreightEditorBinding
+import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
+import br.com.apps.trucktech.expressions.popBackStack
+import br.com.apps.trucktech.expressions.snackBarGreen
+import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Frete"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [FreightEditorFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class FreightEditorFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentFreightEditorBinding? = null
     private val binding get() = _binding!!
 
-
+    private val args: FreightEditorFragmentArgs by navArgs()
+    private val idHolder by lazy {
+        IdHolder(
+            masterUid = sharedViewModel.userData.value?.user?.masterUid,
+            truckId = sharedViewModel.userData.value?.truck?.id,
+            travelId = args.travelId,
+            freightId = args.freightId
+        )
+    }
+    private val viewModel: FreightEditorViewModel by viewModel { parametersOf(idHolder) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE
@@ -32,7 +56,6 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -53,7 +76,8 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        initStateManager()
+        initDateViewClickListener()
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -72,12 +96,160 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.menu_editor_save -> {
-                    clearMenu()
-                    Toast.makeText(requireContext(), "click", LENGTH_LONG)
+                    saveIconClicked()
                     true
                 }
+
                 else -> false
             }
+        }
+    }
+
+    /**
+     * Initialize the Date picker.
+     */
+    private fun initDateViewClickListener() {
+        binding.fragFreightEditorDate.setOnClickListener {
+            val datePicker =
+                MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Selecione a data")
+                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                    .build()
+
+            val calendarPositiveListener = MaterialPickerOnPositiveButtonClickListener<Long> {
+                viewModel.newDateHaveBeenSelected(it)
+            }
+            val calendarDismissListener = DialogInterface.OnDismissListener {
+                binding.fragFreightEditorBlackLayer.visibility = View.GONE
+                datePicker.clearOnPositiveButtonClickListeners()
+                datePicker.clearOnDismissListeners()
+            }
+
+            datePicker.addOnPositiveButtonClickListener(calendarPositiveListener)
+            datePicker.addOnDismissListener(calendarDismissListener)
+            binding.fragFreightEditorBlackLayer.visibility = View.VISIBLE
+            datePicker.show(childFragmentManager, "tag")
+
+        }
+    }
+
+    /**
+     * Try to save an [Freight].
+     *  1. Validate the fields.
+     *  2. Convert to DTO.
+     *  3. Send DTO to be saved.
+     */
+    private fun saveIconClicked() {
+        binding.apply {
+
+            cleanEditTextError(
+                fragFreightEditorCompany,
+                fragFreightEditorOrigin,
+                fragFreightEditorDestiny,
+                fragFreightEditorCargo,
+                fragFreightEditorWeight,
+                fragFreightEditorValue
+            )
+
+            val company = fragFreightEditorCompany.text.toString()
+            val origin = fragFreightEditorOrigin.text.toString()
+            val destiny = fragFreightEditorDestiny.text.toString()
+            val cargo = fragFreightEditorCargo.text.toString()
+            val weight = fragFreightEditorWeight.text.toString()
+            val value = fragFreightEditorValue.text.toString()
+
+            var fieldsAreValid = true
+            if (company.isBlank()) {
+                fragFreightEditorCompany.error = "Preencha o carregador"
+                fieldsAreValid = false
+            }
+            if (origin.isBlank()) {
+                fragFreightEditorOrigin.error = "Preencha a cidade de origem"
+                fieldsAreValid = false
+            }
+            if (destiny.isBlank()) {
+                fragFreightEditorDestiny.error = "Preencha a cidade de destino"
+                fieldsAreValid = false
+            }
+            if (cargo.isBlank()) {
+                fragFreightEditorCargo.error = "Preencha a carga"
+                fieldsAreValid = false
+            }
+            if (weight.isBlank()) {
+                fragFreightEditorWeight.error = "Preencha o peso"
+                fieldsAreValid = false
+            }
+            if (value.isBlank()) {
+                fragFreightEditorValue.error = "Preencha o valor"
+                fieldsAreValid = false
+            }
+
+            if (fieldsAreValid) {
+                val mappedFields = hashMapOf(
+                    Pair(TAG_ORIGIN, origin),
+                    Pair(TAG_COMPANY, company),
+                    Pair(TAG_DESTINY, destiny),
+                    Pair(TAG_CARGO, cargo),
+                    Pair(TAG_WEIGHT, weight),
+                    Pair(TAG_VALUE, value)
+                )
+                save(mappedFields)
+            }
+        }
+    }
+
+    private fun save(mappedFields: HashMap<String, String>) {
+        try {
+            val dto = viewModel.getFreightDto(mappedFields)
+            viewModel.save(dto).observe(viewLifecycleOwner) { response ->
+                when (response) {
+                    is Response.Error -> {
+                        response.exception.printStackTrace()
+                        requireView().snackBarRed(FAILED_TO_SALVE)
+                    }
+
+                    is Response.Success -> requireView().apply {
+                        clearMenu()
+                        snackBarGreen(SUCCESSFULLY_SAVED)
+                        popBackStack()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            requireView().snackBarRed(UNKNOWN_EXCEPTION)
+        }
+    }
+
+    /**
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *   - Observes date for screen changes.
+     *
+     *   - Observes freightData to bind [Freight] if the user is editing.
+     */
+    private fun initStateManager() {
+        viewModel.freightData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                is Response.Success -> bind()
+            }
+        }
+
+        viewModel.date.observe(viewLifecycleOwner) {localDate ->
+            binding.fragFreightEditorDate.text = localDate.getCompleteDateInPtBr()
+        }
+    }
+
+    private fun bind() {
+        val freight = viewModel.freight
+        binding.apply {
+            fragFreightEditorCompany.setText(freight.company)
+            fragFreightEditorOrigin.setText(freight.origin)
+            fragFreightEditorDestiny.setText(freight.destiny)
+            fragFreightEditorCargo.setText(freight.cargo)
+            fragFreightEditorWeight.setText(freight.weight?.toPlainString())
+            fragFreightEditorValue.setText(freight.value?.toPlainString())
         }
     }
 

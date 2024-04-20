@@ -7,14 +7,11 @@ import br.com.apps.repository.DRIVER_ID
 import br.com.apps.repository.FIRESTORE_COLLECTION_TRAVELS
 import br.com.apps.repository.Response
 import br.com.apps.repository.toTravelList
+import br.com.apps.repository.toTravelObject
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class TravelRepository(
     fireStore: FirebaseFirestore,
@@ -24,11 +21,10 @@ class TravelRepository(
 ) {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
-    private val teste= fireStore.collectionGroup("teste")
-    suspend fun getCompleteTravelsListByDriverId(driverId: String): LiveData<Response<List<Travel>>> {
-        return coroutineScope {
+
+    suspend fun getTravelListByDriverId(driverId: String): LiveData<Response<List<Travel>>> {
+        return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<List<Travel>>>()
-            val dataSet = mutableListOf<Travel>()
 
             collection.whereEqualTo(DRIVER_ID, driverId)
                 .addSnapshotListener { querySnap, error ->
@@ -37,26 +33,13 @@ class TravelRepository(
                         return@addSnapshotListener
                     }
                     querySnap?.let { query ->
-                        val travelsList = query.toTravelList()
-                        dataSet.clear()
-                        dataSet.addAll(travelsList)
-
-                        val deferredA = CompletableDeferred<Unit>()
-                        val deferredB = CompletableDeferred<Unit>()
-                        val deferredC = CompletableDeferred<Unit>()
-
-                        freightRepository.getFreightListForThisTravelQuery(query, dataSet, deferredA)
-                        refuelRepository.getRefuelListForThisTravelQuery(query, dataSet, deferredB)
-                        expendRepository.getExpendListForThisTravelQuery(query, dataSet, deferredC)
-
-                        CoroutineScope(Dispatchers.Main).launch {
-                            awaitAll(deferredA, deferredB, deferredC)
-                            liveData.postValue(Response.Success(data = dataSet))
-                        }
+                        liveData.postValue(
+                            Response.Success(data = query.toTravelList())
+                        )
                     }
                 }
 
-            return@coroutineScope liveData
+            return@withContext liveData
         }
     }
 
@@ -68,6 +51,29 @@ class TravelRepository(
             .document(travelId)
             .delete()
             .await()
+    }
+
+    /**
+     * get travel by id
+     */
+    suspend fun getTravelById(travelId: String): LiveData<Response<Travel>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<Travel>>()
+
+            collection
+                .document(travelId)
+                .addSnapshotListener { documentSnap, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    documentSnap?.let { document ->
+                        val travel = document.toTravelObject()
+                        liveData.postValue(Response.Success(travel))
+                    }
+                }
+
+            return@withContext liveData
+        }
     }
 
 }

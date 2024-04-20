@@ -30,14 +30,16 @@
                 android:id="@+id/item_recycler_day_of_month_txt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:minWidth="25dp"
+                android:maxWidth="25dp"
                 tools:text="27"
                 android:textSize="18sp"/>
         </LinearLayout>
 
         <ImageView
             android:id="@+id/item_recycler_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             tools:src="@drawable/image_icon_freight"
             android:contentDescription="@string/item_image"
             android:layout_marginStart="8dp"

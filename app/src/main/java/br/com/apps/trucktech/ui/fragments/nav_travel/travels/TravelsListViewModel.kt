@@ -25,7 +25,7 @@ class TravelsListViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            useCase.getCompleteTravelsListByDriverId(driverId).asFlow().collect {
+            useCase.getTravelListByDriverId(driverId).asFlow().collect {
                 _travelData.postValue(it)
             }
         }

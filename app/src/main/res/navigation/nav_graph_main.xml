@@ -30,9 +30,9 @@
             tools:layout="@layout/fragment_timeline" />
         <fragment
             android:id="@+id/finesFragment"
-            android:name="br.com.apps.trucktech.ui.fragments.nav_home.fines.FinesFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_home.fines.FinesListFragment"
             android:label="fragment_fines"
-            tools:layout="@layout/fragment_fines" />
+            tools:layout="@layout/fragment_fines_list" />
         <fragment
             android:id="@+id/toReceiveFragment"
             android:name="br.com.apps.trucktech.ui.fragments.nav_home.to_receive.ToReceiveFragment"
@@ -114,6 +114,9 @@
             <action
                 android:id="@+id/action_freightPreviewFragment_to_freightEditorFragment"
                 app:destination="@id/freightEditorFragment" />
+            <argument
+                android:name="travelId"
+                app:argType="string" />
         </fragment>
         <fragment
             android:id="@+id/freightEditorFragment"
@@ -124,6 +127,9 @@
                 android:name="freightId"
                 app:argType="string"
                 app:nullable="true" />
+            <argument
+                android:name="travelId"
+                app:argType="string" />
         </fragment>
         <fragment
             android:id="@+id/refuelPreviewFragment"
@@ -136,16 +142,22 @@
             <action
                 android:id="@+id/action_refuelPreviewFragment_to_refuelEditorFragment"
                 app:destination="@id/refuelEditorFragment" />
+            <argument
+                android:name="travelId"
+                app:argType="string" />
         </fragment>
         <fragment
             android:id="@+id/costEditorFragment"
-            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_editor.CostEditorFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_editor.ExpendEditorFragment"
             android:label="fragment_cost_editor"
-            tools:layout="@layout/fragment_cost_editor" >
+            tools:layout="@layout/fragment_expend_editor" >
             <argument
                 android:name="costId"
                 app:argType="string"
                 app:nullable="true" />
+            <argument
+                android:name="travelId"
+                app:argType="string" />
         </fragment>
         <fragment
             android:id="@+id/refuelEditorFragment"
@@ -156,18 +168,24 @@
                 android:name="refuelId"
                 app:argType="string"
                 app:nullable="true" />
+            <argument
+                android:name="travelId"
+                app:argType="string" />
         </fragment>
         <fragment
             android:id="@+id/costPreviewFragment"
-            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_preview.CostPreviewFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_preview.ExpendPreviewFragment"
             android:label="fragment_cost_preview"
-            tools:layout="@layout/fragment_cost_preview" >
+            tools:layout="@layout/fragment_expend_preview" >
             <argument
                 android:name="costId"
                 app:argType="string" />
             <action
                 android:id="@+id/action_costPreviewFragment_to_costEditorFragment"
                 app:destination="@id/costEditorFragment" />
+            <argument
+                android:name="travelId"
+                app:argType="string" />
         </fragment>
     </navigation>
 

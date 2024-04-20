@@ -4,13 +4,13 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.travel.Freight
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemToReceiveBinding
 import br.com.apps.trucktech.expressions.getDayFormatted
 import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.model.costs.DefaultCost
-import br.com.apps.trucktech.model.freight.Freight
 
 class ToReceiveRecyclerAdapter<T>(
 
@@ -83,10 +83,10 @@ class ToReceiveRecyclerAdapter<T>(
 
     private fun bindFreight(holder: ViewHolder, freight: Freight) {
         holder.dataLayout.setBackgroundResource(R.drawable.shape_badge_selected_dark_green)
-        holder.month.text = freight.date.getMonthInPtBrAbbreviated()
-        holder.day.text = freight.date.getDayFormatted()
+        holder.month.text = freight.loadingDate?.getMonthInPtBrAbbreviated()
+        holder.day.text = freight.loadingDate?.getDayFormatted()
         holder.valueText.text = "Minha comissão:"
-        holder.value.text = freight.value.toCurrencyPtBr()
+        holder.value.text = freight.value?.toCurrencyPtBr()
         val description = buildString {
             append("Você carregou ${freight.cargo} de ${freight.origin} para ${freight.destiny} com frete no valor de ${freight.value}." )
         }

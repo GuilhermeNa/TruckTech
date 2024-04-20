@@ -1,7 +1,7 @@
 package br.com.apps.model.model.request.request
 
 import br.com.apps.model.exceptions.InvalidTypeException
-import br.com.apps.model.model.Label
+import br.com.apps.model.model.label.Label
 import java.math.BigDecimal
 
 data class RequestItem(

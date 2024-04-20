@@ -10,7 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.factory.RequestItemDtoFactory
 import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.Label
+import br.com.apps.model.model.label.Label
+import br.com.apps.model.model.label.Label.Companion.getListOfTitles
 import br.com.apps.model.model.request.request.RequestItemType
 import br.com.apps.repository.FAILED_TO_SALVE
 import br.com.apps.repository.SUCCESSFULLY_SAVED
@@ -124,7 +125,7 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
     }
 
     private fun initAutoCompleteAdapter(labels: List<Label>) {
-        val dataSet = viewModel.getListOfTitles(labels)
+        val dataSet = labels.getListOfTitles()
         val adapter = ArrayAdapter(
             requireContext(),
             R.layout.simple_dropdown_item_1line,

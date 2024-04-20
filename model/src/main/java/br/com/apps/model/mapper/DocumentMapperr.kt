@@ -2,6 +2,7 @@ package br.com.apps.model.mapper
 
 import br.com.apps.model.dto.DocumentDto
 import br.com.apps.model.model.Document
+import br.com.apps.model.toLocalDateTime
 
 fun DocumentDto.toModel(): Document {
     return Document(
