@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="16dp">
+
+        <LinearLayout
+            android:id="@+id/item_recycler_data_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:id="@+id/item_recycler_month_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="jan"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/item_recycler_day_of_month_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="27"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/item_recycler_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:src="@drawable/image_icon_freight"
+            android:contentDescription="@string/item_image"
+            android:layout_marginStart="8dp"
+            android:padding="8dp"
+            app:layout_constraintStart_toEndOf="@id/item_recycler_data_layout"
+            app:layout_constraintTop_toTopOf="@id/item_recycler_data_layout"
+            app:layout_constraintBottom_toBottomOf="@id/item_recycler_data_layout" />
+
+        <LinearLayout
+            android:id="@+id/item_recycler_title_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintStart_toEndOf="@id/item_recycler_image"
+            app:layout_constraintTop_toTopOf="@id/item_recycler_data_layout"
+            app:layout_constraintEnd_toStartOf="@id/item_recycler_value_layout"
+            app:layout_constraintBottom_toBottomOf="@id/item_recycler_data_layout"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp">
+
+            <TextView
+                android:id="@+id/item_recycler_title_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Posto Tigrão"
+                android:textSize="16sp"
+                android:ellipsize="end"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/item_recycler_description_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Abastecimento parcial"
+                android:textSize="12sp"
+                android:ellipsize="end"
+                android:maxLines="1"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/item_recycler_value_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/item_recycler_title_layout"
+            app:layout_constraintBottom_toBottomOf="@id/item_recycler_title_layout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/on_value"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/item_recycler_value_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="R$ 3.000,00"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

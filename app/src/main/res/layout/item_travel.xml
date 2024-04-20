@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_margin="8dp"
+    android:checkable="true"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="4dp"
+
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/item_travel_icon_start"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/icon_start"
+
+            app:layout_constraintEnd_toEndOf="@+id/circleImageView"
+            app:layout_constraintStart_toStartOf="@+id/item_travel_line"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_travel_start"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            tools:text="01 abr de 2024"
+            android:textSize="14sp"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@id/item_travel_icon_start"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/item_travel_icon_start"
+            app:layout_constraintBottom_toBottomOf="@id/item_travel_icon_start"/>
+
+        <View
+            android:id="@+id/item_travel_line"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/light_grey"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/item_travel_icon_start"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="12dp" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/circleImageView"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+
+            android:src="@color/light_grey"
+            app:layout_constraintBottom_toBottomOf="@id/item_travel_line"
+            app:layout_constraintStart_toStartOf="@id/item_travel_line"
+            app:layout_constraintTop_toTopOf="@id/item_travel_line" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/circleImageView2"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+
+            android:src="@color/light_grey"
+            app:layout_constraintBottom_toBottomOf="@id/item_travel_line"
+            app:layout_constraintEnd_toEndOf="@id/item_travel_line"
+            app:layout_constraintTop_toTopOf="@id/item_travel_line" />
+
+        <ImageView
+            android:id="@+id/item_travel_icon_end"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="12dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/icon_end"
+            app:layout_constraintEnd_toEndOf="@id/item_travel_line"
+            app:layout_constraintStart_toStartOf="@+id/circleImageView2"
+            app:layout_constraintTop_toBottomOf="@id/item_travel_line" />
+
+        <TextView
+            android:id="@+id/item_travel_end"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            tools:text="15 abr de 2024"
+            android:textSize="14sp"
+            android:gravity="end"
+            android:layout_marginEnd="12dp"
+            app:layout_constraintEnd_toStartOf="@id/item_travel_icon_end"
+            app:layout_constraintTop_toTopOf="@id/item_travel_icon_end"
+            app:layout_constraintBottom_toBottomOf="@id/item_travel_icon_end"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/item_travel_contains_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_travel_end"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/contains" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/icon_freight"
+                        android:contentDescription="@string/fuel_image" />
+
+                    <TextView
+                        android:id="@+id/item_travel_freight_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        tools:text="1" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:background="@color/light_grey"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/icon_refuel"
+                        android:contentDescription="@string/cost_image" />
+
+                    <TextView
+                        android:id="@+id/item_travel_refuel_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        tools:text="2" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:background="@color/light_grey"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/icon_cost"
+                        android:contentDescription="@string/wallet_image" />
+
+                    <TextView
+                        android:id="@+id/item_travel_expend_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        tools:text="4" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

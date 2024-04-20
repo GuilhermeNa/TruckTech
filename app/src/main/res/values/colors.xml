@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- LIGHT_THEME -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="light_green">#EDFDDA</color>
+    <color name="light_cyan">#C4EAFB</color>
+    <color name="dark_red">#860A0A</color>
+    <color name="yellow">#ACA142</color>
+    <color name="light_grey">#ADADAD</color>
+    <color name="orange">#FF9800</color>
+
+    <color name="indigo500">#FF3F51B5</color>
+    <color name="indigo500Light">#92D3F1</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="light_layer">#CCFFFFFF</color>
+
+    <!-- DARK_THEME -->
+    <color name="black">#000000</color>
+    <color name="dark_cyan">#016794</color>
+    <color name = "light_red">#F8B7B7</color>
+    <color name = "dark_green">#006D04</color>
+
+    <color name="indigo400Light">#4DC1F6</color>
+    <color name="indigo400">#FF5C6BC0</color>
+    <color name="dark_grey">#2e2e2e</color>
+    <color name="purple_200">#FFBB86FC</color>
+
+    <color name="black_layer">#A8000000</color>
+</resources>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingEnd="16dp"
+    android:paddingVertical="16dp">
+
+    <LinearLayout
+        android:id="@+id/item_to_receive_layout_data"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:orientation="vertical"
+        android:elevation="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/item_to_receive_layout_description"
+        android:background="@drawable/shape_badge_transparent">
+
+        <TextView
+            android:id="@+id/item_to_receive_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            tools:text="mar"/>
+
+        <TextView
+            android:id="@+id/item_to_receive_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            tools:text="27"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/item_to_receive_layout_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/item_to_receive_layout_data">
+
+        <TextView
+            android:id="@+id/item_to_receive_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            tools:text="Você carregou amianto de Goiânia para São Paulo com frete no valor de R$ 8.000,00."/>
+
+        <TextView
+            android:id="@+id/item_to_receive_value_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:layout_marginTop="8dp"
+            android:text="@string/my_commission"
+            android:textColor="@color/light_grey"/>
+
+        <TextView
+            android:id="@+id/item_to_receive_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            tools:text="R$ 1.000,00"/>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

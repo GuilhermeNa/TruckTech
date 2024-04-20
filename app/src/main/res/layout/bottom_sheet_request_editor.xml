@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fragment_request_editor_bottom_sheet"
+    style="@style/Widget.MaterialComponents.BottomSheet.Modal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/shape_bottom_sheet_layout"
+    android:orientation="vertical"
+    android:paddingVertical="16dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:importantForAccessibility="no"
+        android:src="@drawable/icon_horizontal_line" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/request_add_choise"
+        android:textStyle="bold" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="32dp" />
+
+    <TextView
+        android:id="@+id/bottom_sheet_request_editor_refuel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawablePadding="16dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:padding="16dp"
+        android:text="@string/refuel"
+        android:textSize="18sp"
+        app:drawableStartCompat="@drawable/icon_refuel" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp" />
+
+    <TextView
+        android:id="@+id/bottom_sheet_request_editor_cost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawablePadding="16dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:padding="16dp"
+        android:text="@string/cost"
+        android:textSize="18sp"
+        app:drawableStartCompat="@drawable/icon_cost" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp" />
+
+    <TextView
+        android:id="@+id/bottom_sheet_request_editor_wallet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawablePadding="16dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:padding="16dp"
+        android:text="@string/wallet_found"
+        android:textSize="18sp"
+        app:drawableStartCompat="@drawable/icon_wallet" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="16dp" />
+
+</LinearLayout>
+
+
+

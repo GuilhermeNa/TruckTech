@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "758888265184",
+    "project_id": "smart-truck-3352c",
+    "storage_bucket": "smart-truck-3352c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758888265184:android:79dbb6d739f089d5b36785",
+        "android_client_info": {
+          "package_name": "br.com.apps.smarttruck"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPfy7-y8BggZvfSQ3ALsWB4IvUXOyb4ss"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758888265184:android:8f7c10ff0a611ea8b36785",
+        "android_client_info": {
+          "package_name": "br.com.apps.trucktech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPfy7-y8BggZvfSQ3ALsWB4IvUXOyb4ss"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.TruckTech" parent="Theme.Material3.DayNight">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/indigo400Light</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <!-- Secondary brand color. -->
+        <item name="colorPrimaryContainer">@color/indigo400</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+    </style>
+
+    <style name="Theme.TruckTech.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| -->
+    <!-- STYLES -->
+    <!-- ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| -->
+
+    <style name="FUEL_IMAGE_BG_COLOR">
+        <item name="android:background">@color/dark_cyan</item>
+    </style>
+
+    <style name="EXPENSE_VALUE_TEXT_COLOR">
+        <item name="android:textColor">@color/light_red</item>
+    </style>
+
+    <!-- ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| -->
+    <!-- CIRCLE_INDICATOR -->
+    <!-- ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| -->
+
+    <style name="CIRCLE_INDICATOR">
+        <item name="ci_drawable">@drawable/selector_circle_indicator_dark</item>
+    </style>
+
+</resources>

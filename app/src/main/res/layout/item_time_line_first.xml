@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="16dp">
+
+    <LinearLayout
+        android:id="@+id/panel_time_line_first_layout_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/panel_time_line_first_circle"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/panel_time_line_first_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="Contratado" />
+
+        <TextView
+            android:id="@+id/panel_time_line_first_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="24 jan 2024" />
+    </LinearLayout>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/panel_time_line_first_circle"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_marginStart="16dp"
+        android:elevation="12dp"
+        android:src="@color/orange"
+        app:layout_constraintBottom_toBottomOf="@id/panel_time_line_first_layout_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/panel_time_line_first_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/panel_time_line_first_layout_header"
+        app:layout_constraintStart_toStartOf="@id/panel_time_line_first_layout_header"
+        app:layout_constraintTop_toBottomOf="@id/panel_time_line_first_layout_header"
+        tools:text="@tools:sample/lorem/random" />
+
+    <View
+        android:layout_width="2dp"
+        android:layout_height="0dp"
+        android:background="@color/orange"
+        android:elevation="3dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/panel_time_line_first_circle"
+        app:layout_constraintStart_toStartOf="@id/panel_time_line_first_circle"
+        app:layout_constraintTop_toBottomOf="@id/panel_time_line_first_circle" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+

@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_main"
+    app:startDestination="@id/nav_home">
+
+    <navigation android:id="@+id/nav_home"
+        app:startDestination="@id/homeFragment">
+        <fragment
+            android:id="@+id/homeFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_home.home.HomeFragment"
+            android:label="fragment_home"
+            tools:layout="@layout/fragment_home">
+            <action
+                android:id="@+id/action_homeFragment_to_timelineFragment"
+                app:destination="@id/timelineFragment"
+                />
+            <action
+                android:id="@+id/action_homeFragment_to_finesFragment"
+                app:destination="@id/finesFragment" />
+            <action
+                android:id="@+id/action_homeFragment_to_toReceiveFragment"
+                app:destination="@id/toReceiveFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/timelineFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_home.time_line.TimelineFragment"
+            android:label="fragment_timeline"
+            tools:layout="@layout/fragment_timeline" />
+        <fragment
+            android:id="@+id/finesFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_home.fines.FinesFragment"
+            android:label="fragment_fines"
+            tools:layout="@layout/fragment_fines" />
+        <fragment
+            android:id="@+id/toReceiveFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_home.to_receive.ToReceiveFragment"
+            android:label="fragment_to_receive"
+            tools:layout="@layout/fragment_to_receive" >
+            <action
+                android:id="@+id/action_toReceiveFragment_to_paymentFragment"
+                app:destination="@id/paymentFragment" />
+            <action
+                android:id="@+id/action_toReceiveFragment_to_discountFragment"
+                app:destination="@id/discountFragment" />
+            <action
+                android:id="@+id/action_toReceiveFragment_to_refundFragment"
+                app:destination="@id/refundFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/paymentFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_home.payment.PaymentFragment"
+            android:label="fragment_payment"
+            tools:layout="@layout/fragment_payment" />
+        <fragment
+            android:id="@+id/discountFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_home.discount.DiscountFragment"
+            android:label="fragment_discount"
+            tools:layout="@layout/fragment_discount" />
+        <fragment
+            android:id="@+id/refundFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_home.refund.RefundFragment"
+            android:label="fragment_refund"
+            tools:layout="@layout/fragment_refund" />
+    </navigation>
+
+    <navigation android:id="@+id/nav_travel"
+        app:startDestination="@id/travelsFragment">
+        <fragment
+            android:id="@+id/travelsFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.travels.TravelsListFragment"
+            android:label="fragment_travels"
+            tools:layout="@layout/fragment_travels">
+            <action
+                android:id="@+id/action_travelsFragment_to_recordsFragment"
+                app:destination="@id/recordsFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/recordsFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.records.RecordsFragment"
+            android:label="fragment_records"
+            tools:layout="@layout/fragment_records">
+            <argument
+                android:name="travelId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_recordsFragment_to_freightEditorFragment"
+                app:destination="@id/freightEditorFragment" />
+            <action
+                android:id="@+id/action_recordsFragment_to_costEditorFragment"
+                app:destination="@id/costEditorFragment" />
+            <action
+                android:id="@+id/action_recordsFragment_to_refuelEditorFragment"
+                app:destination="@id/refuelEditorFragment" />
+            <action
+                android:id="@+id/action_recordsFragment_to_costPreviewFragment"
+                app:destination="@id/costPreviewFragment" />
+            <action
+                android:id="@+id/action_recordsFragment_to_refuelPreviewFragment"
+                app:destination="@id/refuelPreviewFragment" />
+            <action
+                android:id="@+id/action_recordsFragment_to_freightPreviewFragment"
+                app:destination="@id/freightPreviewFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/freightPreviewFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_preview.FreightPreviewFragment"
+            android:label="fragment_freight_preview"
+            tools:layout="@layout/fragment_freight_preview" >
+            <argument
+                android:name="freightId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_freightPreviewFragment_to_freightEditorFragment"
+                app:destination="@id/freightEditorFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/freightEditorFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_editor.FreightEditorFragment"
+            android:label="fragment_freight_editor"
+            tools:layout="@layout/fragment_freight_editor" >
+            <argument
+                android:name="freightId"
+                app:argType="string"
+                app:nullable="true" />
+        </fragment>
+        <fragment
+            android:id="@+id/refuelPreviewFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuel_preview.RefuelPreviewFragment"
+            android:label="fragment_refuel_preview"
+            tools:layout="@layout/fragment_refuel_preview" >
+            <argument
+                android:name="refuelId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_refuelPreviewFragment_to_refuelEditorFragment"
+                app:destination="@id/refuelEditorFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/costEditorFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_editor.CostEditorFragment"
+            android:label="fragment_cost_editor"
+            tools:layout="@layout/fragment_cost_editor" >
+            <argument
+                android:name="costId"
+                app:argType="string"
+                app:nullable="true" />
+        </fragment>
+        <fragment
+            android:id="@+id/refuelEditorFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuel_editor.RefuelEditorFragment"
+            android:label="fragment_refuel_editor"
+            tools:layout="@layout/fragment_refuel_editor" >
+            <argument
+                android:name="refuelId"
+                app:argType="string"
+                app:nullable="true" />
+        </fragment>
+        <fragment
+            android:id="@+id/costPreviewFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_preview.CostPreviewFragment"
+            android:label="fragment_cost_preview"
+            tools:layout="@layout/fragment_cost_preview" >
+            <argument
+                android:name="costId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_costPreviewFragment_to_costEditorFragment"
+                app:destination="@id/costEditorFragment" />
+        </fragment>
+    </navigation>
+
+    <navigation android:id="@+id/nav_settings"
+        app:startDestination="@id/settingsFragment">
+        <fragment
+            android:id="@+id/settingsFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsFragment"
+            android:label="fragment_settings"
+            tools:layout="@layout/fragment_settings">
+            <action
+                android:id="@+id/action_settingsFragment_to_changePasswordFragment"
+                app:destination="@id/changePasswordFragment" />
+            <action
+                android:id="@+id/action_settingsFragment_to_themeFragment"
+                app:destination="@id/themeFragment" />
+            <action
+                android:id="@+id/action_settingsFragment_to_bankFragment"
+                app:destination="@id/bankFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/bankFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankListFragment"
+            android:label="fragment_bank"
+            tools:layout="@layout/fragment_bank" >
+            <action
+                android:id="@+id/action_bankFragment_to_bankPreviewFragment"
+                app:destination="@id/bankPreviewFragment" />
+            <action
+                android:id="@+id/action_bankFragment_to_bankEditorFragment"
+                app:destination="@id/bankEditorFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/themeFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_settings.themes.ThemeFragment"
+            android:label="ThemeFragment" />
+        <fragment
+            android:id="@+id/changePasswordFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_settings.change_password.ChangePasswordFragment"
+            android:label="fragment_change_password"
+            tools:layout="@layout/fragment_change_password" />
+        <fragment
+            android:id="@+id/bankPreviewFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_preview.BankPreviewFragment"
+            android:label="fragment_bank_preview"
+            tools:layout="@layout/fragment_bank_preview" >
+            <argument
+                android:name="bankId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_bankPreviewFragment_to_bankEditorFragment"
+                app:destination="@id/bankEditorFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/bankEditorFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_editor.BankEditorFragment"
+            android:label="fragment_bank_editor"
+            tools:layout="@layout/fragment_bank_editor" >
+            <argument
+                android:name="bankId"
+                app:argType="string"
+                app:nullable="true" />
+        </fragment>
+    </navigation>
+    <navigation android:id="@+id/nav_documents"
+        app:startDestination="@id/documentsListFragment">
+        <fragment
+            android:id="@+id/documentsListFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentsListFragment"
+            android:label="fragment_documents_list"
+            tools:layout="@layout/fragment_documents_list" >
+            <action
+                android:id="@+id/action_documentsListFragment_to_documentFragment"
+                app:destination="@id/documentFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/documentFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_documents.document.DocumentFragment"
+            android:label="fragment_document"
+            tools:layout="@layout/fragment_document" >
+            <argument
+                android:name="documentId"
+                app:argType="string" />
+        </fragment>
+    </navigation>
+    <navigation android:id="@+id/nav_requests"
+        app:startDestination="@id/requestsListFragment">
+        <fragment
+            android:id="@+id/requestEditorWalletFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_wallet.RequestEditorWalletFragment"
+            android:label="fragment_request_editor_wallet"
+            tools:layout="@layout/fragment_request_editor_wallet" >
+            <argument
+                android:name="walletId"
+                app:argType="string"
+                app:nullable="true" />
+            <argument
+                android:name="requestId"
+                app:argType="string" />
+        </fragment>
+        <fragment
+            android:id="@+id/requestEditorCostFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost.RequestEditorCostFragment"
+            android:label="fragment_request_editor_cost"
+            tools:layout="@layout/fragment_request_editor_cost" >
+            <argument
+                android:name="costId"
+                app:argType="string"
+                app:nullable="true" />
+            <argument
+                android:name="requestId"
+                app:argType="string" />
+        </fragment>
+        <fragment
+            android:id="@+id/requestEditorRefuelFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_refuel.RequestEditorRefuelFragment"
+            android:label="fragment_request_editor_refuel"
+            tools:layout="@layout/fragment_request_editor_refuel" >
+            <argument
+                android:name="refuelId"
+                app:argType="string"
+                app:nullable="true" />
+            <argument
+                android:name="requestId"
+                app:argType="string" />
+        </fragment>
+        <fragment
+            android:id="@+id/requestsListFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.RequestsListFragment"
+            android:label="fragment_requests_list"
+            tools:layout="@layout/fragment_requests_list">
+            <action
+                android:id="@+id/action_requestsListFragment_to_requestEditorFragment"
+                app:destination="@id/requestEditorFragment" />
+            <action
+                android:id="@+id/action_requestsListFragment_to_requestPreviewFragment"
+                app:destination="@id/requestPreviewFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/requestEditorFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.RequestEditorFragment"
+            android:label="fragment_request_editor"
+            tools:layout="@layout/fragment_request_editor" >
+            <action
+                android:id="@+id/action_requestEditorFragment_to_requestEditorRefuelFragment"
+                app:destination="@id/requestEditorRefuelFragment" />
+            <action
+                android:id="@+id/action_requestEditorFragment_to_requestEditorCostFragment"
+                app:destination="@id/requestEditorCostFragment" />
+            <action
+                android:id="@+id/action_requestEditorFragment_to_requestEditorWalletFragment"
+                app:destination="@id/requestEditorWalletFragment" />
+            <argument
+                android:name="requestId"
+                app:argType="string" />
+        </fragment>
+        <fragment
+            android:id="@+id/requestPreviewFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.RequestPreviewFragment"
+            android:label="fragment_request_preview"
+            tools:layout="@layout/fragment_request_preview" >
+            <argument
+                android:name="requestId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_requestPreviewFragment_to_requestEditorFragment"
+                app:destination="@id/requestEditorFragment" />
+        </fragment>
+    </navigation>
+
+</navigation>

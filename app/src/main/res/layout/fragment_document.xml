@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/fragment_document_toolbar"
+        layout="@layout/layout_toolbar"/>
+
+    <com.ortiz.touchview.TouchImageView
+        android:id="@+id/fragment_document_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.fragments.nav_documents.document.DocumentFragment"
+        android:contentDescription="@string/document" />
+
+</LinearLayout>
+
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:context=".ui.fragments.nav_home.to_receive.ToReceiveFragment">
+
+    <include
+        android:id="@+id/fragment_to_receive_toolbar"
+        layout="@layout/layout_toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/fragment_to_receive_panel_payments"
+                layout="@layout/panel_to_receive_fragment_payments" />
+
+            <include
+                android:id="@+id/fragment_to_receive_panel_refunds"
+                layout="@layout/panel_to_receive_fragment_refunds" />
+
+            <include
+                android:id="@+id/fragment_to_receive_panel_discounts"
+                layout="@layout/panel_to_receive_fragment_discounts" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/home_fragment_panel_time_line" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
+
+
+
+
