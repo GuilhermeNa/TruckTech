@@ -1,27 +1,26 @@
 package br.com.apps.trucktech.ui.fragments.nav_home.home.private_adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.travel.Travel
 import br.com.apps.trucktech.databinding.ItemPeriodBinding
-import br.com.apps.trucktech.expressions.getDayFormatted
-import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
-import br.com.apps.trucktech.ui.PositionHolder
+import br.com.apps.trucktech.ui.PositionHolderTeste
 
 class PeriodRecyclerAdapter(
-
     private val context: Context,
-    private val dataSet: List<Travel>,
-    private val adapterPos: Int?,
+    adapterPos: Int?,
     var itemClickListener: (title: Int) -> Unit = {}
-
 ) : RecyclerView.Adapter<PeriodRecyclerAdapter.ViewHolder>() {
 
-    private var isInitialized = false
-    private val positionHolder = PositionHolder(adapterPos!!)
-    private var lastPos: Int = 0
+    private val dataSet = mutableListOf<String>()
+
+    private val posHolder = PositionHolderTeste(adapterPos!!)
+    val selectedPos get() = posHolder.actualPos
+    private lateinit var firstVh: ViewHolder
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER
@@ -31,25 +30,6 @@ class PeriodRecyclerAdapter(
         RecyclerView.ViewHolder(binding.root) {
         val firstText = binding.itemPeriodRecyclerFirst
         val secondText = binding.itemPeriodRecyclerSecond
-        lateinit var item: Travel
-
-        init {
-            itemView.setOnClickListener {
-                if (::item.isInitialized) {
-                    itemClickListener(bindingAdapterPosition)
-                    if (!itemView.isSelected) {
-                        positionHolder.newPositionHaveBeenSelected(bindingAdapterPosition) { lastPos, _ ->
-                            itemView.isSelected = true
-                            lastPos?.let{
-                                notifyItemChanged(it)
-                                this@PeriodRecyclerAdapter.lastPos = it
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -69,38 +49,69 @@ class PeriodRecyclerAdapter(
     //--------------------------------------------------------------------------------------------//
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val travel = dataSet[position]
-        bind(holder, travel)
-        holder.item = travel
-        selectedStateManager(holder, position)
+        val item = dataSet[position]
+        bind(holder, item)
+        initItemCLickListener(holder, position)
+        selectorStateManager(holder, position)
     }
 
     override fun getItemCount(): Int = dataSet.size
 
-    private fun bind(holder: ViewHolder, travel: Travel) {
+    private fun bind(holder: ViewHolder, item: String) {
         holder.apply {
-            firstText.text = travel.initialDate?.getMonthInPtBrAbbreviated()
-            secondText.text = travel.initialDate?.getDayFormatted()
+            val first = item.substringBefore(" ")
+            val second = item.substringAfter(" ")
+            firstText.text = first
+
+            if (first != second) {
+                secondText.visibility = VISIBLE
+                secondText.text = second
+            } else {
+                secondText.visibility = GONE
+            }
+
         }
     }
 
-    private fun selectedStateManager(holder: ViewHolder, position: Int) {
-        when(isInitialized) {
+    private fun initItemCLickListener(holder: ViewHolder, position: Int) {
+        holder.itemView.apply {
+            setOnClickListener {
+                if (position != posHolder.actualPos) {
 
-            false -> {
-                if(position == adapterPos){
-                    holder.itemView.isSelected = true
-                    isInitialized = true
-                    positionHolder.updateLastPos(adapterPos)
+                    itemClickListener(position)
+
+                    posHolder.newPosSelected(position) { actualPos ->
+                        actualPos?.let { notifyItemChanged(actualPos) }
+                        isSelected = true
+                    }
+
                 }
             }
+        }
+    }
 
-            true -> {
-                if (position ==lastPos) {
-                    holder.itemView.isSelected = false
-                }
+    private fun selectorStateManager(holder: ViewHolder, position: Int) {
+        if (position == posHolder.actualPos) {
+            holder.itemView.isSelected = true
+            firstVh = holder
+        } else {
+            holder.itemView.isSelected = false
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun update(dataSet: List<String>) {
+        this.dataSet.clear()
+        this.dataSet.addAll(dataSet)
+        notifyDataSetChanged()
+    }
+
+    fun resetSelector() {
+        if (posHolder.actualPos != 0) {
+            posHolder.newPosSelected(0) { actualPos ->
+                actualPos?.let { notifyItemChanged(actualPos) }
+                firstVh.itemView.isSelected = true
             }
-
         }
     }
 

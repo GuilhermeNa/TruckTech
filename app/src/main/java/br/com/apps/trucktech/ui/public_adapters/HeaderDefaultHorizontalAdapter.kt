@@ -1,21 +1,17 @@
 package br.com.apps.trucktech.ui.public_adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.ItemHeaderHorizontalBinding
 import br.com.apps.trucktech.ui.PositionHolder
 
 class HeaderDefaultHorizontalAdapter(
-
     private val context: Context,
     dataSet: Map<Int, String>,
     private val adapterPos: Int?,
     var itemClickListener: (title: String) -> Unit = {}
-
 ) : RecyclerView.Adapter<HeaderDefaultHorizontalAdapter.ViewHolder>() {
 
     private val dataSet = dataSet.map { it.value }.toList()
@@ -70,7 +66,7 @@ class HeaderDefaultHorizontalAdapter(
         val headerText = dataSet[position]
         bind(holder, headerText)
         holder.item = headerText
-        selectedStateManager(holder, position)
+        selectorStateManager(holder, position)
     }
 
     override fun getItemCount(): Int = dataSet.size
@@ -79,7 +75,7 @@ class HeaderDefaultHorizontalAdapter(
         holder.title.text = headerText
     }
 
-    private fun selectedStateManager(holder: ViewHolder, position: Int) {
+    private fun selectorStateManager(holder: ViewHolder, position: Int) {
         when (isInitialized) {
             false -> {
                 if (position == adapterPos) {

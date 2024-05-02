@@ -5,20 +5,18 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.trucktech.databinding.ItemPerformanceBinding
-import br.com.apps.trucktech.model.Performance
+import br.com.apps.trucktech.ui.fragments.nav_home.home.PerformanceItem
 
-class HomeFragmentPerformanceViewPagerAdapter(
+class HomeFragmentPerformanceViewPagerAdapter(private var context: Context) :
+    RecyclerView.Adapter<HomeFragmentPerformanceViewPagerAdapter.ViewHolder>() {
 
-    private var context: Context,
-    private val dataSet: List<Performance>
-
-) : RecyclerView.Adapter<HomeFragmentPerformanceViewPagerAdapter.ViewHolder>() {
+    private val dataSet = mutableListOf<PerformanceItem>()
 
     //---------------------------------------------------------------------------------------------//
     // VIEW HOLDER
     //---------------------------------------------------------------------------------------------//
 
-    inner class ViewHolder(binding: ItemPerformanceBinding):
+    inner class ViewHolder(binding: ItemPerformanceBinding) :
         RecyclerView.ViewHolder(binding.root) {
         val title = binding.itemPerformanceTitle
         val goal = binding.itemPerformanceGoal
@@ -49,7 +47,7 @@ class HomeFragmentPerformanceViewPagerAdapter(
 
     override fun getItemCount(): Int = dataSet.size
 
-    private fun bind(holder: ViewHolder, performance: Performance) {
+    private fun bind(holder: ViewHolder, performance: PerformanceItem) {
         holder.apply {
             title.text = performance.title
             goal.text = performance.meta
@@ -57,6 +55,12 @@ class HomeFragmentPerformanceViewPagerAdapter(
             percentage.text = performance.percent
             progressBar.progress = performance.progressBar
         }
+    }
+
+    fun update(dataSet: List<PerformanceItem>) {
+        this.dataSet.clear()
+        this.dataSet.addAll(dataSet)
+        for(i in dataSet.indices) notifyItemChanged(i)
     }
 
 }

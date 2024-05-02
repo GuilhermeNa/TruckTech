@@ -11,6 +11,7 @@ data class Refuel(
     val truckId: String? = null,
     val travelId: String? = null,
     val costId: String? = null,
+    val driverId: String? = null,
 
     var date: LocalDateTime? = null,
     var station: String? = null,

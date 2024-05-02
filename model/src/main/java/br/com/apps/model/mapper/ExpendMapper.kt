@@ -16,7 +16,9 @@ fun ExpendDto.toModel(): Expend {
         value = this.value?.toBigDecimal(),
         description = this.description,
         company = this.company,
-        label = this.label
+        label = this.label,
+        paidByEmployee = this.paidByEmployee,
+        alreadyRefunded = this.alreadyRefunded
     )
 }
 
@@ -31,6 +33,8 @@ fun Expend.toDto(): ExpendDto {
         value = this.value?.toDouble(),
         description = this.description,
         company = this.company,
-        label = this.label
+        label = this.label,
+        paidByEmployee = this.paidByEmployee,
+        alreadyRefunded = this.alreadyRefunded
     )
 }

@@ -15,5 +15,9 @@ data class ExpendDto(
     val date: Date? = null,
     val description: String? = null,
     val value: Double? = null,
-    val label: Label? = null
+    val label: Label? = null,
+
+    var paidByEmployee: Boolean? = null,
+    var alreadyRefunded: Boolean? = null
+
 )

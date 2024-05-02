@@ -23,6 +23,15 @@ class ExpendUseCase(
     private val labelRepository: LabelRepository
 ) {
 
+    /**
+     * Merges the provided list of expenditures into the corresponding travels in the travel list.
+     * Each expenditure is associated with a travel based on the travel ID.
+     *
+     * @param travelList The list of travels into which expenditures will be merged.
+     * @param expendListNullable The nullable list of expenditures to merge into the travels.
+     * @throws InvalidParameterException if the provided expenditure list is null.
+     * @throws InvalidParameterException if any travel in the travel list has a null ID.
+     */
     fun mergeExpendList(travelList: List<Travel>, expendListNullable: List<Expend>?) {
         val expendList = expendListNullable ?: throw InvalidParameterException(EMPTY_DATASET)
         travelList.forEach { travel ->

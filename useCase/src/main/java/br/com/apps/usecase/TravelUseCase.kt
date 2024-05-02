@@ -2,6 +2,9 @@ package br.com.apps.usecase
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.model.travel.Freight
+import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.Response
 import br.com.apps.repository.repository.TravelRepository
@@ -12,6 +15,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.Serializable
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class TravelUseCase(
     private val repository: TravelRepository,
@@ -19,6 +24,31 @@ class TravelUseCase(
     private val refuelUseCase: RefuelUseCase,
     private val expendUseCase: ExpendUseCase
 ) {
+
+    /**
+     * This function allows merging lists of freights, expenditures, and refuels into the corresponding travels.
+     *
+     * @param travelList The list of travels into which additional data will be merged.
+     * @param freightList The list of freights to merge into the travels. Defaults to null.
+     * @param expendList The list of expenditures to merge into the travels. Defaults to null.
+     * @param refuelList The list of refuels to merge into the travels. Defaults to null.
+     */
+    fun mergeTravelData(
+        travelList: List<Travel>,
+        freightList: List<Freight>? = null,
+        expendList: List<Expend>? = null,
+        refuelList: List<Refuel>? = null
+    ) {
+        freightList?.let {
+            freightUseCase.mergeFreightList(travelList, it)
+        }
+        expendList?.let {
+            expendUseCase.mergeExpendList(travelList, it)
+        }
+        refuelList?.let {
+            refuelUseCase.mergeRefuelList(travelList, it)
+        }
+    }
 
     /**
      * get by driverId
@@ -49,7 +79,10 @@ class TravelUseCase(
                                         }
 
                                         is Response.Success -> {
-                                            freightUseCase.mergeFreightListToTravelList(travelList, responseA.data)
+                                            freightUseCase.mergeFreightList(
+                                                travelList,
+                                                responseA.data
+                                            )
                                             deferredA.complete(Unit)
                                         }
                                     }
@@ -115,6 +148,50 @@ class TravelUseCase(
      */
     suspend fun getTravelById(travelId: String): LiveData<Response<Travel>> {
         return repository.getTravelById(travelId)
+    }
+
+    /**
+     * Calculates the profit percentage based on the provided list of travels.
+     * Profit percentage is calculated as the ratio of total waste (expenditures and refuels)
+     * to total profit (freight earnings).
+     *
+     * @param travelList The list of travels for which the profit percentage needs to be calculated.
+     * @return The profit percentage as a BigDecimal value.
+     */
+    fun getProfitPercentage(travelList: List<Travel>): BigDecimal {
+        var profitSum = BigDecimal.ZERO
+        var wasteSum = BigDecimal.ZERO
+
+        travelList.map { travel ->
+            profitSum = profitSum.add(travel.freightsList?.sumOf { it.value!! })
+            wasteSum = wasteSum.add(travel.expendsList?.sumOf { it.value!! })
+            wasteSum = wasteSum.add(travel.refuelsList?.sumOf { it.totalValue!! })
+        }
+
+        val percentage =
+            if (profitSum != BigDecimal.ZERO) {
+                wasteSum.divide(profitSum, 2, RoundingMode.HALF_EVEN).subtract(BigDecimal(1))
+            }
+            else BigDecimal.ZERO
+
+        return percentage.abs().multiply(BigDecimal(100))
+    }
+
+    /**
+     * Calculates the average refuel cost per kilometer traveled based on the provided list of travels.
+     *
+     * @param travelList The list of travels for which the refuel average needs to be calculated.
+     * @return The average refuel cost per kilometer as a BigDecimal value.
+     */
+    fun getRefuelAverage(travelList: List<Travel>): BigDecimal {
+        val sumOfGasCost =
+            travelList.flatMap { it.refuelsList!! }.sumOf { it.totalValue!! }
+
+        val sumOfKm =
+            travelList.last().finalOdometerMeasurement
+                ?.subtract(travelList.first().initialOdometerMeasurement)
+
+        return sumOfKm?.divide(sumOfGasCost, 2, RoundingMode.HALF_EVEN) ?: BigDecimal.ZERO
     }
 
 }

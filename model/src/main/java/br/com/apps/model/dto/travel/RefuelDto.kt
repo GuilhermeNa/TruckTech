@@ -8,6 +8,7 @@ data class RefuelDto(
     val truckId: String? = null,
     val travelId: String? = null,
     val costId: String? = null,
+    val driverId: String? = null,
 
     val date: Date? = null,
     val station: String? = null,

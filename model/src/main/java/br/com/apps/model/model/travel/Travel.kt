@@ -1,5 +1,6 @@
 package br.com.apps.model.model.travel
 
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class Travel(
@@ -7,14 +8,17 @@ data class Travel(
     val id: String? = null,
     val truckId: String? = null,
     val driverId: String? = null,
-    val initialDate: LocalDateTime? = null,
-    val finalDate: LocalDateTime? = null,
+
     @field:JvmField
     val isFinished: Boolean? = false,
+    val initialDate: LocalDateTime? = null,
+    val finalDate: LocalDateTime? = null,
+    val initialOdometerMeasurement: BigDecimal? = null,
+    val finalOdometerMeasurement: BigDecimal? = null,
+
     var freightsList: List<Freight>? = null,
     var refuelsList: List<Refuel>? = null,
     var expendsList: List<Expend>? = null
-
 ) {
 
     fun getNumberOfFreights(): Int {

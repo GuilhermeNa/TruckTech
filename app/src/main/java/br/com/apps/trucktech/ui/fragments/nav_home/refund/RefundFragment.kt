@@ -6,39 +6,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.finance.Cost
+import br.com.apps.model.model.travel.Expend
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.Response
 import br.com.apps.trucktech.databinding.FragmentRefundBinding
+import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toBold
-import br.com.apps.trucktech.expressions.toItalic
+import br.com.apps.trucktech.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.expressions.toUnderline
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.public_adapters.ToReceiveRecyclerAdapter
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Reembolsos"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [RefundFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class RefundFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRefundBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: RefundFragmentViewModel by viewModels()
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private val driverId by lazy {
+        sharedViewModel.userData.value?.user?.employeeId
     }
+    private val viewModel: RefundViewModel by viewModel { parametersOf(driverId) }
+    private var adapter: ToReceiveRecyclerAdapter<Expend>? = null
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -58,7 +52,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bindText()
+        initStateManager()
         initRecyclerView()
     }
 
@@ -73,24 +67,66 @@ class RefundFragment : BaseFragmentWithToolbar() {
         configurator.bottomNavigation(hasBottomNavigation = false)
     }
 
-    private fun bindText() {
-        val refunds = SpannableString("3")
-            .toBold().toItalic().toUnderline()
-        val value = SpannableString("R$ 210,00")
-            .toBold().toItalic().toUnderline()
+    /**
+     * Initialize the state manager and observes [viewModel] data.
+     *
+     *   - Observes expendData for update the recyclerView and bind
+     */
+    private fun initStateManager() {
+        viewModel.expendData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    response.exception.printStackTrace()
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                }
 
-        binding.fragmentRefundDescription.text = buildSpannedString {
-            append("Você tem ")
-            append(refunds)
-            append(" despesas a serem reembolsadas, totalizando ")
-            append(value)
-            append(".")
+                is Response.Success -> {
+                    response.data?.let { dataSet ->
+                        adapter?.update(dataSet)
+                        bindText(dataSet)
+                    }
+                }
+            }
         }
     }
 
+    private fun bindText(dataSet: List<Expend>) {
+        val numberOfExpends = dataSet.size
+        val totalExpends = dataSet.sumOf { it.value!! }
+
+        val refundsFormatted = SpannableString(
+            numberOfExpends.toString()
+        ).toBold().toUnderline()
+        val valueFormatted = SpannableString(
+            totalExpends.toCurrencyPtBr()
+        ).toBold().toUnderline()
+
+        binding.fragmentRefundDescription.text =
+            if (numberOfExpends > 1) {
+                buildSpannedString {
+                    append("Você tem ")
+                    append(refundsFormatted)
+                    append(" despesas a serem reembolsadas, totalizando ")
+                    append(valueFormatted)
+                    append(".")
+                }
+            } else {
+                buildSpannedString {
+                    append("Você tem ")
+                    append(refundsFormatted)
+                    append(" despesa a ser reembolsada no valor de ")
+                    append(valueFormatted)
+                    append(".")
+                }
+            }
+    }
+
+    /**
+     * Initialize Recycler view.
+     */
     private fun initRecyclerView() {
         val recyclerView = binding.fragmentRefundRecycler
-        val adapter = ToReceiveRecyclerAdapter(requireContext(), emptyList<Cost>())
+        adapter = ToReceiveRecyclerAdapter(requireContext(), emptyList())
         recyclerView.adapter = adapter
 
         val divider = DividerItemDecoration(recyclerView.context, RecyclerView.VERTICAL)
@@ -103,6 +139,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        adapter = null
         _binding = null
     }
 

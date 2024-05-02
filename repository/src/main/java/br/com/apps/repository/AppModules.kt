@@ -36,7 +36,7 @@ val repositoryModules = module {
     single<EmployeeRepository> { EmployeeRepository(get()) }
     single<RequestRepository> { RequestRepository(get()) }
     single<StorageRepository> { StorageRepository(get()) }
-    single<TravelRepository> { TravelRepository(get(), get(), get(), get()) }
+    single<TravelRepository> { TravelRepository(get()) }
 
     single<FreightRepository> { FreightRepository(get()) }
     single<RefuelRepository> { RefuelRepository(get()) }

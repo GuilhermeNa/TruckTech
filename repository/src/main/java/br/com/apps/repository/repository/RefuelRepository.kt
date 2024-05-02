@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.repository.DRIVER_ID
 import br.com.apps.repository.EMPTY_ID
 import br.com.apps.repository.FIRESTORE_COLLECTION_REFUELS
 import br.com.apps.repository.FIRESTORE_COLLECTION_TRAVELS
@@ -67,6 +68,41 @@ class RefuelRepository(fireStore: FirebaseFirestore) {
             .document(refuelId)
             .delete()
             .await()
+    }
+
+    /**
+     * Fetches the [Refuel] dataSet based on the driver ID.
+     *
+     * @param driverId The ID of the driver for which [Refuel] data is to be retrieved.
+     * @return A LiveData object containing a [Response] of [Refuel] data for the specified driver ID.
+     */
+    suspend fun getRefuelListByDriverId(driverId: String, withFlow: Boolean): LiveData<Response<List<Refuel>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Refuel>>>()
+            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+
+            if(withFlow) {
+                listener.addSnapshotListener { querySnap, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    querySnap?.let { query ->
+                        liveData.postValue(Response.Success(query.toRefuelList()))
+                    }
+                }
+            } else {
+                listener.get().addOnCompleteListener { task ->
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { query ->
+                        liveData.postValue(Response.Success(query.toRefuelList()))
+                    }
+                }
+            }
+
+            return@withContext liveData
+        }
     }
 
     /**
@@ -195,5 +231,6 @@ class RefuelRepository(fireStore: FirebaseFirestore) {
             .await()
 
     }
+
 
 }

@@ -51,8 +51,7 @@
         android:layout_height="20dp"
         android:gravity="center"
         style="@style/CIRCLE_INDICATOR"
-        app:ci_gravity="center"
-       />
+        app:ci_gravity="center" />
 
 
 

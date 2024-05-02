@@ -7,6 +7,7 @@ import java.math.BigDecimal
 data class RequestItem(
     val id: String? = null,
     var labelId: String? = null,
+    val requestId: String? = null,
 
     val label: Label? = null,
     var kmMarking: Int? = null,

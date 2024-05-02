@@ -27,10 +27,10 @@ class AdvanceRepository(fireStore: FirebaseFirestore) {
      *
      * @return A LiveData object containing a [Response] of [Advance] dataSet for the specified ID.
      */
-    suspend fun getAdvanceListByEmployeeId(
+    suspend fun getAdvanceListByEmployeeIdAndPaymentStatus(
         employeeId: String,
-        withFlow: Boolean,
-        isPaid: Boolean
+        isPaid: Boolean,
+        withFlow: Boolean
     ): LiveData<Response<List<Advance>>> {
         return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<List<Advance>>>()
@@ -62,5 +62,35 @@ class AdvanceRepository(fireStore: FirebaseFirestore) {
         }
     }
 
+    /**
+     * This function fetches [Advance] dataSet for the given [Employee] ID asynchronously from the database.
+     *
+     * @param employeeIdList The ID list of the [Employee] for which [Advance] dataSet is to be retrieved.
+     * @param isPaid Whether the advance has already been paid or not.
+     *
+     * @return A LiveData object containing a [Response] of [Advance] dataSet for the specified IDs in the list.
+     */
+    suspend fun getAdvanceListByEmployeeIdAndPaymentStatus(
+        employeeIdList: List<String>,
+        isPaid: Boolean
+    ): LiveData<Response<List<Advance>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Advance>>>()
+            val listener = collection
+                .whereIn(EMPLOYEE_ID, employeeIdList)
+                .whereEqualTo(IS_PAID, isPaid)
+
+            listener.get().addOnCompleteListener { task ->
+                task.exception?.let { e ->
+                    liveData.postValue(Response.Error(e))
+                }
+                task.result?.let { query ->
+                    liveData.postValue(Response.Success(query.toAdvanceList()))
+                }
+            }.await()
+
+            return@withContext liveData
+        }
+    }
 
 }

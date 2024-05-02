@@ -18,6 +18,8 @@ const val EMPLOYEE_ID = "employeeId"
 
 const val IS_PAID = "isPaid"
 
+const val REQUEST_ID = "requestId"
+
 
 //---------------------------------------------------------------------------------------------//
 // SUCCESS MESSAGES

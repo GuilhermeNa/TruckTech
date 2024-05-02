@@ -4,6 +4,8 @@ import br.com.apps.model.dto.FineDto
 import br.com.apps.model.dto.LabelDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
+import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.RefuelDto
@@ -13,6 +15,8 @@ import br.com.apps.model.model.Fine
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
+import br.com.apps.model.model.request.request.PaymentRequest
+import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
@@ -98,4 +102,24 @@ fun QuerySnapshot.toLoanList(): List<Loan> {
 
 fun DocumentSnapshot.toLoanObject(): Loan? {
     return this.toObject(LoanDto::class.java)?.toModel()
+}
+
+fun QuerySnapshot.toRequestList(): List<PaymentRequest> {
+    return this.mapNotNull { requestDocument ->
+        requestDocument.toRequestObject()
+    }
+}
+
+fun DocumentSnapshot.toRequestObject(): PaymentRequest? {
+    return this.toObject(PaymentRequestDto::class.java)?.toModel()
+}
+
+fun QuerySnapshot.toRequestItemList(): List<RequestItem> {
+    return this.mapNotNull { requestItemDocument ->
+        requestItemDocument.toRequestItemObject()
+    }
+}
+
+fun DocumentSnapshot.toRequestItemObject(): RequestItem? {
+    return this.toObject(RequestItemDto::class.java)?.toModel()
 }

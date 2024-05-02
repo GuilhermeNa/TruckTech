@@ -23,7 +23,7 @@ class RequestUseCase(private val repository: RequestRepository) {
      */
     suspend fun saveRequest(requestDto: PaymentRequestDto): LiveData<Resource<String>> {
         val liveData = MutableLiveData<Resource<String>>()
-        val id = repository.saveRequest(requestDto)
+        val id = repository.save(requestDto)
         liveData.value = Resource(data = id)
         return liveData
     }

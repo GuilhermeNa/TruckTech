@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.request.request.PaymentRequest
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.databinding.FragmentRequestsListBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
@@ -45,16 +47,8 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     private val driverAndTruck by lazy {
         sharedViewModel.userData.value
     }
-    private val viewModel: RequestsListFragmentViewModel by viewModel { parametersOf(driverAndTruck) }
+    private val viewModel: RequestsListViewModel by viewModel { parametersOf(driverAndTruck) }
     private var adapter: RequestsListRecyclerAdapter? = null
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -130,7 +124,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     private fun createNewRequest() {
         lifecycleScope.launch {
-            viewModel.createNewRequest().asFlow().collect { resource ->
+            viewModel.save().asFlow().collect { resource ->
                 if (resource.error == null) {
                     requireView().snackBarGreen(REQUEST_HAVE_BEEN_SAVED)
                     requireView().navigateTo(
@@ -150,16 +144,18 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
      * State manager is configured here.
      */
     private fun initStateManager() {
-        viewModel.loadedRequestsData?.observe(viewLifecycleOwner) {
-            it?.let { resource ->
-                if (resource.error == null) {
-                    if (adapter == null) {
-                        initRequestRecyclerView()
-                    } else {
-                        adapter?.update(resource.data)
+        viewModel.requestData.observe(viewLifecycleOwner) { response ->
+            when(response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+
+                is Response.Success -> {
+                    response.data?.let { data ->
+                        if (adapter == null) {
+                            initRequestRecyclerView()
+                        } else {
+                            adapter?.update(data)
+                        }
                     }
-                } else {
-                    requireView().snackBarRed(resource.error!!)
                 }
             }
         }

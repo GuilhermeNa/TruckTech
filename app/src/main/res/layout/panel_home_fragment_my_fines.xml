@@ -70,9 +70,10 @@
                     android:textSize="24sp" />
 
                 <TextView
+                    android:id="@+id/panel_fines_new_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/new_fines"
+                    tools:text="Multas 2024"
                     android:textSize="14sp" />
             </LinearLayout>
 

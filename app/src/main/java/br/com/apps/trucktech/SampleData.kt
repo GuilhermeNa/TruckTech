@@ -4,7 +4,6 @@ import br.com.apps.model.model.request.payment_payroll.PaymentPayroll
 import br.com.apps.model.model.request.payment_payroll.PaymentPayrollType
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.trucktech.model.Performance
 import br.com.apps.trucktech.model.Truck
 import br.com.apps.trucktech.model.costs.DefaultCost
 import br.com.apps.trucktech.model.employee.AuthorizationLevelType
@@ -213,24 +212,6 @@ val sampleTravelsList = listOf(
         initialDate = LocalDateTime.parse("2024-06-18T12:30:45", formatter),
         finalDate = LocalDateTime.parse("2024-06-29T12:30:45", formatter),
         isFinished = true
-    )
-
-)
-
-val samplePerformanceList = listOf(
-    Performance(
-        title = "Média",
-        meta = "2.50",
-        hit = "2.40",
-        percent = "96%",
-        progressBar = 96
-    ),
-    Performance(
-        title = "Resultado",
-        meta = "50%",
-        hit = "38%",
-        percent = "76%",
-        progressBar = 76
     )
 
 )

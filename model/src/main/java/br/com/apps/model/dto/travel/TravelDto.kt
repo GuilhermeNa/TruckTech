@@ -10,10 +10,13 @@ data class TravelDto(
     val id: String? = null,
     val truckId: String? = null,
     val driverId: String? = null,
-    val initialDate: Date? = null,
-    val finalDate: Date? = null,
+
     @field:JvmField
     val isFinished: Boolean? = false,
+    val initialDate: Date? = null,
+    val finalDate: Date? = null,
+    val initialOdometerMeasurement: Double? = null,
+    val finalOdometerMeasurement: Double? = null,
 
     val freightsList: List<Freight>? = null,
     val refuelsList: List<Refuel>? = null,

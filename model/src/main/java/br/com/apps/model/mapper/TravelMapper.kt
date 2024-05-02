@@ -12,6 +12,8 @@ fun TravelDto.toModel(): Travel {
         driverId = this.driverId,
         initialDate = this.initialDate?.toLocalDateTime(),
         finalDate = this.finalDate?.toLocalDateTime(),
+        initialOdometerMeasurement = this.initialOdometerMeasurement?.toBigDecimal(),
+        finalOdometerMeasurement = this.finalOdometerMeasurement?.toBigDecimal(),
         isFinished = this.isFinished,
         freightsList = this.freightsList,
         refuelsList = this.refuelsList,

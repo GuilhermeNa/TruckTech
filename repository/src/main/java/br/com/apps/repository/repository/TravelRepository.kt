@@ -13,12 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class TravelRepository(
-    fireStore: FirebaseFirestore,
-    private val freightRepository: FreightRepository,
-    private val refuelRepository: RefuelRepository,
-    private val expendRepository: ExpendRepository
-) {
+class TravelRepository(fireStore: FirebaseFirestore) {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
 
@@ -38,6 +33,45 @@ class TravelRepository(
                         )
                     }
                 }
+
+            return@withContext liveData
+        }
+    }
+
+    /**
+     * Fetches the [Travel] dataSet for the specified driver ID.
+     *
+     * @param driverId The ID of the driver for whom the [Travel] dataSet is to be retrieved.
+     * @param withFlow If the user wants to keep observing the source or not.
+     * @return A LiveData object containing a [Response] of an [Travel] dataSet.
+     */
+    suspend fun getTravelListByDriverId(
+        driverId: String,
+        withFlow: Boolean
+    ): LiveData<Response<List<Travel>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Travel>>>()
+            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+
+            if (withFlow) {
+                listener.addSnapshotListener { querySnap, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    querySnap?.let { query ->
+                        liveData.postValue(Response.Success(query.toTravelList()))
+                    }
+                }
+            } else {
+                listener.get().addOnCompleteListener { task ->
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { query ->
+                        liveData.postValue(Response.Success(query.toTravelList()))
+                    }
+                }
+            }
 
             return@withContext liveData
         }
