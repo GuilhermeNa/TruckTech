@@ -18,7 +18,11 @@ data class Expend(
     var date: LocalDateTime? = null,
     var description: String? = null,
     var value: BigDecimal? = null,
-    var label: Label? = null
+    var label: Label? = null,
+
+    var paidByEmployee: Boolean? = null,
+    var alreadyRefunded: Boolean? = null
+
 ) {
 
     /**

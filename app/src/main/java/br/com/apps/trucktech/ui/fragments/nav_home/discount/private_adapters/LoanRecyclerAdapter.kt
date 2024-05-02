@@ -58,8 +58,32 @@ class LoanRecyclerAdapter(
             date.text = loan.date?.getMonthAndYearInPtBr()
             total.text = loan.value?.toCurrencyPtBr()
             installmentValue.text = loan.getInstallmentValue().toCurrencyPtBr()
-            paid.text = "1/4"
-            progressBar.progress = 25
+            paid.text = getProgressBarText(loan)
+            progressBar.progress = getProgressBarPercent(loan)
+        }
+    }
+
+    private fun getProgressBarText(loan: Loan): String {
+        return if (loan.installments != null &&
+            loan.installmentsAlreadyPaid != null
+        ) {
+            "${loan.installmentsAlreadyPaid}/${loan.installments}"
+        } else {
+            "-/-"
+        }
+    }
+
+    private fun getProgressBarPercent(loan: Loan): Int {
+        return if (loan.installments != null &&
+            loan.installmentsAlreadyPaid != null
+        ) {
+            val x = loan.installmentsAlreadyPaid!!.toDouble()
+            val y = loan.installments!!.toDouble()
+            val z = (x/y)*100
+            z.toInt()
+            
+        } else {
+            0
         }
     }
 

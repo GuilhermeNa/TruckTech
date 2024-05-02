@@ -10,7 +10,10 @@ data class Loan(
 
     val date: LocalDateTime? = null,
     val value: BigDecimal? = null,
+
     val installments: Int? = null,
+    val installmentsAlreadyPaid: Int? = null,
+
     @field:JvmField
     val isPaid: Boolean? = null
 

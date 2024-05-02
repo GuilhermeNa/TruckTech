@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.repository.DRIVER_ID
 import br.com.apps.repository.EMPTY_ID
 import br.com.apps.repository.FIRESTORE_COLLECTION_EXPENDS
 import br.com.apps.repository.FIRESTORE_COLLECTION_TRAVELS
@@ -17,6 +18,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
+
+private const val PAID_BY_EMPLOYEE = "paidByEmployee"
+private const val ALREADY_REFUNDED = "alreadyRefunded"
 
 class ExpendRepository(fireStore: FirebaseFirestore) {
 
@@ -67,11 +71,95 @@ class ExpendRepository(fireStore: FirebaseFirestore) {
     }
 
     /**
+     * Retrieves a LiveData containing a list of [Expend] items based on a list of driver IDs and payment status.
+     *
+     * @param driverIdList A list of driver IDs.
+     * @param paidByEmployee A boolean indicating whether the [Expend] was paid by the employee (true) or not (false).
+     * @param alreadyRefunded A boolean indicating whether the [Expend] has already been refunded (true) or not (false).
+     * @return LiveData containing a [Response] object with either a list of [Expend] items or an error.
+     */
+    suspend fun getExpendListByDriverIdAndRefundableStatus(
+        driverIdList: List<String>,
+        paidByEmployee: Boolean,
+        alreadyRefunded: Boolean,
+    ): LiveData<Response<List<Expend>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Expend>>>()
+            val listener =
+                collection
+                    .whereIn(DRIVER_ID, driverIdList)
+                    .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
+                    .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
+
+            listener.get().addOnCompleteListener { task ->
+                task.exception?.let { e ->
+                    liveData.postValue(Response.Error(e))
+                }
+                task.result?.let { query ->
+                    liveData.postValue(Response.Success(query.toExpendList()))
+                }
+            }
+
+            return@withContext liveData
+        }
+    }
+
+    /**
+     * Fetches the [Expend] dataSet based on the driver's ID and refundable status
+     * considering whether the expenditure was paid by the employee and whether it has already been refunded.
+     *
+     * @param driverId The ID of the driver for whom the expenditures are to be retrieved.
+     * @param paidByEmployee A boolean indicating whether the [Expend] was paid by the employee (true) or not (false).
+     * @param alreadyRefunded A boolean indicating whether the [Expend] has already been refunded (true) or not (false).
+     * @param withFlow If the user wants to keep observing the source or not.
+     *
+     * @return A LiveData object containing a [Response] of [Expend] data for the specified driver ID.
+     */
+    suspend fun getExpendListByDriverIdAndRefundableStatus(
+        driverId: String,
+        paidByEmployee: Boolean,
+        alreadyRefunded: Boolean,
+        withFlow: Boolean
+    ): LiveData<Response<List<Expend>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Expend>>>()
+            val listener =
+                collection
+                    .whereEqualTo(DRIVER_ID, driverId)
+                    .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
+                    .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
+
+            if (withFlow) {
+                listener.addSnapshotListener { querySnap, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    querySnap?.let { query ->
+                        liveData.postValue(Response.Success(query.toExpendList()))
+                    }
+                }
+            } else {
+                listener.get().addOnCompleteListener { task ->
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { query ->
+                        liveData.postValue(Response.Success(query.toExpendList()))
+                    }
+                }
+            }
+
+            return@withContext liveData
+        }
+    }
+
+    /**
      * Fetch the dataSet for the specified [Expend] ID.
      *
-     * This function fetches expenditure data for the given travel ID asynchronously from the database.
+     * Fetches [Expend] dataSet for the given [Travel] ID asynchronously from the database.
      *
      * @param travelId The ID of the [Travel] for which expenditure data is to be retrieved.
+     * @param withFlow If the user wants to keep observing the source or not.
      * @return A LiveData object containing a response of [Expend] data for the specified [Travel] ID.
      */
     suspend fun getExpendListByTravelId(
@@ -130,14 +218,14 @@ class ExpendRepository(fireStore: FirebaseFirestore) {
                 }
             } else {
                 listener.get().addOnCompleteListener { task ->
-                        task.exception?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        task.result?.let { document ->
-                            val expend = document.toExpendObject()
-                            liveData.postValue(Response.Success(data = expend))
-                        }
-                    }.await()
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { document ->
+                        val expend = document.toExpendObject()
+                        liveData.postValue(Response.Success(data = expend))
+                    }
+                }.await()
             }
 
             return@withContext liveData

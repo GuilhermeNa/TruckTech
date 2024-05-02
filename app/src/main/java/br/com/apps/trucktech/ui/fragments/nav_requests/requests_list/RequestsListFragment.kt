@@ -49,14 +49,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     private var adapter: RequestsListRecyclerAdapter? = null
 
     //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
     //---------------------------------------------------------------------------------------------//
 

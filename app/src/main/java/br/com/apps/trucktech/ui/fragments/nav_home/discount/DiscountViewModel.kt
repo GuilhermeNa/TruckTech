@@ -46,17 +46,17 @@ class DiscountViewModel(
         }
     }
 
-    private suspend fun loadLoanData() {
-        loanRepository.getLoanListByEmployeeId(employeeId, withFlow = false, isPaid = false)
+    private suspend fun loadAdvanceData() {
+        advanceRepository.getAdvanceListByEmployeeIdAndPaymentStatus(employeeId, withFlow = false, isPaid = false)
             .asFlow().collect {
-                _loanData.value = it
+                _advanceData.value = it
             }
     }
 
-    private suspend fun loadAdvanceData() {
-        advanceRepository.getAdvanceListByEmployeeId(employeeId, withFlow = false, isPaid = false)
+    private suspend fun loadLoanData() {
+        loanRepository.getLoanListByEmployeeIdAndPaymentStatus(employeeId, withFlow = false, isPaid = false)
             .asFlow().collect {
-                _advanceData.value = it
+                _loanData.value = it
             }
     }
 

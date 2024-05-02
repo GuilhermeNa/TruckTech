@@ -2,7 +2,7 @@ package br.com.apps.trucktech.ui.fragments.nav_home.to_receive
 
 import androidx.lifecycle.ViewModel
 
-class ToReceiveFragmentViewModel: ViewModel() {
+class ToReceiveViewModel: ViewModel() {
 
     val paymentsUrlImage = "https://www.redegn.com.br/ckfinder/userfiles/images/educacao-financeira-reserva-financeira.jpg"
     val refundsUrlImage = "https://blog.edenredpay.com.br/wp-content/uploads/2022/05/reembolso_de_despesas-1.jpg"

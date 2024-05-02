@@ -27,10 +27,10 @@ class LoanRepository(fireStore: FirebaseFirestore) {
      *
      * @return A LiveData object containing a [Response] of [Loan] dataSet for the specified ID.
      */
-    suspend fun getLoanListByEmployeeId(
+    suspend fun getLoanListByEmployeeIdAndPaymentStatus(
         employeeId: String,
-        withFlow: Boolean,
-        isPaid: Boolean
+        isPaid: Boolean,
+        withFlow: Boolean
     ): LiveData<Response<List<Loan>>> {
         return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<List<Loan>>>()
@@ -62,6 +62,35 @@ class LoanRepository(fireStore: FirebaseFirestore) {
         }
     }
 
+    /**
+     * This function fetches [Loan] dataSet for the given [Employee] ID asynchronously from the database.
+     *
+     * @param employeeIdList The ID list of the [Employee] for which [Loan] dataSet is to be retrieved.
+     * @param isPaid Whether the [Loan] has already been paid or not.
+     *
+     * @return A LiveData object containing a [Response] of [Loan] dataSet for the specified IDs in the list.
+     */
+    suspend fun getLoanListByEmployeeIdAndPaymentStatus(
+        employeeIdList: List<String>,
+        isPaid: Boolean
+    ): LiveData<Response<List<Loan>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Loan>>>()
+            val listener = collection
+                .whereIn(EMPLOYEE_ID, employeeIdList)
+                .whereEqualTo(IS_PAID, isPaid)
 
+            listener.get().addOnCompleteListener { task ->
+                task.exception?.let { e ->
+                    liveData.postValue(Response.Error(e))
+                }
+                task.result?.let { query ->
+                    liveData.postValue(Response.Success(query.toLoanList()))
+                }
+            }.await()
+
+            return@withContext liveData
+        }
+    }
 
 }

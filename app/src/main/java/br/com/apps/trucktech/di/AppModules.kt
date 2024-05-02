@@ -11,14 +11,14 @@ import br.com.apps.trucktech.ui.fragments.nav_documents.document.DocumentViewMod
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentsListFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.DiscountViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.fines.FinesListViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeFragmentFineViewModel
+import br.com.apps.trucktech.ui.fragments.nav_home.home.FineBoxFromHomeViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeFragmentPerformanceViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeFragmentToReceiveViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeFragmentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.payment.PaymentFragmentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.refund.RefundFragmentViewModel
+import br.com.apps.trucktech.ui.fragments.nav_home.home.ToReceiveBoxFromHomeViewModel
+import br.com.apps.trucktech.ui.fragments.nav_home.payment.PaymentViewModel
+import br.com.apps.trucktech.ui.fragments.nav_home.refund.RefundViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.time_line.TimelineFragmentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.to_receive.ToReceiveFragmentViewModel
+import br.com.apps.trucktech.ui.fragments.nav_home.to_receive.ToReceiveViewModel
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.RequestEditorFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost.RequestEditorCostFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_refuel.RequestEditorRefuelViewModel
@@ -50,8 +50,19 @@ val viewModelModules = module {
     viewModel<MainActivityViewModel> { MainActivityViewModel(get(), get()) }
     viewModel<BankListFragmentViewModel> { (id: String) -> BankListFragmentViewModel(id, get()) }
     viewModel<ChangePasswordFragmentViewModel> { ChangePasswordFragmentViewModel(get()) }
-    viewModel<ExpendEditorFragmentViewModel> { (idHolder: IdHolder) -> ExpendEditorFragmentViewModel(idHolder, get(), get()) }
-    viewModel<ExpendPreviewViewModel> { (expendId: String) -> ExpendPreviewViewModel(expendId, get()) }
+    viewModel<ExpendEditorFragmentViewModel> { (idHolder: IdHolder) ->
+        ExpendEditorFragmentViewModel(
+            idHolder,
+            get(),
+            get()
+        )
+    }
+    viewModel<ExpendPreviewViewModel> { (expendId: String) ->
+        ExpendPreviewViewModel(
+            expendId,
+            get()
+        )
+    }
     viewModel<ExpendListViewModel> { (idHolder: IdHolder) -> ExpendListViewModel(idHolder, get()) }
     viewModel<DocumentViewModel> { (id: String) ->
         DocumentViewModel(
@@ -75,12 +86,27 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<FreightPreviewViewModel> { (freightId: String) -> FreightPreviewViewModel(freightId, get(),) }
-    viewModel<FreightsListViewModel> { (travelId: String) -> FreightsListViewModel(travelId, get()) }
+    viewModel<FreightPreviewViewModel> { (freightId: String) ->
+        FreightPreviewViewModel(
+            freightId,
+            get(),
+        )
+    }
+    viewModel<FreightsListViewModel> { (travelId: String) ->
+        FreightsListViewModel(
+            travelId,
+            get()
+        )
+    }
     viewModel<HomeFragmentViewModel> { HomeFragmentViewModel(get()) }
     viewModel<LoginFragmentViewModel> { LoginFragmentViewModel(get()) }
     viewModel<RequestEditorFragmentViewModel> { RequestEditorFragmentViewModel(get()) }
-    viewModel<RequestPreviewFragmentViewModel> { (id: String) -> RequestPreviewFragmentViewModel(id, get()) }
+    viewModel<RequestPreviewFragmentViewModel> { (id: String) ->
+        RequestPreviewFragmentViewModel(
+            id,
+            get()
+        )
+    }
     viewModel<RequestsListFragmentViewModel> { (driverAndTruck: DriverAndTruck) ->
         RequestsListFragmentViewModel(
             driverAndTruck,
@@ -88,7 +114,12 @@ val viewModelModules = module {
         )
     }
     viewModel<RecordsViewModel> { RecordsViewModel(get()) }
-    viewModel<RefuelFragmentViewModel> { (idHolder: IdHolder) -> RefuelFragmentViewModel(idHolder, get()) }
+    viewModel<RefuelFragmentViewModel> { (idHolder: IdHolder) ->
+        RefuelFragmentViewModel(
+            idHolder,
+            get()
+        )
+    }
     viewModel<RefuelPreviewViewModel> { (refuelId: String) ->
         RefuelPreviewViewModel(
             refuelId,
@@ -106,11 +137,11 @@ val viewModelModules = module {
     viewModel<TimelineFragmentViewModel> { TimelineFragmentViewModel() }
     viewModel<TravelsListViewModel> { (id: String) -> TravelsListViewModel(id, get()) }
     viewModel<HomeFragmentPerformanceViewModel> { HomeFragmentPerformanceViewModel() }
-    viewModel<HomeFragmentToReceiveViewModel> { HomeFragmentToReceiveViewModel() }
-    viewModel<ToReceiveFragmentViewModel> { ToReceiveFragmentViewModel() }
+    viewModel<ToReceiveBoxFromHomeViewModel> { ToReceiveBoxFromHomeViewModel(get(), get(), get(), get()) }
+    viewModel<ToReceiveViewModel> { ToReceiveViewModel() }
     viewModel<DiscountViewModel> { (id: String) -> DiscountViewModel(id, get(), get()) }
-    viewModel<PaymentFragmentViewModel> { PaymentFragmentViewModel() }
-    viewModel<RefundFragmentViewModel> { RefundFragmentViewModel() }
+    viewModel<PaymentViewModel> { (id: String) -> PaymentViewModel(id, get()) }
+    viewModel<RefundViewModel> { (id: String) -> RefundViewModel(id, get()) }
     viewModel<RequestEditorRefuelViewModel> { (idRequest: String, idItem: String?) ->
         RequestEditorRefuelViewModel(
             idRequest,
@@ -134,7 +165,7 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<HomeFragmentFineViewModel> { HomeFragmentFineViewModel(get()) }
+    viewModel<FineBoxFromHomeViewModel> { FineBoxFromHomeViewModel(get(), get()) }
     viewModel<BankPreviewViewModel> { (employeeId: String, bankId: String) ->
         BankPreviewViewModel(
             employeeId,

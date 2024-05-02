@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import br.com.apps.trucktech.databinding.FragmentToReceiveBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo
@@ -13,26 +12,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 private const val TOOLBAR_TITLE = "Valores a receber"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ToReceiveFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ToReceiveFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentToReceiveBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: ToReceiveFragmentViewModel by viewModel()
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
+    private val viewModel: ToReceiveViewModel by viewModel()
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -94,8 +79,6 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
             }
         }
     }
-
-
 
     //---------------------------------------------------------------------------------------------//
     // ON DESTROY VIEW

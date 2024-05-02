@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.repository.FAILED_TO_LOAD_DATA
@@ -15,22 +14,16 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.AdvanceRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.LoanRecyclerAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
-
 import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Descontos"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [DiscountFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class DiscountFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentDiscountBinding? = null
     private val binding get() = _binding!!
 
-    private val employeeId = sharedViewModel.userData.value?.user?.employeeId
+    private val employeeId by lazy { sharedViewModel.userData.value?.user?.employeeId }
     private val viewModel: DiscountViewModel by viewModel { parametersOf(employeeId) }
 
     private var advanceAdapter: AdvanceRecyclerAdapter? = null

@@ -13,7 +13,6 @@ import br.com.apps.repository.TRUCK_ID
 import br.com.apps.repository.toFineList
 import br.com.apps.repository.toFineObject
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -24,28 +23,6 @@ private const val FIRESTORE_COLLECTION_FINES = "fines"
 class FineRepository(private val fireStore: FirebaseFirestore) {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_FINES)
-
-    fun getAllByDriverId(driverId: String): LiveData<List<Fine>> {
-        val liveData = MutableLiveData<List<Fine>>()
-
-        collection.whereEqualTo("driverId", driverId).get()
-            .addOnSuccessListener { querySnapShot ->
-                querySnapShot?.let {
-                    liveData.value = getMappedDataSet(it)
-                }
-            }
-
-        return liveData
-    }
-
-    private fun getMappedDataSet(querySnapShot: QuerySnapshot): List<Fine> {
-        return emptyList()/*querySnapShot.documents.mapNotNull { document ->
-            document.toObject<FineDto>()?.let { fineDto ->
-               // FineMapper.toModel(fineDto)
-            }
-        }*/
-    }
-
 
     /**
      * Fetch the dataSet for the specified [DriverEmployee] ID.
@@ -77,7 +54,7 @@ class FineRepository(private val fireStore: FirebaseFirestore) {
                     task.result?.let {  query ->
                         liveData.postValue(Response.Success(query.toFineList()))
                     }
-                }
+                }.await()
             }
 
             return@withContext liveData
@@ -114,7 +91,7 @@ class FineRepository(private val fireStore: FirebaseFirestore) {
                     task.result?.let {  query ->
                         liveData.postValue(Response.Success(query.toFineList()))
                     }
-                }
+                }.await()
             }
 
             return@withContext liveData
@@ -150,7 +127,7 @@ class FineRepository(private val fireStore: FirebaseFirestore) {
                     task.result?.let { document ->
                         liveData.postValue(Response.Success(document.toFineObject()))
                     }
-                }
+                }.await()
             }
 
             return@withContext liveData

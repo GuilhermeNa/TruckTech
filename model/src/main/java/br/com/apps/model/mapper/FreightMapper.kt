@@ -23,7 +23,8 @@ fun FreightDto.toModel(): Freight {
         loadingDate = this.loadingDate?.toLocalDateTime(),
         dailyValue = this.dailyValue?.let { BigDecimal(it) },
         daily = this.daily,
-        dailyTotalValue = this.dailyTotalValue?.let { BigDecimal(it) }
+        dailyTotalValue = this.dailyTotalValue?.let { BigDecimal(it) },
+        commissionPercentual = this.commissionPercentual?.let { BigDecimal(it) }
     )
 }
 
@@ -44,6 +45,7 @@ fun Freight.toDto(): FreightDto {
         loadingDate = this.loadingDate?.toDate(),
         dailyValue = this.dailyValue?.toDouble(),
         daily = this.daily,
-        dailyTotalValue = this.dailyTotalValue?.toDouble()
+        dailyTotalValue = this.dailyTotalValue?.toDouble(),
+        commissionPercentual = this.commissionPercentual?.toDouble()
     )
 }

@@ -6,9 +6,10 @@ import java.util.Date
 data class FreightDto (
     var masterUid: String? = null,
     var id: String? = null,
-    val incomeId: String? = null,
     val truckId: String? = null,
     val travelId: String? = null,
+    val driverId: String? = null,
+    val incomeId: String? = null,
 
     val origin: String? = null,
     val company: String? = null,
@@ -22,6 +23,10 @@ data class FreightDto (
     val dailyValue: Double? = null,
     val daily: Int? = null,
     val dailyTotalValue: Double? = null,
-    val complement: List<Complement>? = null
+    val complement: List<Complement>? = null,
+
+    @field:JvmField
+    var isCommissionPaid: Boolean? = null,
+    var commissionPercentual: Double? = null
 
 )

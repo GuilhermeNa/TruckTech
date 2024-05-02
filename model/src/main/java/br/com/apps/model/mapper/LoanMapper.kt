@@ -14,6 +14,7 @@ fun LoanDto.toModel(): Loan {
         date = this.date?.toLocalDateTime(),
         value = this.value?.let { BigDecimal(it) },
         installments = this.installments,
+        installmentsAlreadyPaid = this.installmentsAlreadyPaid,
         isPaid = this.isPaid
     )
 }
@@ -26,6 +27,7 @@ fun Loan.toDto(): LoanDto {
         date = this.date?.toDate(),
         value = this.value?.toDouble(),
         installments = this.installments,
+        installmentsAlreadyPaid = this.installmentsAlreadyPaid,
         isPaid = this.isPaid
     )
 }

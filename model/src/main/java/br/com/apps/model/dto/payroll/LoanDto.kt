@@ -9,7 +9,10 @@ data class LoanDto (
 
     val date: Date? = null,
     val value: Double? = null,
+
     val installments: Int? = null,
+    val installmentsAlreadyPaid: Int? = null,
+
     @field:JvmField
     val isPaid: Boolean? = null
 
