@@ -64,18 +64,10 @@
 
     </RelativeLayout>
 
-
-
-
-
-
-
-
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/value"
+        android:text="@string/total_value"
         android:textSize="14sp"
         android:layout_marginTop="8dp"
         android:textColor="@color/light_grey"

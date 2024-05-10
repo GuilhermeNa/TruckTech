@@ -89,6 +89,7 @@ class LabelUseCase(private val repository: LabelRepository) {
                 awaitAll(deferredA, deferredB)
                 mediator.value = Response.Success(data = dataSet)
             }
+
             return@coroutineScope mediator
         }
     }

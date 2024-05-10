@@ -8,6 +8,7 @@ data class PaymentRequestDto(
     val truckId: String? = null,
     val driverId: String? = null,
 
+    val encodedImage: String? = null,
     val date: Date? = null,
     val requestNumber: Int? = 0,
     val status: String? = "",

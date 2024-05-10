@@ -15,10 +15,10 @@
         android:textStyle="bold"/>
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/box_add_pix_card"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         app:cardCornerRadius="20dp"
-        android:clickable="true"
         android:layout_marginTop="16dp">
 
         <LinearLayout
@@ -26,6 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -43,18 +45,34 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:orientation="horizontal"
-            android:visibility="gone"
-            >
+            android:visibility="gone">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/change"
-                app:drawableTopCompat="@drawable/icon_edit"
+            <LinearLayout
+                android:id="@+id/box_add_pix_edit"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center"
+
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/panel_add_pix_image"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="UseCompoundDrawables">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/icon_edit"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change"/>
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/panel_add_pix_image"
@@ -67,9 +85,10 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintWidth_percent="0.7"
                 tools:src="@tools:sample/avatars" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
 

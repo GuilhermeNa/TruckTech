@@ -1,17 +1,19 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_refuel
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.factory.RequestItemDtoFactory
-import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.label.DEFAULT_REFUEL_LABEL_ID
-import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.model.IdHolder
+import br.com.apps.model.factory.RequestItemFactory
+import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.FAILED_TO_SALVE
+import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_SAVED
+import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorRefuelBinding
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
@@ -19,7 +21,6 @@ import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import java.math.BigDecimal
 
 private const val TOOLBAR_TITLE = "Requisição de Abastecimento"
 
@@ -34,21 +35,13 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: RequestEditorRefuelFragmentArgs by navArgs()
-    private val viewModel: RequestEditorRefuelViewModel by viewModel {
-        parametersOf(
-            args.requestId,
-            args.refuelId
+    private val idHolder by lazy {
+        IdHolder(
+            requestId = args.requestId,
+            refuelId = args.refuelId
         )
     }
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.loadData()
-    }
+    private val viewModel: RequestEditorRefuelViewModel by viewModel { parametersOf(idHolder) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -84,34 +77,23 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
     }
 
     /**
-     * State Manager is configured here
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *   - Observes refuelData for bind.
      */
     private fun initStateManager() {
-        viewModel.loadedRequestData.observe(viewLifecycleOwner) {
-            it?.let { resource ->
-                if (resource.error == null) {
-                    args.refuelId?.let { bind() }
-                } else {
-                    requireView().snackBarRed(resource.error!!)
-                }
+        viewModel.refuelData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {}
+                is Response.Success -> response.data?.let { bind() }
             }
         }
 
-        viewModel.requestItemSaved.observe(viewLifecycleOwner) {
-            it?.let { resource ->
-                if (resource.error == null) {
-                    requireView().snackBarGreen(SUCCESSFULLY_SAVED)
-                    requireView().popBackStack()
-                } else {
-                    requireView().snackBarRed(FAILED_TO_SALVE)
-                }
-            }
-        }
     }
 
     fun bind() {
         binding.apply {
-            viewModel.requestItem?.let {
+            viewModel.requestItem.let {
                 it.kmMarking?.let { km ->
                     fragmentRequestEditorKm.setText(km.toString())
                 }
@@ -122,6 +104,12 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
         }
     }
 
+    /**
+     * Try to save an [RequestItem].
+     *  1. Validate the fields.
+     *  2. Create a hashMap with the data.
+     *  3. Send it to the viewModel for saving.
+     */
     private fun initSaveButton() {
         binding.apply {
             fragmentRequestEditorFreightButton.setOnClickListener {
@@ -146,18 +134,28 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
                 }
 
                 if (fieldsAreValid) {
-                    val requestItemDto = viewModel.requestItem?.also { item ->
-                        item.kmMarking = kmMarking.toInt()
-                        item.value = BigDecimal(value)
-                    }?.toDto()
-                        ?: RequestItemDtoFactory.create(
-                            kmMarking = kmMarking,
-                            value = value,
-                            labelId = DEFAULT_REFUEL_LABEL_ID,
-                            type = RequestItemType.REFUEL
-                        ).toDto()
+                    val mappedFields = hashMapOf(
+                        Pair(RequestItemFactory.TAG_KM_MARKING, kmMarking),
+                        Pair(RequestItemFactory.TAG_VALUE, value)
+                    )
 
-                    viewModel.saveButtonClicked(requestItemDto)
+                    save(mappedFields)
+                }
+            }
+        }
+    }
+
+    private fun save(mappedFields: HashMap<String, String>) {
+        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    requireView().snackBarRed(FAILED_TO_SALVE)
+                    Log.e(TAG_DEBUG, response.exception.message.toString())
+                }
+
+                is Response.Success -> {
+                    requireView().snackBarGreen(SUCCESSFULLY_SAVED)
+                    requireView().popBackStack()
                 }
             }
         }

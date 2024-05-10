@@ -1,26 +1,41 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.repository.CANCEL
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.OK
+import br.com.apps.repository.RESULT_KEY
+import br.com.apps.repository.Response
 import br.com.apps.trucktech.R
+import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorBinding
+import br.com.apps.trucktech.expressions.decodeBitMap
 import br.com.apps.trucktech.expressions.navigateTo
-import br.com.apps.trucktech.expressions.snackBarGreen
+import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.trucktech.ui.activities.CameraActivity
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapters.RequestEditorRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_dialogs.RequestEditorBottomSheet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Requisição"
 
@@ -31,28 +46,46 @@ private const val DIRECTION_WALLET = 2
 private const val ITEM_SUCCESSFULLY_REMOVED = "Item removido com sucesso"
 private const val FAILED_TO_REMOVE_ITEM = "Falha ao remover Item"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [RequestEditorFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class RequestEditorFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRequestEditorBinding? = null
     private val binding get() = _binding!!
     private val args: RequestEditorFragmentArgs by navArgs()
-    private val viewModel: RequestEditorFragmentViewModel by viewModel()
+    private val viewModel: RequestEditorViewModel by viewModel { parametersOf(args.requestId) }
     private var adapter: RequestEditorRecyclerAdapter? = null
+    private val activityResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null)
+                processActivityLauncherResult(result)
+        }
 
     //---------------------------------------------------------------------------------------------//
-    // ON CREATE
+    // ON CREATE VIEW
     //---------------------------------------------------------------------------------------------//
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        args.requestId?.let { id ->
-            viewModel.requestId = id
-            viewModel.loadData()
+
+    }
+
+    private fun processActivityLauncherResult(result: ActivityResult) {
+        try {
+
+            result.data?.let { data ->
+                val encodedImage = data.getStringExtra(RESULT_KEY)
+                encodedImage?.run {
+                    viewModel.imageHaveBeenLoaded(this)
+                    lifecycleScope.launch { viewModel.saveEncodedImage() }
+                }
+            }
+
+        } catch (e: Exception) {
+            Log.e(
+                TAG_DEBUG,
+                "RequestEditorFragment, processActivityLauncherResult: ${e.message.toString()}"
+            )
         }
     }
 
@@ -76,21 +109,9 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
         initBoxSummary()
+        initBoxPayment()
         initRecyclerView()
         initFab()
-    }
-
-    private fun initBoxSummary() {
-        binding.boxFragRequestPreviewDescription.apply {
-            sharedViewModel.userData.value.let {
-                it?.let { driverAndUser ->
-                    driverAndUser.user?.name?.let { name -> driverField.text = name } ?: "-"
-                    driverAndUser.truck?.plate?.let { truckPlate -> plateField.text = truckPlate }
-                        ?: "-"
-                    valueField.text = "-"
-                }
-            }
-        }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -105,7 +126,43 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
     }
 
     /**
-     * Recycler view is configured here.
+     * Initialize the box summary. Get user data from sharedViewModel and bind.
+     */
+    private fun initBoxSummary() {
+        binding.boxFragRequestPreviewDescription.apply {
+            sharedViewModel.userData.value.let {
+                it?.let { driverAndUser ->
+                    driverAndUser.user?.name?.let { name -> driverField.text = name } ?: "-"
+                    driverAndUser.truck?.plate?.let { truckPlate -> plateField.text = truckPlate }
+                        ?: "-"
+                    valueField.text = "-"
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Init box payment
+     */
+    private fun initBoxPayment() {
+        binding.boxFragRequestEditorPayment.apply {
+            panelAddPixLayoutWaitingUpload.setOnClickListener { launchCameraActivity() }
+            boxAddPixEdit.setOnClickListener { launchCameraActivity() }
+        }
+    }
+
+    private fun launchCameraActivity() {
+        val intent = Intent(requireContext(), CameraActivity::class.java)
+        activityResultLauncher.launch(intent)
+    }
+
+    /**
+     * Initialize the RecyclerView.
+     *
+     * Options:
+     *  - clickListener -> navigation
+     *  - context menu -> delete
      */
     private fun initRecyclerView() {
         val recyclerView = binding.fragmentRequestEditorRecycler
@@ -118,133 +175,141 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
                         RequestEditorFragmentDirections
                             .actionRequestEditorFragmentToRequestEditorRefuelFragment(
                                 refuelId = itemCLickData.itemId,
-                                requestId = args.requestId!!
+                                requestId = args.requestId
                             )
 
                     RequestItemType.COST ->
                         RequestEditorFragmentDirections
                             .actionRequestEditorFragmentToRequestEditorCostFragment(
                                 costId = itemCLickData.itemId,
-                                requestId = args.requestId!!
+                                requestId = args.requestId
                             )
 
                     RequestItemType.WALLET ->
                         RequestEditorFragmentDirections
                             .actionRequestEditorFragmentToRequestEditorWalletFragment(
                                 walletId = itemCLickData.itemId,
-                                requestId = args.requestId!!
+                                requestId = args.requestId
                             )
                 }
                 requireView().navigateTo(direction)
             },
-            deleteClickListener = this::showAlertDialog
+            deleteClickListener = this::showAlertDialogForDelete
         )
         recyclerView.adapter = adapter
     }
 
-    private fun showAlertDialog(itemId: String) {
+    private fun showAlertDialogForDelete(itemId: String) {
+        viewModel.requestDarkLayer()
+
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle("Apagando item")
             .setMessage("Você realmente deseja apagar este item permanentemente?")
-            .setPositiveButton("Ok") { dialog, _ ->
-                viewModel.deleteItem(itemId)
-            }
-            .setNegativeButton("Cancelar") { _, _ ->
-            }
+            .setPositiveButton(OK) { _, _ -> deleteItem(itemId) }
+            .setNegativeButton(CANCEL) { _, _ -> }
+            .setOnDismissListener { viewModel.dismissDarkLayer() }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
             }
+
+    }
+
+    private fun deleteItem(itemId: String) {
+        viewModel.deleteItem(itemId).observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE_ITEM)
+
+                is Response.Success -> requireView().snackBarOrange(ITEM_SUCCESSFULLY_REMOVED)
+            }
+        }
     }
 
     /**
-     * Fab is configured here.
+     * Initializes the FAB for the request editor fragment.
+     *
+     * Sets a click listener on the FAB to trigger the bottom sheet for ViewModel.
      */
     private fun initFab() {
         binding.fragmentRequestEditorFab.setOnClickListener {
-            viewModel.bottomSheetRequested()
+
+            viewModel.requestDarkLayer()
+
+            val bottomSheet = RequestEditorBottomSheet(
+                onClickListener = { result ->
+                    when (result) {
+                        DIRECTION_REFUEL -> {
+                            requireView().navigateTo(
+                                RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorRefuelFragment(
+                                    refuelId = null,
+                                    requestId = args.requestId
+                                )
+                            )
+                        }
+
+                        DIRECTION_COST -> {
+                            requireView().navigateTo(
+                                RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorCostFragment(
+                                    costId = null,
+                                    requestId = args.requestId
+                                )
+                            )
+                        }
+
+                        DIRECTION_WALLET -> {
+                            requireView().navigateTo(
+                                RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorWalletFragment(
+                                    walletId = null,
+                                    requestId = args.requestId
+                                )
+                            )
+                        }
+                    }
+                },
+                onDismissListener = { viewModel.dismissDarkLayer() }
+            )
+            bottomSheet.show(childFragmentManager, RequestEditorBottomSheet.TAG)
         }
     }
 
     /**
-     * State manager is configured here.
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *  - Observes requestData to update [adapter] and bind data.
+     *  - Observes dark layer to manage the interaction.
+     *
      */
     private fun initStateManager() {
-        viewModel.loadedRequestData.observe(viewLifecycleOwner) {
-            it?.let { resource ->
-                val paymentRequest = resource.data
-                val requestItems = resource.data.itemsList!!
-                val totalValueInPtBr = paymentRequest.getTotalValue().toCurrencyPtBr()
-
-                if (resource.error == null) {
-                    adapter?.update(requestItems)
-                    binding.boxFragRequestPreviewDescription.valueField.text = totalValueInPtBr
-                } else {
-                    requireView().snackBarRed(resource.error!!)
-                }
-
-            }
-        }
-
-        viewModel.bottomSheetVisibility.observe(viewLifecycleOwner) { shouldBeVisible ->
-            when (shouldBeVisible) {
-                true -> {
-                    val bottomSheet = RequestEditorBottomSheet(
-                        onClickListener = { result ->
-                            when (result) {
-                                DIRECTION_REFUEL -> {
-                                    requireView().navigateTo(
-                                        RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorRefuelFragment(
-                                            refuelId = null,
-                                            requestId = args.requestId!!
-                                        )
-                                    )
-                                }
-
-                                DIRECTION_COST -> {
-                                    requireView().navigateTo(
-                                        RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorCostFragment(
-                                            costId = null,
-                                            requestId = args.requestId!!
-                                        )
-                                    )
-                                }
-
-                                DIRECTION_WALLET -> {
-                                    requireView().navigateTo(
-                                        RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorWalletFragment(
-                                            walletId = null,
-                                            requestId = args.requestId!!
-                                        )
-                                    )
-                                }
-                            }
-                        },
-                        onDismissListener = {
-                            viewModel.bottomSheetDismissed()
-                        }
-                    )
-                    bottomSheet.show(childFragmentManager, RequestEditorBottomSheet.TAG)
-                    binding.fragmentRequestEditorDarkLayer.visibility = VISIBLE
-                }
-
-                false -> {
-                    binding.fragmentRequestEditorDarkLayer.visibility = GONE
+        viewModel.requestData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                is Response.Success -> {
+                    response.data?.let { request ->
+                        request.itemsList?.let { adapter?.update(it) }
+                        binding.boxFragRequestPreviewDescription.valueField.text =
+                            request.getTotalValue().toCurrencyPtBr()
+                    }
                 }
             }
         }
 
-        viewModel.requestItemDeleted.observe(viewLifecycleOwner) {
-            it?.let { resource ->
-                if (resource.error == null) {
-
-                    requireView().snackBarGreen(ITEM_SUCCESSFULLY_REMOVED)
-                } else {
-                    requireView().snackBarRed(FAILED_TO_REMOVE_ITEM)
-                }
+        viewModel.boxPaymentImage.observe(viewLifecycleOwner) { encodedImage ->
+            val imageBitmap = encodedImage.decodeBitMap()
+            binding.boxFragRequestEditorPayment.apply {
+                panelAddPixLayoutWaitingUpload.visibility = GONE
+                panelAddPixLayoutAlreadyUploaded.visibility = VISIBLE
+                panelAddPixImage.setImageBitmap(imageBitmap)
             }
         }
+
+        viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
+            when (isRequested) {
+                true -> binding.fragmentRequestEditorDarkLayer.visibility = VISIBLE
+                false -> binding.fragmentRequestEditorDarkLayer.visibility = GONE
+            }
+        }
+
     }
 
     //---------------------------------------------------------------------------------------------//

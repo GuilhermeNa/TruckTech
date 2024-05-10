@@ -63,12 +63,16 @@ internal const val FIRESTORE_COLLECTION_EXPENDS = "expends"
 
 internal const val FIRESTORE_COLLECTION_LOANS = "loans"
 
-
-//private val teste = fireStore.collectionGroup("teste")
-
 //---------------------------------------------------------------------------------------------//
 // COMMON
 //---------------------------------------------------------------------------------------------//
 
 const val OK = "Ok"
 const val CANCEL = "Cancelar"
+
+//---------------------------------------------------------------------------------------------//
+// KEYS
+//---------------------------------------------------------------------------------------------//
+
+const val RESULT_KEY = "result_key"
+

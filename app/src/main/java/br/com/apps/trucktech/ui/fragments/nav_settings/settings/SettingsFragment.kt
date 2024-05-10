@@ -85,7 +85,7 @@ class SettingsFragment : BaseFragmentWithToolbar() {
 
     private fun showAlertDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setIcon(R.drawable.icon_logout_black)
+            .setIcon(R.drawable.icon_logout)
             .setTitle("Saindo do App")
             .setMessage("Você realmente deseja sair do aplicativo e esquecer a senha?")
             .setPositiveButton("Ok") { dialog, _ ->

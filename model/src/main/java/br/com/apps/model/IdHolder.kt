@@ -7,5 +7,7 @@ class IdHolder(
     val travelId: String? = null,
     val refuelId: String? = null,
     val expendId: String? = null,
-    val freightId: String? = null
+    val freightId: String? = null,
+    val requestId: String? = null,
+    val walletId: String? = null
 )

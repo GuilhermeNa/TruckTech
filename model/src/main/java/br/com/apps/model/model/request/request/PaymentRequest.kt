@@ -10,11 +10,11 @@ data class PaymentRequest(
     val truckId: String? = null,
     val driverId: String? = null,
 
+    val encodedImage: String? = null,
     val date: LocalDateTime? = null,
     val requestNumber: Int? = 0,
     val status: PaymentRequestStatusType? = null,
     val itemsList: MutableList<RequestItem>? = mutableListOf()
-
 ) {
 
     fun getTotalValue(): BigDecimal {

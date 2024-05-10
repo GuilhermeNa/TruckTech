@@ -1,6 +1,5 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.requests_list
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
@@ -9,9 +8,7 @@ import androidx.lifecycle.viewModelScope
 import br.com.apps.model.factory.RequestFactory
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.PaymentRequestStatusType
-import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.EMPTY_ID
-import br.com.apps.repository.Resource
 import br.com.apps.repository.Response
 import br.com.apps.repository.repository.RequestRepository
 import br.com.apps.trucktech.expressions.getKeyByValue
@@ -28,7 +25,6 @@ private const val PROCESSED = "Processados"
 
 class RequestsListViewModel(
     private val driverAndTruck: DriverAndTruck,
-    //private val useCase: RequestUseCase,
     private val repository: RequestRepository
 ) : ViewModel() {
 
@@ -66,15 +62,12 @@ class RequestsListViewModel(
 
     private fun loadData() {
         val id = driverAndTruck.user?.employeeId ?: throw InvalidParameterException(EMPTY_ID)
-
         viewModelScope.launch {
-            val liveData =
-                repository.getCompleteRequestListByDriverId(driverId = id, withFlow = false)
-            liveData.asFlow().collect {
-                _requestData.value = it
-            }
+            repository.getCompleteRequestListByDriverId(driverId = id, withFlow = false)
+                .asFlow().collect {
+                    _requestData.value = it
+                }
         }
-
     }
 
     fun newHeaderSelected(headerTitle: String) {
@@ -85,7 +78,7 @@ class RequestsListViewModel(
      * Send the [PaymentRequest] to be created or updated.
      */
     suspend fun save() =
-        liveData<Response<Unit>>(viewModelScope.coroutineContext) {
+        liveData<Response<String>>(viewModelScope.coroutineContext) {
             try {
                 val requestDto = driverAndTruck.let {
                     RequestFactory.createDto(
@@ -96,8 +89,8 @@ class RequestsListViewModel(
                         status = PaymentRequestStatusType.SENT.description
                     )
                 }
-                repository.save(requestDto)
-                emit(Response.Success())
+                val id = repository.create(requestDto)
+                emit(Response.Success(id))
             } catch (e: Exception) {
                 emit(Response.Error(e))
             }
@@ -106,9 +99,15 @@ class RequestsListViewModel(
     /**
      * Delete an item
      */
-    suspend fun delete(requestId: String, itemsIdList: List<String>?): LiveData<Resource<Boolean>> {
-        return repository.delete(requestId, itemsIdList)
-    }
+    suspend fun delete(requestId: String, itemsIdList: List<String>?) =
+        liveData<Response<Unit>>((viewModelScope.coroutineContext)) {
+            try {
+                repository.delete(requestId, itemsIdList)
+                emit(Response.Success())
+            } catch (e: Exception) {
+                emit(Response.Error(e))
+            }
+        }
 
     /**
      * Filter Data by header choise

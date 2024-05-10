@@ -3,96 +3,151 @@ package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.request.request.RequestItemDto
+import br.com.apps.model.factory.RequestItemFactory
+import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
-import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.RequestItem
-import br.com.apps.repository.Resource
+import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.repository.Response
+import br.com.apps.repository.repository.RequestRepository
 import br.com.apps.usecase.LabelUseCase
-import br.com.apps.usecase.RequestUseCase
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import java.security.InvalidParameterException
 
 class RequestEditorCostFragmentViewModel(
-    private val masterUid: String?,
-    private val requestId: String,
-    private val itemId: String?,
-    private val requestUseCase: RequestUseCase,
-    private val labelUseCase: LabelUseCase
+    private val idHolder: IdHolder,
+    private val labelUseCase: LabelUseCase,
+    private val repository: RequestRepository
 ) : ViewModel() {
 
-    var requestItem: RequestItem? = null
+    val masterUid = idHolder.masterUid ?: throw NullPointerException("Null masterUid")
+    val requestId = idHolder.requestId ?: throw NullPointerException("Null requestId")
 
     /**
-     * Loaded request
+     * Holds a [RequestItem] when the data is loaded, to be saved when necessary.
      */
-    private val _loadedRequest = MutableLiveData<Resource<PaymentRequest>>()
-    val loadedRequest get() = _loadedRequest
+    lateinit var requestItem: RequestItem
 
     /**
-     * Loaded labels
+     * LiveData holding the response data of type [Response] with a list of [Label]
+     * to be displayed on screen.
      */
-    private val _loadedLabelsData = MutableLiveData<Resource<List<Label>>>()
-    val loadedLabelsData get() = _loadedLabelsData
+    private val _labelData = MutableLiveData<Response<List<Label>>>()
+    val labelData get() = _labelData
 
     /**
-     * Item saved
+     * LiveData holding the response data of type [Response] with a list of [RequestItem]
+     * to be displayed on screen.
      */
-    private val _requestItemSaved = MutableLiveData<Resource<Boolean>>()
-    val requestItemSaved get() = _requestItemSaved
+    private val _itemData = MutableLiveData<Response<RequestItem>>()
+    val itemData get() = _itemData
 
-    /**
-     * Load data
-     */
-    fun loadData() {
-        masterUid?.let {
-            viewModelScope.launch {
+    //---------------------------------------------------------------------------------------------//
+    // -
+    //---------------------------------------------------------------------------------------------//
 
-                labelUseCase.getOperationalLabels(masterUid, LabelType.COST, true).asFlow()
-                    .collect {
-                        throw InvalidParameterException()
-                       /* _loadedLabelsData.value = it
-
-                        requestUseCase.getRequestAndItemsById(requestId).asFlow()
-                            .collect { resource ->
-                                if (resource.error == null) {
-                                    requestItem = itemId?.let { id ->
-                                        resource.data.itemsList?.firstOrNull { item -> item.id == id }
-                                    }
-                                }
-                                _loadedRequest.value = resource
-                            }*/
-
-                    }
-            }
-        }
+    init {
+        loadData()
     }
 
-    /**
-     * Save button
-     */
-    fun saveButtonClicked(requestItemDto: RequestItemDto) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun loadData() {
         viewModelScope.launch {
-            requestUseCase.saveItem(requestId, requestItemDto).asFlow().collect {
-                _requestItemSaved.value = it
+            val deferredA = CompletableDeferred<Unit>()
+            val deferredB = CompletableDeferred<RequestItem?>()
+
+            launch { loadLabelData { deferredA.complete(Unit) } }
+            launch { loadItemData { deferredB.complete(it) } }
+
+            awaitAll(deferredA, deferredB)
+
+            deferredB.getCompleted()?.let {
+                _itemData.value = Response.Success(it)
             }
+
         }
     }
 
-    fun getLabelDescription(): String? {
-        val labelId = requestItem?.labelId
-        val labelsList = loadedLabelsData.value?.data//TODO nulo pq esse valor ainda n foi atribuido
+    private fun loadLabelData(complete: () -> Unit) {
+        viewModelScope.launch {
+            labelUseCase.getOperationalLabels(masterUid, LabelType.COST, true).asFlow()
+                .collect {
+                    _labelData.value = it
+                    complete()
+                }
+        }
+    }
+
+    private fun loadItemData(complete: (data: RequestItem?) -> Unit) {
+        viewModelScope.launch {
+            idHolder.expendId?.let { itemId ->
+                repository.getItemById(requestId, itemId).asFlow().collect { response ->
+                    when (response) {
+                        is Response.Error -> _itemData.value = response
+                        is Response.Success -> {
+                            response.data?.let {
+                                requestItem = it
+                                complete(it)
+                            }
+                        }
+                    }
+                }
+            } ?: complete(null)
+        }
+    }
+
+    /**
+     * Transforms the mapped fields into a DTO. Creates a new [RequestItem] or updates it if it already exists.
+     */
+    fun save(mappedFields: HashMap<String, String>) =
+        liveData<Response<Unit>>(viewModelScope.coroutineContext) {
+            try {
+                val dto = getItemDto(mappedFields)
+                repository.saveItem(dto)
+                emit(Response.Success())
+            } catch (e: Exception) {
+                emit(Response.Error(e))
+            }
+        }
+
+    private fun getItemDto(mappedFields: HashMap<String, String>): RequestItemDto {
+        return if (::requestItem.isInitialized) {
+            RequestItemFactory.update(requestItem, mappedFields)
+            requestItem.toDto()
+        } else {
+            mappedFields[RequestItemFactory.TAG_REQUEST_ID] = requestId
+            RequestItemFactory.create(mappedFields, RequestItemType.COST).toDto()
+        }
+    }
+
+    /**
+     * Retrieves the description of the label associated with the request item.
+     * Returns the name of the label if found, or null otherwise.
+     */
+    fun getLabelDescriptionById(): String? {
+        val labelId = requestItem.labelId
+        val labelsList = (labelData.value as Response.Success<List<Label>>).data
         val label = labelsList?.firstOrNull { it.id == labelId }
         return label?.name
     }
 
-    fun getLabelIdByName(autoCompleteText: String): String? {
-        var labelId: String? = null
-        loadedLabelsData.value?.data?.let { labelsList ->
+    /**
+     * Retrieves the ID of the label by its name from the autoCompleteText.
+     * Returns the ID of the label if found, or an empty string if not found.
+     */
+    fun getLabelIdByName(autoCompleteText: String): String {
+        var labelId = ""
+        val labelList = (labelData.value as Response.Success).data
+        labelList?.let { labelsList ->
             val label = labelsList.firstOrNull { it.name == autoCompleteText }
-            labelId = label?.id
+            labelId = label?.id.toString()
         }
         return labelId
     }

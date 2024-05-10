@@ -2,19 +2,22 @@ package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost
 
 import android.R
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.factory.RequestItemDtoFactory
-import br.com.apps.model.mapper.toDto
+import br.com.apps.model.IdHolder
+import br.com.apps.model.factory.RequestItemFactory
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.Label.Companion.getListOfTitles
-import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.FAILED_TO_SALVE
+import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_SAVED
+import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorCostBinding
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
@@ -22,40 +25,23 @@ import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import java.math.BigDecimal
 
 private const val TOOLBAR_TITLE = "Requisição de custo"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [RequestEditorCostFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class RequestEditorCostFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRequestEditorCostBinding? = null
     private val binding get() = _binding!!
 
     private val args: RequestEditorCostFragmentArgs by navArgs()
-    private val masterUid by lazy {
-        sharedViewModel.userData.value?.user?.masterUid
-    }
-    private val viewModel: RequestEditorCostFragmentViewModel by viewModel {
-        parametersOf(
-            masterUid,
-            args.requestId,
-            args.costId
+    private val idHolder by lazy {
+        IdHolder(
+            masterUid = sharedViewModel.userData.value?.user?.masterUid,
+            requestId = args.requestId,
+            expendId = args.costId
         )
     }
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-            viewModel.loadData()
-    }
+    private val viewModel: RequestEditorCostFragmentViewModel by viewModel { parametersOf(idHolder) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -91,35 +77,31 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
     }
 
     /**
-     * Init state manager
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *   - Observes labelData for create the adapter for autocomplete.
+     *   - Observes itemData for bind.
      */
     private fun initStateManager() {
-        viewModel.loadedRequest.observe(viewLifecycleOwner) {
-            it?.let { resource ->
-                if (resource.error == null) {
-                    args.costId?.let { bind() }
-                } else {
-                    requireView().snackBarRed(resource.error!!)
+        viewModel.labelData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                    Log.e(TAG_DEBUG, response.exception.message.toString())
                 }
+
+                is Response.Success -> response.data?.let { initAutoCompleteAdapter(it) }
             }
         }
 
-        viewModel.loadedLabelsData.observe(viewLifecycleOwner) {
-            it?.let { resource ->
-                if (resource.error == null) {
-                    initAutoCompleteAdapter(resource.data)
+        viewModel.itemData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                    Log.e(TAG_DEBUG, response.exception.message.toString())
                 }
-            }
-        }
 
-        viewModel.requestItemSaved.observe(viewLifecycleOwner) {
-            it?.let { resource ->
-                if (resource.error == null) {
-                    requireView().snackBarGreen(SUCCESSFULLY_SAVED)
-                    requireView().popBackStack()
-                } else {
-                    requireView().snackBarRed(FAILED_TO_SALVE)
-                }
+                is Response.Success -> response.data?.let { bind() }
             }
         }
     }
@@ -137,20 +119,18 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
 
     fun bind() {
         binding.apply {
-            viewModel.requestItem?.let {
-                viewModel.getLabelDescription()?.let { text ->
-                    fragmentRequestEditorCostAutoComplete.setText(text)
-                }
-
-                it.value?.let { value ->
-                    fragmentRequestEditorCostValue.setText(value.toPlainString())
-                }
+            viewModel.requestItem.let { item ->
+                fragmentRequestEditorCostAutoComplete.setText(viewModel.getLabelDescriptionById())
+                fragmentRequestEditorCostValue.setText(item.value?.toPlainString())
             }
         }
     }
 
     /**
-     * Save button
+     * Try to save an [RequestItem].
+     *  1. Validate the fields.
+     *  2. Create a hashMap with the data.
+     *  3. Send it to the viewModel for saving.
      */
     private fun initSaveButton() {
         binding.apply {
@@ -180,24 +160,29 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
                 }
 
                 if (fieldsAreValid) {
-                    val requestItemDto =
-                        if (viewModel.requestItem != null) {
-                            viewModel.requestItem?.let { item ->
-                                item.value = BigDecimal(value)
-                                item.labelId = labelId
-                                item.toDto()
-                            }
-                        } else {
-                            RequestItemDtoFactory.create(
-                                value = value,
-                                labelId = labelId!!,
-                                type = RequestItemType.COST
-                            ).toDto()
-                        }
+                    val mappedFields = hashMapOf(
+                        Pair(RequestItemFactory.TAG_LABEL_ID, labelId),
+                        Pair(RequestItemFactory.TAG_VALUE, value)
+                    )
 
-                    requestItemDto?.let { itemDto ->
-                        viewModel.saveButtonClicked(itemDto)
-                    }
+                    save(mappedFields)
+
+                }
+            }
+        }
+    }
+
+    private fun save(mappedFields: HashMap<String, String>) {
+        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    requireView().snackBarRed(FAILED_TO_SALVE)
+                    Log.e(TAG_DEBUG, response.exception.toString())
+                }
+
+                is Response.Success -> {
+                    requireView().snackBarGreen(SUCCESSFULLY_SAVED)
+                    requireView().popBackStack()
                 }
             }
         }

@@ -6,7 +6,7 @@ class FactoryUtil {
 
     companion object {
 
-        fun checkStrings(vararg strings: String) {
+        fun checkIfStringsAreBlank(vararg strings: String) {
             strings.forEach { text ->
                 if(text.isBlank()) {
                     throw InvalidParameterException("String is blank")

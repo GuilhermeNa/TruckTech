@@ -128,11 +128,20 @@ dependencies {
     implementation ("com.github.MikeOrtiz:TouchImageView:3.6")
 
     //FireBase
-    //Fire base
     implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage-ktx")
+
+    // CameraX core library using the camera2 implementation
+    val cameraxVersion = "1.4.0-alpha05"
+    implementation ("androidx.camera:camera-camera2:$cameraxVersion")
+    // If you want to additionally use the CameraX Lifecycle library
+    implementation ("androidx.camera:camera-lifecycle:$cameraxVersion")
+    // If you want to additionally use the CameraX View class
+    implementation ("androidx.camera:camera-view:$cameraxVersion")
+    // If you want to additionally use the CameraX Extensions library
+    implementation( "androidx.camera:camera-extensions:$cameraxVersion")
 
 }

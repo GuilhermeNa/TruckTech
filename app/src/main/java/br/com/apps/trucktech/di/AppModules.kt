@@ -18,11 +18,11 @@ import br.com.apps.trucktech.ui.fragments.nav_home.payment.PaymentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.refund.RefundViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.time_line.TimelineFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.to_receive.ToReceiveViewModel
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.RequestEditorFragmentViewModel
+import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.RequestEditorViewModel
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost.RequestEditorCostFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_refuel.RequestEditorRefuelViewModel
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_wallet.RequestEditorWalletFragmentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.RequestPreviewFragmentViewModel
+import br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.RequestPreviewViewModel
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.RequestsListViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_editor.BankEditorViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankListFragmentViewModel
@@ -98,9 +98,9 @@ val viewModelModules = module {
         )
     }
     viewModel<LoginFragmentViewModel> { LoginFragmentViewModel(get()) }
-    viewModel<RequestEditorFragmentViewModel> { RequestEditorFragmentViewModel(get()) }
-    viewModel<RequestPreviewFragmentViewModel> { (id: String) ->
-        RequestPreviewFragmentViewModel(
+    viewModel<RequestEditorViewModel> { (id: String) -> RequestEditorViewModel(id, get()) }
+    viewModel<RequestPreviewViewModel> { (id: String) ->
+        RequestPreviewViewModel(
             id,
             get()
         )
@@ -140,29 +140,9 @@ val viewModelModules = module {
     viewModel<DiscountViewModel> { (id: String) -> DiscountViewModel(id, get(), get()) }
     viewModel<PaymentViewModel> { (id: String) -> PaymentViewModel(id, get()) }
     viewModel<RefundViewModel> { (id: String) -> RefundViewModel(id, get()) }
-    viewModel<RequestEditorRefuelViewModel> { (idRequest: String, idItem: String?) ->
-        RequestEditorRefuelViewModel(
-            idRequest,
-            idItem,
-            get()
-        )
-    }
-    viewModel<RequestEditorCostFragmentViewModel> { (masterUid: String?, idRequest: String, idItem: String?) ->
-        RequestEditorCostFragmentViewModel(
-            masterUid,
-            idRequest,
-            idItem,
-            get(),
-            get()
-        )
-    }
-    viewModel<RequestEditorWalletFragmentViewModel> { (idRequest: String, idItem: String?) ->
-        RequestEditorWalletFragmentViewModel(
-            idRequest,
-            idItem,
-            get()
-        )
-    }
+    viewModel<RequestEditorRefuelViewModel> { (idHolder: IdHolder) -> RequestEditorRefuelViewModel(idHolder, get()) }
+    viewModel<RequestEditorCostFragmentViewModel> { (idHolder: IdHolder) -> RequestEditorCostFragmentViewModel(idHolder, get(), get()) }
+    viewModel<RequestEditorWalletFragmentViewModel> { (idHolder: IdHolder) -> RequestEditorWalletFragmentViewModel(idHolder, get()) }
     viewModel<FineBoxFromHomeViewModel> { FineBoxFromHomeViewModel(get(), get()) }
     viewModel<BankPreviewViewModel> { (employeeId: String, bankId: String) ->
         BankPreviewViewModel(

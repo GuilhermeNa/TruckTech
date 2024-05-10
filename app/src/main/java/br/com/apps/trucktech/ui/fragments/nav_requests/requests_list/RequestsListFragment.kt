@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.repository.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.FAILED_TO_REMOVE
+import br.com.apps.repository.FAILED_TO_SALVE
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.databinding.FragmentRequestsListBinding
@@ -102,7 +104,9 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
 
     /**
-     * Fab is configured here
+     * Try to create a [PaymentRequest].
+     *  1. Displays an alert dialog for confirmation.
+     *  2. If the dialog response is positive, sends the request to the viewModel for creation.
      */
     private fun initFab() {
         binding.fragmentRequestsListFab.setOnClickListener {
@@ -124,28 +128,32 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     private fun createNewRequest() {
         lifecycleScope.launch {
-            viewModel.save().asFlow().collect { resource ->
-                if (resource.error == null) {
-                    requireView().snackBarGreen(REQUEST_HAVE_BEEN_SAVED)
-                    requireView().navigateTo(
-                        RequestsListFragmentDirections.actionRequestsListFragmentToRequestEditorFragment(
-                            resource.data
-                        )
-                    )
-                } else {
-                    requireView().snackBarRed(resource.error!!)
+            viewModel.save().asFlow().collect { response ->
+                when (response) {
+                    is Response.Error -> requireView().snackBarRed(FAILED_TO_SALVE)
+                    is Response.Success -> {
+                        response.data?.let {
+                            requireView().snackBarGreen(REQUEST_HAVE_BEEN_SAVED)
+                            requireView()
+                                .navigateTo(
+                                    RequestsListFragmentDirections
+                                        .actionRequestsListFragmentToRequestEditorFragment(it)
+                                )
+                        }
+                    }
                 }
             }
-
         }
     }
 
     /**
-     * State manager is configured here.
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *   - Observes requestData for update the recyclerView.
      */
     private fun initStateManager() {
         viewModel.requestData.observe(viewLifecycleOwner) { response ->
-            when(response) {
+            when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
 
                 is Response.Success -> {
@@ -204,11 +212,10 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     private fun deleteRequest(requestId: String, itemsIdList: List<String>?) {
         lifecycleScope.launch {
-            viewModel.delete(requestId, itemsIdList).asFlow().collect { resource ->
-                if (resource.error == null) {
-                    requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
-                } else {
-                    requireView().snackBarRed(resource.error!!)
+            viewModel.delete(requestId, itemsIdList).asFlow().collect { response ->
+                when(response) {
+                    is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
+                    is Response.Success -> requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                 }
             }
         }

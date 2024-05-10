@@ -36,7 +36,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
     private val performanceVm: PerformanceBoxFromHomeViewModel by viewModel()
     private val fineVm: FineBoxFromHomeViewModel by viewModel()
 
-    private lateinit var viewPagerAdapter: HomeFragmentPerformanceViewPagerAdapter
+    private var viewPagerAdapter: HomeFragmentPerformanceViewPagerAdapter? = null
     private var viewPager2: ViewPager2? = null
     private var indicator: CircleIndicator3? = null
     private var performancePeriodAdapter: PeriodRecyclerAdapter? = null
@@ -212,7 +212,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
             itemClickListener = { adapterPos ->
                 setClickRangeTimer(requireView(), 1000)
                 performanceVm.newPeriodSelected(adapterPos)
-                viewPagerAdapter.update(performanceVm.getPagerData())
+                viewPagerAdapter?.update(performanceVm.getPagerData())
             }
         )
         recyclerView.adapter = performancePeriodAdapter
@@ -241,7 +241,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
     private fun initCircleIndicator() {
         indicator = binding.homeFragmentPanelPerformance.panelPerformanceCircleIndicator
         indicator?.setViewPager(viewPager2)
-        indicator?.adapterDataObserver?.let { viewPagerAdapter.registerAdapterDataObserver(it) }
+        indicator?.adapterDataObserver?.let { viewPagerAdapter?.registerAdapterDataObserver(it) }
     }
 
     private fun initBoxPerformanceStateManager() {
@@ -251,7 +251,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
                 is Response.Success -> {
                     response.data?.let { viewData ->
                         performancePeriodAdapter?.update(viewData.map { it.value.first })
-                        viewPagerAdapter.update(performanceVm.getPagerData())
+                        viewPagerAdapter?.update(performanceVm.getPagerData())
                     }
                 }
             }
@@ -313,10 +313,11 @@ class HomeFragment : BaseFragmentWithToolbar() {
     override fun onDestroyView() {
         super.onDestroyView()
         performancePeriodAdapter = null
-        _binding = null
         viewPager2?.adapter = null
+        viewPagerAdapter = null
         viewPager2 = null
         indicator = null
+        _binding = null
     }
 
 }

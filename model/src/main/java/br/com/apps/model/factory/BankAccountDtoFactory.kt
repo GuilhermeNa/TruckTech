@@ -1,7 +1,7 @@
 package br.com.apps.model.factory
 
 import br.com.apps.model.dto.employee_dto.BankAccountDto
-import br.com.apps.model.factory.FactoryUtil.Companion.checkStrings
+import br.com.apps.model.factory.FactoryUtil.Companion.checkIfStringsAreBlank
 
 object BankAccountDtoFactory {
 
@@ -20,7 +20,7 @@ object BankAccountDtoFactory {
         mainAccount: Boolean
     ): BankAccountDto {
 
-        checkStrings(masterUid, employeeId, bankName, branch, accNumber, type, pix)
+        checkIfStringsAreBlank(masterUid, employeeId, bankName, branch, accNumber, type, pix)
 
         return BankAccountDto(
             masterUid = masterUid,

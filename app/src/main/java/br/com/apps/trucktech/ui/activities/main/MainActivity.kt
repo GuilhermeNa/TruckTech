@@ -1,8 +1,8 @@
 package br.com.apps.trucktech.ui.activities.main
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import br.com.apps.trucktech.R
@@ -38,6 +38,5 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.activity_main_bottom_navigation)
         navigationView.setupWithNavController(navController)
     }
-
 
 }

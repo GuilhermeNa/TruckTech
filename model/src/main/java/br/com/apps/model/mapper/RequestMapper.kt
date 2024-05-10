@@ -7,13 +7,15 @@ import br.com.apps.model.toLocalDateTime
 
 fun PaymentRequestDto.toModel(): PaymentRequest {
     return PaymentRequest(
-        masterUid = this.masterUid,
-        id = this.id,
-        driverId = this.driverId,
-        truckId = this.truckId,
-        requestNumber = this.requestNumber,
-        date = this.date?.toLocalDateTime(),
-        status = this.status?.let { status -> PaymentRequestStatusType.getType(status) }
+        masterUid = masterUid,
+        id = id,
+        driverId = driverId,
+        truckId = truckId,
+
+        encodedImage = encodedImage,
+        requestNumber = requestNumber,
+        date = date?.toLocalDateTime(),
+        status = status?.let { status -> PaymentRequestStatusType.getType(status) }
     )
 }
 

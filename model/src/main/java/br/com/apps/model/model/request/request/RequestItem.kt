@@ -12,7 +12,7 @@ data class RequestItem(
     val label: Label? = null,
     var kmMarking: Int? = null,
     var value: BigDecimal? = BigDecimal.ZERO,
-    val type: RequestItemType? = null
+    var type: RequestItemType? = null
 ) {
 
     fun getDescription(): String {
