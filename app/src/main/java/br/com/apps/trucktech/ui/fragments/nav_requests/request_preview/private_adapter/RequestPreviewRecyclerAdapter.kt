@@ -4,16 +4,18 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestPreviewBinding
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import java.security.InvalidParameterException
 
 class RequestPreviewRecyclerAdapter(
-
     private val context: Context,
     dataSet: List<RequestItem>
-
 ): RecyclerView.Adapter<RequestPreviewRecyclerAdapter.ViewHolder>() {
 
     private val dataSet = dataSet.toMutableList()
@@ -50,8 +52,20 @@ class RequestPreviewRecyclerAdapter(
 
     fun bind(holder: ViewHolder, requestItem: RequestItem) {
         holder.apply {
+
             description.text = requestItem.getDescription()
+
             value.text = requestItem.value?.toCurrencyPtBr()
+
+            val drawable = when(requestItem.type) {
+                RequestItemType.COST -> ContextCompat.getDrawable(context, R.drawable.icon_cost)
+                RequestItemType.REFUEL -> ContextCompat.getDrawable(context, R.drawable.icon_refuel)
+                RequestItemType.WALLET -> ContextCompat.getDrawable(context, R.drawable.icon_wallet)
+                else -> {throw InvalidParameterException("RequestPreviewRecyclerAdapter, bind: invalid item type: ${requestItem.type}")}
+            }
+            drawable?.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+            description.setCompoundDrawables(drawable, null, null, null)
+
         }
     }
 

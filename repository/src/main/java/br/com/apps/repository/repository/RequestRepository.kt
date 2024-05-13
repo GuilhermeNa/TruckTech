@@ -114,6 +114,7 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
         requestList.forEach { request ->
             val requestId = request.id ?: throw InvalidParameterException(EMPTY_ID)
             val items = itemList.filter { it.requestId == requestId }
+            request.itemsList?.clear()
             request.itemsList?.addAll(items)
         }
     }

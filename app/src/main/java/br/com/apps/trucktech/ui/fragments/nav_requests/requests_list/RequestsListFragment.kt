@@ -11,17 +11,21 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.request.request.PaymentRequest
+import br.com.apps.repository.CANCEL
 import br.com.apps.repository.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.FAILED_TO_REMOVE
 import br.com.apps.repository.FAILED_TO_SALVE
+import br.com.apps.repository.OK
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_REMOVED
+import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRequestsListBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
+import br.com.apps.trucktech.ui.activities.main.VisualComponents
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.private_adapter.RequestsListRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
@@ -51,6 +55,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
     private val viewModel: RequestsListViewModel by viewModel { parametersOf(driverAndTruck) }
     private var adapter: RequestsListRecyclerAdapter? = null
+
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -115,11 +120,18 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun showAlertDialog() {
+        viewModel.requestDarkLayer()
+        viewModel.dismissBottomNav()
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Nova requisição")
             .setMessage("Você confirma a adição uma nova requisição?")
             .setPositiveButton("Ok") { _, _ -> createNewRequest() }
             .setNegativeButton("Cancelar") { _, _ -> }
+            .setOnDismissListener {
+                viewModel.dismissDarkLayer()
+                viewModel.requestBottomNav()
+            }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
@@ -150,6 +162,8 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
      * Initializes the state manager and observes [viewModel] data.
      *
      *   - Observes requestData for update the recyclerView.
+     *   - Observes darkLayer to manage the interaction.
+     *    - Observes bottomNav to manage the interaction.
      */
     private fun initStateManager() {
         viewModel.requestData.observe(viewLifecycleOwner) { response ->
@@ -167,10 +181,29 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                 }
             }
         }
+
+        viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
+            when (isRequested) {
+                true -> binding.fragRequestListDarkLayer.visibility = View.VISIBLE
+                false -> binding.fragRequestListDarkLayer.visibility = View.GONE
+            }
+        }
+
+        viewModel.bottomNav.observe(viewLifecycleOwner) { isRequested ->
+            when (isRequested) {
+                true -> sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = true))
+                false -> sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = false))
+            }
+        }
+
     }
 
     /**
-     * Requests recycler view is configured here
+     * Initialize the RecyclerView.
+     *
+     * Options:
+     *  - clickListener -> navigation
+     *  - context menu -> delete
      */
     private fun initRequestRecyclerView() {
         try {
@@ -180,17 +213,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
         } catch (e: Exception) {
             e.message?.let { error -> requireView().snackBarRed(error) }
         }
-    }
-
-    private fun initAdaptersData(dataSet: List<PaymentRequest>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
-        return dataSet
-            .sortedBy { it.date }
-            .reversed()
-            .groupBy {
-                it.date?.getMonthAndYearInPtBr() ?: throw InvalidParameterException("Date is null")
-            }
-            .map { createAdapters(it) }
-            .flatten()
     }
 
     private fun createAdapters(itemsMap: Map.Entry<String, List<PaymentRequest>>) =
@@ -206,9 +228,46 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                         )
                     )
                 },
-                deleteClickListener = ::deleteRequest
+                deleteClickListener = ::showAlertDialogForDelete
             )
         )
+
+    private fun initAdaptersData(dataSet: List<PaymentRequest>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
+        return dataSet
+            .sortedBy { it.date }
+            .reversed()
+            .groupBy {
+                it.date?.getMonthAndYearInPtBr() ?: throw InvalidParameterException("Date is null")
+            }
+            .map { createAdapters(it) }
+            .flatten()
+    }
+
+    private fun initConcatAdapter(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
+        val concatAdapter = ConcatAdapter(adapters)
+        val recyclerView = binding.fragmentRequestsListRecycler
+        recyclerView.adapter = concatAdapter
+    }
+
+    private fun showAlertDialogForDelete(requestId: String, itemsIdList: List<String>?) {
+        viewModel.requestDarkLayer()
+        viewModel.dismissBottomNav()
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setIcon(R.drawable.icon_delete)
+            .setTitle("Apagando requisição")
+            .setMessage("Você realmente deseja apagar esta requisição e seus itens permanentemente?")
+            .setPositiveButton(OK) { _, _ -> deleteRequest(requestId, itemsIdList) }
+            .setNegativeButton(CANCEL) { _, _ -> }
+            .setOnDismissListener {
+                viewModel.dismissDarkLayer()
+                viewModel.requestBottomNav()
+            }
+            .create().apply {
+                window?.setGravity(Gravity.CENTER)
+                show()
+            }
+    }
 
     private fun deleteRequest(requestId: String, itemsIdList: List<String>?) {
         lifecycleScope.launch {
@@ -219,12 +278,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                 }
             }
         }
-    }
-
-    private fun initConcatAdapter(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
-        val concatAdapter = ConcatAdapter(adapters)
-        val recyclerView = binding.fragmentRequestsListRecycler
-        recyclerView.adapter = concatAdapter
     }
 
     //---------------------------------------------------------------------------------------------//
