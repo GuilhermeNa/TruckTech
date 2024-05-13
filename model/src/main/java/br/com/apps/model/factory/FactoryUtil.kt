@@ -9,7 +9,7 @@ class FactoryUtil {
         fun checkIfStringsAreBlank(vararg strings: String) {
             strings.forEach { text ->
                 if(text.isBlank()) {
-                    throw InvalidParameterException("String is blank")
+                    throw InvalidParameterException("FactoryUtil, checkIfStringsAreBlank: String is blank")
                 }
             }
         }

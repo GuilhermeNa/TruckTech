@@ -9,20 +9,15 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
+import br.com.apps.model.factory.ExpendFactory
 import br.com.apps.model.model.label.Label.Companion.containsByName
 import br.com.apps.model.model.label.Label.Companion.getIdByName
 import br.com.apps.model.model.label.Label.Companion.getListOfTitles
 import br.com.apps.model.model.travel.Expend
-import br.com.apps.model.model.travel.Expend.Companion.TAG_COMPANY
-import br.com.apps.model.model.travel.Expend.Companion.TAG_DATE
-import br.com.apps.model.model.travel.Expend.Companion.TAG_DESCRIPTION
-import br.com.apps.model.model.travel.Expend.Companion.TAG_LABEL_ID
-import br.com.apps.model.model.travel.Expend.Companion.TAG_VALUE
 import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.FAILED_TO_SALVE
+import br.com.apps.repository.FAILED_TO_SAVE
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_SAVED
-import br.com.apps.repository.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentExpendEditorBinding
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
@@ -53,7 +48,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
             travelId = args.travelId
         )
     }
-    private val viewModel: ExpendEditorFragmentViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: ExpendEditorViewModel by viewModel { parametersOf(idHolder) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -150,7 +145,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
             val company = fragExpendEditorCompany.text.toString()
             val value = fragExpendEditorValue.text.toString()
             val description = fragExpendEditorDescription.text.toString()
-
+            val isPaidByDriver = fragExpendPaidByEmployeeCheckbox.isChecked.toString()
 
             var fieldsAreValid = true
             if (type.isBlank()) {
@@ -176,37 +171,36 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
 
             if (fieldsAreValid) {
                 val mappedFields = hashMapOf(
-                    Pair(TAG_LABEL_ID, viewModel.labelList.getIdByName(type)!!),
-                    Pair(TAG_COMPANY, company),
-                    Pair(TAG_DATE, viewModel.date.value.toString()),
-                    Pair(TAG_DESCRIPTION, description),
-                    Pair(TAG_VALUE, value)
+                    Pair(ExpendFactory.TAG_LABEL_ID, viewModel.labelList.getIdByName(type)!!),
+                    Pair(ExpendFactory.TAG_COMPANY, company),
+                    Pair(ExpendFactory.TAG_DATE, viewModel.date.value.toString()),
+                    Pair(ExpendFactory.TAG_DESCRIPTION, description),
+                    Pair(ExpendFactory.TAG_VALUE, value),
+                    Pair(ExpendFactory.TAG_DATE, viewModel.date.value.toString()),
+                    Pair(ExpendFactory.TAG_PAID_BY_EMPLOYEE, isPaidByDriver)
                 )
+
                 save(mappedFields)
+
             }
+
         }
     }
 
     private fun save(mappedFields: HashMap<String, String>) {
-        try {
-            val dto = viewModel.getExpendDto(mappedFields)
-            viewModel.save(dto).observe(viewLifecycleOwner) { response ->
-                when (response) {
-                    is Response.Error -> {
-                        response.exception.printStackTrace()
-                        requireView().snackBarRed(FAILED_TO_SALVE)
-                    }
-
-                    is Response.Success -> requireView().apply {
-                            snackBarGreen(SUCCESSFULLY_SAVED)
-                            popBackStack()
-                        }
-
+        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    response.exception.printStackTrace()
+                    requireView().snackBarRed(FAILED_TO_SAVE)
                 }
+
+                is Response.Success -> requireView().apply {
+                    snackBarGreen(SUCCESSFULLY_SAVED)
+                    popBackStack()
+                }
+
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            requireView().snackBarRed(UNKNOWN_EXCEPTION)
         }
     }
 
@@ -266,6 +260,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
             fragExpendEditorCompany.setText(expend.company)
             fragExpendEditorValue.setText(expend.value?.toPlainString())
             fragExpendEditorDescription.setText(expend.description)
+            expend.paidByEmployee?.let { fragExpendPaidByEmployeeCheckbox.isChecked = it }
         }
     }
 

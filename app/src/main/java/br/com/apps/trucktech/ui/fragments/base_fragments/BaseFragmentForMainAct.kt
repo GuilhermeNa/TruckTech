@@ -2,7 +2,7 @@ package br.com.apps.trucktech.ui.fragments.base_fragments
 
 import android.os.Bundle
 import br.com.apps.trucktech.expressions.navigateTo
-import br.com.apps.trucktech.ui.activities.LoginActivity
+import br.com.apps.trucktech.ui.activities.login.LoginActivity
 import br.com.apps.trucktech.ui.activities.main.MainActivityViewModel
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 

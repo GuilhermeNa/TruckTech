@@ -7,6 +7,7 @@ import br.com.apps.model.toLocalDateTime
 
 fun ExpendDto.toModel(): Expend {
     return Expend(
+        masterUid = this.masterUid,
         id = this.id,
         truckId = this.truckId,
         driverId = this.driverId,
@@ -24,6 +25,7 @@ fun ExpendDto.toModel(): Expend {
 
 fun Expend.toDto(): ExpendDto {
     return ExpendDto(
+        masterUid = this.masterUid,
         id = this.id,
         truckId = this.truckId,
         driverId = this.driverId,

@@ -54,7 +54,7 @@ abstract class BaseFragmentWithToolbar : BaseFragmentForMainAct() {
     }
 
     fun clearMenu() {
-        toolbar?.menu?.clear()
+       // toolbar?.menu?.clear()
     }
 
     //---------------------------------------------------------------------------------------------//

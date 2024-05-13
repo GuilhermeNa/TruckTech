@@ -9,10 +9,10 @@
 
     <include
         android:id="@+id/fragment_refuel_editor_toolbar"
-        layout="@layout/layout_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintEnd_toStartOf="parent"
+        android:layout_height="wrap_content"
+        layout="@layout/layout_toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
@@ -163,6 +163,11 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
                     android:text="@string/full_tank" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"/>
+
             </LinearLayout>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </ScrollView>

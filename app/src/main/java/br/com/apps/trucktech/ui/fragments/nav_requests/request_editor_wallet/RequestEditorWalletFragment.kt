@@ -10,7 +10,7 @@ import br.com.apps.model.IdHolder
 import br.com.apps.model.factory.RequestItemFactory
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.FAILED_TO_SALVE
+import br.com.apps.repository.FAILED_TO_SAVE
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.TAG_DEBUG
@@ -129,7 +129,7 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
         viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
             when(response) {
                 is Response.Error -> {
-                    requireView().snackBarRed(FAILED_TO_SALVE)
+                    requireView().snackBarRed(FAILED_TO_SAVE)
                     Log.e(TAG_DEBUG, response.exception.message.toString())
                 }
                 is Response.Success -> {

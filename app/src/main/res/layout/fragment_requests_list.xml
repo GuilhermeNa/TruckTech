@@ -1,51 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.nav_requests.requests_list.RequestsListFragment"
-    android:orientation="vertical">
+    tools:context=".ui.fragments.nav_requests.requests_list.RequestsListFragment">
 
-    <include
-        android:id="@+id/fragment_requests_list_toolbar"
-        layout="@layout/layout_toolbar"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fragment_requests_list_header_recycler"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:orientation="horizontal"
-        tools:listitem="@layout/item_header_horizontal"
-        android:clipToPadding="false"
-        android:paddingStart="8dp"
-        android:paddingEnd="16dp"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        <include
+            android:id="@+id/fragment_requests_list_toolbar"
+            layout="@layout/layout_toolbar" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fragment_requests_list_recycler"
+            android:id="@+id/fragment_requests_list_header_recycler"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:listitem="@layout/item_request"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fragment_requests_list_fab"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:src="@drawable/icon_order"
-            android:contentDescription="@string/add_a_new_order"
-            app:layout_anchor="@id/fragment_requests_list_recycler"
-            app:layout_anchorGravity="bottom|right|end"
-            app:layout_behavior=".ui.behaviors.ScrollAwareFab" />
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_header_horizontal" />
 
-</LinearLayout>
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_requests_list_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="80dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_request" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fragment_requests_list_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:contentDescription="@string/add_a_new_order"
+                android:src="@drawable/icon_order"
+                app:layout_anchor="@id/fragment_requests_list_recycler"
+                app:layout_anchorGravity="bottom|right|end"
+                app:layout_behavior=".ui.behaviors.ScrollAwareFab" />
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/frag_request_list_dark_layer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black_layer"
+        android:visibility="gone" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

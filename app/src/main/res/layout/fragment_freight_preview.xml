@@ -151,4 +151,11 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <View
+        android:id="@+id/frag_freight_preview_dark_layer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black_layer"
+        android:visibility="gone"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

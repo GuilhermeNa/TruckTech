@@ -7,13 +7,14 @@ data class BankAccount(
     val masterUid: String? = null,
     val id: String? = null,
     val employeeId: String? = null,
-    val bankName: String? = null,
-    val branch: Int? = null,
-    val accNumber: Int? = null,
-    val pix: String? = null,
-    val image: String? = null,
-    val mainAccount: Boolean? = false,
-    val pixType: PixType? = null
+
+    var bankName: String? = null,
+    var branch: Int? = null,
+    var accNumber: Int? = null,
+    var pix: String? = null,
+    var image: String? = null,
+    var mainAccount: Boolean? = false,
+    var pixType: PixType? = null
 ) {
 
     fun getTypeDescription(): String {

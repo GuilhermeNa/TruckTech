@@ -25,42 +25,11 @@ class RefuelRepository(fireStore: FirebaseFirestore) {
     private val parentCollection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
 
     /**
-     * get refuel list
+     * Deletes a specific [Refuel] entry associated with a [Travel].
+     *
+     * @param travelId The ID of the travel from which to delete the refuel entry.
+     * @param refuelId The ID of the refuel entry to delete.
      */
-    suspend fun getRefuelListForThisTravel(travelIdList: List<String>): LiveData<Response<List<Refuel>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Refuel>>>()
-            val dataSet = mutableListOf<Refuel>()
-            var tasksCounter = 0
-
-            travelIdList.forEach { id ->
-                collection.whereEqualTo(TRAVEL_ID, id)
-                    .addSnapshotListener { snapQuery, error ->
-                        error?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        snapQuery?.let { query ->
-                            val refuelList = query.toRefuelList()
-                            refuelList.forEach { refuel ->
-                                val existingIndex = dataSet.indexOfFirst { it.id == refuel.id }
-                                if (existingIndex != -1) {
-                                    dataSet[existingIndex] = refuel
-                                } else {
-                                    dataSet.add(refuel)
-                                }
-                            }
-                            tasksCounter++
-                            if (tasksCounter == travelIdList.size) {
-                                liveData.postValue(Response.Success(data = dataSet))
-                            }
-                        }
-                    }
-            }
-
-            return@withContext liveData
-        }
-    }
-
     suspend fun deleteRefuelForThisTravel(travelId: String, refuelId: String) {
         parentCollection
             .document(travelId)
@@ -141,6 +110,44 @@ class RefuelRepository(fireStore: FirebaseFirestore) {
             return@withContext liveData
         }
     }
+
+    /**
+     * Fetch the dataSet for the specified [Travel] ID list.
+     *
+     * This function fetches expenditure data for the given travel ID asynchronously from the database.
+     *
+     * @param idList The ID list of the travel for which [Refuel] data is to be retrieved.
+     * @return A LiveData object containing a [Response] of [Refuel] data for the specified travel ID.
+     */
+    suspend fun getRefuelListByTravelId(idList: List<String>, withFlow: Boolean): LiveData<Response<List<Refuel>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Refuel>>>()
+            val listener = collection.whereIn(TRAVEL_ID, idList)
+
+            if (withFlow) {
+                listener.addSnapshotListener { snapQuery, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    snapQuery?.let { query ->
+                        liveData.postValue(Response.Success(query.toRefuelList()))
+                    }
+                }
+            } else {
+                listener.get().addOnCompleteListener { task ->
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { query ->
+                        liveData.postValue(Response.Success(query.toRefuelList()))
+                    }
+                }.await()
+            }
+
+            return@withContext liveData
+        }
+    }
+
 
     /**
      * Fetch the data for a specific [Refuel] ID.

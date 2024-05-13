@@ -1,5 +1,6 @@
 package br.com.apps.repository
 
+import br.com.apps.model.dto.DocumentDto
 import br.com.apps.model.dto.FineDto
 import br.com.apps.model.dto.LabelDto
 import br.com.apps.model.dto.payroll.AdvanceDto
@@ -11,6 +12,7 @@ import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.mapper.toModel
+import br.com.apps.model.model.Document
 import br.com.apps.model.model.Fine
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
@@ -123,3 +125,14 @@ fun QuerySnapshot.toRequestItemList(): List<RequestItem> {
 fun DocumentSnapshot.toRequestItemObject(): RequestItem? {
     return this.toObject(RequestItemDto::class.java)?.toModel()
 }
+
+fun QuerySnapshot.toDocumentList(): List<Document> {
+    return this.mapNotNull { document ->
+        document.toDocumentObject()
+    }
+}
+
+fun DocumentSnapshot.toDocumentObject(): Document? {
+    return this.toObject(DocumentDto::class.java)?.toModel()
+}
+

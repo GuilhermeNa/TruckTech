@@ -2,19 +2,22 @@ package br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_editor
 
 import android.R
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.IdHolder
+import br.com.apps.model.factory.BankAccountFactory
 import br.com.apps.model.model.employee.BankAccount
 import br.com.apps.model.model.payment_method.PixType
 import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.FAILED_TO_REMOVE
+import br.com.apps.repository.FAILED_TO_SAVE
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_SAVED
+import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentBankEditorBinding
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
@@ -36,23 +39,14 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: BankEditorFragmentArgs by navArgs()
-    private val bankId by lazy {
-        args.bankId
+    private val idHolder by lazy {
+        IdHolder(
+            masterUid = sharedViewModel.userData.value?.user?.masterUid,
+            driverId = sharedViewModel.userData.value!!.user!!.employeeId,
+            bankAccountId = args.bankId
+        )
     }
-    private val employeeId by lazy {
-        sharedViewModel.userData.value!!.user!!.employeeId
-    }
-
-    private val viewModel: BankEditorViewModel by viewModel { parametersOf(employeeId, bankId) }
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------/
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
+    private val viewModel: BankEditorViewModel by viewModel { parametersOf(idHolder) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -106,20 +100,10 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
      * Init state manager
      */
     private fun initStateManager() {
-        viewModel.loadBankAccount.observe(viewLifecycleOwner) { response ->
+        viewModel.bankData.observe(viewLifecycleOwner) { response ->
             when (response) {
-                is Response.Success -> {
-                    response.data?.let {
-                        viewModel.bankAcc = it
-                        bind(it)
-                    }
-                }
-
-                is Response.Error -> {
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                }
-
-                else -> {}
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                is Response.Success -> response.data?.let { bind(it) }
             }
         }
     }
@@ -150,14 +134,13 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                     fragBankEditorPix
                 )
 
-                val bankName = fragBankEditorBank.text?.toString() ?: ""
-                val branch = fragBankEditorBranch.text?.toString() ?: ""
-                val accNumber = fragBankEditorAccNumber.text?.toString() ?: ""
-                val type = fragmentBankEditorAutoComplete.text?.toString() ?: ""
-                val pix = fragBankEditorPix.text?.toString() ?: ""
+                val bankName = fragBankEditorBank.text.toString()
+                val branch = fragBankEditorBranch.text.toString()
+                val accNumber = fragBankEditorAccNumber.text.toString()
+                val type = fragmentBankEditorAutoComplete.text.toString()
+                val pix = fragBankEditorPix.text.toString()
 
                 var fieldsAreValid = true
-
                 if (bankName.isBlank()) {
                     fragBankEditorBank.error = "Preencha nome da instituição"
                     fieldsAreValid = false
@@ -180,31 +163,32 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                 }
 
                 if (fieldsAreValid) {
-
-                    val bankAccDto = viewModel.getBankAccDto(
-                        sharedViewModel.userData.value?.user?.masterUid!!,
-                        bankName,
-                        branch,
-                        accNumber,
-                        type,
-                        pix
+                    val mappedFields = hashMapOf(
+                        Pair(BankAccountFactory.TAG_BANK_NAME, bankName),
+                        Pair(BankAccountFactory.TAG_BRANCH, branch),
+                        Pair(BankAccountFactory.TAG_ACC_NUMBER, accNumber),
+                        Pair(BankAccountFactory.TAG_PIX, pix),
+                        Pair(BankAccountFactory.TAG_PIX_TYPE, PixType.getTypeInString(type)),
                     )
-                    saveBankAccount(bankAccDto)
+                    saveBankAccount(mappedFields)
                 }
+
             }
         }
     }
 
-    private fun saveBankAccount(bankAccDto: BankAccountDto) {
-        viewModel.saveBankAccount(bankAccDto).observe(viewLifecycleOwner) { response ->
+    private fun saveBankAccount(mappedFields: HashMap<String, String>) {
+        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
             when (response) {
+                is Response.Error -> {
+                    requireView().snackBarRed(FAILED_TO_SAVE)
+                    Log.e(TAG_DEBUG, response.exception.message.toString() )
+                }
                 is Response.Success -> {
                     requireView().snackBarGreen(SUCCESSFULLY_SAVED)
                     requireView().popBackStack()
                 }
 
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
-                else -> {}
             }
         }
     }

@@ -2,6 +2,7 @@ package br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuel_editor
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -10,20 +11,14 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
+import br.com.apps.model.factory.RefuelFactory
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_AMOUNT_LITERS
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_DATE
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_IS_COMPLETE
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_ODOMETER
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_STATION
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_TOTAL_VALUE
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_VALUE_PER_LITER
 import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.FAILED_TO_SALVE
+import br.com.apps.repository.FAILED_TO_SAVE
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_SAVED
-import br.com.apps.repository.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.R
+import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRefuelEditorBinding
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.popBackStack
@@ -48,7 +43,8 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
             masterUid = sharedViewModel.userData.value?.user?.masterUid,
             truckId = sharedViewModel.userData.value?.truck?.id,
             travelId = args.travelId,
-            refuelId = args.refuelId
+            refuelId = args.refuelId,
+            driverId = sharedViewModel.userData.value?.user?.employeeId
         )
     }
     private val viewModel: RefuelFragmentViewModel by viewModel { parametersOf(idHolder) }
@@ -176,13 +172,13 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
 
             if (fieldsAreValid) {
                 val mappedFields = hashMapOf(
-                    Pair(TAG_DATE, viewModel.date.value.toString()),
-                    Pair(TAG_STATION, station),
-                    Pair(TAG_ODOMETER, odometer),
-                    Pair(TAG_AMOUNT_LITERS, amountLiters),
-                    Pair(TAG_VALUE_PER_LITER, valuePerLiter),
-                    Pair(TAG_TOTAL_VALUE, totalValue),
-                    Pair(TAG_IS_COMPLETE, isComplete.toString())
+                    Pair(RefuelFactory.TAG_DATE, viewModel.date.value.toString()),
+                    Pair(RefuelFactory.TAG_STATION, station),
+                    Pair(RefuelFactory.TAG_ODOMETER, odometer),
+                    Pair(RefuelFactory.TAG_AMOUNT_LITERS, amountLiters),
+                    Pair(RefuelFactory.TAG_VALUE_PER_LITER, valuePerLiter),
+                    Pair(RefuelFactory.TAG_TOTAL_VALUE, totalValue),
+                    Pair(RefuelFactory.TAG_IS_COMPLETE, isComplete.toString())
                 )
                 save(mappedFields)
             }
@@ -190,25 +186,19 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
     }
 
     private fun save(mappedFields: HashMap<String, String>) {
-        try {
-            val dto = viewModel.getRefuelDto(mappedFields)
-            viewModel.save(dto).observe(viewLifecycleOwner) { response ->
-                when (response) {
-                    is Response.Error -> {
-                        response.exception.printStackTrace()
-                        requireView().snackBarRed(FAILED_TO_SALVE)
-                    }
-
-                    is Response.Success -> requireView().apply {
-                        clearMenu()
-                        snackBarGreen(SUCCESSFULLY_SAVED)
-                        popBackStack()
-                    }
+        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    requireView().snackBarRed(FAILED_TO_SAVE)
+                    Log.e(TAG_DEBUG, response.exception.message.toString())
                 }
+
+                is Response.Success -> {
+                    requireView().snackBarGreen(SUCCESSFULLY_SAVED)
+                    requireView().popBackStack()
+                }
+
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            requireView().snackBarRed(UNKNOWN_EXCEPTION)
         }
     }
 

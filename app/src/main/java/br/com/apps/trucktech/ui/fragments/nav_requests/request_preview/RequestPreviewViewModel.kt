@@ -17,7 +17,6 @@ class RequestPreviewViewModel(
     private val repository: RequestRepository
 ) : ViewModel() {
 
-
     private lateinit var itemIdList: List<String>
 
     /**

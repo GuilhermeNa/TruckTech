@@ -10,12 +10,6 @@ import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.factory.RefuelFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_AMOUNT_LITERS
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_IS_COMPLETE
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_ODOMETER
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_STATION
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_TOTAL_VALUE
-import br.com.apps.model.model.travel.Refuel.Companion.TAG_VALUE_PER_LITER
 import br.com.apps.repository.Response
 import br.com.apps.repository.repository.RefuelRepository
 import kotlinx.coroutines.launch
@@ -83,43 +77,31 @@ class RefuelFragmentViewModel(
     }
 
     /**
-     * Constructs and returns an [RefuelDto] based on the provided mapped fields.
-     *
-     * @param mappedFields A HashMap containing the mapped fields.
-     * @return An [RefuelDto] object.
-     */
-    fun getRefuelDto(mappedFields: HashMap<String, String>): RefuelDto {
-        return if (::refuel.isInitialized) {
-            refuel.updateFields(mappedFields)
-            refuel.toDto()
-        } else {
-            RefuelFactory.createDto(
-                nMasterUid = idHolder.masterUid,
-                nTravelId = idHolder.travelId,
-                nTruckId = idHolder.truckId,
-                nDate = date.value,
-                nStation = mappedFields[TAG_STATION],
-                nOdometer = mappedFields[TAG_ODOMETER],
-                nAmountLiters = mappedFields[TAG_AMOUNT_LITERS],
-                nValuePerLiter = mappedFields[TAG_VALUE_PER_LITER],
-                nTotalValue = mappedFields[TAG_TOTAL_VALUE],
-                nIsComplete = mappedFields[TAG_IS_COMPLETE].toBoolean()
-            )
-        }
-    }
-
-    /**
      * Send the [Refuel] to be created or updated.
      */
-    fun save(dto: RefuelDto) =
+    fun save(mappedFields: HashMap<String, String>) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
+                val dto = getRefuelDto(mappedFields)
                 repository.save(dto)
                 emit(Response.Success())
             } catch (e: Exception) {
                 emit(Response.Error(e))
             }
         }
+
+    private fun getRefuelDto(mappedFields: HashMap<String, String>): RefuelDto {
+        return if (::refuel.isInitialized) {
+            RefuelFactory.update(refuel, mappedFields)
+            refuel.toDto()
+        } else {
+            mappedFields[RefuelFactory.TAG_MASTER_UID] = idHolder.masterUid!!
+            mappedFields[RefuelFactory.TAG_TRUCK_ID] = idHolder.truckId!!
+            mappedFields[RefuelFactory.TAG_TRAVEL_ID] = idHolder.travelId!!
+            mappedFields[RefuelFactory.TAG_DRIVER_ID] = idHolder.driverId!!
+            RefuelFactory.create(mappedFields).toDto()
+        }
+    }
 
     /**
      * Interact with the [_date] LiveData, changing it.

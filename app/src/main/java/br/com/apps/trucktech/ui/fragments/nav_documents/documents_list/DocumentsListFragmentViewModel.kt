@@ -4,65 +4,77 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.IdHolder
 import br.com.apps.model.model.Document
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
 import br.com.apps.repository.Response
-import br.com.apps.usecase.DocumentUseCase
-import br.com.apps.usecase.LabelUseCase
-import kotlinx.coroutines.async
+import br.com.apps.repository.repository.DocumentRepository
+import br.com.apps.repository.repository.LabelRepository
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DocumentsListFragmentViewModel(
-    private val masterUid: String,
-    private val truckId: String,
-    private val documentUseCase: DocumentUseCase,
-    private val labelUseCase: LabelUseCase
+    idHolder: IdHolder,
+    private val documentRepository: DocumentRepository,
+    private val labelRepository: LabelRepository
 ) : ViewModel() {
 
+    val masterUid = idHolder.masterUid ?: throw IllegalArgumentException("masterUid is null")
+    val truckId = idHolder.truckId ?: throw IllegalArgumentException("truckId is null")
+
+    /**
+     * LiveData holding the response data of type [Response] with a list of [Document]
+     * to be displayed on screen.
+     */
     private val _documentData = MutableLiveData<Response<List<Document>>>()
     val documentData get() = _documentData
 
-    fun loadData() {
+    //---------------------------------------------------------------------------------------------//
+    // -
+    //---------------------------------------------------------------------------------------------//
+
+    init {
+        loadData()
+    }
+
+    private fun loadData() {
         viewModelScope.launch {
-            val documentList = mutableListOf<Document>()
-            val labelList = mutableListOf<Label>()
+            val deferredA = CompletableDeferred<List<Document>>()
+            val deferredB = CompletableDeferred<List<Label>>()
 
-            val liveDataA = documentUseCase.getByTruckId(truckId)
-            val liveDataB = labelUseCase.getAllByType(LabelType.DOCUMENT, masterUid)
-
-            val deferredA = async {
-                liveDataA.asFlow().collect { responseA ->
-                    when (responseA) {
-                        is Response.Error -> throw IllegalArgumentException()
-
-                        is Response.Success -> {
-                            documentList.clear()
-                            documentList.addAll(responseA.data!!)
-                        }
-                    }
-                }
-            }
-
-            val deferredB = async {
-                liveDataB.asFlow().collect { responseB ->
-                    when (responseB) {
-                        is Response.Error -> throw IllegalArgumentException()
-
-                        is Response.Success -> {
-                            labelList.clear()
-                            labelList.addAll(responseB.data!!)
-
-                        }
-                    }
-                }
-            }
+            launch { loadDocumentData { data -> deferredA.complete(data) } }
+            launch { loadLabelData { data -> deferredB.complete(data) } }
 
             awaitAll(deferredA, deferredB)
+            val documentList = deferredA.getCompleted()
+            val labelList = deferredB.getCompleted()
+
             mergeData(documentList, labelList)
             _documentData.postValue(Response.Success(data = documentList))
         }
+    }
+
+    private suspend fun loadDocumentData(complete: (data: List<Document>) -> Unit) {
+        documentRepository.getDocumentListByTruckId(truckId).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> throw IllegalArgumentException()
+                is Response.Success -> response.data?.let { complete(it) }
+            }
+        }
+    }
+
+    private suspend fun loadLabelData(complete: (data: List<Label>) -> Unit) {
+        labelRepository.getLabelListByTypeAndUserId(LabelType.DOCUMENT.description, masterUid)
+            .asFlow().collect { response ->
+                when (response) {
+                    is Response.Error -> throw IllegalArgumentException()
+                    is Response.Success -> response.data?.let { complete(it) }
+                }
+            }
     }
 
     private fun mergeData(documents: List<Document>?, labelResponse: List<Label>) {

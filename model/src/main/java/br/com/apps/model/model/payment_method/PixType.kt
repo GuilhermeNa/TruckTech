@@ -17,7 +17,7 @@ enum class PixType(val description: String) {
                 "KEY" -> KEY
                 "CPF" -> CPF
                 "CNPJ" -> CNPJ
-                else -> throw IllegalArgumentException()
+                else -> throw IllegalArgumentException("PixType, getType: Invalid type for string ($type)")
             }
         }
 

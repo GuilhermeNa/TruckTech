@@ -17,8 +17,10 @@ import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRefuelPreviewBinding
+import br.com.apps.trucktech.expressions.getColorById
+import br.com.apps.trucktech.expressions.getColorStateListById
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
-import br.com.apps.trucktech.expressions.navigateWithSafeArgs
+import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
@@ -64,6 +66,7 @@ class RefuelPreviewFragment : BasePreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
+        onPrepareMenu()
     }
 
     override fun configureBaseFragment(configurator: BasePreviewConfigurator) {
@@ -78,11 +81,26 @@ class RefuelPreviewFragment : BasePreviewFragment() {
         )
     }
 
+    private fun onPrepareMenu() {
+        binding.fragmentRefuelPreviewCollapsingToolbar.toolbar.apply {
+            navigationIcon?.setTint(requireContext().getColorById(R.color.white))
+
+            menu.apply {
+                val iconDelete = findItem(R.id.menu_preview_delete)
+                val iconEdit = findItem(R.id.menu_preview_edit)
+
+                iconDelete.iconTintList = requireContext().getColorStateListById(R.color.white)
+                iconEdit.iconTintList = requireContext().getColorStateListById(R.color.white)
+            }
+
+        }
+    }
+
     /**
      * Initializes the state manager and observes [viewModel] data.
      *
      *  - Observes refuelData to bind the [Refuel].
-     *
+     *  - Observes darkLayer to manage the interaction.
      */
     private fun initStateManager() {
         viewModel.refuelData.observe(viewLifecycleOwner) { response ->
@@ -92,6 +110,14 @@ class RefuelPreviewFragment : BasePreviewFragment() {
                 else -> {}
             }
         }
+
+        viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
+            when(isRequested) {
+                true -> binding.fragRefuelPreviewDarkLayer.visibility = View.VISIBLE
+                false -> binding.fragRefuelPreviewDarkLayer.visibility = View.GONE
+            }
+        }
+
     }
 
     fun bind(refuel: Refuel) {
@@ -120,12 +146,15 @@ class RefuelPreviewFragment : BasePreviewFragment() {
     }
 
     private fun showAlertDialog() {
+        viewModel.requestDarkLayer()
+
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle(DIALOG_TITLE)
             .setMessage(DIALOG_MESSAGE)
             .setPositiveButton(OK) { _, _ -> deleteRefuel() }
             .setNegativeButton(CANCEL) { _, _ -> }
+            .setOnDismissListener { viewModel.dismissDarkLayer() }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
@@ -140,10 +169,7 @@ class RefuelPreviewFragment : BasePreviewFragment() {
                     clearMenu()
                     requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                     requireView().popBackStack()
-
                 }
-
-                else -> {}
             }
         }
     }
@@ -152,7 +178,7 @@ class RefuelPreviewFragment : BasePreviewFragment() {
      * Navigate to the editor fragment.
      */
     override fun onEditMenuCLick() {
-        requireView().navigateWithSafeArgs(
+        requireView().navigateTo(
             RefuelPreviewFragmentDirections
                 .actionRefuelPreviewFragmentToRefuelEditorFragment(args.refuelId, args.travelId)
         )
@@ -163,7 +189,8 @@ class RefuelPreviewFragment : BasePreviewFragment() {
     //---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
-        _binding = null
         super.onDestroyView()
+        _binding = null
     }
+
 }

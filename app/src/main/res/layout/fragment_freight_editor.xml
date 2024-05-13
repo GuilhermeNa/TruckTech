@@ -65,43 +65,49 @@
                     <TextView
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:text="Cliente"
+                        android:text="@string/customer"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Embarcador"
+                        android:hint="@string/name"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/frag_freight_editor_company"
                             android:layout_height="wrap_content"
-                            android:layout_width="match_parent" />
+                            android:layout_width="match_parent"
+                            android:inputType="textCapWords"
+                            android:imeOptions="actionNext"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Origem"
+                        android:hint="@string/origin"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/frag_freight_editor_origin"
                             android:layout_height="wrap_content"
-                            android:layout_width="match_parent" />
+                            android:layout_width="match_parent"
+                            android:inputType="textCapWords"
+                            android:imeOptions="actionNext"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Destino"
+                        android:hint="@string/destiny"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/frag_freight_editor_destiny"
                             android:layout_height="wrap_content"
-                            android:layout_width="match_parent" />
+                            android:layout_width="match_parent"
+                            android:inputType="textCapWords"
+                            android:imeOptions="actionNext"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -117,46 +123,56 @@
                     <TextView
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:text="Carga"
+                        android:text="@string/cargo"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Conteúdo"
+                        android:hint="@string/content"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/frag_freight_editor_cargo"
                             android:layout_height="wrap_content"
-                            android:layout_width="match_parent" />
+                            android:layout_width="match_parent"
+                            android:inputType="textCapWords"
+                            android:imeOptions="actionNext"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Peso"
+                        android:hint="@string/weight"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/frag_freight_editor_weight"
                             android:layout_height="wrap_content"
-                            android:layout_width="match_parent" />
+                            android:layout_width="match_parent"
+                            android:inputType="numberDecimal"
+                            android:imeOptions="actionNext"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="Valor"
+                        android:hint="@string/value"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/frag_freight_editor_value"
                             android:layout_height="wrap_content"
-                            android:layout_width="match_parent" />
+                            android:layout_width="match_parent"
+                            android:inputType="numberDecimal"
+                            android:imeOptions="actionDone"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"/>
 
             </LinearLayout>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>

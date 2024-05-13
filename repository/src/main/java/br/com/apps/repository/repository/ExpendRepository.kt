@@ -27,40 +27,6 @@ class ExpendRepository(fireStore: FirebaseFirestore) {
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_EXPENDS)
     private val parentCollection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
 
-    suspend fun getExpendListForThisTravelListId(idList: List<String>): LiveData<Response<List<Expend>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Expend>>>()
-            val dataSet = mutableListOf<Expend>()
-            var tasksCounter = 0
-
-            idList.forEach { id ->
-                collection.whereEqualTo(TRAVEL_ID, id)
-                    .addSnapshotListener { snapQuery, error ->
-                        error?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        snapQuery?.let { query ->
-                            val expendList = query.toExpendList()
-                            expendList.forEach { expend ->
-                                val existingIndex = dataSet.indexOfFirst { it.id == expend.id }
-                                if (existingIndex != -1) {
-                                    dataSet[existingIndex] = expend
-                                } else {
-                                    dataSet.add(expend)
-                                }
-                            }
-                            tasksCounter++
-                            if (tasksCounter == idList.size) {
-                                liveData.postValue(Response.Success(data = dataSet))
-                            }
-                        }
-                    }
-            }
-
-            return@withContext liveData
-        }
-    }
-
     suspend fun deleteExpendForThisTravel(travelId: String, expendId: String) {
         parentCollection
             .document(travelId)
@@ -208,6 +174,47 @@ class ExpendRepository(fireStore: FirebaseFirestore) {
         return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<List<Expend>>>()
             val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+
+            if (withFlow) {
+                listener.addSnapshotListener { snapQuery, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    snapQuery?.let { query ->
+                        liveData.postValue(Response.Success(query.toExpendList()))
+                    }
+                }
+            } else {
+                listener.get().addOnCompleteListener { task ->
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { query ->
+                        liveData.postValue(Response.Success(query.toExpendList()))
+                    }
+                }.await()
+            }
+
+            return@withContext liveData
+        }
+    }
+
+    /**
+     * Fetch the dataSet for the specified [Expend] ID list.
+     *
+     * Fetches [Expend] dataSet for the given [Travel] ID asynchronously from the database.
+     *
+     * @param idList The ID of the [Travel] for which expenditure data is to be retrieved.
+     * @param withFlow If the user wants to keep observing the source or not.
+     * @return A LiveData object containing a response of [Expend] data for the specified [Travel] ID.
+     */
+    suspend fun getExpendListByTravelId(
+        idList: List<String>,
+        withFlow: Boolean
+    ): LiveData<Response<List<Expend>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Expend>>>()
+            val listener = collection.whereIn(TRAVEL_ID, idList)
 
             if (withFlow) {
                 listener.addSnapshotListener { snapQuery, error ->

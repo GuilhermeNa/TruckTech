@@ -34,11 +34,13 @@ class ExpendListViewModel(
     private fun loadData() {
         val travelId = idHolder.travelId ?: throw IllegalArgumentException(EMPTY_ID)
         val masterUid = idHolder.masterUid ?: throw IllegalArgumentException(EMPTY_ID)
+
         viewModelScope.launch {
             useCase.getExpendListWithLabelByTravelId(masterUid, travelId).asFlow().collect {
                 _expendData.value = it
             }
         }
+
     }
 
 }

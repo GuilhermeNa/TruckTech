@@ -26,31 +26,12 @@ class FreightRepository(fireStore: FirebaseFirestore) {
     private val parentCollection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_FREIGHTS)
 
-    suspend fun getFreightListForThisTravel(idList: List<String>): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Freight>>>()
-            val dataSet = mutableListOf<Freight>()
-            var tasksCounter = 0
-
-            idList.forEach { id ->
-                collection.whereEqualTo(TRAVEL_ID, id)
-                    .addSnapshotListener { snapQuery, error ->
-                        error?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        snapQuery?.let { query ->
-                            dataSet.addAll(query.toFreightList())
-                            tasksCounter++
-                            if (tasksCounter == idList.size)
-                                liveData.postValue(Response.Success(data = dataSet))
-                        }
-                    }
-            }
-
-            return@withContext liveData
-        }
-    }
-
+    /**
+     * Deletes a specific [Freight] entry associated with a [Travel].
+     *
+     * @param travelId The ID of the travel from which to delete the freight entry.
+     * @param freightId The ID of the freight entry to delete.
+     */
     suspend fun deleteFreightForThisTravel(travelId: String, freightId: String) {
         parentCollection
             .document(travelId)
@@ -67,12 +48,15 @@ class FreightRepository(fireStore: FirebaseFirestore) {
      * @param withFlow If the user wants to keep observing the source or not.
      * @return LiveData containing a [Response] object with either a list of [Freight] items or an error.
      */
-    suspend fun getFreightListByDriverId(driverId: String, withFlow: Boolean): LiveData<Response<List<Freight>>> {
+    suspend fun getFreightListByDriverId(
+        driverId: String,
+        withFlow: Boolean
+    ): LiveData<Response<List<Freight>>> {
         return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<List<Freight>>>()
             val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-            if(withFlow) {
+            if (withFlow) {
                 listener.addSnapshotListener { querySnap, error ->
                     error?.let { e ->
                         liveData.postValue(Response.Error(e))
@@ -208,6 +192,45 @@ class FreightRepository(fireStore: FirebaseFirestore) {
     }
 
     /**
+     * Fetches the [Freight] dataSet for the specified list of [Travel] ID.
+     *
+     * @param idList The ID list of the travel for which [Freight] dataSet is to be retrieved.
+     * @return A LiveData object containing a [Response] of [Freight] dataSet.
+     */
+    suspend fun getFreightListByTravelId(
+        idList: List<String>,
+        withFlow: Boolean
+    ): LiveData<Response<List<Freight>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Freight>>>()
+            val listener = collection.whereIn(TRAVEL_ID, idList)
+
+            if (withFlow) {
+                listener.addSnapshotListener { snapQuery, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    snapQuery?.let { query ->
+                        liveData.postValue(Response.Success(query.toFreightList()))
+                    }
+                }
+            } else {
+                listener.get().addOnCompleteListener { task ->
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { query ->
+                        liveData.postValue(Response.Success(query.toFreightList()))
+                    }
+                }.await()
+            }
+
+            return@withContext liveData
+        }
+    }
+
+
+    /**
      * Fetches the [Freight] dataSet for the specified ID.
      *
      * @param freightId The ID of the [Freight] for which data is to be retrieved.
@@ -275,11 +298,7 @@ class FreightRepository(fireStore: FirebaseFirestore) {
     private suspend fun create(dto: FreightDto): String {
         val document = collection.document()
         dto.id = document.id
-
-        document
-            .set(dto)
-            .await()
-
+        document.set(dto).await()
         return document.id
     }
 
@@ -291,7 +310,6 @@ class FreightRepository(fireStore: FirebaseFirestore) {
             .set(dto)
             .await()
     }
-
 
 
 }

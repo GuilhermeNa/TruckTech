@@ -35,7 +35,7 @@ const val SUCCESSFULLY_REMOVED = "Removido com sucesso"
 
 const val UNKNOWN_EXCEPTION = "Erro desconhecido"
 
-const val FAILED_TO_SALVE = "Falha ao salvar"
+const val FAILED_TO_SAVE = "Falha ao salvar"
 
 const val INVALID_OBJECT_ID = "Id inválido"
 

@@ -4,12 +4,16 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import br.com.apps.model.IdHolder
 import br.com.apps.model.model.employee.BankAccount
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.FAILED_TO_REMOVE
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_REMOVED
@@ -18,6 +22,7 @@ import br.com.apps.trucktech.databinding.FragmentBankPreviewBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
+import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -38,27 +43,13 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: BankPreviewFragmentArgs by navArgs()
-    private val bankAccountId by lazy {
-        args.bankId
-    }
-    private val employeeId by lazy {
-        sharedViewModel.userData.value!!.user!!.employeeId
-    }
-
-    private val viewModel: BankPreviewViewModel by viewModel {
-        parametersOf(
-            employeeId,
-            bankAccountId
+    private val idHolder by lazy {
+        IdHolder(
+            driverId = sharedViewModel.userData.value!!.user!!.employeeId,
+            bankAccountId = args.bankId
         )
     }
-
-    //--------------------------------------------------------------------------------------------//
-    //  ON CREATE
-    //--------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private val viewModel: BankPreviewViewModel by viewModel { parametersOf(idHolder) }
 
     //--------------------------------------------------------------------------------------------//
     //  ON CREATE VIEW
@@ -98,9 +89,8 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
             when (it.itemId) {
                 R.id.menu_preview_edit -> {
                     requireView().navigateTo(
-                        BankPreviewFragmentDirections.actionBankPreviewFragmentToBankEditorFragment(
-                            bankAccountId
-                        )
+                        BankPreviewFragmentDirections
+                            .actionBankPreviewFragmentToBankEditorFragment(args.bankId)
                     )
                     true
                 }
@@ -116,11 +106,14 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
     }
 
     private fun showAlertDialog() {
+        viewModel.requestDarkLayer()
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Removendo conta")
             .setMessage("Você confirma a remoção desta conta?")
             .setPositiveButton("Ok") { _, _ -> deleteBankAccount() }
             .setNegativeButton("Cancelar") { _, _ -> }
+            .setOnDismissListener { viewModel.dismissDarkLayer() }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
@@ -130,27 +123,38 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
     private fun deleteBankAccount() {
         lifecycleScope.launch {
             viewModel.delete().observe(viewLifecycleOwner) { response ->
-                when(response) {
+                when (response) {
+                    is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
                     is Response.Success -> {
-                        requireView().snackBarRed(SUCCESSFULLY_REMOVED)
+                        requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                         requireView().popBackStack()
                     }
-                    is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
                 }
             }
         }
     }
 
     /**
-     * Init State manager
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *   - Observes bankData for bind.
+     *   - Observes darkLayer to manage the interaction.
      */
     private fun initStateManager() {
         viewModel.bankData.observe(viewLifecycleOwner) { response ->
             when (response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> response.data?.let { bind(it) }
-                is Response.Error -> {}
             }
         }
+
+        viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
+            when (isRequested) {
+                true -> binding.fragBankPreviewDarkLayer.visibility = VISIBLE
+                false -> binding.fragBankPreviewDarkLayer.visibility = GONE
+            }
+        }
+
     }
 
     private fun bind(bankAccount: BankAccount) {

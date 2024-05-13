@@ -21,6 +21,10 @@ class FreightsListViewModel(
     private val _freightData = MutableLiveData<Response<List<Freight>>>()
     val freightData get() = _freightData
 
+    //---------------------------------------------------------------------------------------------//
+    // -
+    //---------------------------------------------------------------------------------------------//
+
     init {
         loadData()
     }

@@ -1,5 +1,6 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.requests_list
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
@@ -11,6 +12,7 @@ import br.com.apps.model.model.request.request.PaymentRequestStatusType
 import br.com.apps.repository.EMPTY_ID
 import br.com.apps.repository.Response
 import br.com.apps.repository.repository.RequestRepository
+import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.ui.activities.main.DriverAndTruck
 import kotlinx.coroutines.launch
@@ -52,20 +54,34 @@ class RequestsListViewModel(
         Pair(4, ALL)
     )
 
+    /**
+     * LiveData with a dark layer state, used when dialog is requested.
+     */
+    private var _darkLayer = MutableLiveData(false)
+    val darkLayer get() = _darkLayer
+
+    /**
+     * LiveData with a bottom nav state, used when dialog is requested.
+     */
+    private var _bottomNav = MutableLiveData(true)
+    val bottomNav get() = _bottomNav
+
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
     init {
+        Log.d(TAG_DEBUG, "ViewModel init")
         loadData()
     }
 
-    private fun loadData() {
+    fun loadData() {
         val id = driverAndTruck.user?.employeeId ?: throw InvalidParameterException(EMPTY_ID)
         viewModelScope.launch {
-            repository.getCompleteRequestListByDriverId(driverId = id, withFlow = false)
+            repository.getCompleteRequestListByDriverId(driverId = id, withFlow = true)
                 .asFlow().collect {
                     _requestData.value = it
+                    Log.d(TAG_DEBUG, "collected on list")
                 }
         }
     }
@@ -121,11 +137,39 @@ class RequestsListViewModel(
                 2 -> dataSet.filter { it.status == PaymentRequestStatusType.DENIED }
                 3 -> dataSet.filter { it.status == PaymentRequestStatusType.PROCESSED }
                 4 -> dataSet
-                else -> throw InvalidParameterException("Invalid header position")
+                else -> throw InvalidParameterException("RequestListViewModel, filterDataByHeader: Invalid header position $headerPos")
             }
         } else {
             dataSet
         }
+    }
+
+    /**
+     * Sets the visibility of the [_darkLayer] to true, indicating that it should be shown.
+     */
+    fun requestDarkLayer() {
+        _darkLayer.value = true
+    }
+
+    /**
+     * Sets the visibility of the [_darkLayer] to false, indicating that it should be dismissed.
+     */
+    fun dismissDarkLayer() {
+        _darkLayer.value = false
+    }
+
+    /**
+     * Sets the visibility of the [_bottomNav] to true, indicating that it should be shown.
+     */
+    fun requestBottomNav() {
+        _bottomNav.value = true
+    }
+
+    /**
+     * Sets the visibility of the [_bottomNav] to false, indicating that it should be dismissed.
+     */
+    fun dismissBottomNav() {
+        _bottomNav.value = false
     }
 
 }

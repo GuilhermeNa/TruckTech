@@ -267,8 +267,8 @@
             android:label="fragment_document"
             tools:layout="@layout/fragment_document" >
             <argument
-                android:name="documentId"
-                app:argType="string" />
+                android:name="document"
+                app:argType="br.com.apps.model.model.Document" />
         </fragment>
     </navigation>
     <navigation android:id="@+id/nav_requests"

@@ -10,4 +10,6 @@ class StorageRepository(private val fireStorage: FirebaseStorage) {
         reference.putBytes(image).await()
     }
 
+
+
 }

@@ -1,24 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     tools:context=".ui.fragments.nav_travel.travels.TravelsListFragment">
 
-   <include
-      android:id="@+id/fragment_travels_toolbar"
-      layout="@layout/layout_toolbar"/>
+    <include
+        android:id="@+id/fragment_travels_toolbar"
+        layout="@layout/layout_toolbar" />
 
-   <androidx.recyclerview.widget.RecyclerView
-       android:id="@+id/travels_fragment_recycler"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       tools:listitem="@layout/item_travel"
-       android:paddingHorizontal="16dp"
-       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-       android:clipToPadding="false"
-       android:paddingBottom="80dp"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/travels_fragment_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="80dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
 
-</LinearLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fragment_travels_toolbar"
+        tools:listitem="@layout/item_travel" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/frag_travel_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:src="@drawable/icon_add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:importantForAccessibility="no" />
+
+    <View
+        android:id="@+id/frag_travel_list_dark_layer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black_layer"
+        android:visibility="gone" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

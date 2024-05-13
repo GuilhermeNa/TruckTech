@@ -41,14 +41,6 @@ class ExpendUseCase(
         }
     }
 
-    suspend fun getExpendListForThisTravel(idList: List<String>): LiveData<Response<List<Expend>>> {
-        return repository.getExpendListForThisTravelListId(idList)
-    }
-
-    suspend fun deleteExpendForThisTravel(travelId: String, id: String) {
-        repository.deleteExpendForThisTravel(travelId, id)
-    }
-
     /**
      * Retrieves all expends related to a specific [Travel].
      *

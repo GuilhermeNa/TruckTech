@@ -1,24 +1,32 @@
 package br.com.apps.trucktech.ui.fragments.nav_travel.travels
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.IdHolder
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.FAILED_TO_REMOVE
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_REMOVED
+import br.com.apps.repository.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.R
+import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentTravelsBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.navigateWithSafeArgs
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarOrange
+import br.com.apps.trucktech.expressions.snackBarRed
+import br.com.apps.trucktech.ui.activities.main.VisualComponents
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.private_adapters.TravelsListRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
@@ -41,18 +49,14 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentTravelsBinding? = null
     private val binding get() = _binding!!
 
-    private val employeeId by lazy {
-        sharedViewModel.userData.value?.user?.employeeId
+    private val idHolder by lazy {
+        IdHolder(
+            masterUid = sharedViewModel.userData.value?.user?.masterUid,
+            driverId = sharedViewModel.userData.value?.user?.employeeId,
+            truckId = sharedViewModel.userData.value?.truck?.id
+        )
     }
-    private val viewModel: TravelsListViewModel by viewModel { parametersOf(employeeId) }
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private val viewModel: TravelsListViewModel by viewModel { parametersOf(idHolder) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -73,7 +77,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
-
+        initFab()
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -88,21 +92,80 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     }
 
     /**
-     * State manager
+     * Init Fab for create a new Travel
      */
-    private fun initStateManager() {
-        viewModel.travelData.observe(viewLifecycleOwner) { response ->
-            when(response) {
-                is Response.Success -> {
-                    response.data?.let { initRecyclerView(it) }
+    private fun initFab() {
+        binding.fragTravelFab.setOnClickListener {
+            viewModel.requestDarkLayer()
+            viewModel.dismissBottomNav()
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setIcon(R.drawable.icon_logout)
+                .setTitle("Nova viagem")
+                .setMessage("Você confirma a adição de uma nova viagem?")
+                .setPositiveButton("Ok") { _, _ -> createNewTravel() }
+                .setNegativeButton("Cancelar") { _, _ -> }
+                .setOnDismissListener {
+                    viewModel.dismissDarkLayer()
+                    viewModel.requestBottomNav()
                 }
-                is Response.Error -> {}
+                .create().apply {
+                    window?.setGravity(Gravity.CENTER)
+                    show()
+                }
+        }
+    }
+
+    private fun createNewTravel() {
+        viewModel.createNewTravel().observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    requireView().snackBarRed(FAILED_TO_REMOVE)
+                    Log.e(TAG_DEBUG, response.exception.message.toString())
+                }
+
+                is Response.Success -> requireView().snackBarGreen(SUCCESSFULLY_SAVED)
             }
         }
     }
 
     /**
-     * Init recycler view
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *   - Observes travelData for update the recyclerView.
+     *   - Observes darkLayer to manage the interaction.
+     *   - Observes bottomNav to manage the interaction.
+     */
+    private fun initStateManager() {
+        viewModel.travelData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Success -> {
+                    response.data?.let { initRecyclerView(it) }
+                }
+
+                is Response.Error -> {}
+            }
+        }
+
+        viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
+            when (isRequested) {
+                true -> binding.fragTravelListDarkLayer.visibility = VISIBLE
+                false -> binding.fragTravelListDarkLayer.visibility = GONE
+            }
+        }
+
+        viewModel.bottomNav.observe(viewLifecycleOwner) { isRequested ->
+            sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = isRequested))
+        }
+
+    }
+
+    /**
+     * Initialize the RecyclerView.
+     *
+     * Options:
+     *  - clickListener -> navigation
+     *  - context menu -> delete
      */
     private fun initRecyclerView(dataSet: List<Travel>) {
         initConcatAdapter(initAdaptersData(dataSet))
@@ -119,7 +182,8 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             .sortedBy { it.initialDate }
             .reversed()
             .groupBy {
-                it.initialDate?.getMonthAndYearInPtBr() ?: throw InvalidParameterException("Date is null")
+                it.initialDate?.getMonthAndYearInPtBr()
+                    ?: throw InvalidParameterException("Date is null")
             }
             .map { createAdapters(it) }
             .flatten()
@@ -132,36 +196,50 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             itemsMap.value,
             itemCLickListener = {
                 clearMenu()
-                requireView().navigateWithSafeArgs(TravelsListFragmentDirections.actionTravelsFragmentToRecordsFragment(it))
+                requireView().navigateWithSafeArgs(
+                    TravelsListFragmentDirections.actionTravelsFragmentToRecordsFragment(
+                        it
+                    )
+                )
             },
             deleteClickListener = ::showAlertDialog
         )
     )
 
     private fun showAlertDialog(idsData: TravelIdsData) {
+        viewModel.requestDarkLayer()
+        viewModel.dismissBottomNav()
+
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle("Removendo viagem")
             .setMessage("Você realmente deseja remover esta viagem e todos os seus itens?")
-            .setPositiveButton("Ok") { _, _ ->
-                lifecycleScope.launch {
-                    viewModel.delete(idsData).observe(viewLifecycleOwner) { response ->
-                        when(response) {
-                            is Response.Success -> {
-                                requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
-                            }
-                            is Response.Error -> {
-                                requireView().snackBarGreen(FAILED_TO_REMOVE)
-                            }
-                        }
-                    }
-                }
-            }
+            .setPositiveButton("Ok") { _, _ -> delete(idsData) }
             .setNegativeButton("Cancelar") { _, _ -> }
+            .setOnDismissListener {
+                viewModel.dismissDarkLayer()
+                viewModel.requestBottomNav()
+            }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
             }
+    }
+
+    private fun delete(idsData: TravelIdsData) {
+        lifecycleScope.launch {
+            viewModel.delete(idsData).observe(viewLifecycleOwner) { response ->
+                when (response) {
+                    is Response.Success -> {
+                        requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                    }
+
+                    is Response.Error -> {
+                        requireView().snackBarGreen(FAILED_TO_REMOVE)
+                    }
+                }
+            }
+        }
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -172,6 +250,5 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
         _binding = null
         super.onDestroyView()
     }
-
 
 }

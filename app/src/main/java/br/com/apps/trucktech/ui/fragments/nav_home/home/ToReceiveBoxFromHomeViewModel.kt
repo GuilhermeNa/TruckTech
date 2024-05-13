@@ -206,30 +206,43 @@ class DriverPayment(
     }
 
     fun calculateCommissionPercent(): Int {
-        return freightCommission
-            .divide(calculateGrossReceivable(), 2, RoundingMode.HALF_EVEN)
-            .multiply(BigDecimal(100))
-            .toPlainString()
-            .substringBefore(".")
-            .toInt()
+        return if (calculateGrossReceivable() > BigDecimal.ZERO) {
+            freightCommission
+                .divide(calculateGrossReceivable(), 2, RoundingMode.HALF_EVEN)
+                .multiply(BigDecimal(100))
+                .toPlainString()
+                .substringBefore(".")
+                .toInt()
+
+        } else {
+            0
+        }
     }
 
     fun calculateExpendPercent(): Int {
-        return expendValue
-            .divide(calculateGrossReceivable(), 2, RoundingMode.HALF_EVEN)
-            .multiply(BigDecimal(100))
-            .toPlainString()
-            .substringBefore(".")
-            .toInt()
+        return if (calculateGrossReceivable() > BigDecimal.ZERO) {
+            expendValue
+                .divide(calculateGrossReceivable(), 2, RoundingMode.HALF_EVEN)
+                .multiply(BigDecimal(100))
+                .toPlainString()
+                .substringBefore(".")
+                .toInt()
+        } else {
+            0
+        }
     }
 
     fun calculateDiscountPercent(): Int {
-        return discountValue
-            .divide(calculateGrossReceivable(), 2, RoundingMode.HALF_EVEN)
-            .multiply(BigDecimal(100))
-            .toPlainString()
-            .substringBefore(".")
-            .toInt()
+        return if (calculateGrossReceivable() > BigDecimal.ZERO) {
+            discountValue
+                .divide(calculateGrossReceivable(), 2, RoundingMode.HALF_EVEN)
+                .multiply(BigDecimal(100))
+                .toPlainString()
+                .substringBefore(".")
+                .toInt()
+        } else {
+            0
+        }
     }
 
     fun getFreightAmount(): String {

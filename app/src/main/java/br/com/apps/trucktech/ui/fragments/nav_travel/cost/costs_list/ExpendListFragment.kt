@@ -40,15 +40,6 @@ class ExpendListFragment : Fragment() {
     private val viewModel: ExpendListViewModel by viewModel { parametersOf(idHolder) }
 
     //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
-    //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
     //---------------------------------------------------------------------------------------------//
 
@@ -90,6 +81,19 @@ class ExpendListFragment : Fragment() {
         }
     }
 
+    /**
+     * Initializes the RecyclerView.
+     *
+     *   Options:
+     *   - Navigation: Send the ID and page reference as a result to the parent fragment manager,
+     *   which will be in charge of navigation.
+     */
+    private fun initRecyclerView(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
+        val concatAdapter = ConcatAdapter(adapters)
+        val recyclerView = binding.costFragmentRecycler
+        recyclerView.adapter = concatAdapter
+    }
+
     private fun initAdapters(dataSet: List<Expend>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
         return dataSet
             .sortedBy { it.date }
@@ -111,12 +115,6 @@ class ExpendListFragment : Fragment() {
                     parentFragmentManager.setFragmentResult(PAGE_COST, bundle)
                 })
         )
-
-    private fun initRecyclerView(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
-        val concatAdapter = ConcatAdapter(adapters)
-        val recyclerView = binding.costFragmentRecycler
-        recyclerView.adapter = concatAdapter
-    }
 
     //---------------------------------------------------------------------------------------------//
     // ON DESTROY VIEW

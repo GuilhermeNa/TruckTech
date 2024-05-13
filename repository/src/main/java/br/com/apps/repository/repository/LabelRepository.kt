@@ -82,6 +82,40 @@ class LabelRepository(private val fireStore: FirebaseFirestore) {
         }
     }
 
+    suspend fun getLabelListByTypeAndUserId(type: String, uid: String, withFlow: Boolean = false)
+            : LiveData<Response<List<Label>>> {
+        return withContext(Dispatchers.IO) {
+
+            val liveData = MutableLiveData<Response<List<Label>>>()
+            val listener =
+                userCollection.whereEqualTo(LABEL_TYPE, type).whereEqualTo(MASTER_UID, uid)
+
+            if(withFlow) {
+                listener.addSnapshotListener { nQuery, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    nQuery?.let { query ->
+                        liveData.postValue(Response.Success(data = query.toLabelList()))
+                    }
+                }
+            } else {
+                listener.get().addOnCompleteListener { task ->
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { query ->
+                        liveData.postValue(Response.Success(  query.toLabelList()))
+                    }
+                }
+            }
+
+            return@withContext liveData
+        }
+
+
+    }
+
     suspend fun getLabelById(labelId: String): LiveData<Response<Label>> {
         return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<Label>>()
@@ -234,14 +268,14 @@ class LabelRepository(private val fireStore: FirebaseFirestore) {
                 val liveDataB = getUserOperationalLabelListOfExpendsForDrivers(masterUid)
 
                 mediator.addSource(liveDataA) { responseA ->
-                    when(responseA) {
+                    when (responseA) {
                         is Response.Error -> mediator.value = responseA
                         is Response.Success -> responseA.data?.let { dataSet.addAll(it) }
                     }
                     deferredA.complete(Unit)
                 }
                 mediator.addSource(liveDataB) { responseB ->
-                    when(responseB) {
+                    when (responseB) {
                         is Response.Error -> mediator.value = responseB
                         is Response.Success -> responseB.data?.let { dataSet.addAll(it) }
                     }

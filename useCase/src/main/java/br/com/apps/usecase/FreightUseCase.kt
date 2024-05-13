@@ -1,11 +1,9 @@
 package br.com.apps.usecase
 
-import androidx.lifecycle.LiveData
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.EMPTY_DATASET
 import br.com.apps.repository.EMPTY_ID
-import br.com.apps.repository.Response
 import br.com.apps.repository.repository.FreightRepository
 import java.security.InvalidParameterException
 
@@ -30,20 +28,6 @@ class FreightUseCase(
             val freights = freightList.filter { it.travelId == travelId }
             travel.freightsList = freights
         }
-    }
-
-    /**
-     * get List
-     */
-    suspend fun getFreightListForThisTravelId(travelIds: List<String>): LiveData<Response<List<Freight>>> {
-        return repository.getFreightListForThisTravel(travelIds)
-    }
-
-    /**
-     * Delete
-     */
-    suspend fun deleteFreightForThisTravel(travelId: String, id: String) {
-        repository.deleteFreightForThisTravel(travelId, id)
     }
 
     suspend fun delete(freightId: String) {

@@ -3,14 +3,14 @@ package br.com.apps.repository.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.DocumentDto
-import br.com.apps.model.mapper.DocumentMapper
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.Document
 import br.com.apps.repository.Response
+import br.com.apps.repository.toDocumentList
+import br.com.apps.repository.toDocumentObject
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -24,50 +24,27 @@ class DocumentRepository(private val fireBase: FirebaseFirestore) {
     private val collection = fireBase.collection(FIRESTORE_COLLECTION_DOCUMENTS)
 
     /**
-     * Retrieve a list of documents for the currently logged-in master user.
-     *
-     * @param masterUid The master user Id.
-     *
-     * @return The created list of documents.
-     */
-    fun getAll(masterUid: String): LiveData<List<Document>> {
-        val liveData = MutableLiveData<List<Document>>()
-        collection.whereEqualTo(MASTER_USER_ID, masterUid)
-        collection.addSnapshotListener { s, _ ->
-            s?.let { snapShot ->
-                liveData.value = getMappedDataSet(snapShot)
-            }
-        }
-        return liveData
-    }
-
-    private fun getMappedDataSet(snapShot: QuerySnapshot): List<Document> {
-        return snapShot.documents.mapNotNull {
-            it.toObject<DocumentDto>()?.let { documentDto ->
-                DocumentMapper.toModel(documentDto)
-            }
-        }
-    }
-
-    /**
      * Retrieve a document by its Id.
      *
      * @param id The document Id.
      *
      * @return LiveData containing the response.
      */
-    fun getById(id: String): LiveData<Response<Document>> {
-        val liveData = MutableLiveData<Response<Document>>()
-        collection.document(id).addSnapshotListener { s, _ ->
-            s?.let { document ->
-                document.toObject<DocumentDto>()?.let { documentDto ->
-                    DocumentMapper.toModel(documentDto)
-                }?.let {
-                    liveData.postValue(Response.Success(data = it))
+    suspend fun getDocumentById(id: String): LiveData<Response<Document>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<Document>>()
+
+            collection.document(id).get().addOnCompleteListener { task ->
+                task.exception?.let { e ->
+                    liveData.postValue(Response.Error(e))
                 }
-            }
+                task.result?.let { document ->
+                    liveData.postValue(Response.Success(document.toDocumentObject()))
+                }
+            }.await()
+
+            return@withContext liveData
         }
-        return liveData
     }
 
     /**
@@ -127,6 +104,46 @@ class DocumentRepository(private val fireBase: FirebaseFirestore) {
 
     private fun DocumentSnapshot.toModelObject(): Document? {
         return this.toObject(DocumentDto::class.java)?.toModel()
+    }
+
+    /**
+     * Retrieve a list of documents filtered by truckId.
+     *
+     * @param truckId The truck Id.
+     * @param withFlow If the user wants to keep observing the source or not.
+     *
+     * @return LiveData containing a [Response] object with a list of [Document].
+     */
+    suspend fun getDocumentListByTruckId(
+        truckId: String,
+        withFlow: Boolean = false
+    ): LiveData<Response<List<Document>>> {
+        return withContext(Dispatchers.IO) {
+            val liveData = MutableLiveData<Response<List<Document>>>()
+            val listener = collection.whereEqualTo(TRUCK_ID, truckId)
+
+            if (withFlow) {
+                listener.addSnapshotListener { nQuery, error ->
+                    error?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    nQuery?.let { query ->
+                        liveData.postValue(Response.Success(data = query.toDocumentList()))
+                    }
+                }
+            } else {
+                listener.get().addOnCompleteListener { task ->
+                    task.exception?.let { e ->
+                        liveData.postValue(Response.Error(e))
+                    }
+                    task.result?.let { query ->
+                        liveData.postValue(Response.Success(data = query.toDocumentList()))
+                    }
+                }
+            }
+
+            return@withContext liveData
+        }
     }
 
 }

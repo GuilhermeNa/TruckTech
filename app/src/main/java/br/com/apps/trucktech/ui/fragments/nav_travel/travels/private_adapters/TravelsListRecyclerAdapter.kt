@@ -61,6 +61,7 @@ class TravelsListRecyclerAdapter(
                         val idsData = getTravelIdsData()
                         deleteClickListener(idsData)
                     }
+
                     else -> {}
                 }
             }
@@ -71,9 +72,9 @@ class TravelsListRecyclerAdapter(
             val id = travel.id ?: throw InvalidParameterException()
             return TravelIdsData(
                 travelId = id,
-                freightIds = travel.getListOfIdsForFreightList(),
-                refuelIds = travel.getListOfIdsForRefuelList(),
-                expendIds = travel.getListOfIdsForExpendList()
+                freightIds = travel.getListOfIdsForList(Travel.FREIGHT),
+                refuelIds = travel.getListOfIdsForList(Travel.REFUEL),
+                expendIds = travel.getListOfIdsForList(Travel.EXPEND)
             )
         }
 
@@ -107,17 +108,20 @@ class TravelsListRecyclerAdapter(
             startDate.text = travel.initialDate?.getCompleteDateInPtBr()
             endDate.text = travel.finalDate?.getCompleteDateInPtBr() ?: "Em Curso"
 
-            freightNumber.text = if (travel.getNumberOfFreights() > 0) {
-                travel.getNumberOfFreights().toString()
-            } else "-"
+            freightNumber.text =
+                if (travel.getListSize(Travel.FREIGHT) > 0)
+                    travel.getListSize(Travel.FREIGHT).toString()
+                else "-"
 
-            refuelNumber.text = if (travel.getNumberOfRefuels() > 0) {
-                travel.getNumberOfRefuels().toString()
-            } else "-"
+            refuelNumber.text =
+                if (travel.getListSize(Travel.REFUEL) > 0)
+                    travel.getListSize(Travel.REFUEL).toString()
+                else "-"
 
-            expendNumber.text = if (travel.getNumberOfExpends() > 0) {
-                travel.getNumberOfExpends().toString()
-            } else "-"
+            expendNumber.text =
+                if (travel.getListSize(Travel.EXPEND) > 0)
+                    travel.getListSize(Travel.EXPEND).toString()
+                else "-"
 
         }
     }

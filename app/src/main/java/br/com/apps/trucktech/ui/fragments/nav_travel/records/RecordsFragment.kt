@@ -3,7 +3,6 @@ package br.com.apps.trucktech.ui.fragments.nav_travel.records
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
@@ -41,30 +40,29 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         override fun onPageSelected(position: Int) {
             binding.recordsFragmentFab.setImageLevel(position)
             viewModel.newPageHasBeenSelected(position)
-            binding.recordsFragmentFab.visibility = VISIBLE
         }
     }
     private val freightResultListener = FragmentResultListener { requestKey, result ->
         if (requestKey == PAGE_FREIGHT) {
-            val id = result.getString(KEY_ID)
+            val freightId = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToFreightPreviewFragment(id!!, args.travelId)
+                RecordsFragmentDirections.actionRecordsFragmentToFreightPreviewFragment(freightId!!, args.travelId)
             )
         }
     }
     private val refuelResultListener = FragmentResultListener { requestKey, result ->
         if (requestKey == PAGE_REFUEL) {
-            val id = result.getString(KEY_ID)
+            val refuelId = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToRefuelPreviewFragment(id!!, args.travelId)
+                RecordsFragmentDirections.actionRecordsFragmentToRefuelPreviewFragment(refuelId!!, args.travelId)
             )
         }
     }
-    private val costResultListener = FragmentResultListener { requestKey, result ->
+    private val expendResultListener = FragmentResultListener { requestKey, result ->
         if (requestKey == PAGE_COST) {
-            val id = result.getString(KEY_ID)
+            val expendId = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToCostPreviewFragment(id!!, args.travelId)
+                RecordsFragmentDirections.actionRecordsFragmentToCostPreviewFragment(expendId!!, args.travelId)
             )
         }
     }
@@ -178,7 +176,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         childFragmentManager.setFragmentResultListener(
             PAGE_COST,
             viewLifecycleOwner,
-            costResultListener
+            expendResultListener
         )
     }
 

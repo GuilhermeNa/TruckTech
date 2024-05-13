@@ -7,7 +7,7 @@ import java.util.Date
 
 data class TravelDto(
     val masterUid: String? = null,
-    val id: String? = null,
+    var id: String? = null,
     val truckId: String? = null,
     val driverId: String? = null,
 

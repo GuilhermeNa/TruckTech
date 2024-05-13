@@ -13,6 +13,7 @@ fun FreightDto.toModel(): Freight {
         incomeId = this.incomeId,
         truckId = this.truckId,
         travelId = this.travelId,
+        driverId = this.driverId,
         origin = this.origin,
         company = this.company,
         destiny = this.destiny,
@@ -24,7 +25,8 @@ fun FreightDto.toModel(): Freight {
         dailyValue = this.dailyValue?.let { BigDecimal(it) },
         daily = this.daily,
         dailyTotalValue = this.dailyTotalValue?.let { BigDecimal(it) },
-        commissionPercentual = this.commissionPercentual?.let { BigDecimal(it) }
+        commissionPercentual = this.commissionPercentual?.let { BigDecimal(it) },
+        isCommissionPaid = this.isCommissionPaid
     )
 }
 
@@ -35,6 +37,7 @@ fun Freight.toDto(): FreightDto {
         incomeId = this.incomeId,
         truckId = this.truckId,
         travelId = this.travelId,
+        driverId = this.driverId,
         origin = this.origin,
         company = this.company,
         destiny = this.destiny,
@@ -46,6 +49,8 @@ fun Freight.toDto(): FreightDto {
         dailyValue = this.dailyValue?.toDouble(),
         daily = this.daily,
         dailyTotalValue = this.dailyTotalValue?.toDouble(),
-        commissionPercentual = this.commissionPercentual?.toDouble()
+        commissionPercentual = this.commissionPercentual?.toDouble(),
+        isCommissionPaid = this.isCommissionPaid
+
     )
 }

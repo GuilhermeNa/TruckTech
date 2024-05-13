@@ -21,7 +21,7 @@ class RecordsViewModel(private val useCase: TravelUseCase): ViewModel() {
     val viewPagerPosition get() = _viewPagerPosition
 
     //---------------------------------------------------------------------------------------------//
-    // CLASS METHODS
+    // -
     //---------------------------------------------------------------------------------------------//
 
     fun newPageHasBeenSelected(position: Int) {

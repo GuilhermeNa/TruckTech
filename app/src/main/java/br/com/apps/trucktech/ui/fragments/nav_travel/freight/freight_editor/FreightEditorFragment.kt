@@ -8,18 +8,12 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
+import br.com.apps.model.factory.FreightFactory
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.model.model.travel.Freight.Companion.TAG_CARGO
-import br.com.apps.model.model.travel.Freight.Companion.TAG_COMPANY
-import br.com.apps.model.model.travel.Freight.Companion.TAG_DESTINY
-import br.com.apps.model.model.travel.Freight.Companion.TAG_ORIGIN
-import br.com.apps.model.model.travel.Freight.Companion.TAG_VALUE
-import br.com.apps.model.model.travel.Freight.Companion.TAG_WEIGHT
 import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.FAILED_TO_SALVE
+import br.com.apps.repository.FAILED_TO_SAVE
 import br.com.apps.repository.Response
 import br.com.apps.repository.SUCCESSFULLY_SAVED
-import br.com.apps.repository.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentFreightEditorBinding
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
@@ -45,18 +39,11 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
             masterUid = sharedViewModel.userData.value?.user?.masterUid,
             truckId = sharedViewModel.userData.value?.truck?.id,
             travelId = args.travelId,
-            freightId = args.freightId
+            freightId = args.freightId,
+            driverId = sharedViewModel.userData.value?.user?.employeeId
         )
     }
     private val viewModel: FreightEditorViewModel by viewModel { parametersOf(idHolder) }
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -186,39 +173,37 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
 
             if (fieldsAreValid) {
                 val mappedFields = hashMapOf(
-                    Pair(TAG_ORIGIN, origin),
-                    Pair(TAG_COMPANY, company),
-                    Pair(TAG_DESTINY, destiny),
-                    Pair(TAG_CARGO, cargo),
-                    Pair(TAG_WEIGHT, weight),
-                    Pair(TAG_VALUE, value)
+                    Pair(FreightFactory.TAG_ORIGIN, origin),
+                    Pair(FreightFactory.TAG_COMPANY, company),
+                    Pair(FreightFactory.TAG_DESTINY, destiny),
+                    Pair(FreightFactory.TAG_CARGO, cargo),
+                    Pair(FreightFactory.TAG_WEIGHT, weight),
+                    Pair(FreightFactory.TAG_VALUE, value),
+                    Pair(FreightFactory.TAG_LOADING_DATE, viewModel.date.value.toString())
                 )
+
                 save(mappedFields)
+
             }
+
         }
     }
 
     private fun save(mappedFields: HashMap<String, String>) {
-        try {
-            val dto = viewModel.getFreightDto(mappedFields)
-            viewModel.save(dto).observe(viewLifecycleOwner) { response ->
-                when (response) {
-                    is Response.Error -> {
-                        response.exception.printStackTrace()
-                        requireView().snackBarRed(FAILED_TO_SALVE)
-                    }
-
-                    is Response.Success -> requireView().apply {
-                        clearMenu()
-                        snackBarGreen(SUCCESSFULLY_SAVED)
-                        popBackStack()
-                    }
+        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Response.Error -> {
+                    response.exception.printStackTrace()
+                    requireView().snackBarRed(FAILED_TO_SAVE)
+                }
+                is Response.Success -> requireView().apply {
+                    clearMenu()
+                    snackBarGreen(SUCCESSFULLY_SAVED)
+                    popBackStack()
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            requireView().snackBarRed(UNKNOWN_EXCEPTION)
         }
+
     }
 
     /**
@@ -236,7 +221,7 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
             }
         }
 
-        viewModel.date.observe(viewLifecycleOwner) {localDate ->
+        viewModel.date.observe(viewLifecycleOwner) { localDate ->
             binding.fragFreightEditorDate.text = localDate.getCompleteDateInPtBr()
         }
     }

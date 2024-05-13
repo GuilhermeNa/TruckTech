@@ -33,14 +33,6 @@ class FreightsListFragment : Fragment() {
     private val viewModel: FreightsListViewModel by viewModel { parametersOf(sharedViewModel.travelId) }
 
     //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
     //---------------------------------------------------------------------------------------------//
 
@@ -72,13 +64,21 @@ class FreightsListFragment : Fragment() {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
 
                 is Response.Success -> {
-                    val dataSet = response.data ?: emptyList()
-                    initRecyclerView(initAdapters(dataSet))
+                    response.data?.let { freights ->
+                        initRecyclerView(initAdapters(freights))
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Initializes the RecyclerView.
+     *
+     *   Options:
+     *   - Navigation: Send the ID and page reference as a result to the parent fragment manager,
+     *   which will be in charge of navigation.
+     */
     private fun initRecyclerView(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
         val concatAdapter = ConcatAdapter(adapters)
         val recyclerView = binding.freightFragmentRecycler

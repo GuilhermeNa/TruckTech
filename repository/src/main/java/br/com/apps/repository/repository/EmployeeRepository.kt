@@ -251,21 +251,17 @@ class EmployeeRepository(fireStore: FirebaseFirestore) {
     ): LiveData<Response<BankAccount>> {
         return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<BankAccount>>()
-
-            val collection = when (type) {
-                EmployeeType.DRIVER -> collectionDriver
-                EmployeeType.ADMIN -> collectionAdmin
-            }
+            val collection = getCollectionReference(type)
 
             collection
                 .document(employeeId)
                 .collection(FIRESTORE_COLLECTION_BANK)
                 .document(bankId)
-                .addSnapshotListener { docSnap, error ->
+                .addSnapshotListener { nDocument, error ->
                     error?.let { e ->
                         liveData.postValue(Response.Error(e))
                     }
-                    docSnap?.let { document ->
+                    nDocument?.let { document ->
                         liveData.postValue(Response.Success(data = document.toBankObject()))
                     }
                 }
@@ -299,14 +295,31 @@ class EmployeeRepository(fireStore: FirebaseFirestore) {
         val collection = getCollectionReference(type)
 
         if (bankAccDto.id == null) {
-            addNewBankAccount(bankAccDto, collection)
+            createNewBankAccount(bankAccDto, collection)
         } else {
-            editBankAccount(bankAccDto, collection)
+            updateBankAccount(bankAccDto, collection)
         }
 
     }
 
-    private suspend fun editBankAccount(
+    private suspend fun createNewBankAccount(
+        bankAccDto: BankAccountDto,
+        collection: CollectionReference
+    ) {
+        val employeeId = bankAccDto.employeeId
+            ?: throw IllegalArgumentException("EmployeeRepository, addNewBankAccount: Empty id")
+
+        val document =
+            collection
+                .document(employeeId)
+                .collection(FIRESTORE_COLLECTION_BANK)
+                .document()
+
+        bankAccDto.id = document.id
+        document.set(bankAccDto).await()
+    }
+
+    private suspend fun updateBankAccount(
         bankAccDto: BankAccountDto,
         collection: CollectionReference
     ) {
@@ -319,22 +332,6 @@ class EmployeeRepository(fireStore: FirebaseFirestore) {
                 .collection(FIRESTORE_COLLECTION_BANK)
                 .document(id)
 
-        document.set(bankAccDto).await()
-    }
-
-    private suspend fun addNewBankAccount(
-        bankAccDto: BankAccountDto,
-        collection: CollectionReference
-    ) {
-        val employeeId = bankAccDto.employeeId ?: throw IllegalArgumentException("Empty id")
-
-        val document =
-            collection
-                .document(employeeId)
-                .collection(FIRESTORE_COLLECTION_BANK)
-                .document()
-
-        bankAccDto.id = document.id
         document.set(bankAccDto).await()
     }
 

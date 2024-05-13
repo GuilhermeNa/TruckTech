@@ -128,5 +128,14 @@
     <string name="freight_value">Valor do frete</string>
     <string name="daily_value">Valor total das diárias</string>
     <string name="break_down">Avarias</string>
+    <string name="origin">Origem</string>
+    <string name="destiny">Destino</string>
+    <string name="cargo">Carga</string>
+    <string name="weight">Peso</string>
+    <string name="content">Conteúdo</string>
+    <string name="customer">Cliente</string>
+    <string name="paid_by_employee">Pago pelo motorista</string>
+    <string name="forget_pass">Esqueci a senha</string>
+    <string name="loading">Carregando...</string>
 
 </resources>

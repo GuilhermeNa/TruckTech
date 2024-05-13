@@ -10,12 +10,6 @@ import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.factory.FreightFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.model.model.travel.Freight.Companion.TAG_CARGO
-import br.com.apps.model.model.travel.Freight.Companion.TAG_COMPANY
-import br.com.apps.model.model.travel.Freight.Companion.TAG_DESTINY
-import br.com.apps.model.model.travel.Freight.Companion.TAG_ORIGIN
-import br.com.apps.model.model.travel.Freight.Companion.TAG_VALUE
-import br.com.apps.model.model.travel.Freight.Companion.TAG_WEIGHT
 import br.com.apps.repository.Response
 import br.com.apps.repository.repository.FreightRepository
 import kotlinx.coroutines.launch
@@ -92,41 +86,31 @@ class FreightEditorViewModel(
     }
 
     /**
-     * Constructs and returns an [FreightDto] based on the provided mapped fields.
-     *
-     * @param mappedFields A HashMap containing the mapped fields.
-     * @return An [FreightDto] object.
-     */
-    fun getFreightDto(mappedFields: HashMap<String, String>): FreightDto {
-        return if (::freight.isInitialized) {
-            freight.updateFields(mappedFields)
-            freight.toDto()
-        } else {
-            FreightFactory.createDto(
-                nMasterId = idHolder.masterUid,
-                nTruckId = idHolder.truckId,
-                nTravelId = idHolder.travelId,
-                nOrigin = mappedFields[TAG_ORIGIN],
-                nCompany = mappedFields[TAG_COMPANY],
-                nDestiny = mappedFields[TAG_DESTINY],
-                nWeight = mappedFields[TAG_WEIGHT],
-                nCargo = mappedFields[TAG_CARGO],
-                nValue = mappedFields[TAG_VALUE],
-                nLoadingDate = date.value
-            )
-        }
-    }
-
-    /**
      * Send the [Freight] to be created or updated.
      */
-    fun save(dto: FreightDto) =
+    fun save(mappedFields: HashMap<String, String>) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
+                val dto = getFreightDto(mappedFields)
                 repository.save(dto)
                 emit(Response.Success())
             } catch (e: Exception) {
                 emit(Response.Error(e))
             }
         }
+
+    private fun getFreightDto(mappedFields: HashMap<String, String>): FreightDto {
+        return if (::freight.isInitialized) {
+            FreightFactory.update(freight, mappedFields)
+            freight.toDto()
+        } else {
+            mappedFields[FreightFactory.TAG_MASTER_UID] = idHolder.masterUid!!
+            mappedFields[FreightFactory.TAG_TRUCK_ID] = idHolder.truckId!!
+            mappedFields[FreightFactory.TAG_DRIVER_ID] = idHolder.driverId!!
+            mappedFields[FreightFactory.TAG_TRAVEL_ID] = idHolder.travelId!!
+            mappedFields[FreightFactory.TAG_TRAVEL_ID] = idHolder.travelId!!
+            FreightFactory.create(mappedFields).toDto()
+        }
+    }
+
 }

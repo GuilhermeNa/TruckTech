@@ -11,10 +11,6 @@ import br.com.apps.model.factory.ExpendFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.travel.Expend
-import br.com.apps.model.model.travel.Expend.Companion.TAG_COMPANY
-import br.com.apps.model.model.travel.Expend.Companion.TAG_DESCRIPTION
-import br.com.apps.model.model.travel.Expend.Companion.TAG_LABEL_ID
-import br.com.apps.model.model.travel.Expend.Companion.TAG_VALUE
 import br.com.apps.repository.EMPTY_ID
 import br.com.apps.repository.Response
 import br.com.apps.repository.repository.ExpendRepository
@@ -26,7 +22,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-class ExpendEditorFragmentViewModel(
+class ExpendEditorViewModel(
     private val idHolder: IdHolder,
     private val expendRepository: ExpendRepository,
     private val labelRepository: LabelRepository
@@ -122,29 +118,17 @@ class ExpendEditorFragmentViewModel(
         }
     }
 
-    /**
-     * Constructs and returns an ExpendDto based on the provided mapped fields.
-     *
-     * @param mappedFields A HashMap containing the mapped fields.
-     * @return An ExpendDto object.
-     */
-    fun getExpendDto(mappedFields: HashMap<String, String>): ExpendDto {
+    private fun getExpendDto(mappedFields: HashMap<String, String>): ExpendDto {
         return if (::expend.isInitialized) {
             expend.label = null
-            expend.updateFields(mappedFields)
+            ExpendFactory.update(expend, mappedFields)
             expend.toDto()
         } else {
-            ExpendFactory.createDto(
-                nMasterUid = idHolder.masterUid,
-                nTravelId = idHolder.travelId,
-                nTruckId = idHolder.truckId,
-                nLabelId = mappedFields[TAG_LABEL_ID],
-                nDriverId = idHolder.driverId,
-                nDate = date.value,
-                nCompany = mappedFields[TAG_COMPANY],
-                nDescription = mappedFields[TAG_DESCRIPTION],
-                nValue = mappedFields[TAG_VALUE]
-            )
+            mappedFields[ExpendFactory.TAG_MASTER_UID] = idHolder.masterUid!!
+            mappedFields[ExpendFactory.TAG_TRAVEL_ID] = idHolder.travelId!!
+            mappedFields[ExpendFactory.TAG_DRIVER_ID] = idHolder.driverId!!
+            mappedFields[ExpendFactory.TAG_TRUCK_ID] = idHolder.truckId!!
+            ExpendFactory.create(mappedFields).toDto()
         }
     }
 
@@ -160,14 +144,15 @@ class ExpendEditorFragmentViewModel(
     /**
      * Send the [Expend] to be created or updated.
      */
-    fun save(dto: ExpendDto) = liveData<Response<Unit>>(viewModelScope.coroutineContext) {
-        try {
-            expendRepository.save(dto)
-            emit(Response.Success())
-        } catch (e: Exception) {
-            emit(Response.Error(e))
+    fun save(mappedFields: HashMap<String, String>) =
+        liveData<Response<Unit>>(viewModelScope.coroutineContext) {
+            try {
+                val dto = getExpendDto(mappedFields)
+                expendRepository.save(dto)
+                emit(Response.Success())
+            } catch (e: Exception) {
+                emit(Response.Error(e))
+            }
         }
-    }
-
 
 }

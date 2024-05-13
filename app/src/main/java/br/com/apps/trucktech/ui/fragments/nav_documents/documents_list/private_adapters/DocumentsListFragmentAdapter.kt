@@ -11,11 +11,9 @@ import br.com.apps.trucktech.expressions.getDayFormatted
 import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
 
 class DocumentsListFragmentAdapter(
-
     private val context: Context,
     dataSet: List<Document>,
-    val itemCLickListener: (id: String) -> Unit = {}
-
+    val itemCLickListener: (document: Document) -> Unit = {}
 ) : RecyclerView.Adapter<DocumentsListFragmentAdapter.ViewHolder>() {
 
     val dataSet = dataSet.toMutableList()
@@ -28,17 +26,6 @@ class DocumentsListFragmentAdapter(
         RecyclerView.ViewHolder(binding.root) {
         val tittle = binding.itemDocumentRecyclerTitle
         val date = binding.itemDocumentRecyclerDate
-
-        lateinit var document: Document
-
-        init {
-            itemView.setOnClickListener {
-                if (::document.isInitialized) {
-                    document.id?.let { itemCLickListener(it) }
-                }
-            }
-        }
-
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -59,7 +46,8 @@ class DocumentsListFragmentAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val document = dataSet[position]
         bind(holder, document)
-        holder.document = document
+        initClickListener(holder, document)
+
     }
 
     override fun getItemCount(): Int = dataSet.size
@@ -78,6 +66,11 @@ class DocumentsListFragmentAdapter(
 
     }
 
+    private fun initClickListener(holder: ViewHolder, document: Document) {
+        holder.itemView.setOnClickListener {
+            itemCLickListener(document)
+        }
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     fun update(dataSet: List<Document>) {

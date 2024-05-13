@@ -76,6 +76,19 @@ class RefuelsListFragment : Fragment() {
         }
     }
 
+    /**
+     * Initializes the RecyclerView.
+     *
+     *   Options:
+     *   - Navigation: Send the ID and page reference as a result to the parent fragment manager,
+     *   which will be in charge of navigation.
+     */
+    private fun initRecyclerView(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
+        val concatAdapter = ConcatAdapter(adapters)
+        val recyclerView = binding.fuelFragmentRecycler
+        recyclerView.adapter = concatAdapter
+    }
+
     private fun initAdapters(refuelList: List<Refuel>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
         return refuelList
             .sortedBy { it.date }
@@ -97,12 +110,6 @@ class RefuelsListFragment : Fragment() {
                     parentFragmentManager.setFragmentResult(PAGE_REFUEL, bundle)
                 })
         )
-
-    private fun initRecyclerView(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
-        val concatAdapter = ConcatAdapter(adapters)
-        val recyclerView = binding.fuelFragmentRecycler
-        recyclerView.adapter = concatAdapter
-    }
 
     //---------------------------------------------------------------------------------------------//
     // ON DESTROY VIEW

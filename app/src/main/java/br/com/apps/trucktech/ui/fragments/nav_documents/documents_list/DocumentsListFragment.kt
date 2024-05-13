@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.IdHolder
+import br.com.apps.repository.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.Response
 import br.com.apps.trucktech.databinding.FragmentDocumentsListBinding
 import br.com.apps.trucktech.expressions.navigateTo
@@ -27,23 +29,15 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentDocumentsListBinding? = null
     private val binding get() = _binding!!
+
+    private val idHolder by lazy {
+        IdHolder(
+            masterUid = sharedViewModel.userData.value?.user?.masterUid,
+            truckId = sharedViewModel.userData.value?.truck?.id
+        )
+    }
+    private val viewModel : DocumentsListFragmentViewModel by viewModel{ parametersOf(idHolder) }
     private var adapter: DocumentsListFragmentAdapter? = null
-    private val masterUid by lazy {
-        sharedViewModel.userData.value?.user?.masterUid
-    }
-    private val truckId by lazy {
-        sharedViewModel.userData.value?.truck?.id
-    }
-    private val viewModel : DocumentsListFragmentViewModel by viewModel{ parametersOf(masterUid, truckId) }
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.loadData()
-    }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -78,32 +72,32 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
         configurator.bottomNavigation(true)
     }
 
+    /**
+     * Initializes the state manager and observes [viewModel] data.
+     *
+     *   - Observes documentData for update the recyclerView
+     */
+    private fun initStateManager() {
+        viewModel.documentData.observe(viewLifecycleOwner) { response ->
+            when(response) {
+                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                is Response.Success -> response.data?.let { adapter?.update(it) }
+            }
+        }
+    }
+
     private fun initRecyclerView() {
         val recyclerView = binding.freightFragmentRecycler
         adapter = DocumentsListFragmentAdapter(
             requireContext(),
             emptyList(),
-            itemCLickListener = { documentsId ->
-                requireView().navigateTo(DocumentsListFragmentDirections.actionDocumentsListFragmentToDocumentFragment(documentsId))
+            itemCLickListener = { document ->
+                requireView().navigateTo(DocumentsListFragmentDirections.actionDocumentsListFragmentToDocumentFragment(document))
             }
         )
         recyclerView.adapter = adapter
         val divider = DividerItemDecoration(recyclerView.context, RecyclerView.VERTICAL)
         recyclerView.addItemDecoration(divider)
-    }
-
-    private fun initStateManager() {
-        viewModel.documentData.observe(viewLifecycleOwner) { response ->
-            when(response) {
-                is Response.Success -> {
-                    response.data?.let { adapter?.update(it) }
-                }
-                is Response.Error -> {
-                    requireView().snackBarRed("Falha ao carregar dados")
-                }
-            }
-
-        }
     }
 
     //---------------------------------------------------------------------------------------------//

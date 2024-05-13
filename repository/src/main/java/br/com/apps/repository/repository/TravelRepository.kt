@@ -2,6 +2,7 @@ package br.com.apps.repository.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.DRIVER_ID
 import br.com.apps.repository.FIRESTORE_COLLECTION_TRAVELS
@@ -16,27 +17,6 @@ import kotlinx.coroutines.withContext
 class TravelRepository(fireStore: FirebaseFirestore) {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
-
-    suspend fun getTravelListByDriverId(driverId: String): LiveData<Response<List<Travel>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Travel>>>()
-
-            collection.whereEqualTo(DRIVER_ID, driverId)
-                .addSnapshotListener { querySnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                        return@addSnapshotListener
-                    }
-                    querySnap?.let { query ->
-                        liveData.postValue(
-                            Response.Success(data = query.toTravelList())
-                        )
-                    }
-                }
-
-            return@withContext liveData
-        }
-    }
 
     /**
      * Fetches the [Travel] dataSet for the specified driver ID.
@@ -108,6 +88,19 @@ class TravelRepository(fireStore: FirebaseFirestore) {
 
             return@withContext liveData
         }
+    }
+
+    suspend fun save(dto: TravelDto) {
+        if(dto.id == null) {
+            create(dto)
+        }
+    }
+
+    suspend fun create(dto: TravelDto): String {
+        val document = collection.document()
+        dto.id = document.id
+        document.set(dto).await()
+        return document.id
     }
 
 }

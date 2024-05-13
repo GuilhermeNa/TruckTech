@@ -22,6 +22,12 @@ class RefuelPreviewViewModel(
     private val _refuelData = MutableLiveData<Response<Refuel>>()
     val refuelData get() = _refuelData
 
+    /**
+     * LiveData with a dark layer state, used when dialog is requested.
+     */
+    private var _darkLayer = MutableLiveData(false)
+    val darkLayer get() = _darkLayer
+
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
@@ -47,5 +53,19 @@ class RefuelPreviewViewModel(
                 emit(Response.Error(e))
             }
         }
+
+    /**
+     * Sets the visibility of the [_darkLayer] to true, indicating that it should be shown.
+     */
+    fun requestDarkLayer() {
+        _darkLayer.value = true
+    }
+
+    /**
+     * Sets the visibility of the [_darkLayer] to false, indicating that it should be dismissed.
+     */
+    fun dismissDarkLayer() {
+        _darkLayer.value = false
+    }
 
 }

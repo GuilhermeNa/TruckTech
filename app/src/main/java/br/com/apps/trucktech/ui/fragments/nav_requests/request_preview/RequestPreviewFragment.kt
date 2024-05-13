@@ -21,7 +21,6 @@ import br.com.apps.repository.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestPreviewBinding
-import br.com.apps.trucktech.expressions.getColorStateListById
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarOrange
@@ -166,22 +165,6 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
     private fun bind(request: PaymentRequest) {
         val description = viewModel.getDescriptionText(request)
         binding.fragmentRequestPreviewDescription.text = description
-    }
-
-    /**
-     * Menu Items is set Here.
-     */
-    private fun prepareMenuItems() {
-        binding.fragmentRequestPreviewToolbar.toolbar.menu.apply {
-            findItem(R.id.menu_preview_delete).apply {
-                val color = requireContext().getColorStateListById(R.color.dark_grey)
-                iconTintList = color
-            }
-            findItem(R.id.menu_preview_edit).apply {
-                val color = requireContext().getColorStateListById(R.color.dark_grey)
-                iconTintList = color
-            }
-        }
     }
 
     /**
