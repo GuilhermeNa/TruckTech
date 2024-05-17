@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.usecase.TravelUseCase
 import kotlinx.coroutines.launch
 

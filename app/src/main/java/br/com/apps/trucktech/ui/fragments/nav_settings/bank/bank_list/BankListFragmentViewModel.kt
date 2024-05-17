@@ -6,7 +6,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.employee.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.usecase.EmployeeUseCase
 import kotlinx.coroutines.launch
 

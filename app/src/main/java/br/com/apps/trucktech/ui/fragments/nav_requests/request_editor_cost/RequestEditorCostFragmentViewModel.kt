@@ -13,7 +13,7 @@ import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.model.model.request.request.RequestItemType
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.RequestRepository
 import br.com.apps.usecase.LabelUseCase
 import kotlinx.coroutines.CompletableDeferred

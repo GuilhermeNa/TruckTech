@@ -9,8 +9,8 @@ import androidx.lifecycle.viewModelScope
 import br.com.apps.model.factory.RequestFactory
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.PaymentRequestStatusType
-import br.com.apps.repository.EMPTY_ID
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.EMPTY_ID
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.RequestRepository
 import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.expressions.getKeyByValue

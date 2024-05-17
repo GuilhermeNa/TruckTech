@@ -5,9 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.DocumentDto
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.Document
-import br.com.apps.repository.Response
-import br.com.apps.repository.toDocumentList
-import br.com.apps.repository.toDocumentObject
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.toDocumentList
+import br.com.apps.repository.util.toDocumentObject
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot

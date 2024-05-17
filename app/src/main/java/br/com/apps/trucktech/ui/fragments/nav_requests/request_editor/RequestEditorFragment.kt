@@ -15,11 +15,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.model.request.request.RequestItemType
-import br.com.apps.repository.CANCEL
-import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.OK
-import br.com.apps.repository.RESULT_KEY
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.CANCEL
+import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.util.OK
+import br.com.apps.repository.util.RESULT_KEY
+import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorBinding

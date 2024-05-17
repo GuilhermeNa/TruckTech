@@ -6,7 +6,7 @@ import br.com.apps.model.factory.UserDtoFactory
 import br.com.apps.model.mapper.UserMapper
 import br.com.apps.model.model.UserCredentials
 import br.com.apps.repository.Resource
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.AuthenticationRepository
 import com.google.firebase.auth.FirebaseUser
 

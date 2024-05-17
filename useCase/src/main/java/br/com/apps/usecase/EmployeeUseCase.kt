@@ -9,7 +9,7 @@ import br.com.apps.model.model.employee.BankAccount
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.Resource
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.EmployeeRepository
 import java.security.InvalidParameterException
 

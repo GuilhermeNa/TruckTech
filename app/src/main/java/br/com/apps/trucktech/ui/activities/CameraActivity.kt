@@ -11,7 +11,7 @@ import android.view.Gravity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import br.com.apps.repository.RESULT_KEY
+import br.com.apps.repository.util.RESULT_KEY
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.ActivityCameraBinding

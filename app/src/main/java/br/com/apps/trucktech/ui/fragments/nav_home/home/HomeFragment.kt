@@ -12,7 +12,7 @@ import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import br.com.apps.model.model.user.CommonUser
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.databinding.FragmentHomeBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo

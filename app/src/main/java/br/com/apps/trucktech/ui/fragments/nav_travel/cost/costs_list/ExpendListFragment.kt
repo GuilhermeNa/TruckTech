@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.IdHolder
 import br.com.apps.model.model.travel.Expend
-import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.NULL_DATE
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.util.NULL_DATE
+import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.databinding.FragmentExpendListBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.snackBarRed

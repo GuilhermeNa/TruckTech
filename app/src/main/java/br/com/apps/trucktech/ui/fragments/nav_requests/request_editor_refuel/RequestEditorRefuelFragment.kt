@@ -10,9 +10,9 @@ import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
 import br.com.apps.model.factory.RequestItemFactory
 import br.com.apps.model.model.request.request.RequestItem
-import br.com.apps.repository.FAILED_TO_SAVE
-import br.com.apps.repository.Response
-import br.com.apps.repository.SUCCESSFULLY_SAVED
+import br.com.apps.repository.util.FAILED_TO_SAVE
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorRefuelBinding
 import br.com.apps.trucktech.expressions.popBackStack

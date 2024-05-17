@@ -6,11 +6,11 @@ import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.repository.Response
 import br.com.apps.repository.repository.ExpendRepository
 import br.com.apps.repository.repository.FreightRepository
 import br.com.apps.repository.repository.RefuelRepository
 import br.com.apps.repository.repository.TravelRepository
+import br.com.apps.repository.util.Response
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,7 +73,7 @@ class TravelUseCase(
 
             CoroutineScope(Dispatchers.Main).launch {
                 val deferredA = CompletableDeferred<List<Travel>>()
-                val liveDataA = repository.getTravelListByDriverId(driverId, withFlow = true)
+                val liveDataA = repository.getTravelListByDriverId(driverId,true)
                 mediator.addSource(liveDataA) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response
@@ -101,7 +101,7 @@ class TravelUseCase(
                 }
 
                 val deferredC = CompletableDeferred<List<Refuel>>()
-                val liveDataC = refuelRepository.getRefuelListByTravelId(idList, withFlow = true)
+                val liveDataC = refuelRepository.getRefuelListByTravelIds(idList, true)
                 mediator.addSource(liveDataC) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response
@@ -155,13 +155,14 @@ class TravelUseCase(
             expendRepository.deleteExpendForThisTravel(travelId, id)
         }
 
-        repository.deleteTravel(travelId)
+        repository.delete(travelId)
     }
 
     /**
      * get by travelId
      */
     suspend fun getTravelById(travelId: String): LiveData<Response<Travel>> {
+        repository.getTravelById(travelId)
         return repository.getTravelById(travelId)
     }
 

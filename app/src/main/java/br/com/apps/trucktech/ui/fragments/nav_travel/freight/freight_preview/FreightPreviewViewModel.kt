@@ -6,7 +6,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.FreightRepository
 import kotlinx.coroutines.launch
 

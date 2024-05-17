@@ -1,4 +1,4 @@
-package br.com.apps.repository
+package br.com.apps.repository.util
 
 import br.com.apps.model.dto.DocumentDto
 import br.com.apps.model.dto.FineDto
@@ -11,6 +11,7 @@ import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.dto.travel.TravelDto
+import br.com.apps.model.exceptions.ConversionException
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.Document
 import br.com.apps.model.model.Fine
@@ -32,8 +33,9 @@ fun QuerySnapshot.toTravelList(): List<Travel> {
     }
 }
 
-fun DocumentSnapshot.toTravelObject(): Travel? {
+fun DocumentSnapshot.toTravelObject(): Travel {
     return this.toObject(TravelDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toTravelObject: ($this)")
 }
 
 fun QuerySnapshot.toFreightList(): List<Freight> {
@@ -42,8 +44,9 @@ fun QuerySnapshot.toFreightList(): List<Freight> {
     }
 }
 
-fun DocumentSnapshot.toFreightObject(): Freight? {
+fun DocumentSnapshot.toFreightObject(): Freight {
     return this.toObject(FreightDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toFreightObject: ($this)")
 }
 
 fun QuerySnapshot.toRefuelList(): List<Refuel> {
@@ -52,8 +55,9 @@ fun QuerySnapshot.toRefuelList(): List<Refuel> {
     }
 }
 
-fun DocumentSnapshot.toRefuelObject(): Refuel? {
+fun DocumentSnapshot.toRefuelObject(): Refuel {
     return this.toObject(RefuelDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toRefuelObject: ($this)")
 }
 
 fun QuerySnapshot.toExpendList(): List<Expend> {
@@ -62,8 +66,9 @@ fun QuerySnapshot.toExpendList(): List<Expend> {
     }
 }
 
-fun DocumentSnapshot.toExpendObject(): Expend? {
+fun DocumentSnapshot.toExpendObject(): Expend {
     return this.toObject(ExpendDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toExpendObject: ($this)")
 }
 
 fun QuerySnapshot.toLabelList(): List<Label> {
@@ -72,8 +77,9 @@ fun QuerySnapshot.toLabelList(): List<Label> {
     }
 }
 
-fun DocumentSnapshot.toLabelObject(): Label? {
+fun DocumentSnapshot.toLabelObject(): Label {
     return this.toObject(LabelDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toLabelObject: ($this)")
 }
 
 fun QuerySnapshot.toFineList(): List<Fine> {
@@ -82,8 +88,9 @@ fun QuerySnapshot.toFineList(): List<Fine> {
     }
 }
 
-fun DocumentSnapshot.toFineObject(): Fine? {
+fun DocumentSnapshot.toFineObject(): Fine {
     return this.toObject(FineDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toFineObject: ($this)")
 }
 
 fun QuerySnapshot.toAdvanceList(): List<Advance> {
@@ -92,8 +99,9 @@ fun QuerySnapshot.toAdvanceList(): List<Advance> {
     }
 }
 
-fun DocumentSnapshot.toAdvanceObject(): Advance? {
+fun DocumentSnapshot.toAdvanceObject(): Advance {
     return this.toObject(AdvanceDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toAdvanceObject: ($this)")
 }
 
 fun QuerySnapshot.toLoanList(): List<Loan> {
@@ -102,8 +110,9 @@ fun QuerySnapshot.toLoanList(): List<Loan> {
     }
 }
 
-fun DocumentSnapshot.toLoanObject(): Loan? {
+fun DocumentSnapshot.toLoanObject(): Loan {
     return this.toObject(LoanDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toLoanObject: ($this)")
 }
 
 fun QuerySnapshot.toRequestList(): List<PaymentRequest> {
@@ -112,8 +121,9 @@ fun QuerySnapshot.toRequestList(): List<PaymentRequest> {
     }
 }
 
-fun DocumentSnapshot.toRequestObject(): PaymentRequest? {
+fun DocumentSnapshot.toRequestObject(): PaymentRequest {
     return this.toObject(PaymentRequestDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toRequestObject: ($this)")
 }
 
 fun QuerySnapshot.toRequestItemList(): List<RequestItem> {
@@ -122,8 +132,9 @@ fun QuerySnapshot.toRequestItemList(): List<RequestItem> {
     }
 }
 
-fun DocumentSnapshot.toRequestItemObject(): RequestItem? {
+fun DocumentSnapshot.toRequestItemObject(): RequestItem {
     return this.toObject(RequestItemDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toRequestItemObject: ($this)")
 }
 
 fun QuerySnapshot.toDocumentList(): List<Document> {
@@ -132,7 +143,8 @@ fun QuerySnapshot.toDocumentList(): List<Document> {
     }
 }
 
-fun DocumentSnapshot.toDocumentObject(): Document? {
+fun DocumentSnapshot.toDocumentObject(): Document {
     return this.toObject(DocumentDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toDocumentObject: ($this)")
 }
 

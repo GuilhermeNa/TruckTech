@@ -2,8 +2,8 @@ package br.com.apps.trucktech.di
 
 import br.com.apps.model.IdHolder
 import br.com.apps.model.model.user.User
-import br.com.apps.repository.fireBaseModules
-import br.com.apps.repository.repositoryModules
+import br.com.apps.repository.di.fireBaseModules
+import br.com.apps.repository.di.repositoryModules
 import br.com.apps.trucktech.ui.activities.login.LoginActivityViewModel
 import br.com.apps.trucktech.ui.activities.main.DriverAndTruck
 import br.com.apps.trucktech.ui.activities.main.MainActivityViewModel

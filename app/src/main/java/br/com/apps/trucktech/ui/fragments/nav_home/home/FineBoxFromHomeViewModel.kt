@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.Fine
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.FineRepository
 import br.com.apps.usecase.FineUseCase
 import kotlinx.coroutines.launch

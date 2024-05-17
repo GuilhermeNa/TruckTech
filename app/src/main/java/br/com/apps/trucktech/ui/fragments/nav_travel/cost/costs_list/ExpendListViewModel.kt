@@ -6,8 +6,8 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.IdHolder
 import br.com.apps.model.model.travel.Expend
-import br.com.apps.repository.EMPTY_ID
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.EMPTY_ID
+import br.com.apps.repository.util.Response
 import br.com.apps.usecase.ExpendUseCase
 import kotlinx.coroutines.launch
 

@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import br.com.apps.model.IdHolder
 import br.com.apps.model.model.employee.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.EmployeeRepository
 import br.com.apps.trucktech.TAG_DEBUG
 import kotlinx.coroutines.launch

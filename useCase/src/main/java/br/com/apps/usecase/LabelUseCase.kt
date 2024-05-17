@@ -6,8 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.LabelDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
-import br.com.apps.repository.Response
 import br.com.apps.repository.repository.LabelRepository
+import br.com.apps.repository.util.Response
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,21 +17,21 @@ import kotlinx.coroutines.launch
 
 class LabelUseCase(private val repository: LabelRepository) {
 
-    /**
+/*    *//**
      * getAll
-     */
+     *//*
     suspend fun getAll(uid: String): LiveData<Response<List<Label>>> {
-        return repository.getAll(uid)
-    }
+        //return repository.getAll(uid)
+    }*/
 
-    suspend fun getAllByType(type: LabelType, uid: String): LiveData<Response<List<Label>>> {
+ /*   suspend fun getAllByType(type: LabelType, uid: String): LiveData<Response<List<Label>>> {
         return repository.getAllByType(type.description, uid)
-    }
+    }*/
 
     /**
      * save
      */
-    fun save(labelDto: LabelDto): MutableLiveData<Boolean> {
+    suspend fun save(labelDto: LabelDto): MutableLiveData<Boolean> {
         val liveData = MutableLiveData<Boolean>()
         repository.save(labelDto)
         liveData.value = true
@@ -62,7 +62,7 @@ class LabelUseCase(private val repository: LabelRepository) {
                 val deferredB = CompletableDeferred<Unit>()
 
                 val liveDataA =
-                    repository.getUserLabelList(masterUid, type.description, isOperational)
+                    repository.getLabelListByMasterUidAndTypeAndOperational(masterUid, type.description, isOperational)
                 val liveDataB = repository.getDefaultLabelList(type.description, isOperational)
 
                 mediator.addSource(liveDataA) { responseA ->

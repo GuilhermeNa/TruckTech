@@ -1,15 +1,16 @@
 package br.com.apps.repository.repository
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.LabelDto
 import br.com.apps.model.model.label.Label
-import br.com.apps.repository.MASTER_UID
-import br.com.apps.repository.Response
-import br.com.apps.repository.toLabelList
-import br.com.apps.repository.toLabelObject
+import br.com.apps.repository.util.MASTER_UID
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.onComplete
+import br.com.apps.repository.util.onSnapShot
+import br.com.apps.repository.util.toLabelList
+import br.com.apps.repository.util.toLabelObject
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -25,172 +26,114 @@ const val FIRESTORE_COLLECTION_USER_LABELS = "labels"
 private const val LABEL_TYPE = "type"
 private const val LABEL_IS_OPERATIONAL = "isOperational"
 
-class LabelRepository(private val fireStore: FirebaseFirestore) {
+class LabelRepository(fireStore: FirebaseFirestore) {
+
+    private val write = LabWrite(fireStore)
+    private val read = LabRead(fireStore)
+
+    //---------------------------------------------------------------------------------------------//
+    // WRITE
+    //---------------------------------------------------------------------------------------------//
+
+    suspend fun delete(labelId: String) = write.delete(labelId)
+
+    suspend fun save(dto: LabelDto) = write.save(dto)
+
+    //---------------------------------------------------------------------------------------------//
+    // READ
+    //---------------------------------------------------------------------------------------------//
+
+    suspend fun getLabelListByMasterUid(masterUid: String, flow: Boolean = false) =
+        read.getLabelListByMasterUid(masterUid, flow)
+
+    suspend fun getLabelListByMasterUidAndType(type: String, masterUid: String, flow: Boolean = false) =
+        read.getLabelListByMasterUidAndType(type, masterUid, flow)
+
+    suspend fun getLabelById(labelId: String, flow: Boolean = false) =
+        read.getLabelById(labelId, flow)
+
+    suspend fun getLabelListByMasterUidAndTypeAndOperational(
+        masterUid: String,
+        type: String,
+        isOperational: Boolean,
+        flow: Boolean = false
+    ) = read.getLabelListByMasterUidAndTypeAndOperational(masterUid, type, isOperational, flow)
+
+    suspend fun getDefaultLabelList(type: String, isOperational: Boolean, flow: Boolean = false) =
+        read.getDefaultLabelList(type, isOperational, flow)
+
+    suspend fun getDefaultExpendLabelList(isOperational: Boolean? = false, flow: Boolean = false) =
+        read.getDefaultExpendLabelList(isOperational, flow)
+
+    suspend fun getAllOperationalLabelListForDrivers(masterUid: String) =
+        read.getAllOperationalLabelListForDrivers(masterUid)
+
+}
+
+private class LabRead(fireStore: FirebaseFirestore) {
 
     private val userCollection = fireStore.collection(FIRESTORE_COLLECTION_USER_LABELS)
     private val defaultCollection = fireStore.collection(FIRESTORE_COLLECTION_DEFAULT_LABELS)
 
     /**
      * Get all documents by User id.
-     * @param uid The user id.
+     * @param masterUid The user id.
      * @return The mutable live data with a liste of labels for this user.
      */
-    suspend fun getAll(uid: String): LiveData<Response<List<Label>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Label>>>()
+    suspend fun getLabelListByMasterUid(
+        masterUid: String,
+        flow: Boolean = false
+    ): LiveData<Response<List<Label>>> {
+        val listener = userCollection.whereEqualTo(MASTER_UID, masterUid)
 
-            userCollection
-                .whereEqualTo(MASTER_UID, uid)
-                .addSnapshotListener { querySnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    querySnap?.let { query ->
-                        val dataSet = query.toLabelList()
-                        liveData.postValue(Response.Success(data = dataSet))
-                    }
-                }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toLabelList() }
+        else listener.onComplete { it.toLabelList() }
     }
 
     /**
      * Retrieve all labels of a specific type.
      * @param type The label type for search.
-     * @param uid The master user id.
+     * @param masterUid The master user id.
      * @return A Live data with the list of labels.
      */
-    suspend fun getAllByType(type: String, uid: String): LiveData<Response<List<Label>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Label>>>()
+    suspend fun getLabelListByMasterUidAndType(
+        type: String,
+        masterUid: String,
+        flow: Boolean = false
+    ): LiveData<Response<List<Label>>> {
+        val listener =
+            userCollection.whereEqualTo(LABEL_TYPE, type).whereEqualTo(MASTER_UID, masterUid)
 
-            userCollection
-                .whereEqualTo(LABEL_TYPE, type)
-                .whereEqualTo(MASTER_UID, uid)
-                .addSnapshotListener { querySnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    querySnap?.let { query ->
-                        val dataSet = query.toLabelList()
-                        liveData.postValue(Response.Success(data = dataSet))
-                    }
-                }
-
-            return@withContext liveData
-        }
-    }
-
-    suspend fun getLabelListByTypeAndUserId(type: String, uid: String, withFlow: Boolean = false)
-            : LiveData<Response<List<Label>>> {
-        return withContext(Dispatchers.IO) {
-
-            val liveData = MutableLiveData<Response<List<Label>>>()
-            val listener =
-                userCollection.whereEqualTo(LABEL_TYPE, type).whereEqualTo(MASTER_UID, uid)
-
-            if(withFlow) {
-                listener.addSnapshotListener { nQuery, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    nQuery?.let { query ->
-                        liveData.postValue(Response.Success(data = query.toLabelList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(  query.toLabelList()))
-                    }
-                }
-            }
-
-            return@withContext liveData
-        }
-
-
-    }
-
-    suspend fun getLabelById(labelId: String): LiveData<Response<Label>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<Label>>()
-
-            userCollection
-                .document(labelId)
-                .addSnapshotListener { documentSnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    documentSnap?.let { document ->
-                        val label = document.toLabelObject()
-                        liveData.postValue(Response.Success(label))
-                    }
-                }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toLabelList() }
+        else listener.onComplete { it.toLabelList() }
     }
 
     /**
-     * Delete a label.
-     * @param id The id of the label.
-     * @return LiveData with the result of operation.
+     *
      */
-    fun delete(id: String): MutableLiveData<Boolean> {
-        val liveData = MutableLiveData<Boolean>()
-        userCollection.document(id).delete()
-        liveData.value = true
-        return liveData
-    }
+    suspend fun getLabelById(labelId: String, flow: Boolean = false): LiveData<Response<Label>> {
+        val listener = userCollection.document(labelId)
 
-    /**
-     * Add a new user or edit if already exists.
-     * @param labelDto The label sent by the user.
-     * @return The ID of the saved label.
-     */
-    fun save(labelDto: LabelDto): String {
-        val document =
-            if (labelDto.id != null) {
-                userCollection.document(labelDto.id!!)
-            } else {
-                userCollection.document().also {
-                    labelDto.id = it.id
-                }
-            }
-        document.set(labelDto)
-        return document.id
+        return if (flow) listener.onSnapShot { it.toLabelObject() }
+        else listener.onComplete { it.toLabelObject() }
     }
 
     /**
      * User operational Labels
      */
-    suspend fun getUserLabelList(
+    suspend fun getLabelListByMasterUidAndTypeAndOperational(
         masterUid: String,
         type: String,
-        isOperational: Boolean
+        isOperational: Boolean,
+        flow: Boolean = false
     ): LiveData<Response<List<Label>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Label>>>()
+        val listener = userCollection
+            .whereEqualTo(MASTER_UID, masterUid)
+            .whereEqualTo(LABEL_TYPE, type)
+            .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
 
-            userCollection
-                .whereEqualTo(MASTER_UID, masterUid)
-                .whereEqualTo(LABEL_TYPE, type)
-                .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
-                .get()
-                .addOnSuccessListener { querySnap ->
-                    querySnap?.let { query ->
-                        val labelList = query.toLabelList()
-                        liveData.postValue(Response.Success(data = labelList))
-                    }
-                }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toLabelList() }
+        else listener.onComplete { it.toLabelList() }
     }
 
     /**
@@ -198,49 +141,29 @@ class LabelRepository(private val fireStore: FirebaseFirestore) {
      */
     suspend fun getDefaultLabelList(
         type: String,
-        isOperational: Boolean
+        isOperational: Boolean,
+        flow: Boolean = false
     ): LiveData<Response<List<Label>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Label>>>()
+        val listener = defaultCollection.whereEqualTo(LABEL_TYPE, type)
+            .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
 
-            defaultCollection
-                .whereEqualTo(LABEL_TYPE, type)
-                .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
-                .get()
-                .addOnSuccessListener { querySnap ->
-                    querySnap?.let { query ->
-                        val labelList = query.toLabelList()
-                        liveData.postValue(Response.Success(data = labelList))
-                    }
-                }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toLabelList() }
+        else listener.onComplete { it.toLabelList() }
     }
 
     /**
      * Get Default expend labels
      */
-    suspend fun getDefaultExpendLabelList(isOperational: Boolean? = false): LiveData<Response<List<Label>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Label>>>()
+    suspend fun getDefaultExpendLabelList(
+        isOperational: Boolean? = false,
+        flow: Boolean = false
+    ): LiveData<Response<List<Label>>> {
+        val listener = defaultCollection
+            .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
+            .whereIn(LABEL_TYPE, listOf("COST", "EXPENSE"))
 
-            defaultCollection
-                .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
-                .whereIn(LABEL_TYPE, listOf("COST", "EXPENSE"))
-                .addSnapshotListener { querySnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    querySnap?.let { query ->
-                        val labelList = query.toLabelList()
-                        liveData.postValue(Response.Success(labelList))
-                        Log.d("teste", "data A encontrada")
-                    }
-                }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toLabelList() }
+        else listener.onComplete { it.toLabelList() }
     }
 
     /**
@@ -335,6 +258,43 @@ class LabelRepository(private val fireStore: FirebaseFirestore) {
 
             return@withContext liveData
         }
+    }
+
+}
+
+private class LabWrite(fireStore: FirebaseFirestore) {
+
+    private val userCollection = fireStore.collection(FIRESTORE_COLLECTION_USER_LABELS)
+
+    /**
+     * Delete a label.
+     * @param id The id of the label.
+     * @return LiveData with the result of operation.
+     */
+    suspend fun delete(id: String) {
+        userCollection.document(id).delete().await()
+    }
+
+    /**
+     * Add a new user or edit if already exists.
+     * @param dto The label sent by the user.
+     * @return The ID of the saved label.
+     */
+    suspend fun save(dto: LabelDto) {
+        if (dto.id == null) create(dto)
+        else update(dto)
+    }
+
+    private suspend fun update(dto: LabelDto) {
+        val document = userCollection.document(dto.id!!)
+        document.set(dto).await()
+    }
+
+    private suspend fun create(dto: LabelDto): String {
+        val document = userCollection.document()
+        dto.id = document.id
+        document.set(dto).await()
+        return document.id
     }
 
 }

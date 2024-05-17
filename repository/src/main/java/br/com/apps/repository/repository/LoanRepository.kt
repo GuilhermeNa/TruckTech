@@ -1,96 +1,78 @@
 package br.com.apps.repository.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.payroll.Loan
-import br.com.apps.repository.EMPLOYEE_ID
-import br.com.apps.repository.FIRESTORE_COLLECTION_LOANS
-import br.com.apps.repository.IS_PAID
-import br.com.apps.repository.Response
-import br.com.apps.repository.toLoanList
+import br.com.apps.repository.util.EMPLOYEE_ID
+import br.com.apps.repository.util.FIRESTORE_COLLECTION_LOANS
+import br.com.apps.repository.util.IS_PAID
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.onComplete
+import br.com.apps.repository.util.onSnapShot
+import br.com.apps.repository.util.toLoanList
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 class LoanRepository(fireStore: FirebaseFirestore) {
+
+    private val read = LoaRead(fireStore)
+
+    suspend fun getLoanListByEmployeeIdAndPaymentStatus(
+        employeeId: String,
+        isPaid: Boolean,
+        flow: Boolean = false
+    ) =
+        read.getLoanListByEmployeeIdAndPaymentStatus(employeeId, isPaid, flow)
+
+    suspend fun getLoanListByEmployeeIdAndPaymentStatus(
+        employeeIdList: List<String>,
+        isPaid: Boolean,
+        flow: Boolean = false
+    ) =
+        read.getLoanListByEmployeeIdAndPaymentStatus(employeeIdList, isPaid, flow)
+
+}
+
+private class LoaRead(fireStore: FirebaseFirestore) {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_LOANS)
 
     /**
-     * This function fetches [Loan] dataSet for the given [Employee] ID asynchronously from the database.
+     * Fetches the [Loan] dataSet for the specified employee ID.
      *
-     * @param employeeId The ID of the [Employee] for which [Loan] dataSet is to be retrieved.
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @param isPaid Whether the [Loan] has already been paid or not.
-     *
-     * @return A LiveData object containing a [Response] of [Loan] dataSet for the specified ID.
+     * @param employeeId The ID of the [Employee].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Loan] list.
      */
     suspend fun getLoanListByEmployeeIdAndPaymentStatus(
         employeeId: String,
         isPaid: Boolean,
-        withFlow: Boolean
+        flow: Boolean = false
     ): LiveData<Response<List<Loan>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Loan>>>()
-            val listener = collection
-                .whereEqualTo(EMPLOYEE_ID, employeeId)
-                .whereEqualTo(IS_PAID, isPaid)
+        val listener =
+            collection.whereEqualTo(EMPLOYEE_ID, employeeId).whereEqualTo(IS_PAID, isPaid)
 
-            if (withFlow) {
-                listener.addSnapshotListener { snapQuery, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    snapQuery?.let { query ->
-                        liveData.postValue(Response.Success(query.toLoanList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toLoanList()))
-                    }
-                }.await()
-            }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toLoanList() }
+        else listener.onComplete { it.toLoanList() }
     }
 
     /**
-     * This function fetches [Loan] dataSet for the given [Employee] ID asynchronously from the database.
+     * Fetches the [Loan] dataSet for the specified employee ID list.
      *
-     * @param employeeIdList The ID list of the [Employee] for which [Loan] dataSet is to be retrieved.
-     * @param isPaid Whether the [Loan] has already been paid or not.
-     *
-     * @return A LiveData object containing a [Response] of [Loan] dataSet for the specified IDs in the list.
+     * @param employeeIdList The ID of the [Employee]'s.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Loan] list.
      */
     suspend fun getLoanListByEmployeeIdAndPaymentStatus(
         employeeIdList: List<String>,
-        isPaid: Boolean
+        isPaid: Boolean,
+        flow: Boolean = false
     ): LiveData<Response<List<Loan>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Loan>>>()
-            val listener = collection
-                .whereIn(EMPLOYEE_ID, employeeIdList)
-                .whereEqualTo(IS_PAID, isPaid)
+        val listener =
+            collection.whereIn(EMPLOYEE_ID, employeeIdList).whereEqualTo(IS_PAID, isPaid)
 
-            listener.get().addOnCompleteListener { task ->
-                task.exception?.let { e ->
-                    liveData.postValue(Response.Error(e))
-                }
-                task.result?.let { query ->
-                    liveData.postValue(Response.Success(query.toLoanList()))
-                }
-            }.await()
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toLoanList() }
+        else listener.onComplete { it.toLoanList() }
     }
 
 }
+

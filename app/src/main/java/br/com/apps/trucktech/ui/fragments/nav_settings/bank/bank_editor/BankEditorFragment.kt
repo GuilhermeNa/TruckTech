@@ -13,10 +13,10 @@ import br.com.apps.model.IdHolder
 import br.com.apps.model.factory.BankAccountFactory
 import br.com.apps.model.model.employee.BankAccount
 import br.com.apps.model.model.payment_method.PixType
-import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.FAILED_TO_SAVE
-import br.com.apps.repository.Response
-import br.com.apps.repository.SUCCESSFULLY_SAVED
+import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.util.FAILED_TO_SAVE
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentBankEditorBinding
 import br.com.apps.trucktech.expressions.popBackStack

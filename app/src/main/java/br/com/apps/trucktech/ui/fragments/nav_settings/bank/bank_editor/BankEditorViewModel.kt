@@ -12,7 +12,7 @@ import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.employee.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.model.model.payment_method.PixType
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.EmployeeRepository
 import kotlinx.coroutines.launch
 

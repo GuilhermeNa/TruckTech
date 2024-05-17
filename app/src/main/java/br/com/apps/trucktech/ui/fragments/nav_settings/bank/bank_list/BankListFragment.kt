@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.databinding.FragmentBankBinding
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarRed

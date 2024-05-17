@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import br.com.apps.model.IdHolder
-import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.databinding.FragmentFinesListBinding
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar

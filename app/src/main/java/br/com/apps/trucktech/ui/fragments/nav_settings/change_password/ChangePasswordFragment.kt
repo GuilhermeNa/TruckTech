@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import br.com.apps.repository.Response
-import br.com.apps.repository.UNKNOWN_EXCEPTION
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.databinding.FragmentChangePasswordBinding
 import br.com.apps.trucktech.expressions.hideKeyboard
 import br.com.apps.trucktech.expressions.popBackStack

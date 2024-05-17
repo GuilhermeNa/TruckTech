@@ -6,7 +6,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.AdvanceRepository
 import br.com.apps.repository.repository.LoanRepository
 import kotlinx.coroutines.launch

@@ -8,7 +8,7 @@ import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.AdvanceRepository
 import br.com.apps.repository.repository.ExpendRepository
 import br.com.apps.repository.repository.FreightRepository

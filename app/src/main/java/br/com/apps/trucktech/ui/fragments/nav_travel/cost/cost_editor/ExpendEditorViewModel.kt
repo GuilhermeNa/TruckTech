@@ -11,8 +11,8 @@ import br.com.apps.model.factory.ExpendFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.travel.Expend
-import br.com.apps.repository.EMPTY_ID
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.EMPTY_ID
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.ExpendRepository
 import br.com.apps.repository.repository.LabelRepository
 import kotlinx.coroutines.CompletableDeferred

@@ -11,8 +11,8 @@ import br.com.apps.model.factory.TravelFactory
 import br.com.apps.model.factory.TravelFactoryData
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.repository.Response
 import br.com.apps.repository.repository.TravelRepository
+import br.com.apps.repository.util.Response
 import br.com.apps.usecase.TravelIdsData
 import br.com.apps.usecase.TravelUseCase
 import kotlinx.coroutines.launch

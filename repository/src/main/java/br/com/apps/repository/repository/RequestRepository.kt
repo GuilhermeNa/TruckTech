@@ -4,16 +4,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.request.request.PaymentRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
+import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.RequestItem
-import br.com.apps.repository.DRIVER_ID
-import br.com.apps.repository.EMPTY_ID
-import br.com.apps.repository.REQUEST_ID
-import br.com.apps.repository.Response
-import br.com.apps.repository.toRequestItemList
-import br.com.apps.repository.toRequestItemObject
-import br.com.apps.repository.toRequestList
-import br.com.apps.repository.toRequestObject
+import br.com.apps.repository.util.DRIVER_ID
+import br.com.apps.repository.util.EMPTY_ID
+import br.com.apps.repository.util.REQUEST_ID
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.onComplete
+import br.com.apps.repository.util.onSnapShot
+import br.com.apps.repository.util.toRequestItemList
+import br.com.apps.repository.util.toRequestItemObject
+import br.com.apps.repository.util.toRequestList
+import br.com.apps.repository.util.toRequestObject
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -34,23 +37,56 @@ private const val ENCODED_IMAGE = "encodedImage"
  */
 class RequestRepository(private val fireStore: FirebaseFirestore) {
 
+    private val read = ReqRead(fireStore)
+    private val write = ReqWrite(fireStore)
+
+    //---------------------------------------------------------------------------------------------//
+    // WRITE
+    //---------------------------------------------------------------------------------------------//
+
+    suspend fun save(dto: PaymentRequestDto) = write.save(dto)
+
+    suspend fun saveItem(dto: RequestItemDto) = write.saveItem(dto)
+
+    suspend fun delete(id: String, itemsId: List<String>? = null) = write.delete(id, itemsId)
+
+    suspend fun updateEncodedImage(id: String, encodedImage: String) =
+        write.updateEncodedImage(id, encodedImage)
+
+    //---------------------------------------------------------------------------------------------//
+    // READ
+    //---------------------------------------------------------------------------------------------//
+
+    suspend fun getCompleteRequestListByDriverId(driverId: String, flow: Boolean = false) =
+        read.getCompleteRequestListByDriverId(driverId, flow)
+
+    suspend fun getCompleteRequestById(requestId: String, flow: Boolean = false) =
+        read.getCompleteRequestById(requestId, flow)
+
+    suspend fun getItemById(requestId: String, itemId: String, flow: Boolean = false) =
+        read.getItemById(requestId, itemId, flow)
+
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+private class ReqRead(private val fireStore: FirebaseFirestore) {
+
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_REQUESTS)
 
     /**
-     * Retrieves the complete list of [PaymentRequest] and its [RequestItem] associated with a specific driver ID.
+     * Fetches the [PaymentRequest] dataSet for the specified driver ID.
      *
-     * @param driverId The ID of the driver for whom to retrieve payment requests.
-     * @param withFlow Boolean indicating whether to use Flow for real-time updates.
-     * @return LiveData object containing the response with the list of payment requests.
+     * @param driverId The ID of the [Employee].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [PaymentRequest] list.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun getCompleteRequestListByDriverId(driverId: String, withFlow: Boolean)
+    suspend fun getCompleteRequestListByDriverId(driverId: String, flow: Boolean)
             : LiveData<Response<List<PaymentRequest>>> {
         return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<List<PaymentRequest>>>()
 
             val deferred = CompletableDeferred<List<PaymentRequest>>()
-            if (withFlow) {
+            if (flow) {
                 collection.whereEqualTo(DRIVER_ID, driverId)
                     .addSnapshotListener { querySnap, error ->
                         error?.let { e ->
@@ -77,7 +113,7 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
             val requestList = deferred.getCompleted()
             val idList = requestList.mapNotNull { it.id }
 
-            if (withFlow) {
+            if (flow) {
                 fireStore.collectionGroup(FIRESTORE_COLLECTION_ITEMS)
                     .whereIn(REQUEST_ID, idList)
                     .addSnapshotListener { querySnap, error ->
@@ -120,23 +156,22 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
     }
 
     /**
-     * Retrieves a complete [PaymentRequest] by its ID from Firestore.
+     * Fetches the [PaymentRequest] dataSet for the specified ID.
      *
-     * @param requestId The ID of the payment request to be retrieved.
-     * @param withFlow If true, uses a flow to get real-time updates; otherwise, retrieves the request once.
-     * @return LiveData containing a response encapsulating the complete payment request or errors occurred during the operation.
+     * @param requestId The ID of the [PaymentRequest].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [PaymentRequest] list.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getCompleteRequestById(
         requestId: String,
-        withFlow: Boolean
+        flow: Boolean
     ): LiveData<Response<PaymentRequest>> {
         return withContext(Dispatchers.IO) {
             val liveData = MutableLiveData<Response<PaymentRequest>>()
             lateinit var request: PaymentRequest
 
             val deferredA = CompletableDeferred<PaymentRequest>()
-            if (withFlow) {
+            if (flow) {
                 collection.document(requestId)
                     .addSnapshotListener { documentSnap, error ->
                         error?.let { e ->
@@ -162,7 +197,7 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
 
             val deferredB = CompletableDeferred<List<RequestItem>>()
             var isFirstBoot = true
-            if (withFlow) {
+            if (flow) {
                 collection.document(requestId).collection(FIRESTORE_COLLECTION_ITEMS)
                     .addSnapshotListener { querySnap, error ->
                         error?.let { e ->
@@ -202,6 +237,32 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
             return@withContext liveData
         }
     }
+
+    /**
+     * Fetches the [PaymentRequest] dataSet for the specified ID.
+     *
+     * @param requestId The ID of the [PaymentRequest].
+     * @param itemId The ID of the [RequestItem].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [PaymentRequest] list.
+     */
+    suspend fun getItemById(
+        requestId: String,
+        itemId: String,
+        flow: Boolean = false
+    ): LiveData<Response<RequestItem>> {
+        val listener = collection.document(requestId)
+            .collection(FIRESTORE_COLLECTION_ITEMS).document(itemId)
+
+        return if(flow) listener.onSnapShot { it.toRequestItemObject() }
+        else listener.onComplete { it.toRequestItemObject() }
+    }
+
+}
+
+private class ReqWrite(fireStore: FirebaseFirestore) {
+
+    private val collection = fireStore.collection(FIRESTORE_COLLECTION_REQUESTS)
 
     /**
      * Saves the [RequestItemDto] data in Firestore.
@@ -251,6 +312,19 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
     }
 
     /**
+     * Updates the encoded image for a specific document in the Firestore collection.
+     *
+     * @param requestId The ID of the document to which the encoded image will be updated.
+     * @param encodedImage The encoded image in String to be updated in the document.
+     */
+    suspend fun updateEncodedImage(requestId: String, encodedImage: String) {
+        collection
+            .document(requestId)
+            .update(ENCODED_IMAGE, encodedImage)
+            .await()
+    }
+
+    /**
      * Saves the [PaymentRequestDto] data in Firestore.
      *
      *  - If the ID of the Request Dto is null, it creates a new Request.
@@ -266,7 +340,7 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
         }
     }
 
-    suspend fun create(dto: PaymentRequestDto): String {
+    private suspend fun create(dto: PaymentRequestDto): String {
         val document = collection.document()
         dto.id = document.id
 
@@ -290,7 +364,7 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
      * This method is responsible for deleting the requests in Firestore.
      * @param requestId Is the ID of the request that must be deleted.
      */
-    suspend fun delete(requestId: String, itemIdList: List<String>?) {
+    suspend fun delete(requestId: String, itemIdList: List<String>? = null) {
         itemIdList?.forEach { itemId ->
             deleteItem(requestId, itemId)
         }
@@ -317,63 +391,7 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
             .await()
     }
 
-    /**
-     * Updates the encoded image for a specific document in the Firestore collection.
-     *
-     * @param requestId The ID of the document to which the encoded image will be updated.
-     * @param encodedImage The encoded image in String to be updated in the document.
-     */
-    suspend fun updateEncodedImage(requestId: String, encodedImage: String) {
-        collection
-            .document(requestId)
-            .update(ENCODED_IMAGE, encodedImage)
-            .await()
-    }
-
-    /**
-     * Retrieves a specific item by its ID from a specific document in the Firestore collection.
-     *
-     * @param requestId The ID of the parent document where the item is located.
-     * @param itemId The ID of the item to be retrieved.
-     * @param withFlow If true, uses a flow to get real-time updates; otherwise, retrieves the item once.
-     * @return LiveData containing a response encapsulating the retrieved item or errors occurred during the operation.
-     */
-    suspend fun getItemById(
-        requestId: String,
-        itemId: String,
-        withFlow: Boolean = false
-    ): LiveData<Response<RequestItem>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<RequestItem>>()
-            val listener = collection.document(requestId)
-                .collection(FIRESTORE_COLLECTION_ITEMS).document(itemId)
-
-            if (withFlow) {
-                listener.addSnapshotListener { nDocument, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    nDocument?.let { doc ->
-                        val item = doc.toRequestItemObject()
-                        liveData.postValue(Response.Success(item))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { doc ->
-                        val item = doc.toRequestItemObject()
-                        liveData.postValue(Response.Success(item))
-                    }
-                }
-            }
-
-            return@withContext liveData
-        }
-    }
-
 
 }
+
 

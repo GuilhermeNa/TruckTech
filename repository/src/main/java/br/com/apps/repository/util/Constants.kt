@@ -1,4 +1,4 @@
-package br.com.apps.repository
+package br.com.apps.repository.util
 
 //---------------------------------------------------------------------------------------------//
 // IDS

@@ -13,10 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
 import br.com.apps.model.model.employee.BankAccount
-import br.com.apps.repository.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.FAILED_TO_REMOVE
-import br.com.apps.repository.Response
-import br.com.apps.repository.SUCCESSFULLY_REMOVED
+import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.util.FAILED_TO_REMOVE
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentBankPreviewBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl

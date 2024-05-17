@@ -14,10 +14,10 @@ import br.com.apps.model.model.employee.BankAccount
 import br.com.apps.model.model.employee.DriverEmployee
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.employee.EmployeeType
-import br.com.apps.repository.EMPTY_ID
-import br.com.apps.repository.MASTER_UID
+import br.com.apps.repository.util.EMPTY_ID
+import br.com.apps.repository.util.MASTER_UID
 import br.com.apps.repository.Resource
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore

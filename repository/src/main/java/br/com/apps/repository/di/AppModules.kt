@@ -1,4 +1,4 @@
-package br.com.apps.repository
+package br.com.apps.repository.di
 
 import br.com.apps.repository.repository.AdvanceRepository
 import br.com.apps.repository.repository.AuthenticationRepository
@@ -14,8 +14,8 @@ import br.com.apps.repository.repository.LoanRepository
 import br.com.apps.repository.repository.RefuelRepository
 import br.com.apps.repository.repository.RequestRepository
 import br.com.apps.repository.repository.StorageRepository
-import br.com.apps.repository.repository.TravelRepository
 import br.com.apps.repository.repository.UserRepository
+import br.com.apps.repository.repository.TravelRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore

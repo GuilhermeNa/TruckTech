@@ -3,7 +3,7 @@ package br.com.apps.repository.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.repository.Resource
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth

@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.IdHolder
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.repository.FAILED_TO_REMOVE
-import br.com.apps.repository.Response
-import br.com.apps.repository.SUCCESSFULLY_REMOVED
-import br.com.apps.repository.SUCCESSFULLY_SAVED
+import br.com.apps.repository.util.FAILED_TO_REMOVE
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
+import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentTravelsBinding

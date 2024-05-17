@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.employee.BankAccount
-import br.com.apps.repository.INVALID_OBJECT_ID
+import br.com.apps.repository.util.INVALID_OBJECT_ID
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemBankBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl

@@ -11,7 +11,7 @@ import br.com.apps.model.factory.RequestItemFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.model.model.request.request.RequestItemType
-import br.com.apps.repository.Response
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.RequestRepository
 import kotlinx.coroutines.launch
 

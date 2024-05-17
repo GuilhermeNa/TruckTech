@@ -4,11 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.payroll.Advance
-import br.com.apps.repository.EMPLOYEE_ID
-import br.com.apps.repository.FIRESTORE_COLLECTION_ADVANCES
-import br.com.apps.repository.IS_PAID
-import br.com.apps.repository.Response
-import br.com.apps.repository.toAdvanceList
+import br.com.apps.repository.util.EMPLOYEE_ID
+import br.com.apps.repository.util.FIRESTORE_COLLECTION_ADVANCES
+import br.com.apps.repository.util.IS_PAID
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.toAdvanceList
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
