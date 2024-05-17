@@ -7,6 +7,7 @@ import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.DRIVER_ID
 import br.com.apps.repository.FIRESTORE_COLLECTION_TRAVELS
 import br.com.apps.repository.Response
+import br.com.apps.repository.onComplete
 import br.com.apps.repository.toTravelList
 import br.com.apps.repository.toTravelObject
 import com.google.firebase.firestore.FirebaseFirestore
@@ -33,6 +34,7 @@ class TravelRepository(fireStore: FirebaseFirestore) {
             val liveData = MutableLiveData<Response<List<Travel>>>()
             val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
+            listener.onComplete {  }
             if (withFlow) {
                 listener.addSnapshotListener { querySnap, error ->
                     error?.let { e ->
