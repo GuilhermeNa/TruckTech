@@ -15,6 +15,7 @@ import br.com.apps.repository.repository.RequestRepository
 import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.ui.activities.main.DriverAndTruck
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 import java.time.LocalDateTime
@@ -29,6 +30,8 @@ class RequestsListViewModel(
     private val driverAndTruck: DriverAndTruck,
     private val repository: RequestRepository
 ) : ViewModel() {
+
+    private var loadDataJob: Job? = null
 
     /**
      * LiveData holding the response data of type [Response] with a list of expenditures [PaymentRequest]
