@@ -21,6 +21,7 @@ const val IS_PAID = "isPaid"
 const val REQUEST_ID = "requestId"
 
 
+
 //---------------------------------------------------------------------------------------------//
 // SUCCESS MESSAGES
 //---------------------------------------------------------------------------------------------//
@@ -62,6 +63,8 @@ internal const val FIRESTORE_COLLECTION_ADVANCES = "advances"
 internal const val FIRESTORE_COLLECTION_EXPENDS = "expends"
 
 internal const val FIRESTORE_COLLECTION_LOANS = "loans"
+
+internal const val FIRESTORE_COLLECTION_FINES = "fines"
 
 //---------------------------------------------------------------------------------------------//
 // COMMON

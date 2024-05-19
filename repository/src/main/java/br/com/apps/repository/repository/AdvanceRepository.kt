@@ -1,96 +1,83 @@
 package br.com.apps.repository.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.repository.util.EMPLOYEE_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_ADVANCES
 import br.com.apps.repository.util.IS_PAID
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.onComplete
+import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toAdvanceList
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 class AdvanceRepository(fireStore: FirebaseFirestore) {
+
+    private val read = AdvRead(fireStore)
+
+    //---------------------------------------------------------------------------------------------//
+    // WRITE
+    //---------------------------------------------------------------------------------------------//
+
+    suspend fun getAdvanceListByEmployeeIdAndPaymentStatus(
+        employeeId: String,
+        isPaid: Boolean,
+        flow: Boolean = false
+    ) = read.getAdvanceListByEmployeeIdAndPaymentStatus(employeeId, isPaid, flow)
+
+    suspend fun getAdvanceListByEmployeeIdsAndPaymentStatus(
+        employeeIdList: List<String>,
+        isPaid: Boolean,
+        flow: Boolean = false
+    ) = read.getAdvanceListByEmployeeIdsAndPaymentStatus(employeeIdList, isPaid, flow)
+
+}
+
+private class AdvRead(fireStore: FirebaseFirestore) {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_ADVANCES)
 
     /**
-     * This function fetches [Advance] dataSet for the given [Employee] ID asynchronously from the database.
+     * Fetches the [Advance] dataSet for the specified employee ID.
      *
-     * @param employeeId The ID of the [Employee] for which [Advance] dataSet is to be retrieved.
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @param isPaid Whether the advance has already been paid or not.
-     *
-     * @return A LiveData object containing a [Response] of [Advance] dataSet for the specified ID.
+     * @param employeeId The ID of the [Employee].
+     * @param isPaid if the [Advance] is already paid.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Advance] list.
      */
     suspend fun getAdvanceListByEmployeeIdAndPaymentStatus(
         employeeId: String,
         isPaid: Boolean,
-        withFlow: Boolean
+        flow: Boolean = false
     ): LiveData<Response<List<Advance>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Advance>>>()
-            val listener = collection
-                .whereEqualTo(EMPLOYEE_ID, employeeId)
-                .whereEqualTo(IS_PAID, isPaid)
+        val listener = collection
+            .whereEqualTo(EMPLOYEE_ID, employeeId)
+            .whereEqualTo(IS_PAID, isPaid)
 
-            if (withFlow) {
-                listener.addSnapshotListener { snapQuery, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    snapQuery?.let { query ->
-                        liveData.postValue(Response.Success(query.toAdvanceList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toAdvanceList()))
-                    }
-                }.await()
-            }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toAdvanceList() }
+        else listener.onComplete { it.toAdvanceList() }
     }
 
     /**
-     * This function fetches [Advance] dataSet for the given [Employee] ID asynchronously from the database.
+     * Fetches the [Advance] dataSet for the specified employee ID list.
      *
-     * @param employeeIdList The ID list of the [Employee] for which [Advance] dataSet is to be retrieved.
-     * @param isPaid Whether the advance has already been paid or not.
-     *
-     * @return A LiveData object containing a [Response] of [Advance] dataSet for the specified IDs in the list.
+     * @param employeeIdList The ID list of the [Employee]'s.
+     * @param isPaid if the [Advance] is already paid.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Advance] list.
      */
-    suspend fun getAdvanceListByEmployeeIdAndPaymentStatus(
+    suspend fun getAdvanceListByEmployeeIdsAndPaymentStatus(
         employeeIdList: List<String>,
-        isPaid: Boolean
+        isPaid: Boolean,
+        flow: Boolean = false
     ): LiveData<Response<List<Advance>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Advance>>>()
-            val listener = collection
-                .whereIn(EMPLOYEE_ID, employeeIdList)
-                .whereEqualTo(IS_PAID, isPaid)
+        val listener = collection
+            .whereIn(EMPLOYEE_ID, employeeIdList)
+            .whereEqualTo(IS_PAID, isPaid)
 
-            listener.get().addOnCompleteListener { task ->
-                task.exception?.let { e ->
-                    liveData.postValue(Response.Error(e))
-                }
-                task.result?.let { query ->
-                    liveData.postValue(Response.Success(query.toAdvanceList()))
-                }
-            }.await()
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toAdvanceList() }
+        else listener.onComplete { it.toAdvanceList() }
     }
 
 }

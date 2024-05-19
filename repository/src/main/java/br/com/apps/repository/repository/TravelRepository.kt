@@ -17,8 +17,8 @@ import kotlinx.coroutines.tasks.await
 
 class TravelRepository(fireStore: FirebaseFirestore) {
 
-    private val read = Read(fireStore.collection(FIRESTORE_COLLECTION_TRAVELS))
-    private val write = Write(fireStore.collection(FIRESTORE_COLLECTION_TRAVELS))
+    private val read = TraRead(fireStore.collection(FIRESTORE_COLLECTION_TRAVELS))
+    private val write = TraWrite(fireStore.collection(FIRESTORE_COLLECTION_TRAVELS))
 
     //---------------------------------------------------------------------------------------------//
     // WRITE
@@ -40,7 +40,7 @@ class TravelRepository(fireStore: FirebaseFirestore) {
 
 }
 
-private class Read(private val collection: CollectionReference) {
+private class TraRead(private val collection: CollectionReference) {
 
     /**
      * Fetches the [Travel] dataSet for the specified driver ID.
@@ -75,7 +75,7 @@ private class Read(private val collection: CollectionReference) {
 
 }
 
-private class Write(private val collection: CollectionReference) {
+private class TraWrite(private val collection: CollectionReference) {
 
     suspend fun delete(travelId: String) {
         collection

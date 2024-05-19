@@ -3,6 +3,7 @@ package br.com.apps.repository.util
 import br.com.apps.model.dto.DocumentDto
 import br.com.apps.model.dto.FineDto
 import br.com.apps.model.dto.LabelDto
+import br.com.apps.model.dto.TruckDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
 import br.com.apps.model.dto.request.request.PaymentRequestDto
@@ -15,6 +16,7 @@ import br.com.apps.model.exceptions.ConversionException
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.Document
 import br.com.apps.model.model.Fine
+import br.com.apps.model.model.Truck
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
@@ -148,3 +150,13 @@ fun DocumentSnapshot.toDocumentObject(): Document {
         ?: throw ConversionException("ConversionExpression, toDocumentObject: ($this)")
 }
 
+fun QuerySnapshot.toTruckList(): List<Truck> {
+    return this.mapNotNull { document ->
+        document.toTruckObject()
+    }
+}
+
+fun DocumentSnapshot.toTruckObject(): Truck {
+    return this.toObject(TruckDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toTruckObject: ($this)")
+}

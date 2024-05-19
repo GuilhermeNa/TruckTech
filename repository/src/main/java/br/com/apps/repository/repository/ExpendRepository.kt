@@ -1,8 +1,8 @@
 package br.com.apps.repository.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.travel.ExpendDto
+import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.DRIVER_ID
@@ -11,12 +11,12 @@ import br.com.apps.repository.util.FIRESTORE_COLLECTION_EXPENDS
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_TRAVELS
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TRAVEL_ID
+import br.com.apps.repository.util.onComplete
+import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toExpendList
 import br.com.apps.repository.util.toExpendObject
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
 
 private const val PAID_BY_EMPLOYEE = "paidByEmployee"
@@ -27,256 +27,179 @@ class ExpendRepository(fireStore: FirebaseFirestore) {
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_EXPENDS)
     private val parentCollection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
 
-    suspend fun deleteExpendForThisTravel(travelId: String, expendId: String) {
-        parentCollection
-            .document(travelId)
-            .collection(FIRESTORE_COLLECTION_EXPENDS)
-            .document(expendId)
-            .delete()
-            .await()
-    }
+    private val write = ExpWrite(fireStore)
+    private val read = ExpRead(fireStore)
 
-    /**
-     * Fetches [Expend] dataSet for the given driver ID asynchronously from the database.
-     *
-     * @param driverId The ID of the driver for whom the [Expend] dataSet is to be retrieved
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @return A LiveData object containing a response of [Expend] data for the specified driver ID.
-     */
-    suspend fun getExpendListByDriverId(
-        driverId: String,
-        withFlow: Boolean
-    ): LiveData<Response<List<Expend>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Expend>>>()
-            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+    //---------------------------------------------------------------------------------------------//
+    // WRITE
+    //---------------------------------------------------------------------------------------------//
 
-            if (withFlow) {
-                listener.addSnapshotListener { querySnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    querySnap?.let { query ->
-                        liveData.postValue(Response.Success(query.toExpendList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toExpendList()))
-                    }
-                }
-            }
+    suspend fun delete(expendId: String) = write.delete(expendId)
 
-            return@withContext liveData
-        }
-    }
+    suspend fun save(dto: ExpendDto) = write.save(dto)
 
-    /**
-     * Retrieves a LiveData containing a list of [Expend] items based on a list of driver IDs and payment status.
-     *
-     * @param driverIdList A list of driver IDs.
-     * @param paidByEmployee A boolean indicating whether the [Expend] was paid by the employee (true) or not (false).
-     * @param alreadyRefunded A boolean indicating whether the [Expend] has already been refunded (true) or not (false).
-     * @return LiveData containing a [Response] object with either a list of [Expend] items or an error.
-     */
-    suspend fun getExpendListByDriverIdAndRefundableStatus(
+    //---------------------------------------------------------------------------------------------//
+    // READ
+    //---------------------------------------------------------------------------------------------//
+
+    suspend fun getExpendListByDriverId(driverId: String, flow: Boolean = false) =
+        read.getExpendListByDriverId(driverId, flow)
+
+    suspend fun getExpendListByDriverIdsAndRefundableStatus(
         driverIdList: List<String>,
         paidByEmployee: Boolean,
         alreadyRefunded: Boolean,
+        flow: Boolean = false
+    ) = read.getExpendListByDriverIdsAndRefundableStatus(
+        driverIdList,
+        paidByEmployee,
+        alreadyRefunded,
+        flow
+    )
+
+    suspend fun getExpendListByDriverIdAndRefundableStatus(
+        driverId: String,
+        paidByEmployee: Boolean,
+        alreadyRefunded: Boolean,
+        flow: Boolean = false
+    ) = read.getExpendListByDriverIdAndRefundableStatus(
+        driverId,
+        paidByEmployee,
+        alreadyRefunded,
+        flow
+    )
+
+    suspend fun getExpendListByTravelId(travelId: String, flow: Boolean = false) =
+        read.getExpendListByTravelId(travelId, flow)
+
+    suspend fun getExpendListByTravelId(idList: List<String>, flow: Boolean = false) =
+        read.getExpendListByTravelId(idList, flow)
+
+    suspend fun getExpendById(expendId: String, flow: Boolean = false) =
+        read.getExpendById(expendId, flow)
+
+}
+
+private class ExpRead(fireStore: FirebaseFirestore) {
+
+    private val collection = fireStore.collection(FIRESTORE_COLLECTION_EXPENDS)
+
+    /**
+     * Fetches the [Expend] dataSet for the specified driver ID.
+     *
+     * @param driverId The ID of the [Employee].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Expend] list.
+     */
+    suspend fun getExpendListByDriverId(
+        driverId: String,
+        flow: Boolean = false
     ): LiveData<Response<List<Expend>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Expend>>>()
-            val listener =
-                collection
-                    .whereIn(DRIVER_ID, driverIdList)
-                    .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
-                    .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
+        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-            listener.get().addOnCompleteListener { task ->
-                task.exception?.let { e ->
-                    liveData.postValue(Response.Error(e))
-                }
-                task.result?.let { query ->
-                    liveData.postValue(Response.Success(query.toExpendList()))
-                }
-            }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toExpendList() }
+        else listener.onComplete { it.toExpendList() }
     }
 
     /**
-     * Fetches the [Expend] dataSet based on the driver's ID and refundable status
-     * considering whether the expenditure was paid by the employee and whether it has already been refunded.
+     * Fetches the [Expend] dataSet for the specified driver ID list.
      *
-     * @param driverId The ID of the driver for whom the expenditures are to be retrieved.
-     * @param paidByEmployee A boolean indicating whether the [Expend] was paid by the employee (true) or not (false).
-     * @param alreadyRefunded A boolean indicating whether the [Expend] has already been refunded (true) or not (false).
-     * @param withFlow If the user wants to keep observing the source or not.
+     * @param driverIdList The ID list of the [Employee]'s.
+     * @param paidByEmployee If the [Expend] was paid by the employee.
+     * @param alreadyRefunded If the [Expend] has already been refunded.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Expend] list.
+     */
+    suspend fun getExpendListByDriverIdsAndRefundableStatus(
+        driverIdList: List<String>,
+        paidByEmployee: Boolean,
+        alreadyRefunded: Boolean,
+        flow: Boolean = false
+    ): LiveData<Response<List<Expend>>> {
+        val listener = collection.whereIn(DRIVER_ID, driverIdList)
+            .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
+            .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
+
+        return if (flow) listener.onSnapShot { it.toExpendList() }
+        else listener.onComplete { it.toExpendList() }
+    }
+
+    /**
+     * Fetches the [Expend] dataSet for the specified driver ID.
      *
-     * @return A LiveData object containing a [Response] of [Expend] data for the specified driver ID.
+     * @param driverId The ID of the [Employee].
+     * @param paidByEmployee If the [Expend] was paid by the employee.
+     * @param alreadyRefunded If the [Expend] has already been refunded.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Expend] list.
      */
     suspend fun getExpendListByDriverIdAndRefundableStatus(
         driverId: String,
         paidByEmployee: Boolean,
         alreadyRefunded: Boolean,
-        withFlow: Boolean
+        flow: Boolean = false
     ): LiveData<Response<List<Expend>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Expend>>>()
-            val listener =
-                collection
-                    .whereEqualTo(DRIVER_ID, driverId)
-                    .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
-                    .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
+        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+            .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
+            .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
-            if (withFlow) {
-                listener.addSnapshotListener { querySnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    querySnap?.let { query ->
-                        liveData.postValue(Response.Success(query.toExpendList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toExpendList()))
-                    }
-                }
-            }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toExpendList() }
+        else listener.onComplete { it.toExpendList() }
     }
 
     /**
-     * Fetch the dataSet for the specified [Expend] ID.
+     * Fetches the [Expend] dataSet for the specified travel ID.
      *
-     * Fetches [Expend] dataSet for the given [Travel] ID asynchronously from the database.
-     *
-     * @param travelId The ID of the [Travel] for which expenditure data is to be retrieved.
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @return A LiveData object containing a response of [Expend] data for the specified [Travel] ID.
+     * @param travelId The ID of the [Travel].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Expend] list.
      */
     suspend fun getExpendListByTravelId(
         travelId: String,
-        withFlow: Boolean
+        flow: Boolean = false
     ): LiveData<Response<List<Expend>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Expend>>>()
-            val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+        val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
 
-            if (withFlow) {
-                listener.addSnapshotListener { snapQuery, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    snapQuery?.let { query ->
-                        liveData.postValue(Response.Success(query.toExpendList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toExpendList()))
-                    }
-                }.await()
-            }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toExpendList() }
+        else listener.onComplete { it.toExpendList() }
     }
 
     /**
-     * Fetch the dataSet for the specified [Expend] ID list.
+     * Fetches the [Expend] dataSet for the specified driver ID list.
      *
-     * Fetches [Expend] dataSet for the given [Travel] ID asynchronously from the database.
-     *
-     * @param idList The ID of the [Travel] for which expenditure data is to be retrieved.
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @return A LiveData object containing a response of [Expend] data for the specified [Travel] ID.
+     * @param driverIdList The ID list of the [Employee]'s.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Expend] list.
      */
     suspend fun getExpendListByTravelId(
-        idList: List<String>,
-        withFlow: Boolean
+        driverIdList: List<String>,
+        flow: Boolean = false
     ): LiveData<Response<List<Expend>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Expend>>>()
-            val listener = collection.whereIn(TRAVEL_ID, idList)
+        val listener = collection.whereIn(TRAVEL_ID, driverIdList)
 
-            if (withFlow) {
-                listener.addSnapshotListener { snapQuery, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    snapQuery?.let { query ->
-                        liveData.postValue(Response.Success(query.toExpendList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toExpendList()))
-                    }
-                }.await()
-            }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toExpendList() }
+        else listener.onComplete { it.toExpendList() }
     }
 
     /**
-     * Fetch the data for the specified [Expend] ID.
+     * Fetches the [Expend] dataSet for the specified ID.
      *
-     * @param expendId The ID of the [Expend] for which data is to be retrieved.
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @return A LiveData object containing a [Response] of an [Expend] data for the specified expenditure ID.
+     * @param expendId The ID list of the [Expend].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Expend] list.
      */
-    suspend fun getExpendById(expendId: String, withFlow: Boolean): LiveData<Response<Expend>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<Expend>>()
-            val listener = collection.document(expendId)
+    suspend fun getExpendById(expendId: String, flow: Boolean = false): LiveData<Response<Expend>> {
+        val listener = collection.document(expendId)
 
-            if (withFlow) {
-                listener.addSnapshotListener { documentSnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    documentSnap?.let { document ->
-                        val expend = document.toExpendObject()
-                        liveData.postValue(Response.Success(data = expend))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { document ->
-                        val expend = document.toExpendObject()
-                        liveData.postValue(Response.Success(data = expend))
-                    }
-                }.await()
-            }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toExpendObject() }
+        else listener.onComplete { it.toExpendObject() }
     }
+
+}
+
+private class ExpWrite(fireStore: FirebaseFirestore) {
+
+    private val collection = fireStore.collection(FIRESTORE_COLLECTION_EXPENDS)
 
     /**
      * Deletes an [Expend] document from the database based on the specified ID.

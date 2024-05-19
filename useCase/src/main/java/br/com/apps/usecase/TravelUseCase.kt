@@ -89,7 +89,7 @@ class TravelUseCase(
                 val idList = travelList.mapNotNull { travel -> travel.id }
 
                 val deferredB = CompletableDeferred<List<Freight>>()
-                val liveDataB = freightRepository.getFreightListByTravelId(idList, withFlow = true)
+                val liveDataB = freightRepository.getFreightListByTravelIds(idList, true)
                 mediator.addSource(liveDataB) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response
@@ -145,15 +145,9 @@ class TravelUseCase(
     suspend fun deleteTravel(idsData: TravelIdsData) {
         val travelId = idsData.travelId
 
-        idsData.freightIds.forEach { id ->
-            freightRepository.deleteFreightForThisTravel(travelId, id)
-        }
-        idsData.refuelIds.forEach { id ->
-            refuelRepository.deleteRefuelForThisTravel(travelId, id)
-        }
-        idsData.expendIds.forEach { id ->
-            expendRepository.deleteExpendForThisTravel(travelId, id)
-        }
+        idsData.freightIds.forEach { id -> freightRepository.delete(id) }
+        idsData.refuelIds.forEach { id -> refuelRepository.delete(id) }
+        idsData.expendIds.forEach { id -> expendRepository.delete(id) }
 
         repository.delete(travelId)
     }

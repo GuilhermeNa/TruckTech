@@ -4,7 +4,7 @@ import java.util.Date
 
 data class DocumentDto(
     val masterUid: String? = null,
-    val id: String? = null,
+    var id: String? = null,
     val truckId: String? = null,
     val expenseId: String? = null,
     val labelId: String? = null,

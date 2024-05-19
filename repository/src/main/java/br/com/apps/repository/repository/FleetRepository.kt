@@ -1,98 +1,123 @@
 package br.com.apps.repository.repository
 
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
 import br.com.apps.model.dto.TruckDto
-import br.com.apps.model.mapper.TruckMapper
 import br.com.apps.model.model.Truck
-import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.DocumentReference
+import br.com.apps.model.model.employee.Employee
+import br.com.apps.repository.util.DRIVER_ID
+import br.com.apps.repository.util.MASTER_UID
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.onComplete
+import br.com.apps.repository.util.onSnapShot
+import br.com.apps.repository.util.toTruckList
+import br.com.apps.repository.util.toTruckObject
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.toObject
+import kotlinx.coroutines.tasks.await
 
 private const val FIRESTORE_COLLECTION_TRUCKS = "trucks"
 
 class FleetRepository(private val fireStore: FirebaseFirestore) {
 
+    private val write = FleWrite(fireStore)
+    private val read = FleRead(fireStore)
+
+    //---------------------------------------------------------------------------------------------//
+    // WRITE
+    //---------------------------------------------------------------------------------------------//
+
+    suspend fun save(dto: TruckDto) = write.save(dto)
+
+    suspend fun delete(truckId: String) = write.delete(truckId)
+
+    //---------------------------------------------------------------------------------------------//
+    // READ
+    //---------------------------------------------------------------------------------------------//
+
+    suspend fun getTruckListByMasterUid(masterUid: String, flow: Boolean = false) =
+        read.getTruckListByMasterUid(masterUid, flow)
+
+    suspend fun getTruckById(truckId: String, flow: Boolean = false) =
+        read.getTruckById(truckId, flow)
+
+    suspend fun getTruckByDriverId(driverId: String, flow: Boolean = false) =
+        read.getTruckByDriverId(driverId, flow)
+
+}
+
+private class FleWrite(fireStore: FirebaseFirestore) {
+
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_TRUCKS)
 
-    /**
-     * add a new truck
-     */
-    fun save(truckDto: TruckDto): String {
-        val document =
-            if (truckDto.id != null) {
-                collection.document(truckDto.id!!)
-            } else {
-                collection.document().also {
-                    truckDto.id = it.id
-                }
-            }
+    suspend fun save(dto: TruckDto) {
+        if (dto.id == null) create(dto)
+        else update(dto)
+    }
 
-        document.set(truckDto)
+    private suspend fun create(dto: TruckDto): String {
+        val document = collection.document()
+        dto.id = document.id
+        document.set(dto).await()
         return document.id
     }
 
-    /**
-     * delete by id
-     */
-    fun delete(truckId: String): Task<Void> {
-        return fireStore.collection(FIRESTORE_COLLECTION_TRUCKS).document(truckId).delete()
+    private suspend fun update(dto: TruckDto) {
+        val document = collection.document(dto.id!!)
+        document.set(dto).await()
     }
 
-    /**
-     * Get all trucks for this user
-     */
-    fun getAll(): MutableLiveData<List<Truck>> {
-        val liveData = MutableLiveData<List<Truck>>()
-        collection.addSnapshotListener { querySnapShot, _ ->
-            querySnapShot?.let {
-                liveData.value = getMappedDataSet(it)
-            }
-        }
-        return liveData
+    suspend fun delete(truckId: String) {
+        collection.document(truckId).delete().await()
     }
 
-    private fun getMappedDataSet(querySnapShot: QuerySnapshot): List<Truck> {
-        return querySnapShot.documents.mapNotNull { document ->
-            document.toObject<TruckDto>()?.let { truckDto ->
-                TruckMapper.toModel(truckDto, document.id)
-            }
-        }
-    }
+}
+
+private class FleRead(fireStore: FirebaseFirestore) {
+
+    private val collection = fireStore.collection(FIRESTORE_COLLECTION_TRUCKS)
 
     /**
-     * get a truck by id
+     * Fetches the [Truck] dataSet for the specified master UID.
+     *
+     * @param masterUid The ID of the master user.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Truck] list.
      */
-    fun getById(truckId: String): DocumentReference {
-        return fireStore.collection(FIRESTORE_COLLECTION_TRUCKS).document(truckId)
+    suspend fun getTruckListByMasterUid(
+        masterUid: String,
+        flow: Boolean = false
+    ): LiveData<Response<List<Truck>>> {
+        val listener = collection.whereEqualTo(MASTER_UID, masterUid)
+
+        return if (flow) listener.onSnapShot { it.toTruckList() }
+        else listener.onComplete { it.toTruckList() }
     }
 
     /**
-     * get by driver id
+     * Fetches the [Truck] dataSet for the specified ID.
+     *
+     * @param truckId The ID of [Truck].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Truck].
      */
-    fun getByDriverId(driverId: String): MutableLiveData<Truck> {
-        val liveData = MutableLiveData<Truck>()
+    suspend fun getTruckById(truckId: String, flow: Boolean = false): LiveData<Response<Truck>> {
+        val listener = collection.document(truckId)
 
-        collection.whereEqualTo("driverId", driverId).limit(1).get()
-            .addOnSuccessListener { querySnapShot ->
-                querySnapShot?.let {
-                    getMappedTruck(it)?.let {
-                        liveData.value = it
-                    }
-                }
-            }
-
-        return liveData
+        return if (flow) listener.onSnapShot { it.toTruckObject() }
+        else listener.onComplete { it.toTruckObject() }
     }
 
-    private fun getMappedTruck(querySnapShot: QuerySnapshot): Truck? {
-        querySnapShot.documents.mapNotNull { document ->
-            document.toObject<TruckDto>()?.let { truckDto ->
-                return TruckMapper.toModel(truckDto, document.id)
-            }
-        }
-        return null
+    /**
+     * Fetches the [Truck] dataSet for the specified driver ID.
+     *
+     * @param driverId The ID of the [Employee].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Truck] list.
+     */
+    suspend fun getTruckByDriverId(driverId: String, flow: Boolean = false): LiveData<Response<Truck>> {
+        val listener = collection.whereEqualTo(DRIVER_ID, driverId).limit(1)
+
+        return if (flow) listener.onSnapShot { it.toTruckList()[0] }
+        else listener.onComplete { it.toTruckList()[0] }
     }
 
 }

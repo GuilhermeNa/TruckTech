@@ -1,284 +1,73 @@
 package br.com.apps.repository.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.travel.FreightDto
+import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.DRIVER_ID
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_FREIGHTS
-import br.com.apps.repository.util.FIRESTORE_COLLECTION_TRAVELS
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TRAVEL_ID
+import br.com.apps.repository.util.onComplete
+import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toFreightList
 import br.com.apps.repository.util.toFreightObject
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
 
 private const val IS_COMMISSION_PAID = "isCommissionPaid"
 
 class FreightRepository(fireStore: FirebaseFirestore) {
 
-    private val parentCollection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
-    private val collection = fireStore.collection(FIRESTORE_COLLECTION_FREIGHTS)
+    private val read = FreRead(fireStore)
+    private val write = FreWrite(fireStore)
 
-    /**
-     * Deletes a specific [Freight] entry associated with a [Travel].
-     *
-     * @param travelId The ID of the travel from which to delete the freight entry.
-     * @param freightId The ID of the freight entry to delete.
-     */
-    suspend fun deleteFreightForThisTravel(travelId: String, freightId: String) {
-        parentCollection
-            .document(travelId)
-            .collection(FIRESTORE_COLLECTION_FREIGHTS)
-            .document(freightId)
-            .delete()
-            .await()
-    }
+    //---------------------------------------------------------------------------------------------//
+    // WRITE
+    //---------------------------------------------------------------------------------------------//
 
-    /**
-     * Fetches the [Freight] dataSet based on the driver ID.
-     *
-     * @param driverId The ID of the driver for whom the [Freight] dataSet is to be retrieved
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @return LiveData containing a [Response] object with either a list of [Freight] items or an error.
-     */
-    suspend fun getFreightListByDriverId(
-        driverId: String,
-        withFlow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Freight>>>()
-            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+    suspend fun save(dto: FreightDto) = write.save(dto)
 
-            if (withFlow) {
-                listener.addSnapshotListener { querySnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    querySnap?.let { query ->
-                        liveData.postValue(Response.Success(query.toFreightList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toFreightList()))
-                    }
-                }
-            }
+    suspend fun delete(freightId: String) = write.delete(freightId)
 
-            return@withContext liveData
-        }
-    }
+    //---------------------------------------------------------------------------------------------//
+    // READ
+    //---------------------------------------------------------------------------------------------//
 
-    /**
-     * Retrieves a LiveData containing a list of [Freight] items based on a list of driver IDs and payment status.
-     *
-     * @param driverIdList A list of driver IDs.
-     * @param isPaid A boolean indicating the payment status.
-     * @return LiveData containing a [Response] object with either a list of [Freight] items or an error.
-     */
+    suspend fun getFreightListByDriverId(driverId: String, flow: Boolean = false) =
+        read.getFreightListByDriverId(driverId, flow)
+
+    suspend fun getFreightListByTravelId(travelId: String, flow: Boolean = false) =
+        read.getFreightListByTravelId(travelId, flow)
+
+    suspend fun getFreightListByTravelIds(idList: List<String>, flow: Boolean = false) =
+        read.getFreightListByTravelIds(idList, flow)
+
+    suspend fun getFreightById(freightId: String, flow: Boolean = false) =
+        read.getFreightById(freightId, flow)
+
     suspend fun getFreightListByDriverIdAndPaymentStatus(
         driverIdList: List<String>,
-        isPaid: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Freight>>>()
-            val listener = collection
-                .whereIn(DRIVER_ID, driverIdList)
-                .whereEqualTo(IS_COMMISSION_PAID, isPaid)
+        isPaid: Boolean,
+        flow: Boolean = false
+    ) =
+        read.getFreightListByDriverIdsAndPaymentStatus(driverIdList, isPaid, flow)
 
-            listener.get().addOnCompleteListener { task ->
-                task.exception?.let { e ->
-                    liveData.postValue(Response.Error(e))
-                }
-                task.result?.let { query ->
-                    liveData.postValue(Response.Success(query.toFreightList()))
-                }
-            }
-
-            return@withContext liveData
-        }
-    }
-
-    /**
-     * Fetches the list of [Freight] dataSet based on the driver's ID and payment status.
-     *
-     * @param driverId The ID of the driver for whom the [Freight] dataSet is to be retrieved.
-     * @param isPaid A boolean indicating whether the [Freight] is paid (true) or unpaid (false).
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @return A LiveData object containing a [Response] of [Freight] dataSet.
-     */
     suspend fun getFreightListByDriverIdAndPaymentStatus(
         driverId: String,
         isPaid: Boolean,
-        withFlow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Freight>>>()
-            val listener = collection
-                .whereEqualTo(DRIVER_ID, driverId)
-                .whereEqualTo(IS_COMMISSION_PAID, isPaid)
+        flow: Boolean = false
+    ) =
+        read.getFreightListByDriverIdAndPaymentStatus(driverId, isPaid, flow)
 
-            if (withFlow) {
-                listener.addSnapshotListener { querySnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    querySnap?.let { query ->
-                        liveData.postValue(Response.Success(query.toFreightList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toFreightList()))
-                    }
-                }
-            }
+}
 
-            return@withContext liveData
-        }
-    }
+private class FreWrite(fireStore: FirebaseFirestore) {
 
-    /**
-     * Fetches the [Freight] dataSet for the specified [Travel] ID.
-     *
-     * @param travelId The ID of the travel for which [Freight] dataSet is to be retrieved.
-     * @return A LiveData object containing a [Response] of [Freight] dataSet.
-     */
-    suspend fun getFreightListByTravelId(
-        travelId: String,
-        withFlow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Freight>>>()
-            val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
-
-            if (withFlow) {
-                listener.addSnapshotListener { snapQuery, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    snapQuery?.let { query ->
-                        liveData.postValue(Response.Success(query.toFreightList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toFreightList()))
-                    }
-                }.await()
-            }
-
-            return@withContext liveData
-        }
-    }
-
-    /**
-     * Fetches the [Freight] dataSet for the specified list of [Travel] ID.
-     *
-     * @param idList The ID list of the travel for which [Freight] dataSet is to be retrieved.
-     * @return A LiveData object containing a [Response] of [Freight] dataSet.
-     */
-    suspend fun getFreightListByTravelId(
-        idList: List<String>,
-        withFlow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<Freight>>>()
-            val listener = collection.whereIn(TRAVEL_ID, idList)
-
-            if (withFlow) {
-                listener.addSnapshotListener { snapQuery, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    snapQuery?.let { query ->
-                        liveData.postValue(Response.Success(query.toFreightList()))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        liveData.postValue(Response.Success(query.toFreightList()))
-                    }
-                }.await()
-            }
-
-            return@withContext liveData
-        }
-    }
-
-
-    /**
-     * Fetches the [Freight] dataSet for the specified ID.
-     *
-     * @param freightId The ID of the [Freight] for which data is to be retrieved.
-     * @param withFlow If the user wants to keep observing the source or not.
-     * @return A LiveData object containing a [Response] of an [Freight] dataSet.
-     */
-    suspend fun getFreightById(freightId: String, withFlow: Boolean): LiveData<Response<Freight>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<Freight>>()
-            val listener = collection.document(freightId)
-
-            if (withFlow) {
-                listener.addSnapshotListener { documentSnap, error ->
-                    error?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    documentSnap?.let { document ->
-                        val freight = document.toFreightObject()
-                        liveData.postValue(Response.Success(data = freight))
-                    }
-                }
-            } else {
-                listener.get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { document ->
-                        val freight = document.toFreightObject()
-                        liveData.postValue(Response.Success(freight))
-                    }
-                }
-            }
-
-            return@withContext liveData
-        }
-    }
-
-    /**
-     * Deletes an [Freight] document from the database based on the specified ID.
-     *
-     * @param freightId The ID of the document to be deleted.
-     */
-    suspend fun delete(freightId: String) {
-        collection
-            .document(freightId)
-            .delete()
-            .await()
-    }
+    private val collection = fireStore.collection(FIRESTORE_COLLECTION_FREIGHTS)
 
     /**
      * Saves the [FreightDto] object.
@@ -311,5 +100,132 @@ class FreightRepository(fireStore: FirebaseFirestore) {
             .await()
     }
 
+    /**
+     * Deletes an [Freight] document from the database based on the specified ID.
+     *
+     * @param freightId The ID of the document to be deleted.
+     */
+    suspend fun delete(freightId: String) {
+        collection
+            .document(freightId)
+            .delete()
+            .await()
+    }
+
+}
+
+private class FreRead(fireStore: FirebaseFirestore) {
+
+    private val collection = fireStore.collection(FIRESTORE_COLLECTION_FREIGHTS)
+
+    /**
+     * Fetches the [Freight] dataSet for the specified driver ID.
+     *
+     * @param driverId The ID of the [Employee].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Freight] list.
+     */
+    suspend fun getFreightListByDriverId(
+        driverId: String,
+        flow: Boolean = false
+    ): LiveData<Response<List<Freight>>> {
+        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+
+        return if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
+    }
+
+    /**
+     * Fetches the [Freight] dataSet for the specified driver ID list.
+     *
+     * @param driverIdList The ID list of the [Employee]'s.
+     * @param isPaid The payment status.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Freight] list.
+     */
+    suspend fun getFreightListByDriverIdsAndPaymentStatus(
+        driverIdList: List<String>,
+        isPaid: Boolean,
+        flow: Boolean = false
+    ): LiveData<Response<List<Freight>>> {
+        val listener = collection
+            .whereIn(DRIVER_ID, driverIdList)
+            .whereEqualTo(IS_COMMISSION_PAID, isPaid)
+
+        return if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
+    }
+
+    /**
+     * Fetches the [Freight] dataSet for the specified driver ID.
+     *
+     * @param driverId The ID of the [Employee].
+     * @param flow If the user wants to keep observing the data.
+     * @param isPaid The payment status.
+     * @return A [Response] with the [Freight] list.
+     */
+    suspend fun getFreightListByDriverIdAndPaymentStatus(
+        driverId: String,
+        isPaid: Boolean,
+        flow: Boolean = false
+    ): LiveData<Response<List<Freight>>> {
+        val listener = collection
+            .whereEqualTo(DRIVER_ID, driverId)
+            .whereEqualTo(IS_COMMISSION_PAID, isPaid)
+
+        return if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
+    }
+
+    /**
+     * Fetches the [Freight] dataSet for the specified travel ID.
+     *
+     * @param travelId The ID of the [Travel].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Freight] list.
+     */
+    suspend fun getFreightListByTravelId(
+        travelId: String,
+        flow: Boolean = false
+    ): LiveData<Response<List<Freight>>> {
+        val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+
+        return if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
+    }
+
+    /**
+     * Fetches the [Freight] dataSet for the specified travel ID list.
+     *
+     * @param travelIdList The ID list of the [Travel]'s.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Freight] list.
+     */
+    suspend fun getFreightListByTravelIds(
+        travelIdList: List<String>,
+        flow: Boolean = false
+    ): LiveData<Response<List<Freight>>> {
+        val listener = collection.whereIn(TRAVEL_ID, travelIdList)
+
+        return if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
+    }
+
+    /**
+     * Fetches the [Freight] dataSet for the specified ID.
+     *
+     * @param freightId The ID of the [Freight].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Freight] list.
+     */
+    suspend fun getFreightById(
+        freightId: String,
+        flow: Boolean = false
+    ): LiveData<Response<Freight>> {
+        val listener = collection.document(freightId)
+
+        return if (flow) listener.onSnapShot { it.toFreightObject() }
+        else listener.onComplete { it.toFreightObject() }
+    }
 
 }
