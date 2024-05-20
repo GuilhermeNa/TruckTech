@@ -10,8 +10,9 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
-import br.com.apps.model.factory.BankAccountFactory
-import br.com.apps.model.model.employee.BankAccount
+import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.model.bank.Bank
+import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.payment_method.PixType
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
@@ -41,8 +42,8 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
     private val args: BankEditorFragmentArgs by navArgs()
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
-            driverId = sharedViewModel.userData.value!!.user!!.employeeId,
+            masterUid = mainActVM.loggedUser.masterUid,
+            driverId = mainActVM.loggedUser.driverId,
             bankAccountId = args.bankId
         )
     }
@@ -68,21 +69,6 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
         initSaveButton()
-        initAutoCompleteAdapter()
-    }
-
-    /**
-     * Init auto complete adapter
-     */
-    private fun initAutoCompleteAdapter() {
-        val dataSet = viewModel.descriptionList
-        val adapter = ArrayAdapter(
-            requireContext(),
-            R.layout.simple_dropdown_item_1line,
-            dataSet
-        )
-        val autoComplete = binding.fragmentBankEditorAutoComplete
-        autoComplete.setAdapter(adapter)
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -100,17 +86,44 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
      * Init state manager
      */
     private fun initStateManager() {
-        viewModel.bankData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                is Response.Success -> response.data?.let { bind(it) }
+                is Response.Success -> {
+                    response.data?.apply {
+                        initBankAutoComplete(bankList)
+                        initPixAutoComplete(pixList)
+                        bankAcc?.let { bind(it) }
+                    }
+                }
             }
         }
     }
 
+    private fun initBankAutoComplete(bankList: List<Bank>) {
+        val bankNames = bankList.map { it.name }
+        val adapter = ArrayAdapter(
+            requireContext(),
+            R.layout.simple_dropdown_item_1line,
+            bankNames
+        )
+        val autoComplete = binding.fragBankEditorBankAutoComplete
+        autoComplete.setAdapter(adapter)
+    }
+
+    private fun initPixAutoComplete(pixList: List<String>) {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            R.layout.simple_dropdown_item_1line,
+            pixList
+        )
+        val autoComplete = binding.fragmentBankEditorAutoComplete
+        autoComplete.setAdapter(adapter)
+    }
+
     private fun bind(bankAccount: BankAccount) {
         binding.apply {
-            fragBankEditorBank.setText(bankAccount.bankName)
+            fragBankEditorBankAutoComplete.setText(bankAccount.bankName)
             fragBankEditorBranch.setText(bankAccount.branch.toString())
             fragBankEditorAccNumber.setText(bankAccount.accNumber.toString())
             fragmentBankEditorAutoComplete.setText(bankAccount.getTypeDescription())
@@ -127,22 +140,19 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                 setClickRangeTimer(it, 1000)
 
                 fragmentBankEditorAutoComplete.error = null
-                cleanEditTextError(
-                    fragBankEditorBank,
-                    fragBankEditorBranch,
-                    fragBankEditorAccNumber,
-                    fragBankEditorPix
-                )
+                fragBankEditorBankAutoComplete.error = null
+                cleanEditTextError(fragBankEditorBranch, fragBankEditorAccNumber, fragBankEditorPix)
 
-                val bankName = fragBankEditorBank.text.toString()
+                val bankName = fragBankEditorBankAutoComplete.text.toString()
                 val branch = fragBankEditorBranch.text.toString()
                 val accNumber = fragBankEditorAccNumber.text.toString()
                 val type = fragmentBankEditorAutoComplete.text.toString()
                 val pix = fragBankEditorPix.text.toString()
 
                 var fieldsAreValid = true
-                if (bankName.isBlank()) {
-                    fragBankEditorBank.error = "Preencha nome da instituição"
+
+                if (!viewModel.validateBank(bankName)) {
+                    fragBankEditorBankAutoComplete.error = "Preencha nome da instituição"
                     fieldsAreValid = false
                 }
                 if (branch.isBlank()) {
@@ -163,27 +173,30 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                 }
 
                 if (fieldsAreValid) {
-                    val mappedFields = hashMapOf(
-                        Pair(BankAccountFactory.TAG_BANK_NAME, bankName),
-                        Pair(BankAccountFactory.TAG_BRANCH, branch),
-                        Pair(BankAccountFactory.TAG_ACC_NUMBER, accNumber),
-                        Pair(BankAccountFactory.TAG_PIX, pix),
-                        Pair(BankAccountFactory.TAG_PIX_TYPE, PixType.getTypeInString(type)),
+                    val viewDto = BankAccountDto(
+                        bankName = bankName,
+                        branch = branch.toInt(),
+                        accNumber = accNumber.toInt(),
+                        pixType = PixType.getTypeInString(type),
+                        pix = pix,
+                        mainAccount = false,
+                        code = viewModel.getBankCode(bankName)
                     )
-                    saveBankAccount(mappedFields)
+                    saveBankAccount(viewDto)
                 }
 
             }
         }
     }
 
-    private fun saveBankAccount(mappedFields: HashMap<String, String>) {
-        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+    private fun saveBankAccount(viewDto: BankAccountDto) {
+        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_SAVE)
-                    Log.e(TAG_DEBUG, response.exception.message.toString() )
+                    Log.e(TAG_DEBUG, response.exception.message.toString())
                 }
+
                 is Response.Success -> {
                     requireView().snackBarGreen(SUCCESSFULLY_SAVED)
                     requireView().popBackStack()

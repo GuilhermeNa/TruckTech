@@ -8,8 +8,8 @@ import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.ExpendRepository
-import br.com.apps.repository.repository.LabelRepository
+import br.com.apps.repository.repository.expend.ExpendRepository
+import br.com.apps.repository.repository.label.LabelRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

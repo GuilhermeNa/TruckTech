@@ -8,7 +8,7 @@ import br.com.apps.model.IdHolder
 import br.com.apps.model.model.Fine
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.FineRepository
+import br.com.apps.repository.repository.fine.FineRepository
 import kotlinx.coroutines.launch
 
 class FinesListViewModel(

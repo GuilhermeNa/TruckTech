@@ -3,8 +3,6 @@ package br.com.apps.model.model.payment_method
 enum class PixType(val description: String) {
     PHONE("PHONE"),
     EMAIL("EMAIL"),
-    ID("ID"),
-    KEY("KEY"),
     CPF("CPF"),
     CNPJ("CNPJ");
 
@@ -13,8 +11,6 @@ enum class PixType(val description: String) {
             return when (type) {
                 "PHONE" -> PHONE
                 "EMAIL" -> EMAIL
-                "ID" -> ID
-                "KEY" -> KEY
                 "CPF" -> CPF
                 "CNPJ" -> CNPJ
                 else -> throw IllegalArgumentException("PixType, getType: Invalid type for string ($type)")
@@ -25,8 +21,6 @@ enum class PixType(val description: String) {
             return when (text) {
                 "Celular" -> "PHONE"
                 "Email" -> "EMAIL"
-                "Id" -> "ID"
-                "Chave" -> "KEY"
                 "Cpf" -> "CPF"
                 "Cnpj" -> "CNPJ"
                 else -> throw IllegalArgumentException()
@@ -37,8 +31,6 @@ enum class PixType(val description: String) {
             return hashMapOf(
                 Pair(PHONE, "Celular"),
                 Pair(EMAIL, "Email"),
-                Pair(ID, "Id"),
-                Pair(KEY, "Chave"),
                 Pair(CPF, "Cpf"),
                 Pair(CNPJ, "Cnpj"),
             )
@@ -50,7 +42,6 @@ enum class PixType(val description: String) {
         }
 
     }
-
 
 }
 

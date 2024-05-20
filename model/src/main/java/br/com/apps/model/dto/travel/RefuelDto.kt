@@ -18,4 +18,19 @@ data class RefuelDto(
     val totalValue: Double? = null,
     @field:JvmField
     val isCompleteRefuel: Boolean? = null
-)
+) {
+
+    fun validateFields(): Boolean {
+        var isValid = true
+
+        if (masterUid == null || truckId == null || travelId == null || driverId == null || date == null ||
+            station == null || odometerMeasure == null || amountLiters == null || totalValue == null ||
+            isCompleteRefuel == null
+        ) {
+            isValid = false
+        }
+
+        return isValid
+    }
+
+}

@@ -35,4 +35,10 @@
         android:layout_margin="16dp"
         android:importantForAccessibility="no" />
 
+    <include
+        android:id="@+id/frag_bank_box_empty"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        layout="@layout/box_error"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

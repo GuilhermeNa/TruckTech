@@ -4,7 +4,7 @@ import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.EMPTY_ID
-import br.com.apps.repository.repository.RefuelRepository
+import br.com.apps.repository.repository.refuel.RefuelRepository
 import java.security.InvalidParameterException
 
 class RefuelUseCase(private val repository: RefuelRepository) {

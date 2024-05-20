@@ -20,4 +20,18 @@ data class ExpendDto(
     var paidByEmployee: Boolean? = null,
     var alreadyRefunded: Boolean? = null
 
-)
+) {
+
+    fun validateFields(): Boolean {
+        var isValid = true
+
+        if (masterUid == null || truckId == null || travelId == null || driverId == null || labelId == null ||
+            company == null || date == null || value == null || paidByEmployee == null || alreadyRefunded == null
+        ) {
+            isValid = false
+        }
+
+        return isValid
+    }
+
+}

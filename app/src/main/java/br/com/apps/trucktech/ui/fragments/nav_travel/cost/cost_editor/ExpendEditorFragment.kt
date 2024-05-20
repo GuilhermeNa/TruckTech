@@ -41,9 +41,9 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
     private val args: ExpendEditorFragmentArgs by navArgs()
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
-            truckId = sharedViewModel.userData.value?.truck?.id,
-            driverId = sharedViewModel.userData.value?.user?.employeeId,
+            masterUid = mainActVM.loggedUser.masterUid,
+            truckId = mainActVM.loggedUser.truckId,
+            driverId = mainActVM.loggedUser.driverId,
             expendId = args.costId,
             travelId = args.travelId
         )

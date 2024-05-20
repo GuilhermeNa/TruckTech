@@ -12,7 +12,7 @@ import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.model.model.request.request.RequestItemType
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.RequestRepository
+import br.com.apps.repository.repository.request.RequestRepository
 import kotlinx.coroutines.launch
 
 class RequestEditorWalletFragmentViewModel(

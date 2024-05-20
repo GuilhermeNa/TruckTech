@@ -28,9 +28,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentRefundBinding? = null
     private val binding get() = _binding!!
 
-    private val driverId by lazy {
-        sharedViewModel.userData.value?.user?.employeeId
-    }
+    private val driverId by lazy { mainActVM.loggedUser.driverId }
     private val viewModel: RefundViewModel by viewModel { parametersOf(driverId) }
     private var adapter: ToReceiveRecyclerAdapter<Expend>? = null
 

@@ -1,21 +1,18 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.requests_list
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.IdHolder
 import br.com.apps.model.factory.RequestFactory
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.PaymentRequestStatusType
+import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.RequestRepository
-import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.expressions.getKeyByValue
-import br.com.apps.trucktech.ui.activities.main.DriverAndTruck
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 import java.time.LocalDateTime
@@ -27,11 +24,9 @@ private const val DENIED = "Negados"
 private const val PROCESSED = "Processados"
 
 class RequestsListViewModel(
-    private val driverAndTruck: DriverAndTruck,
+    private val idHolder: IdHolder,
     private val repository: RequestRepository
 ) : ViewModel() {
-
-    private var loadDataJob: Job? = null
 
     /**
      * LiveData holding the response data of type [Response] with a list of expenditures [PaymentRequest]
@@ -74,17 +69,15 @@ class RequestsListViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        Log.d(TAG_DEBUG, "ViewModel init")
         loadData()
     }
 
     fun loadData() {
-        val id = driverAndTruck.user?.employeeId ?: throw InvalidParameterException(EMPTY_ID)
+        val id = idHolder.driverId ?: throw InvalidParameterException(EMPTY_ID)
         viewModelScope.launch {
-            repository.getCompleteRequestListByDriverId(driverId = id, withFlow = true)
+            repository.getCompleteRequestListByDriverId(driverId = id, flow = true)
                 .asFlow().collect {
                     _requestData.value = it
-                    Log.d(TAG_DEBUG, "collected on list")
                 }
         }
     }
@@ -99,16 +92,16 @@ class RequestsListViewModel(
     suspend fun save() =
         liveData<Response<String>>(viewModelScope.coroutineContext) {
             try {
-                val requestDto = driverAndTruck.let {
+                val requestDto =
                     RequestFactory.createDto(
-                        masterUid = it.user?.masterUid,
-                        truckId = it.truck?.id,
-                        driverId = it.user?.employeeId,
+                        masterUid = idHolder.masterUid,
+                        truckId = idHolder.truckId,
+                        driverId = idHolder.driverId,
                         date = LocalDateTime.now(),
                         status = PaymentRequestStatusType.SENT.description
                     )
-                }
-                val id = repository.create(requestDto)
+
+                val id = repository.save(requestDto)
                 emit(Response.Success(id))
             } catch (e: Exception) {
                 emit(Response.Error(e))

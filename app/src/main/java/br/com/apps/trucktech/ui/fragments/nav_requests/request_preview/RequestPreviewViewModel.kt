@@ -7,7 +7,7 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.RequestRepository
+import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
 import kotlinx.coroutines.launch

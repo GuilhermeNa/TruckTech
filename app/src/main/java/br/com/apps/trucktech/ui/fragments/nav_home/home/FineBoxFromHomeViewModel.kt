@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.Fine
+import br.com.apps.repository.repository.fine.FineRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.FineRepository
 import br.com.apps.usecase.FineUseCase
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -29,7 +29,7 @@ class FineBoxFromHomeViewModel(
 
     fun loadData(driverId: String) {
         viewModelScope.launch {
-            repository.getFineListByDriverId(driverId, withFlow = false).asFlow().collect {
+            repository.getFineListByDriverId(driverId).asFlow().collect {
                 _fineData.value = it
             }
         }

@@ -2,10 +2,9 @@ package br.com.apps.trucktech.ui.fragments.nav_settings.settings
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import br.com.apps.model.model.user.User
 import br.com.apps.trucktech.R
 
-class SettingsViewModel(user: User?) : ViewModel() {
+class SettingsViewModel(userName: String) : ViewModel() {
 
     /**
      * LiveData with a dark layer state, used when dialog is requested.
@@ -25,7 +24,7 @@ class SettingsViewModel(user: User?) : ViewModel() {
     val settingsItems = listOf(
         SettingsItem(
             imageUrl = "https://www3.al.sp.gov.br/repositorio/deputadoPortal/fotos/20230315-170849-id=1649-GRD.jpeg",
-            title = user?.name
+            title = userName
         ),
         SettingsItem(
             imageId = R.drawable.icon_key,

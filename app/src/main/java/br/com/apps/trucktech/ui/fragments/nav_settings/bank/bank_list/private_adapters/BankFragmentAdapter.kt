@@ -9,11 +9,13 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.employee.BankAccount
+import br.com.apps.model.model.bank.Bank
+import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.repository.util.INVALID_OBJECT_ID
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemBankBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
+import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankLFData
 import java.security.InvalidParameterException
 
 class BankFragmentAdapter(
@@ -24,6 +26,7 @@ class BankFragmentAdapter(
 ) : RecyclerView.Adapter<BankFragmentAdapter.ViewHolder>() {
 
     private val dataSet = dataSet.toMutableList()
+    private var bankList = emptyList<Bank>()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDERS
@@ -97,7 +100,8 @@ class BankFragmentAdapter(
 
     private fun bind(holder: ViewHolder, bankAccount: BankAccount) {
         holder.apply {
-            bankImage.loadImageThroughUrl(bankAccount.image, context)
+            val urlImage = bankList.first { it.code == bankAccount.code }.urlImage
+            bankImage.loadImageThroughUrl(urlImage, context)
             name.text = bankAccount.bankName
             bankAccount.mainAccount?.let { isTrue ->
                 if (isTrue) checkImage.visibility = VISIBLE
@@ -107,9 +111,11 @@ class BankFragmentAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(dataSet: List<BankAccount>) {
+    fun update(dataSet: BankLFData) {
+        this.bankList = dataSet.bankList
+
         this.dataSet.clear()
-        this.dataSet.addAll(dataSet)
+        this.dataSet.addAll(dataSet.bankAccList)
         notifyDataSetChanged()
     }
 

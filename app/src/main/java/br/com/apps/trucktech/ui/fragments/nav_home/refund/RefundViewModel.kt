@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Expend
+import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.ExpendRepository
 import kotlinx.coroutines.launch
 
 class RefundViewModel(
@@ -34,8 +34,7 @@ class RefundViewModel(
            repository.getExpendListByDriverIdAndRefundableStatus(
                driverId = driverId,
                paidByEmployee = true,
-               alreadyRefunded = false,
-               withFlow = false
+               alreadyRefunded = false
            ).asFlow().collect {
             _expendData.value = it
            }

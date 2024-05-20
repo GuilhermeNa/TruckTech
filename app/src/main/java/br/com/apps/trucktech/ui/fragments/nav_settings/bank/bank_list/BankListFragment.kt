@@ -1,18 +1,23 @@
 package br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.Response
+import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentBankBinding
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.private_adapters.BankFragmentAdapter
+import br.com.apps.trucktech.util.State
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -30,18 +35,10 @@ class BankListFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val employeeId by lazy {
-        sharedViewModel.userData.value!!.user!!.employeeId
+        mainActVM.loggedUser.driverId
     }
     private val viewModel: BankListFragmentViewModel by viewModel { parametersOf(employeeId) }
     private var adapter: BankFragmentAdapter? = null
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------/
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -103,20 +100,55 @@ class BankListFragment : BaseFragmentWithToolbar() {
      * Init state manager
      */
     private fun initStateManager() {
-        viewModel.bankData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when (response) {
+                is Response.Error -> Log.d(TAG_DEBUG, response.exception.message.toString())
                 is Response.Success -> {
                     response.data?.let { dataSet ->
-                        viewModel.bankList = dataSet
                         adapter?.update(dataSet)
                     }
                 }
+            }
+        }
 
-                is Response.Error -> {
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when(state) {
+                is State.Loading -> {
+                    binding.apply {
+                        fragmentBankRecycler.visibility = GONE
+                        fragBankBoxEmpty.layout.visibility = GONE
+                        fragBankBoxEmpty.error.visibility = GONE
+                        fragBankBoxEmpty.empty.visibility = GONE
+                    }
+                }
+                is State.Loaded -> {
+                    binding.apply {
+                        fragmentBankRecycler.visibility = VISIBLE
+                        fragBankBoxEmpty.layout.visibility = GONE
+                        fragBankBoxEmpty.error.visibility = GONE
+                        fragBankBoxEmpty.empty.visibility = GONE
+                    }
+                }
+                is State.Empty -> {
+                    binding.apply {
+                        fragmentBankRecycler.visibility = GONE
+                        fragBankBoxEmpty.layout.visibility = VISIBLE
+                        fragBankBoxEmpty.error.visibility = GONE
+                        fragBankBoxEmpty.empty.visibility = VISIBLE
+                    }
+                }
+                is State.Error -> {
                     requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                    binding.apply {
+                        fragmentBankRecycler.visibility = GONE
+                        fragBankBoxEmpty.layout.visibility = VISIBLE
+                        fragBankBoxEmpty.error.visibility = VISIBLE
+                        fragBankBoxEmpty.empty.visibility = GONE
+                    }
                 }
             }
         }
+
     }
 
     /**

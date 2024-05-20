@@ -1,6 +1,6 @@
 package br.com.apps.usecase
 
-import br.com.apps.repository.repository.RequestRepository
+import br.com.apps.repository.repository.request.RequestRepository
 
 /**
  * Use case class responsible for handling business logic related to payment requests and items.

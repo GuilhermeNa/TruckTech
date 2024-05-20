@@ -6,10 +6,10 @@ import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.repository.repository.ExpendRepository
-import br.com.apps.repository.repository.FreightRepository
-import br.com.apps.repository.repository.RefuelRepository
-import br.com.apps.repository.repository.TravelRepository
+import br.com.apps.repository.repository.expend.ExpendRepository
+import br.com.apps.repository.repository.freight.FreightRepository
+import br.com.apps.repository.repository.refuel.RefuelRepository
+import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.util.Response
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -113,7 +113,7 @@ class TravelUseCase(
                 }
 
                 val deferredD = CompletableDeferred<List<Expend>>()
-                val liveDataD = expendRepository.getExpendListByTravelId(idList, withFlow = true)
+                val liveDataD = expendRepository.getExpendListByTravelIds(idList, true)
                 mediator.addSource(liveDataD) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response

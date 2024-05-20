@@ -1,6 +1,6 @@
 package br.com.apps.usecase
 
-import br.com.apps.repository.repository.IncomeRepository
+import br.com.apps.repository.repository.income.IncomeRepository
 
 class IncomeUseCase(private val repository: IncomeRepository) {
 

@@ -101,13 +101,6 @@ data class Travel(
         return false
     }
 
-    fun validateIds(): Boolean {
-        return !(masterUid.isNullOrBlank() ||
-                id.isNullOrBlank() ||
-                truckId.isNullOrBlank() ||
-                driverId.isNullOrBlank())
-    }
-
     companion object {
         const val FREIGHT = 0
         const val EXPEND = 1

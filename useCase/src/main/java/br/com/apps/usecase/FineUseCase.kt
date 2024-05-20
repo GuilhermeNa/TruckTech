@@ -1,7 +1,7 @@
 package br.com.apps.usecase
 
 import br.com.apps.model.model.Fine
-import br.com.apps.repository.repository.FineRepository
+import br.com.apps.repository.repository.fine.FineRepository
 import java.time.LocalDateTime
 
 class FineUseCase(private val repository: FineRepository) {

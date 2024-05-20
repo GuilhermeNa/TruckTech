@@ -23,7 +23,7 @@ class DiscountFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentDiscountBinding? = null
     private val binding get() = _binding!!
 
-    private val employeeId by lazy { sharedViewModel.userData.value?.user?.employeeId }
+    private val employeeId by lazy { mainActVM.loggedUser.driverId }
     private val viewModel: DiscountViewModel by viewModel { parametersOf(employeeId) }
 
     private var advanceAdapter: AdvanceRecyclerAdapter? = null

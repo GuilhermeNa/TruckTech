@@ -20,7 +20,17 @@ const val IS_PAID = "isPaid"
 
 const val REQUEST_ID = "requestId"
 
+const val PAID_BY_EMPLOYEE = "paidByEmployee"
 
+const val ALREADY_REFUNDED = "alreadyRefunded"
+
+const val IS_COMMISSION_PAID = "isCommissionPaid"
+
+const val LABEL_TYPE = "type"
+
+const val LABEL_IS_OPERATIONAL = "isOperational"
+
+const val ENCODED_IMAGE = "encodedImage"
 
 //---------------------------------------------------------------------------------------------//
 // SUCCESS MESSAGES
@@ -65,6 +75,28 @@ internal const val FIRESTORE_COLLECTION_EXPENDS = "expends"
 internal const val FIRESTORE_COLLECTION_LOANS = "loans"
 
 internal const val FIRESTORE_COLLECTION_FINES = "fines"
+
+internal const val FIRESTORE_COLLECTION_TRUCKS = "trucks"
+
+internal const val FIRESTORE_COLLECTION_DOCUMENTS = "documents"
+
+internal const val FIRESTORE_COLLECTION_DEFAULT_LABELS = "defaultLabels"
+
+internal const val FIRESTORE_COLLECTION_USER_LABELS = "labels"
+
+internal const val FIRESTORE_COLLECTION_INCOMES = "incomes"
+
+internal const val FIRESTORE_COLLECTION_REQUESTS = "requests"
+
+internal const val FIRESTORE_COLLECTION_ITEMS = "requestItems"
+
+internal const val FIRESTORE_COLLECTION_DEFAULT_BANKS = "_banks"
+
+internal const val FIRESTORE_COLLECTION_DRIVER = "driverEmployee"
+
+internal const val FIRESTORE_COLLECTION_ADMIN = "adminEmployee"
+
+internal const val FIRESTORE_COLLECTION_BANK = "bankAccount"
 
 //---------------------------------------------------------------------------------------------//
 // COMMON

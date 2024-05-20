@@ -7,7 +7,6 @@ const val DEFAULT_FINANCIAL_LABEL_ID = "1kmv9NwCjA7xG9F4fpXR"
 const val DEFAULT_FINANCIAL_COMPLEMENT_ID = "vYAf2oXK4cEgRzgTLMKP"
 const val DEFAULT_FINANCIAL_DAILY_ID = "58Fh8JUftUbc5i3h2VbG"
 
-
 data class Label(
     val masterUid: String? = null,
     val id: String? = null,

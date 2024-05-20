@@ -36,7 +36,7 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
     private val args: RequestEditorCostFragmentArgs by navArgs()
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
+            masterUid = mainActVM.loggedUser.masterUid,
             requestId = args.requestId,
             expendId = args.costId
         )

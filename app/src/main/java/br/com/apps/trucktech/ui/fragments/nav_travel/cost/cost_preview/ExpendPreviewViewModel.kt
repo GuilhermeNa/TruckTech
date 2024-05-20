@@ -7,7 +7,7 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.ExpendRepository
+import br.com.apps.repository.repository.expend.ExpendRepository
 import kotlinx.coroutines.launch
 
 class ExpendPreviewViewModel(

@@ -7,7 +7,7 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.RefuelRepository
+import br.com.apps.repository.repository.refuel.RefuelRepository
 import kotlinx.coroutines.launch
 
 class RefuelPreviewViewModel(

@@ -3,6 +3,8 @@ package br.com.apps.trucktech.ui.fragments.nav_documents.documents_list
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -15,6 +17,7 @@ import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.private_adapters.DocumentsListFragmentAdapter
+import br.com.apps.trucktech.util.State
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -32,11 +35,11 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
 
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
-            truckId = sharedViewModel.userData.value?.truck?.id
+            masterUid = mainActVM.loggedUser.masterUid,
+            truckId = mainActVM.loggedUser.truckId
         )
     }
-    private val viewModel : DocumentsListFragmentViewModel by viewModel{ parametersOf(idHolder) }
+    private val viewModel: DocumentsListFragmentViewModel by viewModel { parametersOf(idHolder) }
     private var adapter: DocumentsListFragmentAdapter? = null
 
     //---------------------------------------------------------------------------------------------//
@@ -78,10 +81,47 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
      *   - Observes documentData for update the recyclerView
      */
     private fun initStateManager() {
-        viewModel.documentData.observe(viewLifecycleOwner) { response ->
-            when(response) {
+        viewModel.data.observe(viewLifecycleOwner) { response ->
+            when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> response.data?.let { adapter?.update(it) }
+            }
+        }
+
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is State.Loading -> {
+                    binding.apply {
+                        freightFragmentRecycler.visibility = GONE
+                        fragDocumentBoxEmpty.layout.visibility = GONE
+                        fragDocumentBoxEmpty.error.visibility = GONE
+                        fragDocumentBoxEmpty.empty.visibility = GONE
+                    }
+                }
+                is State.Loaded -> {
+                    binding.apply {
+                        freightFragmentRecycler.visibility = VISIBLE
+                        fragDocumentBoxEmpty.layout.visibility = GONE
+                        fragDocumentBoxEmpty.error.visibility = GONE
+                        fragDocumentBoxEmpty.empty.visibility = GONE
+                    }
+                }
+                is State.Empty -> {
+                    binding.apply {
+                        freightFragmentRecycler.visibility = GONE
+                        fragDocumentBoxEmpty.layout.visibility = VISIBLE
+                        fragDocumentBoxEmpty.error.visibility = GONE
+                        fragDocumentBoxEmpty.empty.visibility = VISIBLE
+                    }
+                }
+                is State.Error -> {
+                    binding.apply {
+                        freightFragmentRecycler.visibility = GONE
+                        fragDocumentBoxEmpty.layout.visibility = VISIBLE
+                        fragDocumentBoxEmpty.error.visibility = VISIBLE
+                        fragDocumentBoxEmpty.empty.visibility = GONE
+                    }
+                }
             }
         }
     }
@@ -92,7 +132,11 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
             requireContext(),
             emptyList(),
             itemCLickListener = { document ->
-                requireView().navigateTo(DocumentsListFragmentDirections.actionDocumentsListFragmentToDocumentFragment(document))
+                requireView().navigateTo(
+                    DocumentsListFragmentDirections.actionDocumentsListFragmentToDocumentFragment(
+                        document
+                    )
+                )
             }
         )
         recyclerView.adapter = adapter

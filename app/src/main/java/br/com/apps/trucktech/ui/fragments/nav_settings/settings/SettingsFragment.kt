@@ -12,7 +12,7 @@ import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentSettingsBinding
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.toast
-import br.com.apps.trucktech.ui.activities.login.LoginActivity
+import br.com.apps.trucktech.ui.activities.LoginActivity
 import br.com.apps.trucktech.ui.activities.main.VisualComponents
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsViewModel.Companion.BANK
@@ -33,7 +33,8 @@ class SettingsFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SettingsViewModel by viewModel { parametersOf(sharedViewModel.userData.value?.user) }
+    private val userName by lazy { mainActVM.loggedUser.name }
+    private val viewModel: SettingsViewModel by viewModel { parametersOf(userName) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -78,8 +79,8 @@ class SettingsFragment : BaseFragmentWithToolbar() {
 
         viewModel.bottomNav.observe(viewLifecycleOwner) { isRequested ->
             when (isRequested) {
-                true -> sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = true))
-                false -> sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = false))
+                true -> mainActVM.setComponents(VisualComponents(hasBottomNavigation = true))
+                false -> mainActVM.setComponents(VisualComponents(hasBottomNavigation = false))
             }
         }
     }

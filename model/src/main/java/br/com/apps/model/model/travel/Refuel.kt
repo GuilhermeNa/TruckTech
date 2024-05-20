@@ -21,12 +21,4 @@ data class Refuel(
     var isCompleteRefuel: Boolean? = null
 ) {
 
-    fun validateIds(): Boolean {
-        return !(masterUid.isNullOrBlank() ||
-                id.isNullOrBlank() ||
-                truckId.isNullOrBlank() ||
-                driverId.isNullOrBlank() ||
-                travelId.isNullOrBlank())
-    }
-
 }

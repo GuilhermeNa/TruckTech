@@ -4,7 +4,7 @@ import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.EMPTY_ID
-import br.com.apps.repository.repository.FreightRepository
+import br.com.apps.repository.repository.freight.FreightRepository
 import java.security.InvalidParameterException
 
 class FreightUseCase(

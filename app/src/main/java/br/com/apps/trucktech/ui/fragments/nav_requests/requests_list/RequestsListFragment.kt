@@ -10,6 +10,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.IdHolder
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
@@ -50,10 +51,14 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentRequestsListBinding? = null
     private val binding get() = _binding!!
 
-    private val driverAndTruck by lazy {
-        sharedViewModel.userData.value
+    private val idHolder by lazy {
+        IdHolder(
+            masterUid = mainActVM.loggedUser.masterUid,
+            truckId =  mainActVM.loggedUser.truckId,
+            driverId =  mainActVM.loggedUser.driverId
+        )
     }
-    private val viewModel: RequestsListViewModel by viewModel { parametersOf(driverAndTruck) }
+    private val viewModel: RequestsListViewModel by viewModel { parametersOf(idHolder) }
     private var adapter: RequestsListRecyclerAdapter? = null
 
     //---------------------------------------------------------------------------------------------//
@@ -190,8 +195,8 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
         viewModel.bottomNav.observe(viewLifecycleOwner) { isRequested ->
             when (isRequested) {
-                true -> sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = true))
-                false -> sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = false))
+                true -> mainActVM.setComponents(VisualComponents(hasBottomNavigation = true))
+                false -> mainActVM.setComponents(VisualComponents(hasBottomNavigation = false))
             }
         }
 

@@ -4,6 +4,9 @@ import br.com.apps.model.dto.DocumentDto
 import br.com.apps.model.dto.FineDto
 import br.com.apps.model.dto.LabelDto
 import br.com.apps.model.dto.TruckDto
+import br.com.apps.model.dto.bank.BankDto
+import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
 import br.com.apps.model.dto.request.request.PaymentRequestDto
@@ -13,10 +16,14 @@ import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.exceptions.ConversionException
+import br.com.apps.model.mapper.EmployeeMapper.Companion.toModel
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.Document
 import br.com.apps.model.model.Fine
 import br.com.apps.model.model.Truck
+import br.com.apps.model.model.bank.Bank
+import br.com.apps.model.model.bank.BankAccount
+import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
@@ -159,4 +166,37 @@ fun QuerySnapshot.toTruckList(): List<Truck> {
 fun DocumentSnapshot.toTruckObject(): Truck {
     return this.toObject(TruckDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toTruckObject: ($this)")
+}
+
+fun QuerySnapshot.toBankList(): List<Bank> {
+    return this.mapNotNull { document ->
+        document.toBankObject()
+    }
+}
+
+fun DocumentSnapshot.toBankObject(): Bank {
+    return this.toObject(BankDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toBankObject: ($this)")
+}
+
+fun QuerySnapshot.toBankAccountList(): List<BankAccount> {
+    return this.mapNotNull { document ->
+        document.toBankAccountObject()
+    }
+}
+
+fun DocumentSnapshot.toBankAccountObject(): BankAccount {
+    return this.toObject(BankAccountDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toBankAccountObject: ($this)")
+}
+
+private fun QuerySnapshot.toEmployeeList(): List<Employee> {
+    return this.mapNotNull { document ->
+        document.toEmployeeObject()
+    }
+}
+
+private fun DocumentSnapshot.toEmployeeObject(): Employee {
+    return this.toObject(DriverEmployeeDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toBankAccountObject: ($this)")
 }

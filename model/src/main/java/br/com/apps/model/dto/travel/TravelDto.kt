@@ -23,6 +23,17 @@ data class TravelDto(
     val expendsList: List<Expend>? = null
 ) {
 
+    fun validateFields(): Boolean {
+        var isValid = true
+
+        if (masterUid == null || truckId == null || driverId == null || isFinished == null ||
+            initialDate == null || initialOdometerMeasurement == null
+        ) {
+            isValid = false
+        }
+
+        return isValid
+    }
 
 }
 

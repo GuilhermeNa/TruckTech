@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Freight
+import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.FreightRepository
 import kotlinx.coroutines.launch
 
 class PaymentViewModel(
@@ -31,13 +31,10 @@ class PaymentViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.getFreightListByDriverIdAndPaymentStatus(
-                driverId,
-                isPaid = false,
-                withFlow = false
-            ).asFlow().collect {
-                _freightData.value = it
-            }
+            repository.getFreightListByDriverIdAndPaymentStatus(driverId, isPaid = false)
+                .asFlow().collect {
+                    _freightData.value = it
+                }
         }
     }
 

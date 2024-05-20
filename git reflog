@@ -1,0 +1,83 @@
+[33mcommit 7699e3b7f040cae652e4982eb4ae2ccd19c3d98b[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Merge: 470d294 ea30ff5
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Fri May 17 15:27:30 2024 -0300
+
+    Merge remote-tracking branch 'origin/master'
+    
+    # Conflicts:
+    #       app/src/main/java/br/com/apps/trucktech/ui/fragments/nav_requests/requests_list/RequestsListFragment.kt
+
+[33mcommit 470d294c6ed76131a9f7d84bc0c4cf1f4af276e7[m
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Mon May 13 11:34:13 2024 -0300
+
+    v0.1 - Request nav refactor done
+
+[33mcommit ea30ff5abadb4dc55fdd86d04d79283c6402352b[m
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Mon May 13 11:34:13 2024 -0300
+
+    v0.1 - Request nav refactor done
+
+[33mcommit 155e157383355fb4e8f84d2d6d0ef9bce5f25466[m
+Merge: 0fcd456 6fb9eeb
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Mon May 13 08:25:51 2024 -0300
+
+    Merge remote-tracking branch 'origin/master'
+    
+    # Conflicts:
+    #       app/src/main/java/br/com/apps/trucktech/di/AppModules.kt
+    #       app/src/main/java/br/com/apps/trucktech/ui/fragments/nav_home/home/FineBoxFromHomeViewModel.kt
+    #       app/src/main/java/br/com/apps/trucktech/ui/fragments/nav_home/home/HomeFragment.kt
+    #       app/src/main/java/br/com/apps/trucktech/ui/fragments/nav_home/home/ToReceiveBoxFromHomeViewModel.kt
+    #       repository/src/main/java/br/com/apps/repository/repository/ExpendRepository.kt
+    #       repository/src/main/java/br/com/apps/repository/repository/FreightRepository.kt
+    #       useCase/src/main/java/br/com/apps/usecase/AppModules.kt
+
+[33mcommit 0fcd4564fc0df67965aacf698e73476350e840ee[m
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Fri May 10 20:19:41 2024 -0300
+
+    v0.1 - Request nav refactor
+
+[33mcommit 2d8f45a61834a922c21e7ba18c86f5ad8b308490[m
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Thu May 2 19:38:53 2024 -0300
+
+    v0.1 - Home Fragment viewModels
+
+[33mcommit 6fb9eebf5b7a4adda0e16945bc653b215bd36e75[m
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Thu May 2 19:38:53 2024 -0300
+
+    v0.1 - Home Fragment viewModels
+
+[33mcommit 6c9bbf42fb50feba319cfdddc9f9e838f0e6fea2[m
+Merge: e327d57 5c26796
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Tue Apr 30 07:52:06 2024 -0300
+
+    Merge remote-tracking branch 'origin/master'
+    
+    # Conflicts:
+    #       useCase/src/main/java/br/com/apps/usecase/AppModules.kt
+
+[33mcommit e327d57c6d841758dcd37ea49b7bd5b528cfe1da[m
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Sat Apr 20 12:18:45 2024 -0300
+
+    v0.1 - Inserting project
+
+[33mcommit 5c267966fc29228b13686a9103bbdc858e341454[m
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Sat Apr 20 12:18:45 2024 -0300
+
+    v0.1 - Inserting project
+
+[33mcommit faa5827c11969fa059f9cbf5facf825e3daf2b72[m
+Author: GuilhermeNa <napoleao.gns@hotmail.com>
+Date:   Sat Apr 20 11:18:07 2024 -0300
+
+    v0.1 - Inserting project

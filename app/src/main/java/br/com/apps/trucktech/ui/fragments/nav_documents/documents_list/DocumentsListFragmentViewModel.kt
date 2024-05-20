@@ -8,15 +8,14 @@ import br.com.apps.model.IdHolder
 import br.com.apps.model.model.Document
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
+import br.com.apps.repository.repository.document.DocumentRepository
+import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.DocumentRepository
-import br.com.apps.repository.repository.LabelRepository
+import br.com.apps.trucktech.util.State
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class DocumentsListFragmentViewModel(
     idHolder: IdHolder,
     private val documentRepository: DocumentRepository,
@@ -30,8 +29,11 @@ class DocumentsListFragmentViewModel(
      * LiveData holding the response data of type [Response] with a list of [Document]
      * to be displayed on screen.
      */
-    private val _documentData = MutableLiveData<Response<List<Document>>>()
-    val documentData get() = _documentData
+    private val _data = MutableLiveData<Response<List<Document>>>()
+    val data get() = _data
+
+    private val _state = MutableLiveData<State>()
+    val state get() = _state
 
     //---------------------------------------------------------------------------------------------//
     // -
@@ -42,39 +44,56 @@ class DocumentsListFragmentViewModel(
     }
 
     private fun loadData() {
+        _state.value = State.Loading
+
         viewModelScope.launch {
-            val deferredA = CompletableDeferred<List<Document>>()
-            val deferredB = CompletableDeferred<List<Label>>()
 
-            launch { loadDocumentData { data -> deferredA.complete(data) } }
-            launch { loadLabelData { data -> deferredB.complete(data) } }
+            val docListDef = loadDocumentData()
+            val labelListDef = loadLabelData()
 
-            awaitAll(deferredA, deferredB)
-            val documentList = deferredA.getCompleted()
-            val labelList = deferredB.getCompleted()
+            val docList = docListDef.await()
+            val labList = labelListDef.await()
 
-            mergeData(documentList, labelList)
-            _documentData.postValue(Response.Success(data = documentList))
+            mergeData(docList, labList)
+            sendResponse(docList)
+
         }
     }
 
-    private suspend fun loadDocumentData(complete: (data: List<Document>) -> Unit) {
-        documentRepository.getDocumentListByTruckId(truckId).asFlow().collect { response ->
-            when (response) {
-                is Response.Error -> throw IllegalArgumentException()
-                is Response.Success -> response.data?.let { complete(it) }
-            }
-        }
-    }
+    private suspend fun loadDocumentData(): CompletableDeferred<List<Document>> {
+        val deferred = CompletableDeferred<List<Document>>()
 
-    private suspend fun loadLabelData(complete: (data: List<Label>) -> Unit) {
-        labelRepository.getLabelListByTypeAndUserId(LabelType.DOCUMENT.description, masterUid)
-            .asFlow().collect { response ->
+        documentRepository.getDocumentListByTruckId(truckId)
+            .asFlow().first { response ->
                 when (response) {
-                    is Response.Error -> throw IllegalArgumentException()
-                    is Response.Success -> response.data?.let { complete(it) }
+                    is Response.Error -> {
+                        _state.value = State.Error(response.exception)
+                        _data.value = response
+                    }
+                    is Response.Success -> response.data?.let { deferred.complete(it) }
                 }
+                true
             }
+
+        return deferred
+    }
+
+    private suspend fun loadLabelData(): CompletableDeferred<List<Label>> {
+        val deferred = CompletableDeferred<List<Label>>()
+
+        labelRepository.getLabelListByMasterUidAndType(LabelType.DOCUMENT.description, masterUid)
+            .asFlow().first { response ->
+                when (response) {
+                    is Response.Error -> {
+                        _state.value = State.Error(response.exception)
+                        _data.value = response
+                    }
+                    is Response.Success -> response.data?.let { deferred.complete(it) }
+                }
+                true
+            }
+
+        return deferred
     }
 
     private fun mergeData(documents: List<Document>?, labelResponse: List<Label>) {
@@ -83,6 +102,17 @@ class DocumentsListFragmentViewModel(
             val label = labelResponse.firstOrNull { it.id == id }
             document.name = label?.name
         }
+    }
+
+    private fun sendResponse(docList: List<Document>) {
+        if (docList.isEmpty()) {
+            _state.value = State.Empty
+        }
+        else {
+            _state.value = State.Loaded
+        }
+
+        _data.postValue(Response.Success(data = docList))
     }
 
 }

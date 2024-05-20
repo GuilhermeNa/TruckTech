@@ -130,16 +130,10 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
      */
     private fun initBoxSummary() {
         binding.boxFragRequestPreviewDescription.apply {
-            sharedViewModel.userData.value.let {
-                it?.let { driverAndUser ->
-                    driverAndUser.user?.name?.let { name -> driverField.text = name } ?: "-"
-                    driverAndUser.truck?.plate?.let { truckPlate -> plateField.text = truckPlate }
-                        ?: "-"
-                    valueField.text = "-"
-                }
-            }
+            driverField.text = mainActVM.loggedUser.name
+            plateField.text = mainActVM.loggedUser.plate
+            valueField.text = "-"
         }
-
     }
 
     /**

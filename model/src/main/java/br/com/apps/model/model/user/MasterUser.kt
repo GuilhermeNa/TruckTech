@@ -4,8 +4,8 @@ data class MasterUser(
 
     override val masterUid: String? = null,
 
-    override val email: String? = "",
-    override val name: String? = "",
+    override val email: String? = null,
+    override val name: String? = null,
 
     ) : User(
     masterUid = masterUid,

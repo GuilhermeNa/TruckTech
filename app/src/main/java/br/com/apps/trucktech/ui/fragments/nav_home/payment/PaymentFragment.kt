@@ -28,9 +28,7 @@ class PaymentFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentPaymentBinding? = null
     private val binding get() = _binding!!
 
-    private val driverId by lazy {
-        sharedViewModel.userData.value?.user?.employeeId
-    }
+    private val driverId by lazy { mainActVM.loggedUser.driverId }
     private val viewModel: PaymentViewModel by viewModel { parametersOf(driverId) }
     private var adapter: ToReceiveRecyclerAdapter<Freight>? = null
 

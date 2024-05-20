@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.LabelDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
-import br.com.apps.repository.repository.LabelRepository
+import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.Response
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope

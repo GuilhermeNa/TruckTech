@@ -11,12 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
-import br.com.apps.model.model.user.CommonUser
+import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.databinding.FragmentHomeBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo
+import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.trucktech.ui.activities.main.LoggedUser
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_home.home.private_adapters.HomeFragmentPerformanceViewPagerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_home.home.private_adapters.PeriodRecyclerAdapter
@@ -50,13 +52,15 @@ class HomeFragment : BaseFragmentWithToolbar() {
         loadUserData()
     }
 
+
+
     /**
      * When the app starts and the user logs in, it will load the driver data and save it in the
      * shared activity ViewModel.
      */
     private fun loadUserData() {
         authViewModel.userId.let {
-            sharedViewModel.loadUserData(it)
+            mainActVM.loadUserData(it)
         }
     }
 
@@ -93,22 +97,27 @@ class HomeFragment : BaseFragmentWithToolbar() {
      * State manager for home fragment
      */
     private fun initGeneralStateManager() {
-        sharedViewModel.userData.observe(viewLifecycleOwner) {
-            it?.let { driverAndTruck ->
-                driverAndTruck.user?.let { user ->
-                    bindHeader(user)
-                    user.employeeId?.let { employeeId ->
-                        toReceiveVm.loadData(employeeId)
-                        performanceVm.loadData(employeeId)
-                        fineVm.loadData(employeeId)
+        mainActVM.userData.observe(viewLifecycleOwner) { response ->
+            when(response) {
+                is Response.Error -> {
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                    requireActivity().finish()
+                }
+
+                is Response.Success -> {
+                    response.data?.let {loggedUser ->
+                        bindHeader(loggedUser)
+                        toReceiveVm.loadData(loggedUser.driverId)
+                        performanceVm.loadData(loggedUser.driverId)
+                        fineVm.loadData(loggedUser.driverId)
                     }
                 }
             }
         }
     }
 
-    private fun bindHeader(user: CommonUser) {
-        binding.fragmentHomeName.text = user.name
+    private fun bindHeader(loggedUser: LoggedUser) {
+        binding.fragmentHomeName.text = loggedUser.name
     }
 
     /**
@@ -194,10 +203,10 @@ class HomeFragment : BaseFragmentWithToolbar() {
                 setClickRangeTimer(requireView(), 1000)
                 performanceVm.newHeaderSelected(headerTxt)
                 performancePeriodAdapter?.run {
-                    if(selectedPos != 0) resetSelector()
+                    if (selectedPos != 0) resetSelector()
                 }
                 viewPager2?.run {
-                    if(currentItem != 0) setCurrentItem(0, true)
+                    if (currentItem != 0) setCurrentItem(0, true)
                 }
             }
         )

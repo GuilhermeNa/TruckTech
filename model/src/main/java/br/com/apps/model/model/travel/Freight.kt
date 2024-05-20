@@ -31,14 +31,6 @@ data class Freight(
 
 ) {
 
-    fun validateIds(): Boolean {
-        return !(masterUid.isNullOrBlank() ||
-                id.isNullOrBlank() ||
-                truckId.isNullOrBlank() ||
-                driverId.isNullOrBlank() ||
-                travelId.isNullOrBlank())
-    }
-
     fun getCommissionValue(): BigDecimal {
         return if (value != null && commissionPercentual != null) {
             val x = value!!.multiply(commissionPercentual)

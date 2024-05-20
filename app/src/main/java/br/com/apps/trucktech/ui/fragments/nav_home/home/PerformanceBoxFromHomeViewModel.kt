@@ -8,11 +8,11 @@ import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.repository.repository.expend.ExpendRepository
+import br.com.apps.repository.repository.freight.FreightRepository
+import br.com.apps.repository.repository.refuel.RefuelRepository
+import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.ExpendRepository
-import br.com.apps.repository.repository.FreightRepository
-import br.com.apps.repository.repository.RefuelRepository
-import br.com.apps.repository.repository.TravelRepository
 import br.com.apps.trucktech.expressions.getDayFormatted
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated

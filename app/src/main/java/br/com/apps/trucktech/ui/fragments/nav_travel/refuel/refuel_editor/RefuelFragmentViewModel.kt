@@ -11,7 +11,7 @@ import br.com.apps.model.factory.RefuelFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.RefuelRepository
+import br.com.apps.repository.repository.refuel.RefuelRepository
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime

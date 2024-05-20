@@ -11,7 +11,7 @@ import br.com.apps.model.factory.FreightFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.FreightRepository
+import br.com.apps.repository.repository.freight.FreightRepository
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime

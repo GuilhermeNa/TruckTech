@@ -4,8 +4,8 @@ import android.util.Log
 import br.com.apps.model.dto.employee_dto.AdminEmployeeDto
 import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
 import br.com.apps.model.dto.employee_dto.EmployeeDto
-import br.com.apps.model.model.employee.AdminEmployee
-import br.com.apps.model.model.employee.DriverEmployee
+import br.com.apps.model.model.employee.Admin
+import br.com.apps.model.model.employee.Driver
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.employee.EmployeeType
 
@@ -21,10 +21,10 @@ class EmployeeMapper {
             }
         }
 
-        private fun getAdminEmployee(adminEmployee: EmployeeDto): AdminEmployee {
+        private fun getAdminEmployee(adminEmployee: EmployeeDto): Admin {
             val admin = adminEmployee as? AdminEmployeeDto
             admin?.let {
-                return AdminEmployee(
+                return Admin(
                     masterUid = it.masterUid,
                     id = it.id,
                     name = it.name,
@@ -34,10 +34,10 @@ class EmployeeMapper {
             throw NullPointerException()
         }
 
-        private fun getDriverEmployee(driverDto: EmployeeDto): DriverEmployee {
+        private fun getDriverEmployee(driverDto: EmployeeDto): Driver {
             val driver = driverDto as? DriverEmployeeDto
             driver?.let {
-                return DriverEmployee(
+                return Driver(
                     masterUid = it.masterUid,
                     id = it.id,
                     truckId = it.truckId,

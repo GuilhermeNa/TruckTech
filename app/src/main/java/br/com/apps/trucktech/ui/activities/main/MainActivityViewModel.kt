@@ -8,20 +8,17 @@ import br.com.apps.model.model.Truck
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.model.model.user.CommonUser
 import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.repository.repository.FleetRepository
+import br.com.apps.repository.repository.fleet.FleetRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.FleetUseCase
 import br.com.apps.usecase.UserUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainActivityViewModel(
     private val userUseCase: UserUseCase,
-    private val truckUseCase: FleetUseCase,
     private val truckRepository: FleetRepository
 ) : ViewModel() {
 
@@ -30,7 +27,7 @@ class MainActivityViewModel(
     /**
      * User
      */
-    private var _userData: MutableLiveData<DriverAndTruck> = MutableLiveData()
+    private var _userData = MutableLiveData<Response<LoggedUser>>()
     val userData get() = _userData
 
     /**
@@ -50,18 +47,21 @@ class MainActivityViewModel(
         _components.value = components
     }
 
+    /**
+     * Load user data
+     */
     fun loadUserData(userId: String) {
         viewModelScope.launch {
-
-            val userDef =  loadUser(userId)
-            val truckDef = loadTruck(userId)
-
-            awaitAll(userDef, truckDef)
+            val userDef = loadUser(userId)
+            userDef.await()
             val user = userDef.getCompleted()
+
+            val truckDef = loadTruck(user.employeeId)
+            truckDef.await()
             val truck = truckDef.getCompleted()
 
             loggedUser = LoggedUser(
-                masterUID = truck.masterUid,
+                masterUid = truck.masterUid,
                 driverId = truck.driverId,
                 truckId = truck.id!!,
 
@@ -71,23 +71,27 @@ class MainActivityViewModel(
                 urlImage = user.urlImage,
                 permissionLevelType = user.permission
             )
+
+            _userData.value = Response.Success(loggedUser)
         }
     }
 
     private suspend fun loadUser(userId: String): CompletableDeferred<CommonUser> {
         val userDef = CompletableDeferred<CommonUser>()
         userUseCase.getById(userId, EmployeeType.DRIVER).asFlow().first {
-            userDef.complete(it as CommonUser)
+            val user = it as CommonUser
+            user.employeeId
+            userDef.complete(user)
             true
         }
         return userDef
     }
 
-    private suspend fun loadTruck(userId: String): CompletableDeferred<Truck> {
+    private suspend fun loadTruck(driverId: String): CompletableDeferred<Truck> {
         val truckDef = CompletableDeferred<Truck>()
-        truckRepository.getTruckByDriverId(userId).asFlow().first { response ->
+        truckRepository.getTruckByDriverId(driverId).asFlow().first { response ->
             when (response) {
-                is Response.Error -> {}
+                is Response.Error -> _userData.value = Response.Error(response.exception)
                 is Response.Success -> response.data?.let { truckDef.complete(it) }
             }
             true
@@ -99,14 +103,8 @@ class MainActivityViewModel(
 
 class VisualComponents(val hasBottomNavigation: Boolean = false)
 
-//TODO parei aqui refazendo o usuario logado para ser salvo em cache na act viewModel
-data class DriverAndTruck(
-    var user: CommonUser? = null,
-    var truck: Truck? = null
-)
-
 data class LoggedUser(
-    val masterUID: String,
+    val masterUid: String,
     val driverId: String,
     val truckId: String,
 
