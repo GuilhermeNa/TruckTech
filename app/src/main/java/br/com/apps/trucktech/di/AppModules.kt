@@ -7,7 +7,7 @@ import br.com.apps.repository.di.repositoryModules
 import br.com.apps.trucktech.ui.activities.login.LoginActivityViewModel
 import br.com.apps.trucktech.ui.activities.main.DriverAndTruck
 import br.com.apps.trucktech.ui.activities.main.MainActivityViewModel
-import br.com.apps.trucktech.ui.fragments.login.LoginFragmentViewModel
+import br.com.apps.trucktech.ui.fragments.login.AuthViewModel
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentsListFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.DiscountViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.fines.FinesListViewModel
@@ -84,7 +84,7 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<LoginFragmentViewModel> { LoginFragmentViewModel(get()) }
+    viewModel<AuthViewModel> { AuthViewModel(get()) }
     viewModel<RequestEditorViewModel> { (id: String) -> RequestEditorViewModel(id, get()) }
     viewModel<RequestPreviewViewModel> { (id: String) ->
         RequestPreviewViewModel(

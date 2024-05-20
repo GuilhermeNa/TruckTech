@@ -36,9 +36,9 @@ class LoginFragment : BaseFragment() {
     }
 
     private fun searchForLoggedUser() {
-        loginViewModel.getCurrentUser().let { user ->
+        authViewModel.getCurrentUser().let { user ->
             if (user != null) {
-                loginViewModel.userId = user.uid
+                authViewModel.userId = user.uid
                 requireActivity().navigateTo(MainActivity::class.java)
                 requireActivity().finish()
             }
@@ -92,7 +92,7 @@ class LoginFragment : BaseFragment() {
 
                 if(fieldsAreValid) {
                     val credential = Pair(login, email)
-                    loginViewModel.signIn(credential)
+                    authViewModel.signIn(credential)
                 }
 
             }
@@ -100,7 +100,7 @@ class LoginFragment : BaseFragment() {
     }
 
     private fun initStateManager() {
-        loginViewModel.signIn.observe(viewLifecycleOwner) {
+        authViewModel.signIn.observe(viewLifecycleOwner) {
             it?.let { resource ->
                 if(resource.data) {
                     requireContext().hideKeyboard(requireView())

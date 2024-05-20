@@ -24,7 +24,7 @@ abstract class BaseFragmentForMainAct: BaseFragment() {
      * login view model. If not, it will navigate to the Login Activity.
      */
     private fun userIsStillLogged() {
-        loginViewModel.getCurrentUser().let { user ->
+        authViewModel.getCurrentUser().let { user ->
             if(user == null) {
                 requireActivity().navigateTo(LoginActivity::class.java)
                 requireActivity().finish()

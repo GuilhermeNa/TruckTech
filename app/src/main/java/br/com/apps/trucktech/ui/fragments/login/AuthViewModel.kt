@@ -9,12 +9,24 @@ import br.com.apps.usecase.AuthenticationUseCase
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
-class LoginFragmentViewModel(private val authUseCase: AuthenticationUseCase): ViewModel() {
+class AuthViewModel(private val authUseCase: AuthenticationUseCase): ViewModel() {
 
-    var userId: String? = null
+    lateinit var userId: String
 
     private var _signIn = MutableLiveData<Resource<Boolean>>()
     val signIn get() = _signIn
+
+    //---------------------------------------------------------------------------------------------//
+    // -
+    //---------------------------------------------------------------------------------------------//
+
+    fun getCurrentUser(): FirebaseUser? {
+        val currentUser = authUseCase.getCurrentUser()
+        currentUser?.let {
+            if(!::userId.isInitialized) userId = currentUser.uid
+        }
+        return currentUser
+    }
 
     fun signIn(credentials: Pair<String, String>) {
         viewModelScope.launch {
@@ -22,16 +34,6 @@ class LoginFragmentViewModel(private val authUseCase: AuthenticationUseCase): Vi
                 _signIn.value = it
             }
         }
-    }
-
-    fun getCurrentUser(): FirebaseUser? {
-        val currentUser = authUseCase.getCurrentUser()
-        currentUser?.let {
-            if(userId == null) {
-                userId = currentUser.uid
-            }
-        }
-        return currentUser
     }
 
     fun signOut() {

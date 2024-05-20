@@ -55,7 +55,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
      * shared activity ViewModel.
      */
     private fun loadUserData() {
-        loginViewModel.userId?.let {
+        authViewModel.userId.let {
             sharedViewModel.loadUserData(it)
         }
     }

@@ -3,7 +3,7 @@ package br.com.apps.trucktech.ui.fragments.base_fragments
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import br.com.apps.trucktech.ui.fragments.login.LoginFragmentViewModel
+import br.com.apps.trucktech.ui.fragments.login.AuthViewModel
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -11,7 +11,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 abstract class BaseFragment: Fragment() {
 
-    val loginViewModel: LoginFragmentViewModel by viewModel()
+    val authViewModel: AuthViewModel by viewModel()
 
     /**
      * Defines a timer range for click interactions with the view.

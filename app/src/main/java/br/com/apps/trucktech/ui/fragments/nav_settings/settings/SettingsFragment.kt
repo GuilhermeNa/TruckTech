@@ -116,7 +116,7 @@ class SettingsFragment : BaseFragmentWithToolbar() {
             .setTitle("Saindo do App")
             .setMessage("Você realmente deseja sair do aplicativo e esquecer a senha?")
             .setPositiveButton("Ok") { dialog, _ ->
-                loginViewModel.signOut()
+                authViewModel.signOut()
                 requireContext().navigateTo(LoginActivity::class.java)
                 requireActivity().finish()
             }
