@@ -41,8 +41,8 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
     private val args: BankEditorFragmentArgs by navArgs()
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
-            driverId = sharedViewModel.userData.value!!.user!!.employeeId,
+            masterUid = mainActVM.loggedUser.masterUid,
+            driverId = mainActVM.loggedUser.driverId,
             bankAccountId = args.bankId
         )
     }

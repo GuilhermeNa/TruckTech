@@ -8,9 +8,9 @@ import br.com.apps.model.IdHolder
 import br.com.apps.model.model.Document
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
-import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.DocumentRepository
 import br.com.apps.repository.repository.LabelRepository
+import br.com.apps.repository.util.Response
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
@@ -68,7 +68,7 @@ class DocumentsListFragmentViewModel(
     }
 
     private suspend fun loadLabelData(complete: (data: List<Label>) -> Unit) {
-        labelRepository.getLabelListByTypeAndUserId(LabelType.DOCUMENT.description, masterUid)
+        labelRepository.getLabelListByMasterUidAndType(LabelType.DOCUMENT.description, masterUid)
             .asFlow().collect { response ->
                 when (response) {
                     is Response.Error -> throw IllegalArgumentException()

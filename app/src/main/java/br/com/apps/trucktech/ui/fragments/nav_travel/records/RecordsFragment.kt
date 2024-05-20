@@ -74,7 +74,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.travelId = args.travelId
-        viewModel.masterUid = sharedViewModel.userData.value?.user?.masterUid!!
+        viewModel.masterUid = mainActVM.loggedUser.masterUid
         viewModel.loadData()
     }
 

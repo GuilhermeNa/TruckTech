@@ -30,7 +30,7 @@ class BankListFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val employeeId by lazy {
-        sharedViewModel.userData.value!!.user!!.employeeId
+        mainActVM.loggedUser.driverId
     }
     private val viewModel: BankListFragmentViewModel by viewModel { parametersOf(employeeId) }
     private var adapter: BankFragmentAdapter? = null

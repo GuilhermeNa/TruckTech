@@ -36,11 +36,11 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
     private val args: FreightEditorFragmentArgs by navArgs()
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
-            truckId = sharedViewModel.userData.value?.truck?.id,
+            masterUid = mainActVM.loggedUser.masterUid,
+            truckId = mainActVM.loggedUser.truckId,
             travelId = args.travelId,
             freightId = args.freightId,
-            driverId = sharedViewModel.userData.value?.user?.employeeId
+            driverId = mainActVM.loggedUser.driverId
         )
     }
     private val viewModel: FreightEditorViewModel by viewModel { parametersOf(idHolder) }

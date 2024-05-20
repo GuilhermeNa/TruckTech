@@ -50,8 +50,10 @@ class RequestRepository(private val fireStore: FirebaseFirestore) {
 
     suspend fun delete(id: String, itemsId: List<String>? = null) = write.delete(id, itemsId)
 
-    suspend fun updateEncodedImage(id: String, encodedImage: String) =
-        write.updateEncodedImage(id, encodedImage)
+    suspend fun deleteItem(requestId: String, itemId: String) = write.deleteItem(requestId, itemId)
+
+    suspend fun updateEncodedImage(requestId: String, encodedImage: String) =
+        write.updateEncodedImage(requestId, encodedImage)
 
     //---------------------------------------------------------------------------------------------//
     // READ
@@ -332,8 +334,8 @@ private class ReqWrite(fireStore: FirebaseFirestore) {
      *
      * @param dto The [PaymentRequestDto] object to be saved.
      */
-    suspend fun save(dto: PaymentRequestDto) {
-        if (dto.id == null) {
+    suspend fun save(dto: PaymentRequestDto): String {
+        return if (dto.id == null) {
             create(dto)
         } else {
             update(dto)
@@ -351,13 +353,15 @@ private class ReqWrite(fireStore: FirebaseFirestore) {
         return document.id
     }
 
-    private suspend fun update(dto: PaymentRequestDto) {
+    private suspend fun update(dto: PaymentRequestDto): String {
         val id = dto.id ?: throw InvalidParameterException(EMPTY_ID)
 
         collection
             .document(id)
             .set(dto)
             .await()
+
+        return id
     }
 
     /**

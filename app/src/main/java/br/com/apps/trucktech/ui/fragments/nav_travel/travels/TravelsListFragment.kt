@@ -51,9 +51,9 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
 
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
-            driverId = sharedViewModel.userData.value?.user?.employeeId,
-            truckId = sharedViewModel.userData.value?.truck?.id
+            masterUid = mainActVM.loggedUser.masterUid,
+            driverId = mainActVM.loggedUser.driverId,
+            truckId = mainActVM.loggedUser.truckId
         )
     }
     private val viewModel: TravelsListViewModel by viewModel { parametersOf(idHolder) }
@@ -155,7 +155,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
         }
 
         viewModel.bottomNav.observe(viewLifecycleOwner) { isRequested ->
-            sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = isRequested))
+            mainActVM.setComponents(VisualComponents(hasBottomNavigation = isRequested))
         }
 
     }

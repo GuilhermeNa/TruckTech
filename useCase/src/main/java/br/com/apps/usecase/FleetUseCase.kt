@@ -3,7 +3,7 @@ package br.com.apps.usecase
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.TruckDto
-import br.com.apps.repository.repository.FleetRepository
+import br.com.apps.repository.repository.fleet.FleetRepository
 
 class FleetUseCase(private val repository: FleetRepository) {
 

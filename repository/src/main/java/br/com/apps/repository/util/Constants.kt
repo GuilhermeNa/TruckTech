@@ -66,6 +66,8 @@ internal const val FIRESTORE_COLLECTION_LOANS = "loans"
 
 internal const val FIRESTORE_COLLECTION_FINES = "fines"
 
+internal const val FIRESTORE_COLLECTION_TRUCKS = "trucks"
+
 //---------------------------------------------------------------------------------------------//
 // COMMON
 //---------------------------------------------------------------------------------------------//

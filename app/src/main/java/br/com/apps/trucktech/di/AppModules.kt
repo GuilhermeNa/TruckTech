@@ -1,11 +1,11 @@
 package br.com.apps.trucktech.di
 
 import br.com.apps.model.IdHolder
-import br.com.apps.model.model.user.User
 import br.com.apps.repository.di.fireBaseModules
+import br.com.apps.repository.di.readModules
 import br.com.apps.repository.di.repositoryModules
+import br.com.apps.repository.di.writeModules
 import br.com.apps.trucktech.ui.activities.login.LoginActivityViewModel
-import br.com.apps.trucktech.ui.activities.main.DriverAndTruck
 import br.com.apps.trucktech.ui.activities.main.MainActivityViewModel
 import br.com.apps.trucktech.ui.fragments.login.AuthViewModel
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentsListFragmentViewModel
@@ -92,12 +92,7 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<RequestsListViewModel> { (driverAndTruck: DriverAndTruck) ->
-        RequestsListViewModel(
-            driverAndTruck,
-            get()
-        )
-    }
+    viewModel<RequestsListViewModel> { (idHolder: IdHolder) -> RequestsListViewModel(idHolder, get()) }
     viewModel<RecordsViewModel> { RecordsViewModel(get()) }
     viewModel<RefuelFragmentViewModel> { (idHolder: IdHolder) ->
         RefuelFragmentViewModel(
@@ -117,7 +112,7 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<SettingsViewModel> { (user: User) -> SettingsViewModel(user) }
+    viewModel<SettingsViewModel> { (userName: String) -> SettingsViewModel(userName) }
     viewModel<ThemeFragmentViewModel> { ThemeFragmentViewModel() }
     viewModel<TimelineFragmentViewModel> { TimelineFragmentViewModel() }
     viewModel<TravelsListViewModel> { (idHolder: IdHolder) -> TravelsListViewModel(idHolder, get(), get()) }
@@ -139,7 +134,9 @@ val appModules = listOf(
     viewModelModules,
     useCaseModules,
     repositoryModules,
-    fireBaseModules
+    fireBaseModules,
+    writeModules,
+    readModules
 )
 
 

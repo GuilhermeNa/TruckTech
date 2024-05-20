@@ -29,7 +29,7 @@ abstract class BaseFragmentWithToolbar : BaseFragmentForMainAct() {
         }
 
         override fun bottomNavigation(hasBottomNavigation: Boolean) {
-            sharedViewModel.setComponents(VisualComponents(hasBottomNavigation = hasBottomNavigation))
+            mainActVM.setComponents(VisualComponents(hasBottomNavigation = hasBottomNavigation))
         }
     }
 

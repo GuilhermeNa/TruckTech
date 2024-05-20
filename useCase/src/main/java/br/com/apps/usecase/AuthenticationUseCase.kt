@@ -2,12 +2,11 @@ package br.com.apps.usecase
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import br.com.apps.model.factory.UserDtoFactory
-import br.com.apps.model.mapper.UserMapper
+import br.com.apps.model.factory.UserFactory
 import br.com.apps.model.model.UserCredentials
 import br.com.apps.repository.Resource
-import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.AuthenticationRepository
+import br.com.apps.repository.util.Response
 import com.google.firebase.auth.FirebaseUser
 
 class AuthenticationUseCase(
@@ -45,12 +44,12 @@ class AuthenticationUseCase(
         authResource: Resource<String>,
         mediatorLiveData: MediatorLiveData<Resource<Boolean>>
     ) {
-        val userDto = UserMapper.toDto(credentials)
+      /*  val userDto = UserMapper.toDto(credentials)
         userDto.masterUid = authResource.data
 
         mediatorLiveData.addSource(userUseCase.createNewUser(userDto)) { userResource ->
             mediatorLiveData.value = userResource
-        }
+        }*/
 
     }
 
@@ -60,7 +59,7 @@ class AuthenticationUseCase(
     fun authenticateAnExistingUser(credentials: UserCredentials, employeeId: String):
             LiveData<Resource<Boolean>> {
         val mediatorLiveData = MediatorLiveData<Resource<Boolean>>()
-        val userDto = UserDtoFactory.createObject(credentials, employeeId)
+        val userDto = UserFactory.createObject(credentials, employeeId)
 
         val uidLiveData = authRepository.authenticateNewUserWithEmailAndPassword(
             credentials.email,

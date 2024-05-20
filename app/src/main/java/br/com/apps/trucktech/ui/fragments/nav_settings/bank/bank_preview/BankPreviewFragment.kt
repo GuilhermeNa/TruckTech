@@ -45,7 +45,7 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
     private val args: BankPreviewFragmentArgs by navArgs()
     private val idHolder by lazy {
         IdHolder(
-            driverId = sharedViewModel.userData.value!!.user!!.employeeId,
+            driverId = mainActVM.loggedUser.driverId,
             bankAccountId = args.bankId
         )
     }

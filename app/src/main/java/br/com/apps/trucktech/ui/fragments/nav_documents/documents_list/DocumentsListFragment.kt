@@ -32,8 +32,8 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
 
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
-            truckId = sharedViewModel.userData.value?.truck?.id
+            masterUid = mainActVM.loggedUser.masterUid,
+            truckId = mainActVM.loggedUser.truckId
         )
     }
     private val viewModel : DocumentsListFragmentViewModel by viewModel{ parametersOf(idHolder) }

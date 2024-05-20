@@ -8,7 +8,7 @@ import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 abstract class BaseFragmentForMainAct: BaseFragment() {
 
-    val sharedViewModel: MainActivityViewModel by activityViewModel()
+    val mainActVM: MainActivityViewModel by activityViewModel()
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE

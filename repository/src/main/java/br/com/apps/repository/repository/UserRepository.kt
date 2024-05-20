@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.user_dto.CommonUserDto
 import br.com.apps.model.dto.user_dto.UserDto
-import br.com.apps.model.mapper.UserMapper
+import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.user.User
 import br.com.apps.repository.Resource
 import com.google.firebase.firestore.FirebaseFirestore
@@ -62,7 +62,7 @@ class UserRepository(private val fireStore: FirebaseFirestore) {
             .addOnSuccessListener { s ->
                 s?.let { document ->
                     document.toObject<CommonUserDto>()?.let { userDto ->
-                        UserMapper.toModel(userDto)
+                        userDto.toModel()
                     }?.let {
                         liveData.value = it
                     }

@@ -72,8 +72,8 @@ class ExpendRepository(fireStore: FirebaseFirestore) {
     suspend fun getExpendListByTravelId(travelId: String, flow: Boolean = false) =
         read.getExpendListByTravelId(travelId, flow)
 
-    suspend fun getExpendListByTravelId(idList: List<String>, flow: Boolean = false) =
-        read.getExpendListByTravelId(idList, flow)
+    suspend fun getExpendListByTravelIds(idList: List<String>, flow: Boolean = false) =
+        read.getExpendListByTravelIds(idList, flow)
 
     suspend fun getExpendById(expendId: String, flow: Boolean = false) =
         read.getExpendById(expendId, flow)
@@ -171,7 +171,7 @@ private class ExpRead(fireStore: FirebaseFirestore) {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Expend] list.
      */
-    suspend fun getExpendListByTravelId(
+    suspend fun getExpendListByTravelIds(
         driverIdList: List<String>,
         flow: Boolean = false
     ): LiveData<Response<List<Expend>>> {

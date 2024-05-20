@@ -113,7 +113,7 @@ class TravelUseCase(
                 }
 
                 val deferredD = CompletableDeferred<List<Expend>>()
-                val liveDataD = expendRepository.getExpendListByTravelId(idList, withFlow = true)
+                val liveDataD = expendRepository.getExpendListByTravelIds(idList, true)
                 mediator.addSource(liveDataD) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response

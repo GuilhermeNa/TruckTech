@@ -40,11 +40,11 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
     private val args: RefuelEditorFragmentArgs by navArgs()
     private val idHolder by lazy {
         IdHolder(
-            masterUid = sharedViewModel.userData.value?.user?.masterUid,
-            truckId = sharedViewModel.userData.value?.truck?.id,
+            masterUid = mainActVM.loggedUser.masterUid,
+            truckId = mainActVM.loggedUser.truckId,
             travelId = args.travelId,
             refuelId = args.refuelId,
-            driverId = sharedViewModel.userData.value?.user?.employeeId
+            driverId = mainActVM.loggedUser.driverId
         )
     }
     private val viewModel: RefuelFragmentViewModel by viewModel { parametersOf(idHolder) }

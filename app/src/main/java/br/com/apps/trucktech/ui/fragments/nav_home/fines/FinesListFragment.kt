@@ -25,8 +25,8 @@ class FinesListFragment : BaseFragmentWithToolbar() {
 
     private val idHolder by lazy {
         IdHolder(
-            truckId = sharedViewModel.userData.value?.truck?.id,
-            driverId = sharedViewModel.userData.value?.user?.employeeId
+            truckId = mainActVM.loggedUser.truckId,
+            driverId = mainActVM.loggedUser.driverId
         )
     }
     private val viewModel: FinesListViewModel by viewModel { parametersOf(idHolder) }
