@@ -18,7 +18,7 @@ class EmployeeUseCase(
     /**
      * Add a new Employee
      */
-    fun save(employeeDto: EmployeeDto): LiveData<Resource<Boolean>> {
+    suspend fun save(employeeDto: EmployeeDto): LiveData<Resource<Boolean>> {
         val liveData = MutableLiveData<Resource<Boolean>>()
 
         try {

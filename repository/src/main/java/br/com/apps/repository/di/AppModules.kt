@@ -1,6 +1,5 @@
 package br.com.apps.repository.di
 
-import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.repository.advance.AdvanceRead
@@ -10,6 +9,9 @@ import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.document.DocumentRead
 import br.com.apps.repository.repository.document.DocumentRepository
 import br.com.apps.repository.repository.document.DocumentWrite
+import br.com.apps.repository.repository.employee.EmployeeRead
+import br.com.apps.repository.repository.employee.EmployeeRepository
+import br.com.apps.repository.repository.employee.EmployeeWrite
 import br.com.apps.repository.repository.expend.ExpendRead
 import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.repository.expend.ExpendWrite
@@ -55,7 +57,7 @@ val repositoryModules = module {
     single<LabelRepository> { LabelRepository(get(), get()) }
     single<IncomeRepository> { IncomeRepository(get()) }
     single<FineRepository> { FineRepository(get(), get()) }
-    single<EmployeeRepository> { EmployeeRepository(get()) }
+    single<EmployeeRepository> { EmployeeRepository(get(), get()) }
     single<RequestRepository> { RequestRepository(get(), get()) }
     single<StorageRepository> { StorageRepository(get()) }
     single<TravelRepository> { TravelRepository(get(), get()) }
@@ -78,6 +80,7 @@ val writeModules = module {
     single<RequestWrite> { RequestWrite(get()) }
     single<TravelWrite> { TravelWrite(get()) }
     single<LabelWrite> { LabelWrite(get()) }
+    single<EmployeeWrite> { EmployeeWrite(get()) }
 }
 
 val readModules = module {
@@ -93,10 +96,12 @@ val readModules = module {
     single<RequestRead> { RequestRead(get()) }
     single<TravelRead> { TravelRead(get()) }
     single<LabelRead> { LabelRead(get()) }
+    single<EmployeeRead> { EmployeeRead(get()) }
 }
 
 val fireBaseModules = module {
     single<FirebaseAuth> { Firebase.auth }
     single<FirebaseFirestore> { Firebase.firestore }
     single<FirebaseStorage> { Firebase.storage }
+
 }

@@ -190,13 +190,13 @@ fun DocumentSnapshot.toBankAccountObject(): BankAccount {
         ?: throw ConversionException("ConversionExpression, toBankAccountObject: ($this)")
 }
 
-private fun QuerySnapshot.toEmployeeList(): List<Employee> {
+fun QuerySnapshot.toEmployeeList(): List<Employee> {
     return this.mapNotNull { document ->
         document.toEmployeeObject()
     }
 }
 
-private fun DocumentSnapshot.toEmployeeObject(): Employee {
+fun DocumentSnapshot.toEmployeeObject(): Employee {
     return this.toObject(DriverEmployeeDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toBankAccountObject: ($this)")
 }

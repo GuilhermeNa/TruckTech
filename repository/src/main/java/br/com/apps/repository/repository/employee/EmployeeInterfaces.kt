@@ -6,7 +6,6 @@ import br.com.apps.model.dto.employee_dto.EmployeeDto
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.employee.EmployeeType
-import br.com.apps.repository.Resource
 import br.com.apps.repository.util.Response
 
 interface EmployeeRepositoryI : EmployeeWriteI, EmployeeReadI
@@ -32,11 +31,13 @@ interface EmployeeWriteI {
 
 interface EmployeeReadI {
 
-    fun getAll(masterUid: String): LiveData<Resource<List<Employee>>>
+    suspend fun getEmployeeListByMasterUid(masterUid: String, flow: Boolean = false)
+    : LiveData<Response<List<Employee>>>
 
-    fun getById(id: String, type: EmployeeType): LiveData<Resource<Employee>>
+    suspend fun getById(id: String, type: EmployeeType, flow: Boolean = false)
+    : LiveData<Response<Employee>>
 
-    suspend fun getEmployeeBankAccounts(id: String, type: EmployeeType)
+    suspend fun getEmployeeBankAccounts(id: String, type: EmployeeType, flow: Boolean = false)
             : LiveData<Response<List<BankAccount>>>
 
     suspend fun getBankAccountById(

@@ -6,9 +6,10 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
+import br.com.apps.repository.repository.advance.AdvanceRepository
+import br.com.apps.repository.repository.loan.LoanRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.AdvanceRepository
-import br.com.apps.repository.repository.LoanRepository
+
 import kotlinx.coroutines.launch
 
 class DiscountViewModel(
@@ -47,14 +48,14 @@ class DiscountViewModel(
     }
 
     private suspend fun loadAdvanceData() {
-        advanceRepository.getAdvanceListByEmployeeIdAndPaymentStatus(employeeId, withFlow = false, isPaid = false)
+        advanceRepository.getAdvanceListByEmployeeIdAndPaymentStatus(employeeId, isPaid = false)
             .asFlow().collect {
                 _advanceData.value = it
             }
     }
 
     private suspend fun loadLoanData() {
-        loanRepository.getLoanListByEmployeeIdAndPaymentStatus(employeeId, withFlow = false, isPaid = false)
+        loanRepository.getLoanListByEmployeeIdAndPaymentStatus(employeeId, isPaid = false)
             .asFlow().collect {
                 _loanData.value = it
             }

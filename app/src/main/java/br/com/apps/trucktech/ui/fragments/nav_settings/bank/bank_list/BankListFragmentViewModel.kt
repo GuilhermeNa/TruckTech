@@ -8,19 +8,18 @@ import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.repository.bank.BankRepository
+import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.util.State
-import br.com.apps.usecase.EmployeeUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BankListFragmentViewModel(
     private val employeeId: String,
-    private val useCase: EmployeeUseCase,
+    private val employeeRepository: EmployeeRepository,
     private val bankRepository: BankRepository
 ) : ViewModel() {
 
@@ -42,23 +41,22 @@ class BankListFragmentViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-
-            val bankListDef = CompletableDeferred<List<Bank>>()
-            loadBankList { bankListDef.complete(it) }
-
+            val bankListDef = loadBankList()
             val bankAccListDef = CompletableDeferred<List<BankAccount>>()
+
             launch {
-                loadBankAccList {
+                loadBankAccList { data ->
                     if (isFirstBoot) {
                         isFirstBoot = false
-                        bankAccListDef.complete(it)
-                    }
-                    else sendResponse(bankListDef.getCompleted(), it)
+                        bankAccListDef.complete(data)
+                    } else sendResponse(bankListDef.getCompleted(), data)
                 }
             }
 
-            awaitAll(bankListDef, bankAccListDef)
-            sendResponse(bankListDef.getCompleted(), bankAccListDef.getCompleted())
+            val bankList = bankListDef.await()
+            val accList = bankAccListDef.await()
+
+            sendResponse(bankList, accList)
         }
     }
 
@@ -72,7 +70,9 @@ class BankListFragmentViewModel(
         )
     }
 
-    private suspend fun loadBankList(complete: (List<Bank>) -> Unit) {
+    private suspend fun loadBankList(): CompletableDeferred<List<Bank>> {
+        val deferred = CompletableDeferred<List<Bank>>()
+
         bankRepository.getBankList().asFlow().first { response ->
             when (response) {
                 is Response.Error -> {
@@ -80,14 +80,16 @@ class BankListFragmentViewModel(
                     _data.value = response
                 }
 
-                is Response.Success -> response.data?.let { complete(it) }
+                is Response.Success -> response.data?.let { deferred.complete(it) }
             }
             true
         }
+
+        return deferred
     }
 
     private suspend fun loadBankAccList(complete: (List<BankAccount>) -> Unit) {
-        useCase.getEmployeeBankAccountsList(employeeId, EmployeeType.DRIVER).asFlow()
+        employeeRepository.getEmployeeBankAccounts(employeeId, EmployeeType.DRIVER, true).asFlow()
             .collect { response ->
                 when (response) {
                     is Response.Error -> {
@@ -95,9 +97,7 @@ class BankListFragmentViewModel(
                         _data.value = response
                     }
 
-                    is Response.Success -> response.data?.let {
-                        complete(it)
-                    }
+                    is Response.Success -> response.data?.let { complete(it) }
                 }
             }
     }
@@ -106,7 +106,7 @@ class BankListFragmentViewModel(
         val bankList = (data.value as Response.Success).data!!.bankAccList
 
         val oldMainAccId = bankList.firstOrNull { it.mainAccount }?.id
-        useCase.updateMainAccount(
+        employeeRepository.updateMainAccount(
             employeeId,
             oldMainAccId,
             newMainAccId,
@@ -114,7 +114,6 @@ class BankListFragmentViewModel(
         )
 
     }
-
 }
 
 data class BankLFData(

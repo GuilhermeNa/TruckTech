@@ -93,7 +93,7 @@ class EmployeeWrite(fireStore: FirebaseFirestore) : EmployeeWriteI {
 
         document.set(dto).await()
     }
-//TODO finaliza updateMainAcc
+
     /**
      * Update main acc
      */
@@ -103,26 +103,15 @@ class EmployeeWrite(fireStore: FirebaseFirestore) : EmployeeWriteI {
         newMainAccId: String,
         type: EmployeeType
     ) {
-        val collection = when (type) {
-            EmployeeType.DRIVER -> collectionDriver
-            EmployeeType.ADMIN -> collectionAdmin
-        }
+        val collection = getCollectionReference(type)
 
         oldMainAccId?.let {
-            collection
-                .document(employeeId)
-                .collection(FIRESTORE_COLLECTION_BANK)
-                .document(it)
-                .update("mainAccount", false)
-                .await()
+            collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK)
+                .document(it).update("mainAccount", false).await()
         }
 
-        collection
-            .document(employeeId)
-            .collection(FIRESTORE_COLLECTION_BANK)
-            .document(newMainAccId)
-            .update("mainAccount", true)
-            .await()
+        collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK)
+            .document(newMainAccId).update("mainAccount", true).await()
 
     }
 

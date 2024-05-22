@@ -8,11 +8,11 @@ import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
+import br.com.apps.repository.repository.advance.AdvanceRepository
+import br.com.apps.repository.repository.expend.ExpendRepository
+import br.com.apps.repository.repository.freight.FreightRepository
+import br.com.apps.repository.repository.loan.LoanRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.AdvanceRepository
-import br.com.apps.repository.repository.ExpendRepository
-import br.com.apps.repository.repository.FreightRepository
-import br.com.apps.repository.repository.LoanRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
@@ -86,8 +86,7 @@ class ToReceiveBoxFromHomeViewModel(
     private suspend fun loadFreightData(driverId: String, deferred: CompletableDeferred<Unit>) {
         val liveData = freightRepository.getFreightListByDriverIdAndPaymentStatus(
             driverId = driverId,
-            isPaid = false,
-            withFlow = false
+            isPaid = false
         )
         liveData.asFlow().first().let { response ->
             when (response) {
@@ -106,8 +105,7 @@ class ToReceiveBoxFromHomeViewModel(
         val liveData = expendRepository.getExpendListByDriverIdAndRefundableStatus(
             driverId = driverId,
             paidByEmployee = true,
-            alreadyRefunded = false,
-            withFlow = false
+            alreadyRefunded = false
         )
         liveData.asFlow().first().let { response ->
             when (response) {
@@ -125,8 +123,7 @@ class ToReceiveBoxFromHomeViewModel(
     private suspend fun loadAdvanceData(driverId: String, deferred: CompletableDeferred<Unit>) {
         val liveData = advanceRepository.getAdvanceListByEmployeeIdAndPaymentStatus(
             employeeId = driverId,
-            isPaid = false,
-            withFlow = false
+            isPaid = false
         )
         liveData.asFlow().first().let { response ->
             when (response) {
@@ -144,8 +141,7 @@ class ToReceiveBoxFromHomeViewModel(
     private suspend fun loadLoanData(driverId: String, deferred: CompletableDeferred<Unit>) {
         val liveData = loanRepository.getLoanListByEmployeeIdAndPaymentStatus(
             employeeId = driverId,
-            isPaid = false,
-            withFlow = false
+            isPaid = false
         )
         liveData.asFlow().first().let { response ->
             when (response) {
