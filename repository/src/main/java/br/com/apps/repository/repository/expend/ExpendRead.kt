@@ -116,8 +116,7 @@ class ExpendRead(fireStore: FirebaseFirestore): ExpendReadI {
         driverIdList: List<String>,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> {
-        if (driverIdList.isEmpty())
-            return MutableLiveData(Response.Error(EmptyIdException("ExpendRead: emptyId")))
+        if (driverIdList.isEmpty()) return MutableLiveData(Response.Success(emptyList()))
 
         val listener = collection.whereIn(TRAVEL_ID, driverIdList)
 

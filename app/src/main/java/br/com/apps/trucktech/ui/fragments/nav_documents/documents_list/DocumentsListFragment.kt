@@ -17,7 +17,7 @@ import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.private_adapters.DocumentsListFragmentAdapter
-import br.com.apps.trucktech.util.State
+import br.com.apps.trucktech.util.state.State
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -122,6 +122,8 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                         fragDocumentBoxEmpty.empty.visibility = GONE
                     }
                 }
+
+
             }
         }
     }

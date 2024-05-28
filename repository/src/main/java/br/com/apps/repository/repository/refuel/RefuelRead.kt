@@ -2,7 +2,6 @@ package br.com.apps.repository.repository.refuel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import br.com.apps.model.exceptions.EmptyIdException
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
@@ -59,8 +58,7 @@ class RefuelRead(fireStore: FirebaseFirestore) : RefuelReadI {
      */
     override suspend fun getRefuelListByTravelIds(idList: List<String>, flow: Boolean)
             : LiveData<Response<List<Refuel>>> {
-        if (idList.isEmpty())
-            return MutableLiveData(Response.Error(EmptyIdException("RefuelRead: emptyId")))
+        if (idList.isEmpty()) return MutableLiveData(Response.Success(emptyList()))
 
         val listener = collection.whereIn(TRAVEL_ID, idList)
 

@@ -5,27 +5,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.factory.RefuelFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.repository.util.Response
+import br.com.apps.model.toDate
 import br.com.apps.repository.repository.refuel.RefuelRepository
+import br.com.apps.repository.util.Response
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-class RefuelFragmentViewModel(
-    private val idHolder: IdHolder,
+class RefuelEditorViewModel(
+    private val vmData: RefuelEVMData,
     private val repository: RefuelRepository
 ) : ViewModel() {
 
-    /**
-     * The [Refuel] to be loaded when there is an ID.
-     */
-    lateinit var refuel: Refuel
+    private var isEditing: Boolean = vmData.refuelId?.let { true } ?: false
 
     /**
      * LiveData containing the [LocalDateTime] of the [Refuel] date,
@@ -38,40 +36,29 @@ class RefuelFragmentViewModel(
      * if there is an [Refuel] to be loaded, this liveData is
      * responsible for holding the [Response] data of the [Refuel].
      */
-    private val _refuelData = MutableLiveData<Response<Refuel>>()
-    val refuelData get() = _refuelData
+    private val _data = MutableLiveData<Response<Refuel>>()
+    val data get() = _data
 
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
     init {
-        if (idHolder.refuelId != null) {
-            loadData(idHolder.refuelId!!)
-        } else {
-            _date.value = LocalDateTime.now()
-        }
+        if (isEditing) loadData()
+        else _date.value = LocalDateTime.now()
     }
 
-    /**
-     * Loads data asynchronously and set [_refuelData] response.
-     *
-     * @param [refuelId] is the id of the refuel to be loaded
-     */
-    private fun loadData(refuelId: String) {
+    private fun loadData() {
         viewModelScope.launch {
-            repository.getRefuelById(refuelId, false).asFlow().collect { response ->
-                _refuelData.value =
+            repository.getRefuelById(vmData.refuelId!!).asFlow().first { response ->
                     when (response) {
-                        is Response.Error -> response
+                        is Response.Error -> _data.value = response
                         is Response.Success -> {
-                            response.data?.let {
-                                refuel = it
-                                _date.value = it.date!!
-                            }
-                            response
+                            _data.value = response
+                            _date.value = response.data?.date ?: LocalDateTime.now()
                         }
                     }
+                true
             }
         }
     }
@@ -79,10 +66,10 @@ class RefuelFragmentViewModel(
     /**
      * Send the [Refuel] to be created or updated.
      */
-    fun save(mappedFields: HashMap<String, String>) =
+    fun save(viewDto: RefuelDto) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = getRefuelDto(mappedFields)
+                val dto = createOrUpdate(viewDto)
                 repository.save(dto)
                 emit(Response.Success())
             } catch (e: Exception) {
@@ -90,16 +77,26 @@ class RefuelFragmentViewModel(
             }
         }
 
-    private fun getRefuelDto(mappedFields: HashMap<String, String>): RefuelDto {
-        return if (::refuel.isInitialized) {
-            RefuelFactory.update(refuel, mappedFields)
-            refuel.toDto()
-        } else {
-            mappedFields[RefuelFactory.TAG_MASTER_UID] = idHolder.masterUid!!
-            mappedFields[RefuelFactory.TAG_TRUCK_ID] = idHolder.truckId!!
-            mappedFields[RefuelFactory.TAG_TRAVEL_ID] = idHolder.travelId!!
-            mappedFields[RefuelFactory.TAG_DRIVER_ID] = idHolder.driverId!!
-            RefuelFactory.create(mappedFields).toDto()
+    private fun createOrUpdate(viewDto: RefuelDto): RefuelDto {
+        viewDto.apply {
+            date = _date.value!!.toDate()
+        }
+
+        return when(isEditing) {
+            true -> {
+                val refuel = (data.value as Response.Success).data!!
+                RefuelFactory.update(refuel, viewDto)
+                refuel.toDto()
+            }
+            false -> {
+                viewDto.apply {
+                    masterUid = vmData.masterUid
+                    truckId = vmData.truckId
+                    travelId = vmData.travelId
+                    driverId = vmData.driverId
+                }
+                RefuelFactory.create(viewDto).toDto()
+            }
         }
     }
 
@@ -113,3 +110,11 @@ class RefuelFragmentViewModel(
     }
 
 }
+
+data class RefuelEVMData(
+    val masterUid: String,
+    val truckId: String,
+    val travelId: String,
+    val driverId: String,
+    val refuelId: String? = null
+)

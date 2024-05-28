@@ -5,11 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.TravelUseCase
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class RecordsViewModel(private val useCase: TravelUseCase): ViewModel() {
+class RecordsViewModel(
+    private val repository: TravelRepository
+): ViewModel() {
 
     lateinit var travelId: String
     lateinit var masterUid: String
@@ -30,12 +33,11 @@ class RecordsViewModel(private val useCase: TravelUseCase): ViewModel() {
 
     fun loadData() {
         viewModelScope.launch {
-            useCase.getTravelById(travelId).asFlow().collect {
+            repository.getTravelById(travelId).asFlow().first {
                 _travel.value = it
+                true
             }
         }
     }
-
-
 
 }

@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.util
+package br.com.apps.trucktech.util.state
 
 sealed class State {
     object Loading: State()

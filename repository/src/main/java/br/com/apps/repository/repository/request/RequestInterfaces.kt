@@ -7,7 +7,7 @@ import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.util.Response
 
-interface RequestRepositoryI: RequestWriteI, RequestReadI
+interface RequestRepositoryI : RequestWriteI, RequestReadI
 
 interface RequestWriteI {
 
@@ -25,10 +25,19 @@ interface RequestWriteI {
 
 interface RequestReadI {
 
-    suspend fun getCompleteRequestListByDriverId(driverId: String, flow: Boolean)
+    suspend fun getRequestListByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<PaymentRequest>>>
 
-    suspend fun getCompleteRequestById(requestId: String, flow: Boolean): LiveData<Response<PaymentRequest>>
+    suspend fun getItemListByRequests(idList: List<String>, flow: Boolean = false)
+            : LiveData<Response<List<RequestItem>>>
+
+    suspend fun getRequestById(
+        requestId: String,
+        flow: Boolean = false
+    ): LiveData<Response<PaymentRequest>>
+
+    suspend fun getItemListByRequestId(requestId: String, flow: Boolean = false)
+            : LiveData<Response<List<RequestItem>>>
 
     suspend fun getItemById(
         requestId: String,

@@ -5,15 +5,14 @@ import androidx.lifecycle.MediatorLiveData
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.repository.repository.expend.ExpendRepository
+import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.repository.expend.ExpendRepository
-import br.com.apps.repository.repository.label.LabelRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
@@ -22,24 +21,6 @@ class ExpendUseCase(
     private val repository: ExpendRepository,
     private val labelRepository: LabelRepository
 ) {
-
-    /**
-     * Merges the provided list of expenditures into the corresponding travels in the travel list.
-     * Each expenditure is associated with a travel based on the travel ID.
-     *
-     * @param travelList The list of travels into which expenditures will be merged.
-     * @param expendListNullable The nullable list of expenditures to merge into the travels.
-     * @throws InvalidParameterException if the provided expenditure list is null.
-     * @throws InvalidParameterException if any travel in the travel list has a null ID.
-     */
-    fun mergeExpendList(travelList: List<Travel>, expendListNullable: List<Expend>?) {
-        val expendList = expendListNullable ?: throw InvalidParameterException(EMPTY_DATASET)
-        travelList.forEach { travel ->
-            val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
-            val expends = expendList.filter { it.travelId == travelId }
-            travel.expendsList = expends
-        }
-    }
 
     /**
      * Retrieves all expends related to a specific [Travel].
@@ -57,51 +38,58 @@ class ExpendUseCase(
     ): LiveData<Response<List<Expend>>> {
         return coroutineScope {
             val mediator = MediatorLiveData<Response<List<Expend>>>()
-            val dataSet = mutableListOf<Expend>()
-            val labelData = mutableListOf<Label>()
 
             CoroutineScope(Dispatchers.Main).launch {
-                val deferredA = CompletableDeferred<Unit>()
-                val deferredB = CompletableDeferred<Unit>()
+                val labelResponse = loadLabels(masterUid, mediator)
+                val labels = labelResponse.await()
 
-                val liveDataA = repository.getExpendListByTravelId(travelId, true)
-                val liveDataB = labelRepository.getAllOperationalLabelListForDrivers(masterUid)
+                loadExpends(travelId, mediator) { expends ->
 
-                var isFirstLoading = true
-                mediator.addSource(liveDataA) { responseA ->
-                    when (responseA) {
-                        is Response.Error -> throw responseA.exception
-                        is Response.Success -> {
-                            val expendList = responseA.data ?: emptyList()
-                            dataSet.clear()
-                            dataSet.addAll(expendList)
-                        }
-                    }
-                    if (isFirstLoading) {
-                        deferredA.complete(Unit)
-                        isFirstLoading = false
-                    } else {
-                        mergeLabelListToAnExpend(dataSet, labelData)
-                    }
+                    mergeLabelListToAnExpend(expends, labels)
+                    mediator.value = Response.Success(data = expends)
                 }
-                mediator.addSource(liveDataB) { responseB ->
-                    when (responseB) {
-                        is Response.Error -> throw responseB.exception
-                        is Response.Success -> {
-                            val labelList = responseB.data ?: emptyList()
-                            labelData.addAll(labelList)
-                        }
-                    }
-                    deferredB.complete(Unit)
-                }
-
-                awaitAll(deferredA, deferredB)
-                mediator.removeSource(liveDataB)
-                mergeLabelListToAnExpend(dataSet, labelData)
-                mediator.value = Response.Success(data = dataSet)
             }
 
             return@coroutineScope mediator
+        }
+    }
+
+    private suspend fun loadLabels(
+        masterUid: String,
+        mediator: MediatorLiveData<Response<List<Expend>>>
+    ): CompletableDeferred<List<Label>> {
+        val deferred = CompletableDeferred<List<Label>>()
+        val liveData = labelRepository.getAllOperationalLabelListForDrivers(masterUid)
+
+        mediator.addSource(liveData) { response ->
+            when (response) {
+                is Response.Error -> deferred.completeExceptionally(response.exception)
+                is Response.Success -> {
+                    response.data?.let { deferred.complete(it) }
+                        ?: deferred.completeExceptionally(NullPointerException(EMPTY_DATASET))
+                }
+            }
+            mediator.removeSource(liveData)
+        }
+
+        return deferred
+    }
+
+    private suspend fun loadExpends(
+        travelId: String,
+        mediator: MediatorLiveData<Response<List<Expend>>>,
+        complete: (expendList: List<Expend>) -> Unit
+    ) {
+        val liveData = repository.getExpendListByTravelId(travelId, true)
+
+        mediator.addSource(liveData) { response ->
+            when (response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> {
+                    response.data?.let { complete(it) }
+                        ?: complete(emptyList())
+                }
+            }
         }
     }
 
@@ -109,6 +97,24 @@ class ExpendUseCase(
         dataSet.forEach { expend ->
             val label = labelData.firstOrNull { it.id == expend.labelId }
             expend.label = label
+        }
+    }
+
+    /**
+     * Merges the provided list of expenditures into the corresponding travels in the travel list.
+     * Each expenditure is associated with a travel based on the travel ID.
+     *
+     * @param travelList The list of travels into which expenditures will be merged.
+     * @param expendListNullable The nullable list of expenditures to merge into the travels.
+     * @throws InvalidParameterException if the provided expenditure list is null.
+     * @throws InvalidParameterException if any travel in the travel list has a null ID.
+     */
+    fun mergeExpendList(travelList: List<Travel>, expendListNullable: List<Expend>?) {
+        val expendList = expendListNullable ?: throw InvalidParameterException(EMPTY_DATASET)
+        travelList.forEach { travel ->
+            val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
+            val expends = expendList.filter { it.travelId == travelId }
+            travel.expendsList = expends
         }
     }
 

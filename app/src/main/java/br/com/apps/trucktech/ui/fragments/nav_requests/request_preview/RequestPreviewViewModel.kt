@@ -6,10 +6,13 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.request.request.PaymentRequest
-import br.com.apps.repository.util.Response
+import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.repository.request.RequestRepository
+import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 class RequestPreviewViewModel(
@@ -17,14 +20,12 @@ class RequestPreviewViewModel(
     private val repository: RequestRepository
 ) : ViewModel() {
 
-    private lateinit var itemIdList: List<String>
-
     /**
      * LiveData holding the response data of type [Response] with a [PaymentRequest]
      * to be displayed on screen.
      */
-    private val _requestData = MutableLiveData<Response<PaymentRequest>>()
-    val requestData get() = _requestData
+    private val _data = MutableLiveData<Response<PaymentRequest>>()
+    val requestData get() = _data
 
     /**
      * LiveData with a dark layer state, used when dialogs and bottom sheets are requested.
@@ -37,21 +38,62 @@ class RequestPreviewViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        loadData()
+        loadData { request, items ->
+            request.itemsList = items.toMutableList()
+            _data.postValue(Response.Success(request))
+        }
     }
 
-    fun loadData() {
+    fun loadData(complete: (requests: PaymentRequest, items: List<RequestItem>) -> Unit) {
+        var isFirstBoot = true
+        lateinit var request: PaymentRequest
+        lateinit var items: List<RequestItem>
+
         viewModelScope.launch {
-            repository.getCompleteRequestById(requestId, true).asFlow().collect { response ->
-                when(response) {
-                    is Response.Error -> _requestData.value = response
-                    is Response.Success -> {
-                        response.data?.let {
-                            itemIdList = it.itemsList!!.map { it.id!! }.toList()
-                        }
-                        _requestData.value = response
-                    }
+            val requestResponse = CompletableDeferred<PaymentRequest>()
+            val itemsResponse = CompletableDeferred<List<RequestItem>>()
+
+            launch {
+                loadRequest {
+                    request = it
+                    if (isFirstBoot) requestResponse.complete(request)
+                    else complete(request, items)
                 }
+            }
+
+            launch {
+                loadItems {
+                    items = it
+                    if (isFirstBoot) itemsResponse.complete(items)
+                    else complete(request, items)
+                }
+            }
+
+            awaitAll(requestResponse, itemsResponse)
+            isFirstBoot = false
+
+            complete(request, items)
+
+        }
+    }
+
+    private suspend fun loadRequest(complete: (requests: PaymentRequest) -> Unit) {
+        repository.getRequestById(requestId, true).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> _data.value = response
+                is Response.Success -> {
+                    if (response.data != null) complete(response.data!!)
+                    else _data.value = Response.Error(NullPointerException())
+                }
+            }
+        }
+    }
+
+    private suspend fun loadItems(complete: (items: List<RequestItem>) -> Unit) {
+        repository.getItemListByRequestId(requestId, true).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> _data.value = response
+                is Response.Success -> response.data?.let { complete(it) } ?: complete(emptyList())
             }
         }
     }
@@ -88,7 +130,8 @@ class RequestPreviewViewModel(
     fun delete() =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                repository.delete(requestId, itemIdList)
+                val itemsId = (_data.value as Response.Success).data!!.itemsList!!.mapNotNull { it.id }
+                repository.delete(requestId, itemsId)
                 emit(Response.Success())
             } catch (e: Exception) {
                 emit(Response.Error(e))

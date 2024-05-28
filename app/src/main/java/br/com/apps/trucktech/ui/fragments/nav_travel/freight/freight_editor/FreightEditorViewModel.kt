@@ -5,27 +5,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.factory.FreightFactory
 import br.com.apps.model.mapper.toDto
+import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.repository.util.Response
+import br.com.apps.model.toDate
+import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
+import br.com.apps.repository.util.Response
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
 class FreightEditorViewModel(
-    private val idHolder: IdHolder,
-    private val repository: FreightRepository
+    private val vmData: FreightEVMData,
+    private val repository: FreightRepository,
+    private val customerRepository: CustomerRepository,
 ) : ViewModel() {
 
-    /**
-     * The [Freight] to be loaded when there is an ID.
-     */
-    lateinit var freight: Freight
+    private var isEditing: Boolean = vmData.freightId?.let { true } ?: false
 
     /**
      * LiveData containing the [LocalDateTime] of the [Freight] date,
@@ -38,42 +41,94 @@ class FreightEditorViewModel(
      * if there is an [Freight] to be loaded, this liveData is
      * responsible for holding the [Response] data of the [Freight].
      */
-    private val _freightData = MutableLiveData<Response<Freight>>()
-    val freightData get() = _freightData
+    private val _data = MutableLiveData<FreightEFData>()
+    val data get() = _data
 
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
     init {
-        if (idHolder.freightId != null) {
-            loadData(idHolder.freightId!!)
-        } else {
-            _date.value = LocalDateTime.now()
+
+        loadData { customers, freight ->
+            processData(customers, freight)
+            sendResponse(customers, freight)
         }
+
     }
 
     /**
-     * Loads data asynchronously and set [_freightData] response.
+     * Loads data asynchronously and set [_data] response.
      *
      * @param [freightId] is the id of the freight to be loaded
      */
-    private fun loadData(freightId: String) {
+    private fun loadData(complete: (customers: List<Customer>, freight: Freight?) -> Unit) {
         viewModelScope.launch {
-            repository.getFreightById(freightId, false).asFlow().collect { response ->
-                _freightData.value =
-                    when (response) {
-                        is Response.Error -> response
-                        is Response.Success -> {
-                            response.data?.let {
-                                freight = it
-                                _date.value = it.loadingDate!!
-                            }
-                            response
-                        }
-                    }
-            }
+
+            val customerListDef = loadCustomers()
+            val freightDef = vmData.freightId?.let { loadFreight(it) }
+
+            val customers = customerListDef.await()
+            val freight = freightDef?.await()
+
+            complete(customers, freight)
+
         }
+    }
+
+    private suspend fun loadFreight(freightId: String): CompletableDeferred<Freight> {
+        val deferred = CompletableDeferred<Freight>()
+
+        repository.getFreightById(freightId).asFlow().first { response ->
+            when (response) {
+                is Response.Error -> deferred.completeExceptionally(response.exception)
+                is Response.Success -> {
+                    response.data?.let { deferred.complete(it) }
+                        ?: deferred.completeExceptionally(NullPointerException())
+                }
+            }
+            true
+        }
+
+        return deferred
+    }
+
+    private suspend fun loadCustomers(): CompletableDeferred<List<Customer>> {
+        val deferred = CompletableDeferred<List<Customer>>()
+
+        customerRepository.getCustomerListByMasterUid(vmData.masterUid).asFlow().first { response ->
+            when (response) {
+                is Response.Error -> deferred.completeExceptionally(response.exception)
+                is Response.Success ->
+                    response.data?.let { deferred.complete(it) }
+                        ?: deferred.completeExceptionally(NullPointerException())
+
+            }
+            true
+        }
+
+        return deferred
+    }
+
+    private fun processData(customers: List<Customer>, freight: Freight?) {
+        freight?.apply {
+            customer = customers.first { it.id == customerId }
+        }
+
+        _date.value =
+            freight?.let {
+                it.loadingDate ?: LocalDateTime.now()
+            } ?: LocalDateTime.now()
+    }
+
+    private fun sendResponse(customers: List<Customer>, freight: Freight?) {
+        _data.value =
+            if (freight == null) {
+                FreightEFData(customerList = customers)
+            } else {
+                FreightEFData(customerList = customers, freight = freight)
+            }
+
     }
 
     /**
@@ -88,10 +143,10 @@ class FreightEditorViewModel(
     /**
      * Send the [Freight] to be created or updated.
      */
-    fun save(mappedFields: HashMap<String, String>) =
+    fun save(viewDto: FreightDto) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = getFreightDto(mappedFields)
+                val dto = createOrUpdate(viewDto)
                 repository.save(dto)
                 emit(Response.Success())
             } catch (e: Exception) {
@@ -99,18 +154,57 @@ class FreightEditorViewModel(
             }
         }
 
-    private fun getFreightDto(mappedFields: HashMap<String, String>): FreightDto {
-        return if (::freight.isInitialized) {
-            FreightFactory.update(freight, mappedFields)
-            freight.toDto()
-        } else {
-            mappedFields[FreightFactory.TAG_MASTER_UID] = idHolder.masterUid!!
-            mappedFields[FreightFactory.TAG_TRUCK_ID] = idHolder.truckId!!
-            mappedFields[FreightFactory.TAG_DRIVER_ID] = idHolder.driverId!!
-            mappedFields[FreightFactory.TAG_TRAVEL_ID] = idHolder.travelId!!
-            mappedFields[FreightFactory.TAG_TRAVEL_ID] = idHolder.travelId!!
-            FreightFactory.create(mappedFields).toDto()
+    private fun createOrUpdate(viewDto: FreightDto): FreightDto {
+        viewDto.apply {
+            loadingDate = date.value!!.toDate()
+            isCommissionPaid = false
+            customerId = data.value!!.customerList.first { it.name == customer }.id
+            customer = null
         }
+
+        return when (isEditing) {
+            true -> {
+                val freight = data.value!!.freight!!
+                FreightFactory.update(freight, viewDto)
+                freight.toDto()
+            }
+            false -> {
+                viewDto.apply {
+                    masterUid = vmData.masterUid
+                    truckId = vmData.truckId
+                    travelId = vmData.travelId
+                    driverId = vmData.driverId
+                    commissionPercentual = vmData.commissionPercentual.toDouble()
+                }
+                FreightFactory.create(viewDto).toDto()
+            }
+        }
+
+    }
+
+    fun validateCustomer(customer: String): Boolean {
+        var isValid = true
+
+        if (customer.isEmpty()) isValid = false
+
+        val customers = data.value!!.customerList.map { it.name }
+        if (!customers.contains(customer)) isValid = false
+
+        return isValid
     }
 
 }
+
+data class FreightEFData(
+    val customerList: List<Customer>,
+    val freight: Freight? = null
+)
+
+data class FreightEVMData(
+    val masterUid: String,
+    val truckId: String,
+    val travelId: String,
+    val driverId: String,
+    val freightId: String? = null,
+    val commissionPercentual: BigDecimal
+)

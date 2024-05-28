@@ -2,14 +2,14 @@ package br.com.apps.usecase
 
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.EMPTY_ID
-import br.com.apps.repository.repository.freight.FreightRepository
 import java.security.InvalidParameterException
 
 class FreightUseCase(
-    private val repository: FreightRepository,
-    private val labelUseCase: LabelUseCase
+    private val fRepository: FreightRepository,
+    private val cUseCase: CustomerUseCase
 ) {
 
     /**
@@ -28,10 +28,6 @@ class FreightUseCase(
             val freights = freightList.filter { it.travelId == travelId }
             travel.freightsList = freights
         }
-    }
-
-    suspend fun delete(freightId: String) {
-        repository.delete(freightId)
     }
 
 }

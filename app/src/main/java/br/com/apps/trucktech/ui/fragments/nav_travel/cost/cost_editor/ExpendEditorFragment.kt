@@ -8,13 +8,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.IdHolder
-import br.com.apps.model.factory.ExpendFactory
+import br.com.apps.model.dto.travel.ExpendDto
+import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.Label.Companion.containsByName
 import br.com.apps.model.model.label.Label.Companion.getIdByName
-import br.com.apps.model.model.label.Label.Companion.getListOfTitles
 import br.com.apps.model.model.travel.Expend
-import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
@@ -24,7 +22,6 @@ import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
-import br.com.apps.trucktech.expressions.toast
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
@@ -39,16 +36,16 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: ExpendEditorFragmentArgs by navArgs()
-    private val idHolder by lazy {
-        IdHolder(
+    private val vmData by lazy {
+        ExpendEVMData(
             masterUid = mainActVM.loggedUser.masterUid,
             truckId = mainActVM.loggedUser.truckId,
             driverId = mainActVM.loggedUser.driverId,
-            expendId = args.costId,
-            travelId = args.travelId
+            travelId = args.travelId,
+            expendId = args.costId
         )
     }
-    private val viewModel: ExpendEditorViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: ExpendEditorViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -134,25 +131,18 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
     private fun saveIconClicked() {
         binding.apply {
 
-            cleanEditTextError(
-                fragExpendEditorCompany,
-                fragExpendEditorValue,
-                fragExpendEditorDescription
-            )
-            fragExpendEditorAutoComplete.error = null
-
-            val type = fragExpendEditorAutoComplete.text.toString()
+            val name = fragExpendEditorAutoComplete.text.toString()
             val company = fragExpendEditorCompany.text.toString()
             val value = fragExpendEditorValue.text.toString()
             val description = fragExpendEditorDescription.text.toString()
             val isPaidByDriver = fragExpendPaidByEmployeeCheckbox.isChecked.toString()
 
             var fieldsAreValid = true
-            if (type.isBlank()) {
+            if (name.isBlank()) {
                 fragExpendEditorAutoComplete.error = "Preencha o tipo"
                 fieldsAreValid = false
             }
-            if (!viewModel.labelList.containsByName(type)) {
+            if (!viewModel.data.value!!.labelList.containsByName(name)) {
                 fragExpendEditorAutoComplete.error = "Nome inválido"
                 fieldsAreValid = false
             }
@@ -170,25 +160,21 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
             }
 
             if (fieldsAreValid) {
-                val mappedFields = hashMapOf(
-                    Pair(ExpendFactory.TAG_LABEL_ID, viewModel.labelList.getIdByName(type)!!),
-                    Pair(ExpendFactory.TAG_COMPANY, company),
-                    Pair(ExpendFactory.TAG_DATE, viewModel.date.value.toString()),
-                    Pair(ExpendFactory.TAG_DESCRIPTION, description),
-                    Pair(ExpendFactory.TAG_VALUE, value),
-                    Pair(ExpendFactory.TAG_DATE, viewModel.date.value.toString()),
-                    Pair(ExpendFactory.TAG_PAID_BY_EMPLOYEE, isPaidByDriver)
+                val viewDto = ExpendDto(
+                    labelId = viewModel.data.value!!.labelList.getIdByName(name),
+                    company = company,
+                    value = value.toDouble(),
+                    description = description,
+                    isPaidByEmployee = isPaidByDriver.toBoolean()
                 )
-
-                save(mappedFields)
-
+                save(viewDto)
             }
 
         }
     }
 
-    private fun save(mappedFields: HashMap<String, String>) {
-        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+    private fun save(viewDto: ExpendDto) {
+        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
                     response.exception.printStackTrace()
@@ -214,27 +200,10 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
      *   - Observes expendData to bind [Expend] if the user is editing.
      */
     private fun initStateManager() {
-        viewModel.labelData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    requireContext().toast(FAILED_TO_LOAD_DATA)
-                    response.exception.printStackTrace()
-                }
-
-                is Response.Success -> initAutoCompleteAdapter()
-            }
-        }
-
-        viewModel.expendData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    response.exception.printStackTrace()
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                }
-
-                is Response.Success -> {
-                    response.data?.let { bind(it) }
-                }
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            data.apply {
+                initAutoCompleteAdapter(labelList)
+                expend?.run { bind(this) }
             }
         }
 
@@ -243,24 +212,27 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
         }
     }
 
-    private fun initAutoCompleteAdapter() {
-        val dataSet = viewModel.labelList.getListOfTitles()
+    private fun initAutoCompleteAdapter(labelList: List<Label>) {
         val adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_dropdown_item_1line,
-            dataSet
+            labelList.mapNotNull { it.name }
         )
+
         val autoComplete = binding.fragExpendEditorAutoComplete
         autoComplete.setAdapter(adapter)
+
+        autoComplete.setOnItemClickListener { _, _, _, _ -> autoComplete.error = null }
+
     }
 
     private fun bind(expend: Expend) {
         binding.apply {
             fragExpendEditorAutoComplete.setText(expend.label?.name)
             fragExpendEditorCompany.setText(expend.company)
-            fragExpendEditorValue.setText(expend.value?.toPlainString())
+            fragExpendEditorValue.setText(expend.value.toPlainString())
             fragExpendEditorDescription.setText(expend.description)
-            expend.paidByEmployee?.let { fragExpendPaidByEmployeeCheckbox.isChecked = it }
+            expend.isPaidByEmployee.let { fragExpendPaidByEmployeeCheckbox.isChecked = it }
         }
     }
 

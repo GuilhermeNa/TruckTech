@@ -11,8 +11,8 @@ import br.com.apps.model.factory.RequestItemFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.model.model.request.request.RequestItemType
-import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.request.RequestRepository
+import br.com.apps.repository.util.Response
 import kotlinx.coroutines.launch
 
 class RequestEditorRefuelViewModel(
@@ -65,10 +65,10 @@ class RequestEditorRefuelViewModel(
     /**
      * Transforms the mapped fields into a DTO. Creates a new [RequestItem] or updates it if it already exists.
      */
-    fun save(mappedFields: HashMap<String, String>) =
+    fun save(viewDto: RequestItemDto) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = getItemDto(mappedFields)
+                val dto = createOrUpdate(viewDto)
                 repository.saveItem(dto)
                 emit(Response.Success())
             } catch (e: Exception) {
@@ -76,13 +76,13 @@ class RequestEditorRefuelViewModel(
             }
         }
 
-    private fun getItemDto(mappedFields: HashMap<String, String>): RequestItemDto {
+    private fun createOrUpdate(viewDto: RequestItemDto): RequestItemDto {
         return if (::requestItem.isInitialized) {
-            RequestItemFactory.update(requestItem, mappedFields)
+            RequestItemFactory.update(requestItem, viewDto)
             requestItem.toDto()
         } else {
-            mappedFields[RequestItemFactory.TAG_REQUEST_ID] = requestId
-            RequestItemFactory.create(mappedFields, RequestItemType.REFUEL).toDto()
+            viewDto.requestId = this@RequestEditorRefuelViewModel.requestId
+            RequestItemFactory.create(viewDto, RequestItemType.REFUEL).toDto()
         }
     }
 

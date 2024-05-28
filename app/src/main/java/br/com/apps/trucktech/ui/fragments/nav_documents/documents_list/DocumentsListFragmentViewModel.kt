@@ -11,7 +11,7 @@ import br.com.apps.model.model.label.LabelType
 import br.com.apps.repository.repository.document.DocumentRepository
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.trucktech.util.State
+import br.com.apps.trucktech.util.state.State
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

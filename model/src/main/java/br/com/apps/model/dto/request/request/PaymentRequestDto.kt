@@ -10,8 +10,8 @@ data class PaymentRequestDto(
 
     val encodedImage: String? = null,
     val date: Date? = null,
-    val requestNumber: Int? = 0,
-    val status: String? = "",
+    val requestNumber: Int? = null,
+    val status: String? = null,
     val itemsList: List<RequestItemDto>? = null
 
     ) {

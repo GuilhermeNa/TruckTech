@@ -1,6 +1,7 @@
 package br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuels_list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.NULL_DATE
-import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRefuelsListBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.snackBarRed
@@ -20,6 +21,7 @@ import br.com.apps.trucktech.ui.PAGE_REFUEL
 import br.com.apps.trucktech.ui.fragments.nav_travel.records.RecordsViewModel
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.RecordsItemRecyclerAdapter
+import br.com.apps.trucktech.util.state.State
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import java.security.InvalidParameterException
@@ -64,16 +66,51 @@ class RefuelsListFragment : Fragment() {
      *   - Observes refuelData for bind the recyclerView
      */
     private fun initStateManager() {
-        viewModel.refuelData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                is Response.Success -> {
-                    response.data?.let { dataSet ->
-                        initRecyclerView(initAdapters(dataSet))
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            initRecyclerView(initAdapters(data))
+        }
+
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is State.Loading -> {
+                    binding.apply {
+                        fuelFragmentRecycler.visibility = View.GONE
+                        fragRefuelBoxError.layout.visibility = View.GONE
+                        fragRefuelBoxError.error.visibility = View.GONE
+                        fragRefuelBoxError.empty.visibility = View.GONE
                     }
+                }
+
+                is State.Loaded -> {
+                    binding.apply {
+                        fuelFragmentRecycler.visibility = View.VISIBLE
+                        fragRefuelBoxError.layout.visibility = View.GONE
+                        fragRefuelBoxError.error.visibility = View.GONE
+                        fragRefuelBoxError.empty.visibility = View.GONE
+                    }
+                }
+
+                is State.Empty -> {
+                    binding.apply {
+                        fuelFragmentRecycler.visibility = View.GONE
+                        fragRefuelBoxError.layout.visibility = View.VISIBLE
+                        fragRefuelBoxError.error.visibility = View.GONE
+                        fragRefuelBoxError.empty.visibility = View.VISIBLE
+                    }
+                }
+                is State.Error -> {
+                    binding.apply {
+                        fuelFragmentRecycler.visibility = View.GONE
+                        fragRefuelBoxError.layout.visibility = View.VISIBLE
+                        fragRefuelBoxError.error.visibility = View.VISIBLE
+                        fragRefuelBoxError.empty.visibility = View.GONE
+                    }
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                    Log.e(TAG_DEBUG, state.error.message.toString())
                 }
             }
         }
+
     }
 
     /**
@@ -93,7 +130,9 @@ class RefuelsListFragment : Fragment() {
         return refuelList
             .sortedBy { it.date }
             .reversed()
-            .groupBy { it.date?.getMonthAndYearInPtBr() ?: throw InvalidParameterException(NULL_DATE) }
+            .groupBy {
+                it.date?.getMonthAndYearInPtBr() ?: throw InvalidParameterException(NULL_DATE)
+            }
             .map { createAdapters(it) }
             .flatten()
     }
@@ -111,9 +150,9 @@ class RefuelsListFragment : Fragment() {
                 })
         )
 
-    //---------------------------------------------------------------------------------------------//
-    // ON DESTROY VIEW
-    //---------------------------------------------------------------------------------------------//
+//---------------------------------------------------------------------------------------------//
+// ON DESTROY VIEW
+//---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
         super.onDestroyView()

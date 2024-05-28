@@ -82,7 +82,7 @@ class RecordsItemRecyclerAdapter<T>(
         holder.apply {
             month.text = freight.loadingDate?.getMonthInPtBrAbbreviated()
             day.text = freight.loadingDate?.getDayFormatted()
-            title.text = freight.company
+            title.text = freight.customer?.name
             description.text = freight.getTextDescription()
             value.text = freight.value?.toCurrencyPtBr()
             image.run {

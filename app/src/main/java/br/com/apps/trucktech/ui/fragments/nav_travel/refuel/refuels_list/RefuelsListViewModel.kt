@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.refuel.RefuelRepository
+import br.com.apps.repository.util.Response
+import br.com.apps.trucktech.util.state.State
+import br.com.apps.trucktech.util.buildUiResponse
 import kotlinx.coroutines.launch
 
 class RefuelsListViewModel(
@@ -18,21 +20,23 @@ class RefuelsListViewModel(
      * LiveData holding the response data of type [Response] with a list of expenditures [Refuel]
      * to be displayed on screen.
      */
-    private val _refuelData = MutableLiveData<Response<List<Refuel>>>()
-    val refuelData get() = _refuelData
+    private val _data = MutableLiveData<List<Refuel>>()
+    val data get() = _data
+
+    private val _state = MutableLiveData<State>()
+    val state get() = _state
 
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init {
-        loadData()
-    }
+    init { loadData() }
 
     private fun loadData() {
+        _state.value = State.Loading
         viewModelScope.launch {
-            repository.getRefuelListByTravelId(travelId, true).asFlow().collect {
-                _refuelData.value = it
+            repository.getRefuelListByTravelId(travelId, true).asFlow().collect { response ->
+                response.buildUiResponse(state = _state, data = _data)
             }
         }
     }

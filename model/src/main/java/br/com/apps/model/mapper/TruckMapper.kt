@@ -3,6 +3,7 @@ package br.com.apps.model.mapper
 import br.com.apps.model.dto.TruckDto
 import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.model.Truck
+import java.math.BigDecimal
 
 
 fun TruckDto.toModel(): Truck {
@@ -13,7 +14,8 @@ fun TruckDto.toModel(): Truck {
             driverId = this.driverId!!,
             masterUid = this.masterUid!!,
             plate = this.plate ?: "-",
-            color = this.color ?: "-"
+            color = this.color ?: "-",
+            commissionPercentual = BigDecimal(this.commissionPercentual!!)
         )
     }
 

@@ -3,9 +3,23 @@ package br.com.apps.model.dto.request.request
 data class RequestItemDto(
     var id: String? = null,
     val labelId: String? = null,
-    val requestId: String? = null,
+    var requestId: String? = null,
 
-    val kmMarking: Int? = 0,
-    val value: Double? = 0.0,
-    val type: String? = ""
-)
+    val kmMarking: Int? = null,
+    val value: Double? = null,
+    var type: String? = null
+) {
+
+    fun validateFields(): Boolean {
+        var isValid = true
+
+        if (requestId == null ||
+            value == null
+        ) {
+            isValid = false
+        }
+
+        return isValid
+    }
+
+}

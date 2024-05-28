@@ -4,21 +4,23 @@ import br.com.apps.model.model.label.Label
 import java.util.Date
 
 data class ExpendDto(
-    val masterUid: String? = null,
+    var masterUid: String? = null,
     var id: String? = null,
-    val truckId: String? = null,
-    val driverId: String? = null,
-    val travelId: String? = null,
+    var truckId: String? = null,
+    var driverId: String? = null,
+    var travelId: String? = null,
     val labelId: String? = null,
 
+    var label: Label? = null,
     val company: String? = null,
-    val date: Date? = null,
+    var date: Date? = null,
     val description: String? = null,
     val value: Double? = null,
-    val label: Label? = null,
 
-    var paidByEmployee: Boolean? = null,
-    var alreadyRefunded: Boolean? = null
+    @field:JvmField
+    var isPaidByEmployee: Boolean? = null,
+    @field:JvmField
+    var isAlreadyRefunded: Boolean? = null
 
 ) {
 
@@ -26,7 +28,7 @@ data class ExpendDto(
         var isValid = true
 
         if (masterUid == null || truckId == null || travelId == null || driverId == null || labelId == null ||
-            company == null || date == null || value == null || paidByEmployee == null || alreadyRefunded == null
+            company == null || date == null || value == null || isPaidByEmployee == null || isAlreadyRefunded == null
         ) {
             isValid = false
         }

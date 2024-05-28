@@ -70,17 +70,20 @@
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:hint="@string/name"
+                        android:id="@+id/frag_freight_editor_customer_layout"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_width="match_parent">
+                        android:hint="@string/name"
+                        app:endIconMode="dropdown_menu">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/frag_freight_editor_company"
-                            android:layout_height="wrap_content"
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/frag_freight_editor_customer_ac"
                             android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="actionNext"
                             android:inputType="textCapWords"
-                            android:imeOptions="actionNext"/>
-
+                            android:maxLines="1"
+                            android:padding="16dp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout

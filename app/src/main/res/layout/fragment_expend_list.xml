@@ -15,4 +15,10 @@
         android:clipToPadding="false"
         android:paddingBottom="80dp"/>
 
+    <include
+        android:id="@+id/frag_expend_box_error"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        layout="@layout/box_error"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

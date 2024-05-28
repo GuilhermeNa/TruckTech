@@ -18,8 +18,8 @@ import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.OK
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
+import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
-import br.com.apps.trucktech.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestPreviewBinding
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack

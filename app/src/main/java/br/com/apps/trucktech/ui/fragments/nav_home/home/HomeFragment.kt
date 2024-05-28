@@ -60,7 +60,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
      */
     private fun loadUserData() {
         authViewModel.userId.let {
-            mainActVM.loadUserData(it)
+            mainActVM.initUserData(it)
         }
     }
 

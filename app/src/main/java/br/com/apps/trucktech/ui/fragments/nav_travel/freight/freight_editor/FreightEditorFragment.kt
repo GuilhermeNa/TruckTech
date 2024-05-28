@@ -5,12 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.IdHolder
-import br.com.apps.model.factory.FreightFactory
+import br.com.apps.model.dto.travel.FreightDto
+import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
@@ -34,16 +34,17 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: FreightEditorFragmentArgs by navArgs()
-    private val idHolder by lazy {
-        IdHolder(
+    private val vmData by lazy {
+        FreightEVMData(
             masterUid = mainActVM.loggedUser.masterUid,
             truckId = mainActVM.loggedUser.truckId,
             travelId = args.travelId,
+            driverId = mainActVM.loggedUser.driverId,
             freightId = args.freightId,
-            driverId = mainActVM.loggedUser.driverId
+            commissionPercentual = mainActVM.loggedUser.commissionPercentual
         )
     }
-    private val viewModel: FreightEditorViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: FreightEditorViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -129,16 +130,7 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
     private fun saveIconClicked() {
         binding.apply {
 
-            cleanEditTextError(
-                fragFreightEditorCompany,
-                fragFreightEditorOrigin,
-                fragFreightEditorDestiny,
-                fragFreightEditorCargo,
-                fragFreightEditorWeight,
-                fragFreightEditorValue
-            )
-
-            val company = fragFreightEditorCompany.text.toString()
+            val customer = fragFreightEditorCustomerAc.text.toString()
             val origin = fragFreightEditorOrigin.text.toString()
             val destiny = fragFreightEditorDestiny.text.toString()
             val cargo = fragFreightEditorCargo.text.toString()
@@ -146,8 +138,8 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
             val value = fragFreightEditorValue.text.toString()
 
             var fieldsAreValid = true
-            if (company.isBlank()) {
-                fragFreightEditorCompany.error = "Preencha o carregador"
+            if (!viewModel.validateCustomer(customer)) {
+                fragFreightEditorCustomerAc.error = "Preencha o cliente"
                 fieldsAreValid = false
             }
             if (origin.isBlank()) {
@@ -172,30 +164,29 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
             }
 
             if (fieldsAreValid) {
-                val mappedFields = hashMapOf(
-                    Pair(FreightFactory.TAG_ORIGIN, origin),
-                    Pair(FreightFactory.TAG_COMPANY, company),
-                    Pair(FreightFactory.TAG_DESTINY, destiny),
-                    Pair(FreightFactory.TAG_CARGO, cargo),
-                    Pair(FreightFactory.TAG_WEIGHT, weight),
-                    Pair(FreightFactory.TAG_VALUE, value),
-                    Pair(FreightFactory.TAG_LOADING_DATE, viewModel.date.value.toString())
+                val viewDto = FreightDto(
+                    customer = customer,
+                    origin = origin,
+                    destiny = destiny,
+                    cargo = cargo,
+                    weight = weight.toDouble(),
+                    value = value.toDouble()
                 )
 
-                save(mappedFields)
+                save(viewDto)
 
             }
-
         }
     }
 
-    private fun save(mappedFields: HashMap<String, String>) {
-        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+    private fun save(viewDto: FreightDto) {
+        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
                     response.exception.printStackTrace()
                     requireView().snackBarRed(FAILED_TO_SAVE)
                 }
+
                 is Response.Success -> requireView().apply {
                     clearMenu()
                     snackBarGreen(SUCCESSFULLY_SAVED)
@@ -214,26 +205,42 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
      *   - Observes freightData to bind [Freight] if the user is editing.
      */
     private fun initStateManager() {
-        viewModel.freightData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                is Response.Success -> bind()
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            data.apply {
+                initCustomerAutoComplete(customerList)
+                freight?.let { bind(it) }
             }
         }
 
         viewModel.date.observe(viewLifecycleOwner) { localDate ->
             binding.fragFreightEditorDate.text = localDate.getCompleteDateInPtBr()
         }
+
     }
 
-    private fun bind() {
-        val freight = viewModel.freight
+    private fun initCustomerAutoComplete(customerList: List<Customer>) {
+        val customersNames = customerList.map { it.name }
+
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            customersNames
+        )
+
+        val autoComplete = binding.fragFreightEditorCustomerAc
+        autoComplete.setAdapter(adapter)
+
+        autoComplete.setOnItemClickListener { _, _, _, _ -> autoComplete.error = null }
+
+    }
+
+    private fun bind(freight: Freight) {
         binding.apply {
-            fragFreightEditorCompany.setText(freight.company)
+            fragFreightEditorCustomerAc.setText(freight.customer?.name)
             fragFreightEditorOrigin.setText(freight.origin)
             fragFreightEditorDestiny.setText(freight.destiny)
             fragFreightEditorCargo.setText(freight.cargo)
-            fragFreightEditorWeight.setText(freight.weight?.toPlainString())
+            fragFreightEditorWeight.setText(freight.weight.toPlainString())
             fragFreightEditorValue.setText(freight.value?.toPlainString())
         }
     }

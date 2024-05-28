@@ -45,4 +45,5 @@ class FreightRepository(
     ) =
         read.getFreightListByDriverIdAndPaymentStatus(driverId, isPaid, flow)
 
+
 }

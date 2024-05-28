@@ -6,7 +6,8 @@ data class TruckDto(
     val driverId: String? = null,
 
     val plate: String? = null,
-    val color: String? = null
+    val color: String? = null,
+    val commissionPercentual: Double? = null
 ) {
 
     fun validateFields(): Boolean {

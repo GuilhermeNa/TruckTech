@@ -8,12 +8,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
-import br.com.apps.model.factory.RequestItemFactory
+import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
-import br.com.apps.trucktech.TAG_DEBUG
+import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorRefuelBinding
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
@@ -115,11 +115,6 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
             fragmentRequestEditorFreightButton.setOnClickListener {
                 setClickRangeTimer(it, 1000)
 
-                cleanEditTextError(
-                    fragmentRequestEditorKm,
-                    fragmentRequestEditorValue
-                )
-
                 val kmMarking = fragmentRequestEditorKm.text.toString()
                 val value = fragmentRequestEditorValue.text.toString()
 
@@ -134,23 +129,23 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
                 }
 
                 if (fieldsAreValid) {
-                    val mappedFields = hashMapOf(
-                        Pair(RequestItemFactory.TAG_KM_MARKING, kmMarking),
-                        Pair(RequestItemFactory.TAG_VALUE, value)
+                    val viewDto = RequestItemDto(
+                        kmMarking = kmMarking.toInt(),
+                        value = value.toDouble()
                     )
-
-                    save(mappedFields)
+                    save(viewDto)
                 }
             }
         }
     }
 
-    private fun save(mappedFields: HashMap<String, String>) {
-        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+    private fun save(viewDto: RequestItemDto) {
+        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_SAVE)
                     Log.e(TAG_DEBUG, response.exception.message.toString())
+                    response.exception.printStackTrace()
                 }
 
                 is Response.Success -> {

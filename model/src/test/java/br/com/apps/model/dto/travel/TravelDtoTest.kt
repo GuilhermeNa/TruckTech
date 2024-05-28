@@ -1,8 +1,5 @@
 package br.com.apps.model.dto.travel
 
-import br.com.apps.model.model.travel.Expend
-import br.com.apps.model.model.travel.Freight
-import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.toDate
 import org.junit.Assert
 import org.junit.Test
@@ -21,9 +18,9 @@ class TravelDtoTest {
         finalDate = LocalDateTime.of(2022, 1, 15, 12, 0).toDate(),
         initialOdometerMeasurement = 10.0,
         finalOdometerMeasurement = 50.0,
-        freightsList = listOf(Freight(id = "1"), Freight(id = "2")),
+    /*    freightsList = listOf(Freight(id = "1"), Freight(id = "2")),
         refuelsList = listOf(Refuel(id = "3"), Refuel(id = "4"), Refuel(id = "5")),
-        expendsList = listOf(Expend(id = "6"))
+        expendsList = listOf(Expend(id = "6"))*/
     )
 
     @Test

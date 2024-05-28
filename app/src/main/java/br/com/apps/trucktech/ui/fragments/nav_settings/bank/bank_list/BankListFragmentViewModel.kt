@@ -10,7 +10,7 @@ import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.trucktech.util.State
+import br.com.apps.trucktech.util.state.State
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

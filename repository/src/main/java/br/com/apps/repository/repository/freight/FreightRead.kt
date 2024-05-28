@@ -111,8 +111,7 @@ class FreightRead(fireStore: FirebaseFirestore): FreightReadI {
         travelIdList: List<String>,
         flow: Boolean
     ): LiveData<Response<List<Freight>>> {
-        if (travelIdList.isEmpty())
-            return MutableLiveData(Response.Error(EmptyIdException("FreightRead: emptyId")))
+        if (travelIdList.isEmpty()) return MutableLiveData(Response.Success(emptyList()))
 
         val listener = collection.whereIn(TRAVEL_ID, travelIdList)
 

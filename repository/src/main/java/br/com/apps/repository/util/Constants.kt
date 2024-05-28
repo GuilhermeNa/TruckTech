@@ -98,6 +98,8 @@ internal const val FIRESTORE_COLLECTION_ADMIN = "adminEmployee"
 
 internal const val FIRESTORE_COLLECTION_BANK = "bankAccount"
 
+internal const val FIRESTORE_COLLECTION_CUSTOMER = "customers"
+
 //---------------------------------------------------------------------------------------------//
 // COMMON
 //---------------------------------------------------------------------------------------------//

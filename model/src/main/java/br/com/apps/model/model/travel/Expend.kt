@@ -5,20 +5,22 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class Expend(
-    val masterUid: String? = null,
+    val masterUid: String,
     val id: String? = null,
-    val truckId: String? = null,
-    val driverId: String? = null,
-    val travelId: String? = null,
-    var labelId: String? = null,
+    val truckId: String,
+    val driverId: String,
+    val travelId: String,
+    var labelId: String,
 
-    var company: String? = null,
-    var date: LocalDateTime? = null,
-    var description: String? = null,
-    var value: BigDecimal? = null,
     var label: Label? = null,
+    var company: String,
+    var date: LocalDateTime,
+    var description: String,
+    var value: BigDecimal,
 
-    var paidByEmployee: Boolean? = null,
-    var alreadyRefunded: Boolean? = null
+    @field:JvmField
+    var isPaidByEmployee: Boolean,
+    @field:JvmField
+    var isAlreadyRefunded: Boolean
 
 )

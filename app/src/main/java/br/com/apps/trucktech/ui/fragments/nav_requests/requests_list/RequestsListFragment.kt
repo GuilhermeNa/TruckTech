@@ -10,10 +10,8 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.IdHolder
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.repository.util.CANCEL
-import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.OK
@@ -31,6 +29,7 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.private_adapter.RequestsListRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.HeaderDefaultHorizontalAdapter
+import br.com.apps.trucktech.util.state.State
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -50,15 +49,16 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRequestsListBinding? = null
     private val binding get() = _binding!!
+    private var stateHandler: RequestsListState? = null
 
-    private val idHolder by lazy {
-        IdHolder(
+    private val vmData by lazy {
+        RequestLVMData(
             masterUid = mainActVM.loggedUser.masterUid,
-            truckId =  mainActVM.loggedUser.truckId,
-            driverId =  mainActVM.loggedUser.driverId
+            truckId = mainActVM.loggedUser.truckId,
+            driverId = mainActVM.loggedUser.driverId
         )
     }
-    private val viewModel: RequestsListViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: RequestsListViewModel by viewModel { parametersOf(vmData) }
     private var adapter: RequestsListRecyclerAdapter? = null
 
     //---------------------------------------------------------------------------------------------//
@@ -79,6 +79,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        stateHandler = RequestsListState(binding)
         initHeaderRecyclerView()
         initStateManager()
         initFab()
@@ -124,18 +125,14 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun showAlertDialog() {
-        viewModel.requestDarkLayer()
-        viewModel.dismissBottomNav()
+        viewModel.dialogRequested()
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Nova requisição")
             .setMessage("Você confirma a adição uma nova requisição?")
             .setPositiveButton("Ok") { _, _ -> createNewRequest() }
             .setNegativeButton("Cancelar") { _, _ -> }
-            .setOnDismissListener {
-                viewModel.dismissDarkLayer()
-                viewModel.requestBottomNav()
-            }
+            .setOnDismissListener { viewModel.dialogDismissed() }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
@@ -170,33 +167,36 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
      *   - Observes bottomNav to manage the interaction.
      */
     private fun initStateManager() {
-        viewModel.requestData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-
-                is Response.Success -> {
-                    response.data?.let { data ->
-                        if (adapter == null) {
-                            initRequestRecyclerView()
-                        } else {
-                            adapter?.update(data)
-                        }
-                    }
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            data?.let { requests ->
+                if (adapter == null) {
+                    initRequestRecyclerView()
+                } else {
+                    adapter?.update(requests)
                 }
             }
         }
 
-        viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
-            when (isRequested) {
-                true -> binding.fragRequestListDarkLayer.visibility = View.VISIBLE
-                false -> binding.fragRequestListDarkLayer.visibility = View.GONE
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is State.Loading -> stateHandler?.showLoading()
+                is State.Loaded -> stateHandler?.showLoaded()
+                is State.Empty -> stateHandler?.showEmpty()
+                is State.Error -> stateHandler?.showError(state.error)
             }
         }
 
-        viewModel.bottomNav.observe(viewLifecycleOwner) { isRequested ->
-            when (isRequested) {
-                true -> mainActVM.setComponents(VisualComponents(hasBottomNavigation = true))
-                false -> mainActVM.setComponents(VisualComponents(hasBottomNavigation = false))
+        viewModel.dialog.observe(viewLifecycleOwner) { dialog ->
+            when (dialog) {
+                true -> {
+                    binding.fragRequestListDarkLayer.visibility = View.VISIBLE
+                    mainActVM.setComponents(VisualComponents(hasBottomNavigation = false))
+                }
+
+                false -> {
+                    binding.fragRequestListDarkLayer.visibility = View.GONE
+                    mainActVM.setComponents(VisualComponents(hasBottomNavigation = true))
+                }
             }
         }
 
@@ -254,8 +254,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun showAlertDialogForDelete(requestId: String, itemsIdList: List<String>?) {
-        viewModel.requestDarkLayer()
-        viewModel.dismissBottomNav()
+        viewModel.dialogRequested()
 
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
@@ -263,10 +262,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
             .setMessage("Você realmente deseja apagar esta requisição e seus itens permanentemente?")
             .setPositiveButton(OK) { _, _ -> deleteRequest(requestId, itemsIdList) }
             .setNegativeButton(CANCEL) { _, _ -> }
-            .setOnDismissListener {
-                viewModel.dismissDarkLayer()
-                viewModel.requestBottomNav()
-            }
+            .setOnDismissListener { viewModel.dialogDismissed() }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
@@ -276,12 +272,24 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     private fun deleteRequest(requestId: String, itemsIdList: List<String>?) {
         lifecycleScope.launch {
             viewModel.delete(requestId, itemsIdList).asFlow().collect { response ->
-                when(response) {
+                when (response) {
                     is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
-                    is Response.Success -> requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                    is Response.Success -> {
+                        viewModel.loadData()
+                        requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                    }
                 }
             }
         }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // ON RESUME
+    //---------------------------------------------------------------------------------------------//
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadData()
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -290,8 +298,9 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
         adapter = null
+        stateHandler = null
+        _binding = null
     }
 
 }

@@ -6,7 +6,6 @@ import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.util.DRIVER_ID
-import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_ITEMS
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_REQUESTS
 import br.com.apps.repository.util.REQUEST_ID
@@ -18,17 +17,8 @@ import br.com.apps.repository.util.toRequestItemObject
 import br.com.apps.repository.util.toRequestList
 import br.com.apps.repository.util.toRequestObject
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.withContext
-import java.security.InvalidParameterException
 
-private const val EMPTY_ID_LIST = "Empty id list"
-
-@OptIn(ExperimentalCoroutinesApi::class)
-class RequestRead(private val fireStore: FirebaseFirestore): RequestReadI {
+class RequestRead(private val fireStore: FirebaseFirestore) : RequestReadI {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_REQUESTS)
 
@@ -39,87 +29,34 @@ class RequestRead(private val fireStore: FirebaseFirestore): RequestReadI {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [PaymentRequest] list.
      */
-    override suspend fun getCompleteRequestListByDriverId(driverId: String, flow: Boolean)
-            : LiveData<Response<List<PaymentRequest>>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<List<PaymentRequest>>>()
+    override suspend fun getRequestListByDriverId(
+        driverId: String,
+        flow: Boolean
+    ): LiveData<Response<List<PaymentRequest>>> {
+        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-            val deferred = CompletableDeferred<List<PaymentRequest>>()
-            if (flow) {
-                collection.whereEqualTo(DRIVER_ID, driverId)
-                    .addSnapshotListener { querySnap, error ->
-                        error?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        querySnap?.let { query ->
-                            if (query.isEmpty) {
-                                liveData.postValue(Response.Error(InvalidParameterException(EMPTY_ID_LIST)))
-                            } else {
-                                val requestList = query.toRequestList()
-                                deferred.complete(requestList)
-                            }
-                        }
-                    }
-            } else {
-                collection.whereEqualTo(DRIVER_ID, driverId).get().addOnCompleteListener { task ->
-                    task.exception?.let { e ->
-                        liveData.postValue(Response.Error(e))
-                    }
-                    task.result?.let { query ->
-                        if(query.isEmpty) {
-                            liveData.postValue(Response.Error(InvalidParameterException(EMPTY_ID_LIST)))
-                        } else {
-                            val requestList = query.toRequestList()
-                            deferred.complete(requestList)
-                        }
-                    }
-                }
-            }
-
-            deferred.await()
-            val requestList = deferred.getCompleted()
-            val idList = requestList.mapNotNull { it.id }
-
-            if (flow) {
-                fireStore.collectionGroup(FIRESTORE_COLLECTION_ITEMS)
-                    .whereIn(REQUEST_ID, idList)
-                    .addSnapshotListener { querySnap, error ->
-                        error?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        querySnap?.let { query ->
-                            val itemList = query.toRequestItemList()
-                            mergeRequestData(requestList, itemList)
-                            liveData.postValue(Response.Success(requestList))
-                        }
-                    }
-            } else {
-                fireStore.collectionGroup(FIRESTORE_COLLECTION_ITEMS)
-                    .whereIn(REQUEST_ID, idList)
-                    .get()
-                    .addOnCompleteListener { task ->
-                        task.exception?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        task.result?.let { query ->
-                            val itemList = query.toRequestItemList()
-                            mergeRequestData(requestList, itemList)
-                            liveData.postValue(Response.Success(requestList))
-                        }
-                    }
-            }
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toRequestList() }
+        else listener.onComplete { it.toRequestList() }
     }
 
-    private fun mergeRequestData(requestList: List<PaymentRequest>, itemList: List<RequestItem>) {
-        requestList.forEach { request ->
-            val requestId = request.id ?: throw InvalidParameterException(EMPTY_ID)
-            val items = itemList.filter { it.requestId == requestId }
-            request.itemsList?.clear()
-            request.itemsList?.addAll(items)
-        }
+    /**
+     * Fetches the [RequestItem] dataSet for the specified request's ID.
+     *
+     * @param idList The ID's of the [PaymentRequest]'s.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [RequestItem] list.
+     */
+    override suspend fun getItemListByRequests(
+        idList: List<String>,
+        flow: Boolean
+    ): LiveData<Response<List<RequestItem>>> {
+        if (idList.isEmpty()) return MutableLiveData(Response.Success(emptyList()))
+
+        val listener = fireStore.collectionGroup(FIRESTORE_COLLECTION_ITEMS)
+            .whereIn(REQUEST_ID, idList)
+
+        return if (flow) listener.onSnapShot { it.toRequestItemList() }
+        else listener.onComplete { it.toRequestItemList() }
     }
 
     /**
@@ -129,80 +66,31 @@ class RequestRead(private val fireStore: FirebaseFirestore): RequestReadI {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [PaymentRequest] list.
      */
-    override suspend fun getCompleteRequestById(
+    override suspend fun getRequestById(
         requestId: String,
         flow: Boolean
     ): LiveData<Response<PaymentRequest>> {
-        return withContext(Dispatchers.IO) {
-            val liveData = MutableLiveData<Response<PaymentRequest>>()
-            lateinit var request: PaymentRequest
+        val listener = collection.document(requestId)
 
-            val deferredA = CompletableDeferred<PaymentRequest>()
-            if (flow) {
-                collection.document(requestId)
-                    .addSnapshotListener { documentSnap, error ->
-                        error?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        documentSnap?.let { document ->
-                            document.toRequestObject()?.let {
-                                deferredA.complete(it)
-                            }
-                        }
-                    }
-            } else {
-                collection.document(requestId).get()
-                    .addOnCompleteListener { task ->
-                        task.exception?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        task.result?.let { document ->
-                            document.toRequestObject()?.let { deferredA.complete(it) }
-                        }
-                    }
-            }
+        return if (flow) listener.onSnapShot { it.toRequestObject() }
+        else listener.onComplete { it.toRequestObject() }
+    }
 
-            val deferredB = CompletableDeferred<List<RequestItem>>()
-            var isFirstBoot = true
-            if (flow) {
-                collection.document(requestId).collection(FIRESTORE_COLLECTION_ITEMS)
-                    .addSnapshotListener { querySnap, error ->
-                        error?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        querySnap?.let { query ->
-                            val itemList = query.toRequestItemList()
-                            if (isFirstBoot) {
-                                deferredB.complete(itemList)
-                                isFirstBoot = false
-                            } else {
-                                request.itemsList?.clear()
-                                request.itemsList?.addAll(itemList)
-                                liveData.postValue(Response.Success(request))
-                            }
-                        }
-                    }
-            } else {
-                collection.document(requestId).collection(FIRESTORE_COLLECTION_ITEMS)
-                    .get().addOnCompleteListener { task ->
-                        task.exception?.let { e ->
-                            liveData.postValue(Response.Error(e))
-                        }
-                        task.result?.let { query ->
-                            val itemList = query.toRequestItemList()
-                            deferredB.complete(itemList)
-                        }
-                    }
-            }
+    /**
+     * Fetches the [RequestItem] dataSet for the specified request ID.
+     *
+     * @param requestId The ID of the [PaymentRequest].
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [RequestItem] list.
+     */
+    override suspend fun getItemListByRequestId(
+        requestId: String,
+        flow: Boolean
+    ): LiveData<Response<List<RequestItem>>> {
+        val listener = collection.document(requestId).collection(FIRESTORE_COLLECTION_ITEMS)
 
-            awaitAll(deferredA, deferredB)
-            request = deferredA.getCompleted()
-            val itemList = deferredB.getCompleted()
-            request.itemsList?.addAll(itemList)
-            liveData.postValue(Response.Success(request))
-
-            return@withContext liveData
-        }
+        return if (flow) listener.onSnapShot { it.toRequestItemList() }
+        else listener.onComplete { it.toRequestItemList() }
     }
 
     /**
@@ -221,7 +109,7 @@ class RequestRead(private val fireStore: FirebaseFirestore): RequestReadI {
         val listener = collection.document(requestId)
             .collection(FIRESTORE_COLLECTION_ITEMS).document(itemId)
 
-        return if(flow) listener.onSnapShot { it.toRequestItemObject() }
+        return if (flow) listener.onSnapShot { it.toRequestItemObject() }
         else listener.onComplete { it.toRequestItemObject() }
     }
 

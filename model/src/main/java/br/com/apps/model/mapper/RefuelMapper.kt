@@ -7,19 +7,19 @@ import br.com.apps.model.toLocalDateTime
 
 fun RefuelDto.toModel(): Refuel {
     return Refuel(
-        masterUid = this.masterUid,
+        masterUid = this.masterUid!!,
         id = this.id,
-        truckId = this.truckId,
+        truckId = this.truckId!!,
         driverId = this.driverId,
         travelId = this.travelId,
         costId = this.costId,
-        date = this.date?.toLocalDateTime(),
-        station = this.station,
-        odometerMeasure = this.odometerMeasure?.toBigDecimal(),
-        valuePerLiter = this.valuePerLiter?.toBigDecimal(),
-        amountLiters = this.amountLiters?.toBigDecimal(),
-        totalValue = this.totalValue?.toBigDecimal(),
-        isCompleteRefuel = this.isCompleteRefuel
+        date = this.date!!.toLocalDateTime(),
+        station = this.station!!,
+        odometerMeasure = this.odometerMeasure!!.toBigDecimal(),
+        valuePerLiter = this.valuePerLiter!!.toBigDecimal(),
+        amountLiters = this.amountLiters!!.toBigDecimal(),
+        totalValue = this.totalValue!!.toBigDecimal(),
+        isCompleteRefuel = this.isCompleteRefuel!!
     )
 }
 
@@ -31,12 +31,12 @@ fun Refuel.toDto(): RefuelDto {
         driverId = this.driverId,
         travelId = this.travelId,
         costId = this.costId,
-        date = this.date?.toDate(),
+        date = this.date.toDate(),
         station = this.station,
-        odometerMeasure = this.odometerMeasure?.toDouble(),
-        valuePerLiter = this.valuePerLiter?.toDouble(),
-        amountLiters = this.amountLiters?.toDouble(),
-        totalValue = this.totalValue?.toDouble(),
+        odometerMeasure = this.odometerMeasure.toDouble(),
+        valuePerLiter = this.valuePerLiter.toDouble(),
+        amountLiters = this.amountLiters.toDouble(),
+        totalValue = this.totalValue.toDouble(),
         isCompleteRefuel = this.isCompleteRefuel
     )
 }

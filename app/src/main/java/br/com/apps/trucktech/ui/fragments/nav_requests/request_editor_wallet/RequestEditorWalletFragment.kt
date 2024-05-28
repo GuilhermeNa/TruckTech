@@ -7,13 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
-import br.com.apps.model.factory.RequestItemFactory
+import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
-import br.com.apps.trucktech.TAG_DEBUG
+import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorWalletBinding
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
@@ -103,8 +103,6 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
             fragmentRequestEditorWalletButton.setOnClickListener {
                 setClickRangeTimer(it, 1000)
 
-                cleanEditTextError(fragmentRequestEditorWalletValue)
-
                 val value = fragmentRequestEditorWalletValue.text.toString()
 
                 var fieldsAreValid = true
@@ -114,19 +112,19 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
                 }
 
                 if (fieldsAreValid) {
-                    val mappedFields = hashMapOf(
-                        Pair(RequestItemFactory.TAG_VALUE, value)
+                    val viewDto = RequestItemDto(
+                        value = value.toDouble()
                     )
 
-                    save(mappedFields)
+                    save(viewDto)
 
                 }
             }
         }
     }
 
-    private fun save(mappedFields: HashMap<String, String>) {
-        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+    private fun save(viewDto: RequestItemDto) {
+        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
             when(response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_SAVE)

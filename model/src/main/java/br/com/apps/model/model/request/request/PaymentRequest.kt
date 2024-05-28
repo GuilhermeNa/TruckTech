@@ -12,9 +12,9 @@ data class PaymentRequest(
 
     val encodedImage: String? = null,
     val date: LocalDateTime? = null,
-    val requestNumber: Int? = 0,
+    val requestNumber: Int? = null,
     val status: PaymentRequestStatusType? = null,
-    val itemsList: MutableList<RequestItem>? = mutableListOf()
+    var itemsList: MutableList<RequestItem>? = mutableListOf()
 ) {
 
     fun getTotalValue(): BigDecimal {

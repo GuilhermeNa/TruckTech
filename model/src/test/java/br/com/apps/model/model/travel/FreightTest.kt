@@ -1,6 +1,5 @@
 package br.com.apps.model.model.travel
 
-import br.com.apps.model.model.travel.Freight
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -14,7 +13,7 @@ class FreightTest {
         travelId = "5",
 
         origin = "Origem",
-        company = "Companhia",
+        customer = "Companhia",
         destiny = "Destino",
         weight = BigDecimal(30000),
         cargo = "Carga",

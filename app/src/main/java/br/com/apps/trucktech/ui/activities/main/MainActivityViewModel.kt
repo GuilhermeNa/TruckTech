@@ -12,11 +12,10 @@ import br.com.apps.repository.repository.fleet.FleetRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.usecase.UserUseCase
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class MainActivityViewModel(
     private val userUseCase: UserUseCase,
     private val truckRepository: FleetRepository
@@ -47,48 +46,47 @@ class MainActivityViewModel(
         _components.value = components
     }
 
+
     /**
      * Load user data
      */
-    fun loadUserData(userId: String) {
+    fun initUserData(userId: String) {
+        loadData(userId) { user, truck ->
+            sendResponse(processData(user, truck))
+        }
+    }
+
+    private fun loadData(
+        userId: String,
+        complete: (user: CommonUser, truck: Truck) -> Unit
+    ) {
         viewModelScope.launch {
             val userDef = loadUser(userId)
-            userDef.await()
-            val user = userDef.getCompleted()
+            val user = userDef.await()
 
             val truckDef = loadTruck(user.employeeId)
-            truckDef.await()
-            val truck = truckDef.getCompleted()
+            val truck = truckDef.await()
 
-            loggedUser = LoggedUser(
-                masterUid = truck.masterUid,
-                driverId = truck.driverId,
-                truckId = truck.id!!,
-
-                name = user.name,
-                plate = truck.plate,
-                email = user.email,
-                urlImage = user.urlImage,
-                permissionLevelType = user.permission
-            )
-
-            _userData.value = Response.Success(loggedUser)
+            complete(user, truck)
         }
     }
 
     private suspend fun loadUser(userId: String): CompletableDeferred<CommonUser> {
         val userDef = CompletableDeferred<CommonUser>()
+
         userUseCase.getById(userId, EmployeeType.DRIVER).asFlow().first {
             val user = it as CommonUser
             user.employeeId
             userDef.complete(user)
             true
         }
+
         return userDef
     }
 
     private suspend fun loadTruck(driverId: String): CompletableDeferred<Truck> {
         val truckDef = CompletableDeferred<Truck>()
+
         truckRepository.getTruckByDriverId(driverId).asFlow().first { response ->
             when (response) {
                 is Response.Error -> _userData.value = Response.Error(response.exception)
@@ -96,7 +94,26 @@ class MainActivityViewModel(
             }
             true
         }
+
         return truckDef
+    }
+
+    private fun processData(user: CommonUser, truck: Truck) =
+        LoggedUser(
+            masterUid = truck.masterUid,
+            driverId = truck.driverId,
+            truckId = truck.id!!,
+            name = user.name,
+            plate = truck.plate,
+            email = user.email,
+            urlImage = user.urlImage,
+            permissionLevelType = user.permission,
+            commissionPercentual = truck.commissionPercentual
+        )
+
+    private fun sendResponse(loggedUser: LoggedUser) {
+        this@MainActivityViewModel.loggedUser = loggedUser
+        _userData.value = Response.Success(loggedUser)
     }
 
 }
@@ -112,5 +129,6 @@ data class LoggedUser(
     val plate: String,
     val email: String,
     val urlImage: String? = null,
-    val permissionLevelType: PermissionLevelType
+    val permissionLevelType: PermissionLevelType,
+    val commissionPercentual: BigDecimal
 )

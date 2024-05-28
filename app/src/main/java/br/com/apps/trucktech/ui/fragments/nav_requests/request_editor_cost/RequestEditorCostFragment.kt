@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.IdHolder
-import br.com.apps.model.factory.RequestItemFactory
+import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.Label.Companion.getListOfTitles
 import br.com.apps.model.model.request.request.RequestItem
@@ -17,7 +17,7 @@ import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
-import br.com.apps.trucktech.TAG_DEBUG
+import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorCostBinding
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
@@ -35,8 +35,7 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
 
     private val args: RequestEditorCostFragmentArgs by navArgs()
     private val idHolder by lazy {
-        IdHolder(
-            masterUid = mainActVM.loggedUser.masterUid,
+        IdHolder(masterUid = mainActVM.loggedUser.masterUid,
             requestId = args.requestId,
             expendId = args.costId
         )
@@ -107,14 +106,19 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
     }
 
     private fun initAutoCompleteAdapter(labels: List<Label>) {
-        val dataSet = labels.getListOfTitles()
         val adapter = ArrayAdapter(
             requireContext(),
             R.layout.simple_dropdown_item_1line,
-            dataSet
+            labels.getListOfTitles()
         )
+
         val autoComplete = binding.fragmentRequestEditorCostAutoComplete
         autoComplete.setAdapter(adapter)
+
+        autoComplete.setOnItemClickListener { _, _, _, _ ->
+            autoComplete.error = null
+        }
+
     }
 
     fun bind() {
@@ -137,13 +141,9 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
             fragmentRequestEditorCostButton.setOnClickListener {
                 setClickRangeTimer(it, 1000)
 
-                cleanEditTextError(fragmentRequestEditorCostValue)
-                fragmentRequestEditorCostAutoComplete.error = null
-
                 val autoCompleteText = fragmentRequestEditorCostAutoComplete.text.toString()
                 val value = fragmentRequestEditorCostValue.text.toString()
                 val labelId = viewModel.getLabelIdByName(autoCompleteText)
-
 
                 var fieldsAreValid = true
                 if (autoCompleteText.isBlank()) {
@@ -160,24 +160,24 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
                 }
 
                 if (fieldsAreValid) {
-                    val mappedFields = hashMapOf(
-                        Pair(RequestItemFactory.TAG_LABEL_ID, labelId),
-                        Pair(RequestItemFactory.TAG_VALUE, value)
+                    val viewDto = RequestItemDto(
+                        labelId = labelId,
+                        value = value.toDouble()
                     )
 
-                    save(mappedFields)
+                    save(viewDto)
 
                 }
             }
         }
     }
 
-    private fun save(mappedFields: HashMap<String, String>) {
-        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+    private fun save(viewDto: RequestItemDto) {
+        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_SAVE)
-                    Log.e(TAG_DEBUG, response.exception.toString())
+                    response.exception.printStackTrace()
                 }
 
                 is Response.Success -> {

@@ -17,16 +17,17 @@ import kotlinx.coroutines.launch
 
 class LabelUseCase(private val repository: LabelRepository) {
 
-/*    *//**
+    /*    */
+    /**
      * getAll
      *//*
     suspend fun getAll(uid: String): LiveData<Response<List<Label>>> {
         //return repository.getAll(uid)
     }*/
 
- /*   suspend fun getAllByType(type: LabelType, uid: String): LiveData<Response<List<Label>>> {
-        return repository.getAllByType(type.description, uid)
-    }*/
+    /*   suspend fun getAllByType(type: LabelType, uid: String): LiveData<Response<List<Label>>> {
+           return repository.getAllByType(type.description, uid)
+       }*/
 
     /**
      * save
@@ -62,7 +63,11 @@ class LabelUseCase(private val repository: LabelRepository) {
                 val deferredB = CompletableDeferred<Unit>()
 
                 val liveDataA =
-                    repository.getLabelListByMasterUidAndTypeAndOperational(masterUid, type.description, isOperational)
+                    repository.getLabelListByMasterUidAndTypeAndOperational(
+                        masterUid,
+                        type.description,
+                        isOperational
+                    )
                 val liveDataB = repository.getDefaultLabelList(type.description, isOperational)
 
                 mediator.addSource(liveDataA) { responseA ->
@@ -94,7 +99,9 @@ class LabelUseCase(private val repository: LabelRepository) {
         }
     }
 
-/*    *//**
+
+    /*    */
+    /**
      * Merge label to freightList
      *//*
     fun mergeFreightToLabel(freightList: List<Freight>, labelList: List<Label>) {

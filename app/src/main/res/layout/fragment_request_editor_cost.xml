@@ -44,6 +44,8 @@
                 android:id="@+id/fragment_request_editor_cost_auto_complete"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:imeOptions="actionNext"
                 android:padding="16dp"/>
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -57,7 +59,9 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/fragment_request_editor_cost_value"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:imeOptions="actionDone"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 

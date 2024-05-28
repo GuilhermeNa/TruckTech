@@ -6,8 +6,8 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Expend
-import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.expend.ExpendRepository
+import br.com.apps.repository.util.Response
 import kotlinx.coroutines.launch
 
 class ExpendPreviewViewModel(
@@ -19,8 +19,14 @@ class ExpendPreviewViewModel(
      * LiveData holding the response data of type [Response] with a [Expend]
      * to be displayed on screen.
      */
-    private val _expendData = MutableLiveData<Response<Expend>>()
-    val expendData get() = _expendData
+    private val _data = MutableLiveData<Response<Expend>>()
+    val data get() = _data
+
+    /**
+     * LiveData with a dark layer state, used when dialog is requested.
+     */
+    private var _darkLayer = MutableLiveData(false)
+    val darkLayer get() = _darkLayer
 
     //---------------------------------------------------------------------------------------------//
     // -
@@ -33,7 +39,7 @@ class ExpendPreviewViewModel(
     private fun loadData() {
         viewModelScope.launch {
             repository.getExpendById(expendId, true).asFlow().collect {
-                _expendData.value = it
+                _data.value = it
             }
         }
     }
@@ -45,6 +51,20 @@ class ExpendPreviewViewModel(
         } catch (e: Exception) {
             emit(Response.Error(e))
         }
+    }
+
+    /**
+     * Sets the visibility of the [_darkLayer] to true, indicating that it should be shown.
+     */
+    fun requestDarkLayer() {
+        _darkLayer.value = true
+    }
+
+    /**
+     * Sets the visibility of the [_darkLayer] to false, indicating that it should be dismissed.
+     */
+    fun dismissDarkLayer() {
+        _darkLayer.value = false
     }
 
 }

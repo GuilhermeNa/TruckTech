@@ -6,8 +6,11 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.request.request.PaymentRequest
-import br.com.apps.repository.util.Response
+import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.repository.request.RequestRepository
+import br.com.apps.repository.util.Response
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class RequestEditorViewModel(
@@ -22,8 +25,8 @@ class RequestEditorViewModel(
      * LiveData holding the response data of type [Response] with a [PaymentRequest]
      * to be displayed on screen.
      */
-    private val _requestData = MutableLiveData<Response<PaymentRequest>>()
-    val requestData get() = _requestData
+    private val _data = MutableLiveData<Response<PaymentRequest>>()
+    val requestData get() = _data
 
     /**
      * LiveData with a dark layer state, used when dialogs and bottom sheets are requested.
@@ -36,25 +39,54 @@ class RequestEditorViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        loadData()
+        loadData { request, items ->
+            request.itemsList = items.toMutableList()
+            sendResponse(request)
+        }
     }
 
-    fun loadData() {
+    fun loadData(complete: (request: PaymentRequest, items: List<RequestItem>) -> Unit) {
         viewModelScope.launch {
-            repository.getCompleteRequestById(requestId, true).asFlow().collect { response ->
-                when (response) {
-                    is Response.Error -> _requestData.value = response
-                    is Response.Success -> {
-                        response.data?.let { request ->
-                            if (!request.encodedImage.isNullOrBlank()) {
-                                _boxPaymentImage.value = request.encodedImage!!
-                            }
-                        }
-                        _requestData.value = response
-                    }
+            val request = loadRequest()
+            loadItems { items -> complete(request, items) }
+        }
+    }
+
+    private suspend fun loadRequest(): PaymentRequest {
+        val deferred = CompletableDeferred<PaymentRequest>()
+
+        repository.getRequestById(requestId).asFlow().first { response ->
+            when (response) {
+                is Response.Error -> _data.value = response
+                is Response.Success -> {
+                    if (response.data != null) deferred.complete(response.data!!)
+                    else _data.value = Response.Error(NullPointerException())
+                }
+            }
+            true
+        }
+
+        return deferred.await()
+    }
+
+    private suspend fun loadItems(complete: (List<RequestItem>) -> Unit) {
+        repository.getItemListByRequestId(requestId, true).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> _data.value = response
+                is Response.Success -> {
+                    if (response.data != null) complete(response.data!!)
+                    else _data.value = Response.Error(NullPointerException())
                 }
             }
         }
+
+    }
+
+    private fun sendResponse(request: PaymentRequest) {
+        if(_boxPaymentImage.value == null) {
+            request.encodedImage?.let { _boxPaymentImage.value = it }
+        }
+        _data.value = Response.Success(request)
     }
 
     fun deleteItem(itemId: String) =

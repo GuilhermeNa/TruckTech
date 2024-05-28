@@ -97,7 +97,7 @@ class ExpendPreviewFragment : BasePreviewFragment() {
      *
      */
     private fun initStateManager() {
-        viewModel.expendData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when(response) {
                 is Response.Error -> {
                     response.exception.printStackTrace()
@@ -108,6 +108,14 @@ class ExpendPreviewFragment : BasePreviewFragment() {
                 }
             }
         }
+
+        viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
+            when (isRequested) {
+                true -> binding.fragExpendPreviewDarkLayer.visibility = View.VISIBLE
+                false -> binding.fragExpendPreviewDarkLayer.visibility = View.GONE
+            }
+        }
+
     }
 
     private fun bind(expend: Expend) {
@@ -127,12 +135,15 @@ class ExpendPreviewFragment : BasePreviewFragment() {
     override fun onDeleteMenuClick() { showAlertDialog() }
 
     private fun showAlertDialog() {
+        viewModel.requestDarkLayer()
+
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle(DIALOG_TITLE)
             .setMessage(DIALOG_MESSAGE)
             .setPositiveButton(OK) { _, _ -> deleteExpend() }
             .setNegativeButton(CANCEL) { _, _ -> }
+            .setOnDismissListener { viewModel.dismissDarkLayer() }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
@@ -170,4 +181,5 @@ class ExpendPreviewFragment : BasePreviewFragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

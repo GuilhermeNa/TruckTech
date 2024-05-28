@@ -130,7 +130,7 @@ class FreightPreviewFragment : BasePreviewFragment() {
 
     private fun bind(freight: Freight) {
         binding.apply {
-            fragmentFreightPreviewClient.text = freight.company
+            fragmentFreightPreviewClient.text = freight.customer?.name
             fragmentFreightPreviewValue.text = freight.value?.toCurrencyPtBr()
             fragmentFreightPreviewBreakDown.text = freight.breakDown?.toCurrencyPtBr() ?: "-"
             fragmentFreightPreviewDaily.text = freight.daily?.toString() ?: "-"

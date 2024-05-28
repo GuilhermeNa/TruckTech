@@ -8,6 +8,8 @@ import br.com.apps.model.IdHolder
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
+import br.com.apps.trucktech.util.state.State
+import br.com.apps.trucktech.util.buildUiResponse
 import br.com.apps.usecase.ExpendUseCase
 import kotlinx.coroutines.launch
 
@@ -16,12 +18,18 @@ class ExpendListViewModel(
     private val useCase: ExpendUseCase
 ): ViewModel() {
 
+    val travelId = idHolder.travelId ?: throw IllegalArgumentException(EMPTY_ID)
+    val masterUid = idHolder.masterUid ?: throw IllegalArgumentException(EMPTY_ID)
+
     /**
      * LiveData holding the response data of type [Response] with a list of expenditures [Expend]
      * to be displayed on screen.
      */
-    private val _expendData = MutableLiveData<Response<List<Expend>>>()
-    val expendData get() = _expendData
+    private val _data = MutableLiveData<List<Expend>>()
+    val data get() = _data
+
+    private val _state = MutableLiveData<State>()
+    val state get() = _state
 
     //---------------------------------------------------------------------------------------------//
     // -
@@ -32,15 +40,12 @@ class ExpendListViewModel(
     }
 
     private fun loadData() {
-        val travelId = idHolder.travelId ?: throw IllegalArgumentException(EMPTY_ID)
-        val masterUid = idHolder.masterUid ?: throw IllegalArgumentException(EMPTY_ID)
-
+        _state.value = State.Loading
         viewModelScope.launch {
-            useCase.getExpendListWithLabelByTravelId(masterUid, travelId).asFlow().collect {
-                _expendData.value = it
+            useCase.getExpendListWithLabelByTravelId(masterUid, travelId).asFlow().collect { response ->
+                response.buildUiResponse(_state, _data)
             }
         }
-
     }
 
 }

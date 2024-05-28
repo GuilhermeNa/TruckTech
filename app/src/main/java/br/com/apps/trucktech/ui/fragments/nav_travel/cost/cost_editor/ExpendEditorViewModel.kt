@@ -5,38 +5,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.factory.ExpendFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.travel.Expend
-import br.com.apps.repository.util.EMPTY_ID
-import br.com.apps.repository.util.Response
+import br.com.apps.model.toDate
 import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.repository.label.LabelRepository
+import br.com.apps.repository.util.EMPTY_DATASET
+import br.com.apps.repository.util.Response
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.security.InvalidParameterException
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
 class ExpendEditorViewModel(
-    private val idHolder: IdHolder,
+    private val vmData: ExpendEVMData,
     private val expendRepository: ExpendRepository,
     private val labelRepository: LabelRepository
 ) : ViewModel() {
 
-    /**
-     * The [Expend] to be loaded when there is an ID.
-     */
-    private lateinit var expend: Expend
-
-    /**
-     * The [Label] list with drivers operational data.
-     */
-    lateinit var labelList: List<Label>
+    private var isEditing: Boolean = vmData.expendId?.let { true } ?: false
 
     /**
      * LiveData containing the [LocalDateTime] of the [Expend] date,
@@ -46,24 +38,21 @@ class ExpendEditorViewModel(
     val date get() = _date
 
     /**
-     * LiveData holding the response data of type [Response] with the [Label] data.
-     */
-    private val _labelData = MutableLiveData<Response<List<Label>>>()
-    val labelData get() = _labelData
-
-    /**
      * if there is an [Expend] to be loaded, this liveData is
      * responsible for holding the [Response] data of the [Expend].
      */
-    private val _expendData = MutableLiveData<Response<Expend>>()
-    val expendData get() = _expendData
+    private val _data = MutableLiveData<ExpendEFData>()
+    val data get() = _data
 
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
     init {
-        loadData()
+        loadData { labels, expend ->
+            processData(labels, expend)
+            sendResponse(labels, expend)
+        }
     }
 
     /**
@@ -71,65 +60,62 @@ class ExpendEditorViewModel(
      *  1. Load the [Label] list.
      *  2. Load the [Expend] if there is an ID to be loaded.
      */
-    private fun loadData() {
+    private fun loadData(complete: (labels: List<Label>, expend: Expend?) -> Unit) {
         viewModelScope.launch {
-            val deferredA = CompletableDeferred<Unit>()
-            launch { loadLabelData(deferredA) }
+            val labelResponse = loadLabels()
+            val labels = labelResponse.await()
 
-            if (idHolder.expendId != null) {
-                deferredA.await()
-                loadExpendData(idHolder.expendId!!)
-            } else {
-                _date.value = LocalDateTime.now()
-            }
+            val expendResponse = vmData.expendId?.let { loadExpend(it) }
+            val expend = expendResponse?.await()
+
+            complete(labels, expend)
         }
     }
 
-    private suspend fun loadLabelData(deferredA: CompletableDeferred<Unit>) {
-        val masterUid = idHolder.masterUid ?: throw InvalidParameterException(EMPTY_ID)
-        val liveData = labelRepository.getAllOperationalLabelListForDrivers(masterUid)
-        liveData.asFlow().collect { response ->
-            when (response) {
-                is Response.Error -> _labelData.value = response
-                is Response.Success -> {
-                    response.data?.let { labelData ->
-                        labelList = labelData
-                        _labelData.value = response
+    private suspend fun loadLabels(): CompletableDeferred<List<Label>> {
+        val deferred = CompletableDeferred<List<Label>>()
+
+        labelRepository.getAllOperationalLabelListForDrivers(vmData.masterUid)
+            .asFlow().first { response ->
+                when (response) {
+                    is Response.Error -> deferred.completeExceptionally(response.exception)
+                    is Response.Success -> {
+                        response.data?.let { deferred.complete(it) }
+                            ?: deferred.completeExceptionally(NullPointerException(EMPTY_DATASET))
                     }
                 }
+                true
             }
-            deferredA.complete(Unit)
-        }
+
+        return deferred
     }
 
-    private suspend fun loadExpendData(id: String) {
-        expendRepository.getExpendById(id, false).asFlow().collect { response ->
+    private suspend fun loadExpend(expendId: String): CompletableDeferred<Expend> {
+        val deferred = CompletableDeferred<Expend>()
+
+        expendRepository.getExpendById(expendId).asFlow().first { response ->
             when (response) {
-                is Response.Error -> _expendData.value = response
+                is Response.Error -> deferred.completeExceptionally(response.exception)
                 is Response.Success -> {
-                    response.data?.let { expend ->
-                        expend.date?.let { _date.value = it }
-                        expend.label = labelList.firstOrNull { it.id == expend.labelId }
-                        this.expend = expend
-                        _expendData.value = response
-                    }
+                    response.data?.let { deferred.complete(it) }
+                        ?: deferred.completeExceptionally(NullPointerException(EMPTY_DATASET))
                 }
             }
+            true
         }
+
+        return deferred
     }
 
-    private fun getExpendDto(mappedFields: HashMap<String, String>): ExpendDto {
-        return if (::expend.isInitialized) {
-            expend.label = null
-            ExpendFactory.update(expend, mappedFields)
-            expend.toDto()
-        } else {
-            mappedFields[ExpendFactory.TAG_MASTER_UID] = idHolder.masterUid!!
-            mappedFields[ExpendFactory.TAG_TRAVEL_ID] = idHolder.travelId!!
-            mappedFields[ExpendFactory.TAG_DRIVER_ID] = idHolder.driverId!!
-            mappedFields[ExpendFactory.TAG_TRUCK_ID] = idHolder.truckId!!
-            ExpendFactory.create(mappedFields).toDto()
-        }
+    private fun processData(labels: List<Label>, expend: Expend?) {
+        _date.value = expend?.date ?: LocalDateTime.now()
+
+        expend?.let { it.label = labels.firstOrNull { l -> l.id == it.labelId } }
+
+    }
+
+    private fun sendResponse(labels: List<Label>, expend: Expend?) {
+        _data.value = ExpendEFData(labelList = labels, expend = expend)
     }
 
     /**
@@ -144,10 +130,10 @@ class ExpendEditorViewModel(
     /**
      * Send the [Expend] to be created or updated.
      */
-    fun save(mappedFields: HashMap<String, String>) =
+    fun save(viewDto: ExpendDto) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = getExpendDto(mappedFields)
+                val dto = createOrUpdate(viewDto)
                 expendRepository.save(dto)
                 emit(Response.Success())
             } catch (e: Exception) {
@@ -155,4 +141,43 @@ class ExpendEditorViewModel(
             }
         }
 
+    private fun createOrUpdate(viewDto: ExpendDto): ExpendDto {
+        viewDto.apply {
+            date = _date.value!!.toDate()
+            label = null
+        }
+
+        return when(isEditing) {
+            true -> {
+                val expend = _data.value!!.expend!!
+                ExpendFactory.update(expend, viewDto)
+                expend.toDto()
+            }
+
+            false -> {
+                viewDto.apply {
+                    masterUid = vmData.masterUid
+                    truckId = vmData.truckId
+                    travelId = vmData.travelId
+                    driverId = vmData.driverId
+                    isAlreadyRefunded = false
+                }
+                ExpendFactory.create(viewDto).toDto()
+            }
+        }
+    }
+
 }
+
+class ExpendEVMData(
+    val masterUid: String,
+    val truckId: String,
+    val driverId: String,
+    val travelId: String,
+    val expendId: String? = null
+)
+
+class ExpendEFData(
+    val labelList: List<Label>,
+    val expend: Expend?
+)

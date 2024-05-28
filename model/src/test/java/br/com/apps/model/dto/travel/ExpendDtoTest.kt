@@ -10,7 +10,7 @@ class ExpendDtoTest {
     private val expend = ExpendDto(
         masterUid = "1", id = "2", truckId = "3", driverId = "4", travelId = "5", labelId = "6",
         company = "Company", date = Date(), description = "Description", value = 100.0, label = Label(),
-        paidByEmployee = true, alreadyRefunded = true
+        isPaidByEmployee = true, isAlreadyRefunded = true
     )
 
     @Test
@@ -24,52 +24,52 @@ class ExpendDtoTest {
         val dtoA = ExpendDto(
             masterUid = null, id = "1", truckId = "2", driverId = "3", travelId = "4", labelId = "5",
             company = "Company", date = Date(), description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = true, alreadyRefunded = true
+            isPaidByEmployee = true, isAlreadyRefunded = true
         )
         val dtoB = ExpendDto(
             masterUid = "1", id = "2", truckId = null, driverId = "3", travelId = "4", labelId = "5",
             company = "Company", date = Date(), description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = true, alreadyRefunded = true
+            isPaidByEmployee = true, isAlreadyRefunded = true
         )
         val dtoC = ExpendDto(
             masterUid = "1", id = "2", truckId = "3", driverId = null, travelId = "4", labelId = "5",
             company = "Company", date = Date(), description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = true, alreadyRefunded = true
+            isPaidByEmployee = true, isAlreadyRefunded = true
         )
         val dtoD = ExpendDto(
             masterUid = "1", id = "2", truckId = "3", driverId = "4", travelId = null, labelId = "5",
             company = "Company", date = Date(), description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = true, alreadyRefunded = true
+            isPaidByEmployee = true, isAlreadyRefunded = true
         )
         val dtoE = ExpendDto(
             masterUid = "1", id = "2", truckId = "3", driverId = "4", travelId = "5", labelId = null,
             company = "Company", date = Date(), description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = true, alreadyRefunded = true
+            isPaidByEmployee = true, isAlreadyRefunded = true
         )
         val dtoF = ExpendDto(
             masterUid = "1", id = "2", truckId = "3", driverId = "4", travelId = "5", labelId = "6",
             company = null, date = Date(), description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = true, alreadyRefunded = true
+            isPaidByEmployee = true, isAlreadyRefunded = true
         )
         val dtoG = ExpendDto(
             masterUid = "1", id = "2", truckId = "3", driverId = "4", travelId = "5", labelId = "6",
             company = "Company", date = null, description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = true, alreadyRefunded = true
+            isPaidByEmployee = true, isAlreadyRefunded = true
         )
         val dtoH = ExpendDto(
             masterUid = "1", id = "2", truckId = "3", driverId = "4", travelId = "5", labelId = "6",
             company = "Company", date = Date(), description = "Description", value = null, label = Label(),
-            paidByEmployee = true, alreadyRefunded = true
+            isPaidByEmployee = true, isAlreadyRefunded = true
         )
         val dtoI = ExpendDto(
             masterUid = "1", id = "2", truckId = "3", driverId = "4", travelId = "5", labelId = "6",
             company = "Company", date = Date(), description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = null, alreadyRefunded = true
+            isPaidByEmployee = null, isAlreadyRefunded = true
         )
         val dtoJ = ExpendDto(
             masterUid = "1", id = "2", truckId = "3", driverId = "4", travelId = "5", labelId = "6",
             company = "Company", date = Date(), description = "Description", value = 100.0, label = Label(),
-            paidByEmployee = true, alreadyRefunded = null
+            isPaidByEmployee = true, isAlreadyRefunded = null
         )
 
         val isValidA = dtoA.validateFields()

@@ -147,6 +147,7 @@ class LabelRead(fireStore: FirebaseFirestore): LabelReadI {
                         is Response.Error -> mediator.value = responseA
                         is Response.Success -> responseA.data?.let { dataSet.addAll(it) }
                     }
+                    mediator.removeSource(liveDataA)
                     deferredA.complete(Unit)
                 }
                 mediator.addSource(liveDataB) { responseB ->
@@ -154,12 +155,11 @@ class LabelRead(fireStore: FirebaseFirestore): LabelReadI {
                         is Response.Error -> mediator.value = responseB
                         is Response.Success -> responseB.data?.let { dataSet.addAll(it) }
                     }
+                    mediator.removeSource(liveDataB)
                     deferredB.complete(Unit)
                 }
 
                 awaitAll(deferredA, deferredB)
-                mediator.removeSource(liveDataA)
-                mediator.removeSource(liveDataB)
                 mediator.value = Response.Success(dataSet)
             }
 

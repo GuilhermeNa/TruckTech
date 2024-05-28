@@ -3,12 +3,13 @@ package br.com.apps.trucktech.ui.fragments.base_fragments
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-abstract class BaseFragment: Fragment() {
+abstract class BaseFragment : Fragment() {
 
     val authViewModel: AuthViewModel by viewModel()
 
@@ -33,9 +34,12 @@ abstract class BaseFragment: Fragment() {
      *
      * @param view represents the editTexts
      */
-    fun cleanEditTextError(vararg view: TextInputEditText) {
-        view.forEach { editText ->
-            editText.error = null
+    fun cleanEditTextError(vararg view: View) {
+        view.forEach {
+            when (it) {
+                is MaterialAutoCompleteTextView -> it.error = null
+                is TextInputEditText -> it.error = null
+            }
         }
     }
 

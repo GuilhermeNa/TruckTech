@@ -6,8 +6,8 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.repository.util.Response
 import br.com.apps.repository.repository.refuel.RefuelRepository
+import br.com.apps.repository.util.Response
 import kotlinx.coroutines.launch
 
 class RefuelPreviewViewModel(
@@ -19,8 +19,8 @@ class RefuelPreviewViewModel(
      * LiveData holding the response data of type [Response] with a [Refuel]
      * to be displayed on screen.
      */
-    private val _refuelData = MutableLiveData<Response<Refuel>>()
-    val refuelData get() = _refuelData
+    private val _data = MutableLiveData<Response<Refuel>>()
+    val data get() = _data
 
     /**
      * LiveData with a dark layer state, used when dialog is requested.
@@ -39,7 +39,7 @@ class RefuelPreviewViewModel(
     private fun loadData() {
         viewModelScope.launch {
             repository.getRefuelById(refuelId, true).asFlow().collect {
-                _refuelData.value = it
+                _data.value = it
             }
         }
     }

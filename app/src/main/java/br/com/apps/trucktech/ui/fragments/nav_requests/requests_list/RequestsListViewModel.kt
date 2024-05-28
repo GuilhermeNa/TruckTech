@@ -5,14 +5,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
 import br.com.apps.model.factory.RequestFactory
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.PaymentRequestStatusType
+import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.repository.request.RequestRepository
-import br.com.apps.repository.util.EMPTY_ID
+import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.expressions.getKeyByValue
+import br.com.apps.trucktech.util.state.State
+import br.com.apps.usecase.RequestUseCase
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 import java.time.LocalDateTime
@@ -24,16 +28,20 @@ private const val DENIED = "Negados"
 private const val PROCESSED = "Processados"
 
 class RequestsListViewModel(
-    private val idHolder: IdHolder,
-    private val repository: RequestRepository
+    private val vmData: RequestLVMData,
+    private val repository: RequestRepository,
+    private val useCase: RequestUseCase
 ) : ViewModel() {
 
     /**
      * LiveData holding the response data of type [Response] with a list of expenditures [PaymentRequest]
      * to be displayed on screen.
      */
-    private val _requestData = MutableLiveData<Response<List<PaymentRequest>>>()
-    val requestData get() = _requestData
+    private val _data = MutableLiveData<List<PaymentRequest>>()
+    val data get() = _data
+
+    private val _state = MutableLiveData<State>()
+    val state get() = _state
 
     /**
      * Header Position
@@ -52,34 +60,68 @@ class RequestsListViewModel(
         Pair(4, ALL)
     )
 
-    /**
-     * LiveData with a dark layer state, used when dialog is requested.
-     */
-    private var _darkLayer = MutableLiveData(false)
-    val darkLayer get() = _darkLayer
-
-    /**
-     * LiveData with a bottom nav state, used when dialog is requested.
-     */
-    private var _bottomNav = MutableLiveData(true)
-    val bottomNav get() = _bottomNav
+    private val _dialog = MutableLiveData<Boolean>()
+    val dialog get() = _dialog
 
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init {
-        loadData()
+    fun loadData() {
+        _state.value = State.Loading
+
+        viewModelScope.launch {
+            try {
+
+                val requests = loadRequestsAwait()
+                val idList = requests.mapNotNull { it.id }
+
+                val items = loadItemsAwait(idList)
+                useCase.mergeRequestData(requests, items)
+
+                if(requests.isEmpty()) _state.value = State.Empty
+                _data.value = requests
+
+            } catch (e: Exception) {
+                _state.value = State.Error(e)
+
+            }
+        }
     }
 
-    fun loadData() {
-        val id = idHolder.driverId ?: throw InvalidParameterException(EMPTY_ID)
-        viewModelScope.launch {
-            repository.getCompleteRequestListByDriverId(driverId = id, flow = true)
-                .asFlow().collect {
-                    _requestData.value = it
+    private suspend fun loadRequestsAwait(): List<PaymentRequest> {
+        val deferred = CompletableDeferred<List<PaymentRequest>>()
+
+        repository.getRequestListByDriverId(driverId = vmData.driverId)
+            .asFlow().first { response ->
+                when (response) {
+                    is Response.Error -> throw response.exception
+
+                    is Response.Success -> response.data?.let { deferred.complete(it) }
+                        ?: deferred.complete(emptyList())
+
                 }
-        }
+                true
+            }
+
+        return deferred.await()
+    }
+
+    private suspend fun loadItemsAwait(idList: List<String>): List<RequestItem> {
+        val deferred = CompletableDeferred<List<RequestItem>>()
+
+        repository.getItemListByRequests(idList, true)
+            .asFlow().first { response ->
+                when (response) {
+                    is Response.Error -> throw response.exception
+
+                    is Response.Success -> response.data?.let { deferred.complete(it) }
+                        ?: deferred.complete(emptyList())
+                }
+                true
+            }
+
+        return deferred.await()
     }
 
     fun newHeaderSelected(headerTitle: String) {
@@ -94,9 +136,9 @@ class RequestsListViewModel(
             try {
                 val requestDto =
                     RequestFactory.createDto(
-                        masterUid = idHolder.masterUid,
-                        truckId = idHolder.truckId,
-                        driverId = idHolder.driverId,
+                        masterUid = vmData.masterUid,
+                        truckId = vmData.truckId,
+                        driverId = vmData.driverId,
                         date = LocalDateTime.now(),
                         status = PaymentRequestStatusType.SENT.description
                     )
@@ -125,47 +167,63 @@ class RequestsListViewModel(
      * Filter Data by header choise
      */
     fun filterDataByHeader(): List<PaymentRequest>? {
-        val dataSet = (requestData.value as Response.Success<List<PaymentRequest>>).data
+        val dataSet = data.value
         return if (headerPos != null && dataSet != null) {
             when (headerPos) {
-                0 -> dataSet.filter { it.status == PaymentRequestStatusType.SENT }
-                1 -> dataSet.filter { it.status == PaymentRequestStatusType.APPROVED }
-                2 -> dataSet.filter { it.status == PaymentRequestStatusType.DENIED }
-                3 -> dataSet.filter { it.status == PaymentRequestStatusType.PROCESSED }
-                4 -> dataSet
+                0 -> {
+                    val data = dataSet.filter { it.status == PaymentRequestStatusType.SENT }
+                    if (data.isEmpty()) _state.value = State.Empty
+                    else _state.value = State.Loaded
+                    data
+                }
+
+                1 -> {
+                    val data = dataSet.filter { it.status == PaymentRequestStatusType.APPROVED }
+                    if (data.isEmpty()) _state.value = State.Empty
+                    else _state.value = State.Loaded
+                    data
+                }
+
+                2 -> {
+                    val data = dataSet.filter { it.status == PaymentRequestStatusType.DENIED }
+                    if (data.isEmpty()) _state.value = State.Empty
+                    else _state.value = State.Loaded
+                    data
+                }
+
+                3 -> {
+                    val data = dataSet.filter { it.status == PaymentRequestStatusType.PROCESSED }
+                    if (data.isEmpty()) _state.value = State.Empty
+                    else _state.value = State.Loaded
+                    data
+                }
+
+                4 -> {
+                    if (dataSet.isEmpty()) _state.value = State.Empty
+                    else _state.value = State.Loaded
+                    dataSet
+                }
+
                 else -> throw InvalidParameterException("RequestListViewModel, filterDataByHeader: Invalid header position $headerPos")
             }
         } else {
+            _state.value = State.Error(NullPointerException(EMPTY_DATASET))
             dataSet
         }
     }
 
-    /**
-     * Sets the visibility of the [_darkLayer] to true, indicating that it should be shown.
-     */
-    fun requestDarkLayer() {
-        _darkLayer.value = true
+    fun dialogRequested() {
+        _dialog.value = true
     }
 
-    /**
-     * Sets the visibility of the [_darkLayer] to false, indicating that it should be dismissed.
-     */
-    fun dismissDarkLayer() {
-        _darkLayer.value = false
-    }
-
-    /**
-     * Sets the visibility of the [_bottomNav] to true, indicating that it should be shown.
-     */
-    fun requestBottomNav() {
-        _bottomNav.value = true
-    }
-
-    /**
-     * Sets the visibility of the [_bottomNav] to false, indicating that it should be dismissed.
-     */
-    fun dismissBottomNav() {
-        _bottomNav.value = false
+    fun dialogDismissed() {
+        _dialog.value = false
     }
 
 }
+
+data class RequestLVMData(
+    val masterUid: String,
+    val truckId: String,
+    val driverId: String
+)

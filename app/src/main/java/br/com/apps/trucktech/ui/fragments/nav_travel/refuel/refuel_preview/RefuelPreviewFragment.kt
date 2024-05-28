@@ -19,7 +19,7 @@ import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRefuelPreviewBinding
 import br.com.apps.trucktech.expressions.getColorById
 import br.com.apps.trucktech.expressions.getColorStateListById
-import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
+import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarOrange
@@ -103,11 +103,10 @@ class RefuelPreviewFragment : BasePreviewFragment() {
      *  - Observes darkLayer to manage the interaction.
      */
     private fun initStateManager() {
-        viewModel.refuelData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> response.data?.let { bind(it) }
-                else -> {}
             }
         }
 
@@ -126,7 +125,7 @@ class RefuelPreviewFragment : BasePreviewFragment() {
             fragmentRefuelPreviewValue.text = refuel.totalValue?.toCurrencyPtBr()
 
             val dateFormatted =
-                SpannableString(refuel.date?.getMonthAndYearInPtBr()).toBold().toUnderline()
+                SpannableString(refuel.date?.getCompleteDateInPtBr()).toBold().toUnderline()
 
             fragmentRefuelPreviewDescription.text = buildSpannedString {
                 append("No dia ")

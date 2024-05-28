@@ -1,22 +1,24 @@
 package br.com.apps.model.model.travel
 
+import br.com.apps.model.model.Customer
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDateTime
 
 data class Freight(
-    val masterUid: String? = null,
+    val masterUid: String,
     val id: String? = null,
-    val truckId: String? = null,
-    val driverId: String? = null,
-    val travelId: String? = null,
-    val incomeId: String? = null,
+    val truckId: String,
+    val driverId: String,
+    val travelId: String,
+    var customerId: String,
 
-    var origin: String? = null,
-    var company: String? = null,
-    var destiny: String? = null,
-    var weight: BigDecimal? = null,
-    var cargo: String? = null,
+    var customer: Customer? = null,
+    var origin: String,
+    var destiny: String,
+    var weight: BigDecimal,
+    var cargo: String,
+
     var breakDown: BigDecimal? = null,
     var value: BigDecimal? = null,
     var loadingDate: LocalDateTime? = null,
@@ -26,8 +28,8 @@ data class Freight(
     var dailyTotalValue: BigDecimal? = null,
 
     @field:JvmField
-    var isCommissionPaid: Boolean? = null,
-    var commissionPercentual: BigDecimal? = null
+    var isCommissionPaid: Boolean,
+    var commissionPercentual: BigDecimal
 
 ) {
 

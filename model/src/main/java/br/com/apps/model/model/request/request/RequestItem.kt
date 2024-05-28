@@ -46,7 +46,7 @@ enum class RequestItemType(val description: String) {
                 REFUEL.description -> REFUEL
                 COST.description -> COST
                 WALLET.description -> WALLET
-                else -> throw InvalidTypeException("Fun getType needs a valid type")
+                else -> throw InvalidTypeException("Fun getType needs a valid type: ($type)")
             }
         }
     }

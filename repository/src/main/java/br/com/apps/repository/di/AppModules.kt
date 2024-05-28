@@ -6,6 +6,8 @@ import br.com.apps.repository.repository.advance.AdvanceRead
 import br.com.apps.repository.repository.advance.AdvanceRepository
 import br.com.apps.repository.repository.auth.AuthenticationRepository
 import br.com.apps.repository.repository.bank.BankRepository
+import br.com.apps.repository.repository.customer.CustomerRead
+import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.document.DocumentRead
 import br.com.apps.repository.repository.document.DocumentRepository
 import br.com.apps.repository.repository.document.DocumentWrite
@@ -67,6 +69,7 @@ val repositoryModules = module {
     single<LoanRepository> { LoanRepository(get()) }
     single<AdvanceRepository> { AdvanceRepository(get()) }
     single<BankRepository> { BankRepository(get()) }
+    single<CustomerRepository> { CustomerRepository(get()) }
 }
 
 val writeModules = module {
@@ -97,6 +100,7 @@ val readModules = module {
     single<TravelRead> { TravelRead(get()) }
     single<LabelRead> { LabelRead(get()) }
     single<EmployeeRead> { EmployeeRead(get()) }
+    single<CustomerRead> { CustomerRead(get()) }
 }
 
 val fireBaseModules = module {

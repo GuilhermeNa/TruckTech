@@ -10,15 +10,14 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.IdHolder
-import br.com.apps.model.factory.RefuelFactory
+import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.R
-import br.com.apps.trucktech.TAG_DEBUG
+import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRefuelEditorBinding
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.popBackStack
@@ -38,16 +37,16 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: RefuelEditorFragmentArgs by navArgs()
-    private val idHolder by lazy {
-        IdHolder(
+    private val vmData by lazy {
+        RefuelEVMData(
             masterUid = mainActVM.loggedUser.masterUid,
             truckId = mainActVM.loggedUser.truckId,
             travelId = args.travelId,
-            refuelId = args.refuelId,
-            driverId = mainActVM.loggedUser.driverId
+            driverId = mainActVM.loggedUser.driverId,
+            refuelId = args.refuelId
         )
     }
-    private val viewModel: RefuelFragmentViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: RefuelEditorViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -133,14 +132,6 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
     private fun saveIconClicked() {
         binding.apply {
 
-            cleanEditTextError(
-                fragRefuelEditorStation,
-                fragRefuelEditorOdometer,
-                fragRefuelEditorAmountLiters,
-                fragRefuelEditorValuePerLiter,
-                fragRefuelEditorTotalValue
-            )
-
             val station = fragRefuelEditorStation.text.toString()
             val odometer = fragRefuelEditorOdometer.text.toString()
             val amountLiters = fragRefuelEditorAmountLiters.text.toString()
@@ -171,22 +162,21 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
             }
 
             if (fieldsAreValid) {
-                val mappedFields = hashMapOf(
-                    Pair(RefuelFactory.TAG_DATE, viewModel.date.value.toString()),
-                    Pair(RefuelFactory.TAG_STATION, station),
-                    Pair(RefuelFactory.TAG_ODOMETER, odometer),
-                    Pair(RefuelFactory.TAG_AMOUNT_LITERS, amountLiters),
-                    Pair(RefuelFactory.TAG_VALUE_PER_LITER, valuePerLiter),
-                    Pair(RefuelFactory.TAG_TOTAL_VALUE, totalValue),
-                    Pair(RefuelFactory.TAG_IS_COMPLETE, isComplete.toString())
+                val viewDto = RefuelDto(
+                    station = station,
+                    odometerMeasure = odometer.toDouble(),
+                    amountLiters = amountLiters.toDouble(),
+                    valuePerLiter = valuePerLiter.toDouble(),
+                    totalValue = totalValue.toDouble(),
+                    isCompleteRefuel = isComplete
                 )
-                save(mappedFields)
+                save(viewDto)
             }
         }
     }
 
-    private fun save(mappedFields: HashMap<String, String>) {
-        viewModel.save(mappedFields).observe(viewLifecycleOwner) { response ->
+    private fun save(viewDto: RefuelDto) {
+        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_SAVE)
@@ -210,7 +200,7 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
      *   - Observes refuelData to bind [Refuel] if the user is editing.
      */
     private fun initStateManager() {
-        viewModel.refuelData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> response.data?.let { bind(it) }
@@ -225,11 +215,11 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
     private fun bind(refuel: Refuel) {
         binding.apply {
             fragRefuelEditorStation.setText(refuel.station)
-            fragRefuelEditorOdometer.setText(refuel.odometerMeasure?.toPlainString())
-            fragRefuelEditorAmountLiters.setText(refuel.amountLiters?.toPlainString())
-            fragRefuelEditorValuePerLiter.setText(refuel.valuePerLiter?.toPlainString())
-            fragRefuelEditorTotalValue.setText(refuel.totalValue?.toPlainString())
-            refuel.isCompleteRefuel?.let { fragRefuelEditorCheckbox.isChecked = it }
+            fragRefuelEditorOdometer.setText(refuel.odometerMeasure.toPlainString())
+            fragRefuelEditorAmountLiters.setText(refuel.amountLiters.toPlainString())
+            fragRefuelEditorValuePerLiter.setText(refuel.valuePerLiter.toPlainString())
+            fragRefuelEditorTotalValue.setText(refuel.totalValue.toPlainString())
+            refuel.isCompleteRefuel.let { fragRefuelEditorCheckbox.isChecked = it }
         }
     }
 

@@ -1,5 +1,6 @@
 package br.com.apps.repository.util
 
+import br.com.apps.model.dto.CustomerDto
 import br.com.apps.model.dto.DocumentDto
 import br.com.apps.model.dto.FineDto
 import br.com.apps.model.dto.LabelDto
@@ -18,6 +19,7 @@ import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.exceptions.ConversionException
 import br.com.apps.model.mapper.EmployeeMapper.Companion.toModel
 import br.com.apps.model.mapper.toModel
+import br.com.apps.model.model.Customer
 import br.com.apps.model.model.Document
 import br.com.apps.model.model.Fine
 import br.com.apps.model.model.Truck
@@ -125,6 +127,7 @@ fun DocumentSnapshot.toLoanObject(): Loan {
 }
 
 fun QuerySnapshot.toRequestList(): List<PaymentRequest> {
+    this.isEmpty
     return this.mapNotNull { requestDocument ->
         requestDocument.toRequestObject()
     }
@@ -199,4 +202,15 @@ fun QuerySnapshot.toEmployeeList(): List<Employee> {
 fun DocumentSnapshot.toEmployeeObject(): Employee {
     return this.toObject(DriverEmployeeDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toBankAccountObject: ($this)")
+}
+
+fun QuerySnapshot.toCustomerList(): List<Customer> {
+    return this.mapNotNull { document ->
+        document.toCustomerObject()
+    }
+}
+
+fun DocumentSnapshot.toCustomerObject(): Customer {
+    return this.toObject(CustomerDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toCustomerObject: ($this)")
 }
