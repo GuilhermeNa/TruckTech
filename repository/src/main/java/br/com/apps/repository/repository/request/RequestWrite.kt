@@ -2,6 +2,7 @@ package br.com.apps.repository.repository.request
 
 import br.com.apps.model.dto.request.request.PaymentRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
+import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.ENCODED_IMAGE
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_ITEMS
@@ -83,6 +84,8 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
      * @param dto The [PaymentRequestDto] object to be saved.
      */
     override suspend fun save(dto: PaymentRequestDto): String {
+        if(!dto.validateFields()) throw CorruptedFileException("$dto")
+
         return if (dto.id == null) {
             create(dto)
         } else {

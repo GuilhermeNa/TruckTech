@@ -120,25 +120,14 @@ class TravelUseCase(
     suspend fun getCompleteTravelListByDriverId(driverId: String): LiveData<Response<List<Travel>>> {
         return coroutineScope {
             val mediator = MediatorLiveData<Response<List<Travel>>>()
-            lateinit var freights: List<Freight>
-            lateinit var expends: List<Expend>
-            lateinit var refuels: List<Refuel>
-
-            var isFirstBoot = true
 
             CoroutineScope(Dispatchers.Main).launch {
                 val deferredA = CompletableDeferred<List<Travel>>()
-                val liveDataA = repository.getTravelListByDriverId(driverId, true)
+                val liveDataA = repository.getTravelListByDriverId(driverId)
                 mediator.addSource(liveDataA) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response
-                        is Response.Success -> response.data?.let {
-                            if (isFirstBoot) deferredA.complete(it)
-                            else {
-                                mergeTravelData(it, freights, expends, refuels)
-                                mediator.value = Response.Success(it)
-                            }
-                        }
+                        is Response.Success -> response.data?.let { deferredA.complete(it) }
                     }
                 }
 
@@ -146,50 +135,29 @@ class TravelUseCase(
                 val travelIdList = travels.mapNotNull { t -> t.id }
 
                 val deferredB = CompletableDeferred<List<Freight>>()
-                val liveDataB = freightRepository.getFreightListByTravelIds(travelIdList, true)
+                val liveDataB = freightRepository.getFreightListByTravelIds(travelIdList)
                 mediator.addSource(liveDataB) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response
-                        is Response.Success -> response.data?.let {
-                            freights = it
-                            if (isFirstBoot) deferredB.complete(it)
-                            else {
-                                mergeTravelData(travels, freightList = it)
-                                mediator.value = Response.Success(travels)
-                            }
-                        }
+                        is Response.Success -> response.data?.let { deferredB.complete(it) }
                     }
                 }
 
                 val deferredC = CompletableDeferred<List<Refuel>>()
-                val liveDataC = refuelRepository.getRefuelListByTravelIds(travelIdList, true)
+                val liveDataC = refuelRepository.getRefuelListByTravelIds(travelIdList)
                 mediator.addSource(liveDataC) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response
-                        is Response.Success -> response.data?.let {
-                            refuels = it
-                            if (isFirstBoot) deferredC.complete(it)
-                            else {
-                                mergeTravelData(travels, refuelList = it)
-                                mediator.value = Response.Success(travels)
-                            }
-                        }
+                        is Response.Success -> response.data?.let { deferredC.complete(it) }
                     }
                 }
 
                 val deferredD = CompletableDeferred<List<Expend>>()
-                val liveDataD = expendRepository.getExpendListByTravelIds(travelIdList, true)
+                val liveDataD = expendRepository.getExpendListByTravelIds(travelIdList)
                 mediator.addSource(liveDataD) { response ->
                     when (response) {
                         is Response.Error -> mediator.value = response
-                        is Response.Success -> response.data?.let {
-                            expends = it
-                            if (isFirstBoot) deferredD.complete(it)
-                            else {
-                                mergeTravelData(travels, expendList = it)
-                                mediator.value = Response.Success(travels)
-                            }
-                        }
+                        is Response.Success -> response.data?.let { deferredD.complete(it) }
                     }
                 }
 
@@ -198,7 +166,6 @@ class TravelUseCase(
                 val expendList = deferredD.await()
 
                 mergeTravelData(travels, freightList, expendList, refuelList)
-                isFirstBoot = false
                 mediator.value = Response.Success(data = travels)
             }
 

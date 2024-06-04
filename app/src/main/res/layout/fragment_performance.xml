@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.fragments.nav_home.home.frag_performance.PerformanceFragment">
+
+    <TextView
+        android:id="@+id/panel_performance_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:text="@string/my_performance"
+        android:textSize="18sp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/panel_performance_header_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_header_horizontal" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/panel_performance_period_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_period" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/panel_performance_viewPager2"
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="16dp" />
+
+    <me.relex.circleindicator.CircleIndicator3
+        android:id="@+id/panel_performance_circle_indicator"
+        style="@style/CIRCLE_INDICATOR"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:gravity="center"
+        app:ci_gravity="center" />
+
+    <LinearLayout
+        android:id="@+id/layout_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/no_travel_found"
+            android:visibility="gone"
+            app:drawableLeftCompat="@drawable/map" />
+
+        <TextView
+            android:id="@+id/error"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Falha ao buscar dados"
+            android:visibility="gone"
+            app:drawableTopCompat="@drawable/error" />
+
+    </LinearLayout>
+
+</LinearLayout>

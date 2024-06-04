@@ -16,6 +16,7 @@ import br.com.apps.trucktech.util.buildUiResponse
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.TravelIdsData
 import br.com.apps.usecase.TravelUseCase
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -42,14 +43,11 @@ class TravelsListViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init {
-        loadData()
-    }
-
-    private fun loadData() {
+    fun loadData() {
         viewModelScope.launch {
-            useCase.getCompleteTravelListByDriverId(vmData.driverId).asFlow().collect { response ->
+            useCase.getCompleteTravelListByDriverId(vmData.driverId).asFlow().first { response ->
                 response.buildUiResponse(_state, _data)
+                true
             }
         }
     }

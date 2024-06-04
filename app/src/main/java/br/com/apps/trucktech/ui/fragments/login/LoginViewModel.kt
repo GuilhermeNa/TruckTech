@@ -3,35 +3,47 @@ package br.com.apps.trucktech.ui.fragments.login
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.FirebaseTooManyRequestsException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-const val STATE_INITIAL = 0
-const val STATE_CREDENTIAL = 1
-const val STATE_LOGIN = 2
+
 
 class LoginViewModel : ViewModel() {
 
-    private val _uiState = MutableLiveData(STATE_INITIAL)
-    val uiState get() = _uiState
+    private val _state = MutableLiveData<LfState>()
+    val state get() = _state
 
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
-    fun setStateCredential() {
+    fun setState(state: LfState, timer: Long = 0L) {
         viewModelScope.launch {
-            delay(1000)
-            _uiState.value = STATE_CREDENTIAL
-        }
-
-    }
-
-    fun setStateLogin() {
-        viewModelScope.launch {
-            delay(1000)
-            _uiState.value = STATE_LOGIN
+            delay(timer)
+            _state.value = state
         }
     }
 
+    fun getErrorMessage(exception: Exception) =
+        when (exception) {
+            is FirebaseAuthInvalidUserException,
+            is FirebaseAuthInvalidCredentialsException -> "Credenciais incorretas"
+
+            is FirebaseNetworkException -> "Falha na conexão"
+            is FirebaseTooManyRequestsException -> "Usuário bloqueado temporariamente por muitas tentativas"
+            else -> "Erro desconhecido"
+        }
+
+}
+
+sealed class LfState {
+    object Opening : LfState()
+    object CurrentUserNotFound : LfState()
+    object CurrentUserFound : LfState()
+    object TryingToLogin : LfState()
+    data class LoginFailed(val error: Exception) : LfState()
 }

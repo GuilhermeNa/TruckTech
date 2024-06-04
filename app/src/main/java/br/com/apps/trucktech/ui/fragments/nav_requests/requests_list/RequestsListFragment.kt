@@ -5,7 +5,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -40,11 +39,6 @@ private const val TOOLBAR_TITLE = "Solicitação de pagamento"
 
 private const val REQUEST_HAVE_BEEN_SAVED = "Requisição adicionada"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [RequestsListFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class RequestsListFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRequestsListBinding? = null
@@ -54,6 +48,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     private val vmData by lazy {
         RequestLVMData(
             masterUid = mainActVM.loggedUser.masterUid,
+            uid = mainActVM.loggedUser.uid,
             truckId = mainActVM.loggedUser.truckId,
             driverId = mainActVM.loggedUser.driverId
         )

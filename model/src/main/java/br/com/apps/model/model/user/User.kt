@@ -6,7 +6,8 @@ abstract class User(
 
     open val email: String? = "",
     open val name: String? = "",
-
+    open val orderCode: Int,
+    open val orderNumber: Int,
 )
 
 enum class PermissionLevelType(val description: String) {

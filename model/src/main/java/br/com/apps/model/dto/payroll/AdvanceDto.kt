@@ -11,4 +11,21 @@ data class AdvanceDto(
     val value: Double? = null,
     @field:JvmField
     val isPaid: Boolean? = null
-)
+) {
+
+    fun validateFields(): Boolean {
+        var isValid = true
+
+        if (masterUid == null ||
+            employeeId == null ||
+            date == null ||
+            value == null ||
+            isPaid == null
+        ) {
+            isValid = false
+        }
+
+        return isValid
+    }
+
+}

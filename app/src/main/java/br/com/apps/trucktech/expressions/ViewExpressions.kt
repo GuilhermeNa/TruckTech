@@ -2,6 +2,7 @@ package br.com.apps.trucktech.expressions
 
 import android.graphics.Color
 import android.view.View
+import android.view.ViewGroup
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import com.google.android.material.snackbar.Snackbar
@@ -40,4 +41,37 @@ fun View.snackBarOrange(text: String) {
         .setBackgroundTint(Color.parseColor("#FF9800"))
         .setTextColor(Color.parseColor("#FFFFFF"))
         .show()
+}
+
+fun View.snackBarRedTop(text: String) {
+    val snackBar = Snackbar.make(this, text, Snackbar.LENGTH_SHORT)
+    snackBar.setBackgroundTint(Color.parseColor("#FF0000"))
+    snackBar.setTextColor(Color.parseColor("#FFFFFF"))
+
+    // Get the Snackbar's view
+    val snackBarView = snackBar.view
+
+    // Get the Snackbar's LayoutParams and set its gravity to TOP
+    val params = snackBarView.layoutParams as ViewGroup.MarginLayoutParams
+    params.topMargin = 0
+    params.bottomMargin = 0
+
+    // Use the parent view to set the layout parameters
+    val parentView = this as ViewGroup
+    parentView.addView(snackBarView, params)
+
+    // Show the Snackbar
+    snackBar.addCallback(object : Snackbar.Callback() {
+        override fun onShown(sb: Snackbar?) {
+            // Move the Snackbar to the top
+            snackBarView.translationY = -parentView.height.toFloat() + snackBarView.height
+        }
+
+        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+            // Remove the Snackbar view when it's dismissed
+            parentView.removeView(snackBarView)
+        }
+    })
+
+    snackBar.show()
 }

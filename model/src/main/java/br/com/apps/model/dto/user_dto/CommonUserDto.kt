@@ -7,6 +7,8 @@ data class CommonUserDto(
     override var masterUid: String? = null,
     var employeeId: String? = null,
 
+    override val orderCode: Int? = null,
+    override val orderNumber: Int? = null,
     override val email: String? = null,
     override val name: String? = null,
     val urlImage: String? = null,
@@ -15,7 +17,9 @@ data class CommonUserDto(
 ): UserDto(
     masterUid = masterUid,
     email = email,
-    name = name
+    name = name,
+    orderCode = orderCode,
+    orderNumber = orderNumber
 ) {
 
     override fun validateFields(): Boolean {
@@ -27,6 +31,8 @@ data class CommonUserDto(
         if(masterUid == null) isValid = false
         if(employeeId == null) isValid = false
         if(permission == null) isValid = false
+        if(orderCode == null) isValid = false
+        if(orderNumber == null) isValid = false
 
         return isValid
     }

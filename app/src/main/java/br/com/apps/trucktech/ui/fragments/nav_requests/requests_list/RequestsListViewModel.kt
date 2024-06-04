@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.factory.RequestFactory
+import br.com.apps.model.dto.request.request.PaymentRequestDto
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.PaymentRequestStatusType
 import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.toDate
+import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
@@ -30,7 +32,8 @@ private const val PROCESSED = "Processados"
 class RequestsListViewModel(
     private val vmData: RequestLVMData,
     private val repository: RequestRepository,
-    private val useCase: RequestUseCase
+    private val useCase: RequestUseCase,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     /**
@@ -79,7 +82,7 @@ class RequestsListViewModel(
                 val items = loadItemsAwait(idList)
                 useCase.mergeRequestData(requests, items)
 
-                if(requests.isEmpty()) _state.value = State.Empty
+                if (requests.isEmpty()) _state.value = State.Empty
                 _data.value = requests
 
             } catch (e: Exception) {
@@ -132,23 +135,25 @@ class RequestsListViewModel(
      * Send the [PaymentRequest] to be created or updated.
      */
     suspend fun save() =
-        liveData<Response<String>>(viewModelScope.coroutineContext) {
+        liveData(viewModelScope.coroutineContext) {
             try {
-                val requestDto =
-                    RequestFactory.createDto(
-                        masterUid = vmData.masterUid,
-                        truckId = vmData.truckId,
-                        driverId = vmData.driverId,
-                        date = LocalDateTime.now(),
-                        status = PaymentRequestStatusType.SENT.description
-                    )
-
-                val id = repository.save(requestDto)
+                val dto = createDto()
+                val id = useCase.createRequest(dto, vmData.uid)
                 emit(Response.Success(id))
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(Response.Error(e))
             }
         }
+
+    private fun createDto() =
+        PaymentRequestDto(
+            masterUid = vmData.masterUid,
+            truckId = vmData.truckId,
+            driverId = vmData.driverId,
+            date = LocalDateTime.now().toDate(),
+            status = PaymentRequestStatusType.SENT.description,
+        )
 
     /**
      * Delete an item
@@ -224,6 +229,7 @@ class RequestsListViewModel(
 
 data class RequestLVMData(
     val masterUid: String,
+    val uid: String,
     val truckId: String,
     val driverId: String
 )

@@ -6,11 +6,15 @@ data class MasterUserDto(
 
     override val email: String? = null,
     override val name: String? = null,
+    override val orderCode: Int? = null,
+    override val orderNumber: Int? = null,
 
     ) : UserDto(
     masterUid = masterUid,
     email = email,
-    name = name
+    name = name,
+    orderCode = orderCode,
+    orderNumber = orderNumber
 ) {
 
     override fun validateFields(): Boolean {

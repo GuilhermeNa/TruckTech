@@ -1,4 +1,7 @@
 package br.com.apps.model.model.counter
 
-class Counter {
-}
+data class Counter(
+    val masterUid: String,
+    val id: String,
+    val orderCode: Int
+)

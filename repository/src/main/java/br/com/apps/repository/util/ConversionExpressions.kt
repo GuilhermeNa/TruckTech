@@ -16,6 +16,7 @@ import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.dto.travel.TravelDto
+import br.com.apps.model.dto.user_dto.CommonUserDto
 import br.com.apps.model.exceptions.ConversionException
 import br.com.apps.model.mapper.EmployeeMapper.Companion.toModel
 import br.com.apps.model.mapper.toModel
@@ -35,6 +36,7 @@ import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.model.model.user.CommonUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 
@@ -213,4 +215,8 @@ fun QuerySnapshot.toCustomerList(): List<Customer> {
 fun DocumentSnapshot.toCustomerObject(): Customer {
     return this.toObject(CustomerDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toCustomerObject: ($this)")
+}
+
+fun DocumentSnapshot.toCommonUserObject(): CommonUser {
+    return this.toObject(CommonUserDto::class.java)?.toModel() as CommonUser
 }

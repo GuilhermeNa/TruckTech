@@ -1,5 +1,6 @@
 package br.com.apps.repository.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.user_dto.CommonUserDto
@@ -7,8 +8,15 @@ import br.com.apps.model.dto.user_dto.UserDto
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.user.User
 import br.com.apps.repository.Resource
+import br.com.apps.repository.util.toCommonUserObject
+import br.com.apps.trucktech.expressions.getMonthFormatted
+import br.com.apps.trucktech.expressions.getYearReference
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
+import kotlinx.coroutines.tasks.await
+import java.security.InvalidParameterException
+import java.time.LocalDateTime
 
 private const val FIRESTORE_COLLECTION_USERS = "users"
 
@@ -72,5 +80,40 @@ class UserRepository(private val fireStore: FirebaseFirestore) {
         return liveData
     }
 
+    suspend fun getUserRequestNumber(uid: String): Int {
+        var orderCode = -1
+        var orderNumber = -1
+        val listener = collection.document(uid)
+
+        listener.get().addOnCompleteListener { task ->
+            task.exception?.let { e -> throw e }
+            task.result?.let { doc ->
+                orderCode = doc.toCommonUserObject().orderCode
+                orderNumber = doc.toCommonUserObject().orderNumber
+                Log.d("teste", "pre")
+            }
+        }.await()
+
+        Log.d("teste", "apos")
+        if (orderCode != -1 && orderNumber != -1) {
+            val year = LocalDateTime.now().getYearReference()
+            val month = LocalDateTime.now().getMonthFormatted()
+            val code = when (orderCode.toString().length) {
+                1 -> "00$orderCode"
+                2 -> "0$orderCode"
+                else -> throw InvalidParameterException()
+            }
+
+            return ("$year$month$code$orderNumber").toInt()
+        }
+
+        throw InvalidParameterException("Failed to generate a request number")
+
+    }
+
+    suspend fun updateRequestNumber(uid: String) {
+        collection.document(uid)
+            .update("orderNumber", FieldValue.increment(1)).await()
+    }
 
 }

@@ -11,9 +11,9 @@ import br.com.apps.trucktech.ui.fragments.login.LoginViewModel
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentsListFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.DiscountViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.fines.FinesListViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.home.FineBoxFromHomeViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.home.PerformanceBoxFromHomeViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.home.ToReceiveBoxFromHomeViewModel
+import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeViewModel
+import br.com.apps.trucktech.ui.fragments.nav_home.home.frag_performance.PerformanceViewModel
+import br.com.apps.trucktech.ui.fragments.nav_home.home.frag_to_receive.ReceivableViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.payment.PaymentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.refund.RefundViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.time_line.TimelineFragmentViewModel
@@ -99,14 +99,9 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<RequestsListViewModel> { (vmData: RequestLVMData) -> RequestsListViewModel(vmData, get(), get()) }
+    viewModel<RequestsListViewModel> { (vmData: RequestLVMData) -> RequestsListViewModel(vmData, get(), get(), get()) }
     viewModel<RecordsViewModel> { RecordsViewModel(get()) }
-    viewModel<RefuelEditorViewModel> { (vmData: RefuelEVMData) ->
-        RefuelEditorViewModel(
-            vmData,
-            get()
-        )
-    }
+    viewModel<RefuelEditorViewModel> { (vmData: RefuelEVMData) -> RefuelEditorViewModel(vmData, get()) }
     viewModel<RefuelPreviewViewModel> { (refuelId: String) ->
         RefuelPreviewViewModel(
             refuelId,
@@ -123,8 +118,6 @@ val viewModelModules = module {
     viewModel<ThemeFragmentViewModel> { ThemeFragmentViewModel() }
     viewModel<TimelineFragmentViewModel> { TimelineFragmentViewModel() }
     viewModel<TravelsListViewModel> { (vmData: TravelLVMData) -> TravelsListViewModel(vmData, get(), get()) }
-    viewModel<PerformanceBoxFromHomeViewModel> { PerformanceBoxFromHomeViewModel(get(), get(), get(), get(), get()) }
-    viewModel<ToReceiveBoxFromHomeViewModel> { ToReceiveBoxFromHomeViewModel(get(), get(), get(), get()) }
     viewModel<ToReceiveViewModel> { ToReceiveViewModel() }
     viewModel<DiscountViewModel> { (id: String) -> DiscountViewModel(id, get(), get()) }
     viewModel<PaymentViewModel> { (id: String) -> PaymentViewModel(id, get()) }
@@ -132,9 +125,11 @@ val viewModelModules = module {
     viewModel<RequestEditorRefuelViewModel> { (idHolder: IdHolder) -> RequestEditorRefuelViewModel(idHolder, get()) }
     viewModel<RequestEditorCostFragmentViewModel> { (idHolder: IdHolder) -> RequestEditorCostFragmentViewModel(idHolder, get(), get()) }
     viewModel<RequestEditorWalletFragmentViewModel> { (idHolder: IdHolder) -> RequestEditorWalletFragmentViewModel(idHolder, get()) }
-    viewModel<FineBoxFromHomeViewModel> { FineBoxFromHomeViewModel(get(), get()) }
     viewModel<BankPreviewViewModel> { (idHolder: IdHolder) -> BankPreviewViewModel(idHolder, get(), get()) }
     viewModel<BankEditorViewModel> { (idHolder: IdHolder) -> BankEditorViewModel(idHolder, get(), get()) }
+    viewModel<HomeViewModel> { HomeViewModel(get(),get(),get(),get(),get(),get(),get(),get()) }
+    viewModel<PerformanceViewModel> { PerformanceViewModel(get()) }
+    viewModel<ReceivableViewModel> { ReceivableViewModel() }
 }
 
 val appModules = listOf(

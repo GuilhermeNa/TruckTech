@@ -13,10 +13,11 @@ object RequestFactory {
         return null
     }
 
-    fun createDto(
+    fun create(
         masterUid: String?,
         truckId: String?,
         driverId: String?,
+        requestNumber: Int?,
         date: LocalDateTime?,
         status: String?
     ): PaymentRequestDto {
@@ -25,6 +26,7 @@ object RequestFactory {
             masterUid = masterUid,
             truckId = truckId,
             driverId = driverId,
+            requestNumber = requestNumber,
             date = date?.toDate(),
             status = status
         )

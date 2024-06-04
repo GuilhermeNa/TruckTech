@@ -32,6 +32,8 @@ private fun mapMasterUser(dto: MasterUserDto): MasterUser {
             masterUid = dto.masterUid!!,
             email = dto.email!!,
             name = dto.name!!,
+            orderCode = dto.orderCode!!,
+            orderNumber = dto.orderNumber!!
         )
     }
     throw CorruptedFileException("UserMapper, mapMasterUser ($dto)")
@@ -43,6 +45,8 @@ private fun mapCommonUser(dto: CommonUserDto): CommonUser {
             masterUid = dto.masterUid!!,
             uid = dto.uid!!,
             employeeId = dto.employeeId!!,
+            orderCode = dto.orderCode!!,
+            orderNumber = dto.orderNumber!!,
             email = dto.email!!,
             name = dto.name!!,
             urlImage = dto.urlImage,

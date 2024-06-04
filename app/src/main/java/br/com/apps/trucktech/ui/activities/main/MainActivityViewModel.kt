@@ -3,6 +3,7 @@ package br.com.apps.trucktech.ui.activities.main
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.Truck
 import br.com.apps.model.model.employee.EmployeeType
@@ -11,9 +12,7 @@ import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.fleet.FleetRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.usecase.UserUseCase
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
 class MainActivityViewModel(
@@ -22,12 +21,6 @@ class MainActivityViewModel(
 ) : ViewModel() {
 
     lateinit var loggedUser: LoggedUser
-
-    /**
-     * User
-     */
-    private var _userData = MutableLiveData<Response<LoggedUser>>()
-    val userData get() = _userData
 
     /**
      * Components
@@ -46,74 +39,58 @@ class MainActivityViewModel(
         _components.value = components
     }
 
-
     /**
      * Load user data
      */
-    fun initUserData(userId: String) {
-        loadData(userId) { user, truck ->
-            sendResponse(processData(user, truck))
-        }
-    }
+    fun initUserData(userId: String) =
+        liveData(viewModelScope.coroutineContext) {
+            try {
+                val user = fetchUser(userId)
+                val truck = fetchTruck(user.employeeId)
+                val loggedUser = processData(user, truck)
 
-    private fun loadData(
-        userId: String,
-        complete: (user: CommonUser, truck: Truck) -> Unit
-    ) {
-        viewModelScope.launch {
-            val userDef = loadUser(userId)
-            val user = userDef.await()
-
-            val truckDef = loadTruck(user.employeeId)
-            val truck = truckDef.await()
-
-            complete(user, truck)
-        }
-    }
-
-    private suspend fun loadUser(userId: String): CompletableDeferred<CommonUser> {
-        val userDef = CompletableDeferred<CommonUser>()
-
-        userUseCase.getById(userId, EmployeeType.DRIVER).asFlow().first {
-            val user = it as CommonUser
-            user.employeeId
-            userDef.complete(user)
-            true
-        }
-
-        return userDef
-    }
-
-    private suspend fun loadTruck(driverId: String): CompletableDeferred<Truck> {
-        val truckDef = CompletableDeferred<Truck>()
-
-        truckRepository.getTruckByDriverId(driverId).asFlow().first { response ->
-            when (response) {
-                is Response.Error -> _userData.value = Response.Error(response.exception)
-                is Response.Success -> response.data?.let { truckDef.complete(it) }
+                emit(Response.Success(loggedUser))
+            } catch (e: Exception) {
+                emit(Response.Error(e))
             }
-            true
         }
 
-        return truckDef
+    private suspend fun fetchUser(userId: String): CommonUser {
+        val response = userUseCase.getById(userId, EmployeeType.DRIVER).asFlow().first()
+        return response as CommonUser
     }
 
-    private fun processData(user: CommonUser, truck: Truck) =
-        LoggedUser(
-            masterUid = truck.masterUid,
-            driverId = truck.driverId,
-            truckId = truck.id!!,
-            name = user.name,
-            plate = truck.plate,
-            email = user.email,
-            urlImage = user.urlImage,
-            permissionLevelType = user.permission,
-            commissionPercentual = truck.commissionPercentual
-        )
+    private suspend fun fetchTruck(driverId: String): Truck {
+        val response = truckRepository.getTruckByDriverId(driverId).asFlow().first()
 
-    private fun sendResponse(loggedUser: LoggedUser) {
-        this@MainActivityViewModel.loggedUser = loggedUser
-        _userData.value = Response.Success(loggedUser)
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullPointerException("Truck data is null")
+        }
+    }
+
+    private fun processData(user: CommonUser, truck: Truck): LoggedUser {
+        val parts = user.name.split(" ")
+        val name = parts[0]
+        val surname = if (parts.size > 1) " ${parts[1]}" else ""
+
+        loggedUser =
+            LoggedUser(
+                masterUid = truck.masterUid,
+                driverId = truck.driverId,
+                truckId = truck.id!!,
+                uid = user.uid,
+                orderCode = user.orderCode,
+                orderNumber = user.orderNumber,
+                name = ("$name$surname"),
+                plate = truck.plate,
+                email = user.email,
+                urlImage = user.urlImage,
+                permissionLevelType = user.permission,
+                commissionPercentual = truck.commissionPercentual
+            )
+
+        return loggedUser
     }
 
 }
@@ -122,9 +99,12 @@ class VisualComponents(val hasBottomNavigation: Boolean = false)
 
 data class LoggedUser(
     val masterUid: String,
+    val uid: String,
     val driverId: String,
     val truckId: String,
 
+    val orderCode: Int,
+    val orderNumber: Int,
     val name: String,
     val plate: String,
     val email: String,

@@ -6,6 +6,8 @@ data class CommonUser(
     val uid: String,
     val employeeId: String,
 
+    override val orderCode: Int,
+    override val orderNumber: Int,
     override val email: String,
     override val name: String,
     val urlImage: String? = "",
@@ -14,5 +16,7 @@ data class CommonUser(
 ) : User(
     masterUid = masterUid,
     email = email,
-    name = name
+    name = name,
+    orderCode = orderCode,
+    orderNumber = orderNumber
 )

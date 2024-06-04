@@ -134,6 +134,7 @@ class RequestPreviewViewModel(
                 repository.delete(requestId, itemsId)
                 emit(Response.Success())
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(Response.Error(e))
             }
         }

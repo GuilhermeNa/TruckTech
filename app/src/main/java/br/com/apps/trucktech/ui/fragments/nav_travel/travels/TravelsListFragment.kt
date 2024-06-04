@@ -123,7 +123,10 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
                     Log.e(TAG_DEBUG, response.exception.message.toString())
                 }
 
-                is Response.Success -> requireView().snackBarGreen(SUCCESSFULLY_SAVED)
+                is Response.Success -> {
+                    requireView().snackBarGreen(SUCCESSFULLY_SAVED)
+                    viewModel.loadData()
+                }
             }
         }
     }
@@ -231,6 +234,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
                 when (response) {
                     is Response.Success -> {
                         requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                        viewModel.loadData()
                     }
 
                     is Response.Error -> {
@@ -239,6 +243,15 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
                 }
             }
         }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // ON RESUME
+    //---------------------------------------------------------------------------------------------//
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadData()
     }
 
     //---------------------------------------------------------------------------------------------//

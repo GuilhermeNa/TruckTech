@@ -9,7 +9,7 @@ data class Advance(
     val employeeId: String? = null,
 
     val date: LocalDateTime? = null,
-    val value: BigDecimal? = null,
+    val value: BigDecimal,
     @field:JvmField
     val isPaid: Boolean? = null
 

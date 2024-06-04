@@ -10,11 +10,26 @@ data class PaymentRequestDto(
 
     val encodedImage: String? = null,
     val date: Date? = null,
-    val requestNumber: Int? = null,
+    var requestNumber: Int? = null,
     val status: String? = null,
     val itemsList: List<RequestItemDto>? = null
 
-    ) {
+) {
 
+    fun validateFields(): Boolean {
+        var isValid = true
+
+        if (masterUid == null ||
+            truckId == null ||
+            driverId == null ||
+            date == null ||
+            requestNumber == null ||
+            status == null
+        ) {
+            isValid = false
+        }
+
+        return isValid
+    }
 
 }

@@ -1,7 +1,9 @@
 package br.com.apps.usecase
 
+import br.com.apps.model.dto.request.request.PaymentRequestDto
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_ID
 import java.security.InvalidParameterException
@@ -11,7 +13,11 @@ import java.security.InvalidParameterException
  *
  * @param repository The repository instance to interact with Firestore.
  */
-class RequestUseCase(private val repository: RequestRepository) {
+class RequestUseCase(
+    private val repository: RequestRepository,
+    private val userRepository: UserRepository,
+    private val userUseCase: UserUseCase
+) {
 
     fun mergeRequestData(
         requestList: List<PaymentRequest>,
@@ -25,5 +31,14 @@ class RequestUseCase(private val repository: RequestRepository) {
         }
     }
 
+    suspend fun createRequest(dto: PaymentRequestDto, uid: String): String {
+        dto.requestNumber = userRepository.getUserRequestNumber(uid)
+        val id = repository.save(dto)
+        userRepository.updateRequestNumber(uid)
+        return id
+    }
 
 }
+
+
+

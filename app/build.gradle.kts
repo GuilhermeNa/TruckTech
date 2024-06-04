@@ -91,7 +91,7 @@ dependencies {
     val navVersion = "2.7.7"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
-   // implementation("androidx.navigation:navigation-safe-args-gradle-plugin:$navVersion")
+    // implementation("androidx.navigation:navigation-safe-args-gradle-plugin:$navVersion")
 
     //Leak Canary
     implementation("com.squareup.leakcanary:leakcanary-android:2.12")
@@ -112,20 +112,20 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0-RC")
 
     //DataStore
-    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     //Coil
-    implementation ("io.coil-kt:coil:2.4.0")
+    implementation("io.coil-kt:coil:2.4.0")
     implementation("io.coil-kt:coil-gif:2.4.0")
 
     //Circle imageView
-    implementation ("de.hdodenhof:circleimageview:3.1.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 
     //Circle indicator
     implementation("me.relex:circleindicator:2.1.6")
 
     //Touch Image View
-    implementation ("com.github.MikeOrtiz:TouchImageView:3.6")
+    implementation("com.github.MikeOrtiz:TouchImageView:3.6")
 
     //FireBase
     implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
@@ -136,12 +136,15 @@ dependencies {
 
     // CameraX core library using the camera2 implementation
     val cameraxVersion = "1.4.0-alpha05"
-    implementation ("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
     // If you want to additionally use the CameraX Lifecycle library
-    implementation ("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     // If you want to additionally use the CameraX View class
-    implementation ("androidx.camera:camera-view:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
     // If you want to additionally use the CameraX Extensions library
-    implementation( "androidx.camera:camera-extensions:$cameraxVersion")
+    implementation("androidx.camera:camera-extensions:$cameraxVersion")
+
+    //Swipe Refresh Layout
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
 }
