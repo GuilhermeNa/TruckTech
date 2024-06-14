@@ -1,4 +1,4 @@
-package br.com.apps.model.model.request.request
+package br.com.apps.model.model.request.travel_requests
 
 import br.com.apps.model.exceptions.InvalidTypeException
 import br.com.apps.model.model.label.Label

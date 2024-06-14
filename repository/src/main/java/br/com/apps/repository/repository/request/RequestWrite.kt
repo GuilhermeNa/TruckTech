@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.request
 
-import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.ENCODED_IMAGE
@@ -75,14 +75,14 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
     }
 
     /**
-     * Saves the [PaymentRequestDto] data in Firestore.
+     * Saves the [TravelRequestDto] data in Firestore.
      *
      *  - If the ID of the Request Dto is null, it creates a new Request.
      *  - If the ID is not null, it updates the existing Request.
      *
-     * @param dto The [PaymentRequestDto] object to be saved.
+     * @param dto The [TravelRequestDto] object to be saved.
      */
-    override suspend fun save(dto: PaymentRequestDto): String {
+    override suspend fun save(dto: TravelRequestDto): String {
         return if (dto.id == null) {
             create(dto)
         } else {
@@ -90,7 +90,7 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
         }
     }
 
-    private suspend fun create(dto: PaymentRequestDto): String {
+    private suspend fun create(dto: TravelRequestDto): String {
         val document = collection.document()
         dto.id = document.id
 
@@ -101,7 +101,7 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
         return document.id
     }
 
-    private suspend fun update(dto: PaymentRequestDto): String {
+    private suspend fun update(dto: TravelRequestDto): String {
         val id = dto.id ?: throw InvalidParameterException(EMPTY_ID)
 
         collection

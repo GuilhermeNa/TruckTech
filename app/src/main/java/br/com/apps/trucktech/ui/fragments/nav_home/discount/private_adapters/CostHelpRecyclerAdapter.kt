@@ -5,7 +5,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.payroll.TravelAdvance
+import br.com.apps.model.model.payroll.TravelAid
 import br.com.apps.trucktech.databinding.ItemRequestSubItemBinding
 import br.com.apps.trucktech.expressions.getDayFormatted
 import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
@@ -16,7 +16,7 @@ class CostHelpRecyclerAdapter(
     private val context: Context
 ) : RecyclerView.Adapter<CostHelpRecyclerAdapter.ViewHolder>() {
 
-    private val dataSet = mutableListOf<TravelAdvance>()
+    private val dataSet = mutableListOf<TravelAid>()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER
@@ -45,7 +45,7 @@ class CostHelpRecyclerAdapter(
         bind(holder, item)
     }
 
-    fun bind(holder: ViewHolder, item: TravelAdvance) {
+    fun bind(holder: ViewHolder, item: TravelAid) {
         holder.apply {
             try {
                 image.loadImageThroughUrl(
@@ -64,7 +64,7 @@ class CostHelpRecyclerAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(data: List<TravelAdvance>) {
+    fun update(data: List<TravelAid>) {
         this.dataSet.clear()
         this.dataSet.addAll(data)
         notifyDataSetChanged()

@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.factory.RequestItemFactory
 import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.request.request.RequestItem
-import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.model.model.request.travel_requests.RequestItem
+import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response

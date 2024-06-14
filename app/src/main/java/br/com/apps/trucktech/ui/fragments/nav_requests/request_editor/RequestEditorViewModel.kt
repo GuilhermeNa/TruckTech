@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.request.request.PaymentRequest
-import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
@@ -131,7 +131,7 @@ class RequestEditorViewModel(
         useCase.updateEncodedImage(vmData.permission, dto, encodedImage)
     }
 
-    private fun getRequestDto(): PaymentRequestDto {
+    private fun getRequestDto(): TravelRequestDto {
         return (data.value as Response.Success).data!!.toDto()
     }
 

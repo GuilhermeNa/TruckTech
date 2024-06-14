@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.request
 
-import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
 
 class RequestRepository(
@@ -12,7 +12,7 @@ class RequestRepository(
     // WRITE
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun save(dto: PaymentRequestDto) = write.save(dto)
+    override suspend fun save(dto: TravelRequestDto) = write.save(dto)
 
     override suspend fun saveItem(itemDto: RequestItemDto) = write.saveItem(itemDto)
 

@@ -1,8 +1,8 @@
 package br.com.apps.model.mapper
 
 import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.model.request.request.RequestItem
-import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.model.model.request.travel_requests.RequestItem
+import br.com.apps.model.model.request.travel_requests.RequestItemType
 import java.math.BigDecimal
 
 fun RequestItemDto.toModel(): RequestItem {

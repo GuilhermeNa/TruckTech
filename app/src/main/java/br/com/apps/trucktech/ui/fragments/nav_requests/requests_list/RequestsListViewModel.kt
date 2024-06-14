@@ -5,11 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.request.request.PaymentRequest
-import br.com.apps.model.model.request.request.PaymentRequestStatusType
-import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
+import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.UserRepository
@@ -148,7 +148,7 @@ class RequestsListViewModel(
         }
 
     private fun createDto() =
-        PaymentRequestDto(
+        TravelRequestDto(
             masterUid = vmData.masterUid,
             truckId = vmData.truckId,
             driverId = vmData.driverId,

@@ -14,7 +14,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.OK

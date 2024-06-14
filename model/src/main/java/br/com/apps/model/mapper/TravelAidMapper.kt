@@ -1,16 +1,16 @@
 package br.com.apps.model.mapper
 
-import br.com.apps.model.dto.payroll.TravelAdvanceDto
+import br.com.apps.model.dto.payroll.TravelAidDto
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.model.payroll.TravelAdvance
+import br.com.apps.model.model.payroll.TravelAid
 import br.com.apps.model.toDate
 import br.com.apps.model.toLocalDateTime
 import java.math.BigDecimal
 
-fun TravelAdvanceDto.toModel(): TravelAdvance {
+fun TravelAidDto.toModel(): TravelAid {
 
     if(this.validateFields()) {
-        return TravelAdvance(
+        return TravelAid(
             masterUid = this.masterUid!!,
             id = this.id,
             employeeId = this.employeeId!!,
@@ -23,8 +23,8 @@ fun TravelAdvanceDto.toModel(): TravelAdvance {
     throw CorruptedFileException("CostHelpMapper, toModel: ($this)")
 }
 
-fun TravelAdvance.toDto(): TravelAdvanceDto {
-    return TravelAdvanceDto(
+fun TravelAid.toDto(): TravelAidDto {
+    return TravelAidDto(
         masterUid = this.masterUid,
         id = this.id,
         employeeId = this.employeeId,

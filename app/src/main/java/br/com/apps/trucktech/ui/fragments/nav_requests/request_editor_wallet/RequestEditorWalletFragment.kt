@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response

@@ -1,7 +1,6 @@
 package br.com.apps.trucktech
 
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.trucktech.model.Truck
 import br.com.apps.trucktech.model.employee.AuthorizationLevelType
 import br.com.apps.trucktech.model.employee.Driver
 import br.com.apps.trucktech.model.events.TimeLineEvent

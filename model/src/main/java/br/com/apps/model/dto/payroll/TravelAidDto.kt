@@ -2,7 +2,7 @@ package br.com.apps.model.dto.payroll
 
 import java.util.Date
 
-data class TravelAdvanceDto(
+data class TravelAidDto(
     val masterUid: String? = null,
     val id: String? = null,
     val employeeId: String? = null,

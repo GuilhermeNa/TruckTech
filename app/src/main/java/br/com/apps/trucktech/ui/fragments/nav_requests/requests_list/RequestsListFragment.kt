@@ -9,7 +9,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.request.request.PaymentRequest
+import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.FAILED_TO_SAVE

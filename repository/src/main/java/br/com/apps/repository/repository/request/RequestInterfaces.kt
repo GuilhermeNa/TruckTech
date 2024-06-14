@@ -1,10 +1,10 @@
 package br.com.apps.repository.repository.request
 
 import androidx.lifecycle.LiveData
-import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.model.request.request.PaymentRequest
-import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.repository.util.Response
 
 interface RequestRepositoryI : RequestWriteI, RequestReadI
@@ -15,7 +15,7 @@ interface RequestWriteI {
 
     suspend fun updateEncodedImage(requestId: String, encodedImage: String)
 
-    suspend fun save(dto: PaymentRequestDto): String
+    suspend fun save(dto: TravelRequestDto): String
 
     suspend fun delete(requestId: String, itemIdList: List<String>? = null)
 

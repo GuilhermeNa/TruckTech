@@ -1,4 +1,4 @@
-package br.com.apps.model.model.request.payment_payroll
+package br.com.apps.model.model.request.payment_requests
 
 import java.math.BigDecimal
 import java.time.LocalDateTime

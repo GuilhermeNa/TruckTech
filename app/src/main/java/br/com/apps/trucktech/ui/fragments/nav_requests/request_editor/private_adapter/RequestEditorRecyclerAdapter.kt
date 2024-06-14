@@ -7,8 +7,8 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.request.request.RequestItem
-import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.model.model.request.travel_requests.RequestItem
+import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestSubItemBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl

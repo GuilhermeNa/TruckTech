@@ -1,12 +1,12 @@
 package br.com.apps.model.factory
 
-import br.com.apps.model.dto.request.request.PaymentRequestDto
-import br.com.apps.model.model.request.request.PaymentRequest
+import br.com.apps.model.dto.request.request.TravelRequestDto
+import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Date
 
-object RequestFactory {
+object TravelRequestFactory {
 
     fun createModel(): PaymentRequest? {
 
@@ -20,9 +20,9 @@ object RequestFactory {
         requestNumber: Int?,
         date: LocalDateTime?,
         status: String?
-    ): PaymentRequestDto {
+    ): TravelRequestDto {
 
-        return PaymentRequestDto(
+        return TravelRequestDto(
             masterUid = masterUid,
             truckId = truckId,
             driverId = driverId,

@@ -6,9 +6,9 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.request.request.PaymentRequest
-import br.com.apps.model.model.request.request.PaymentRequestStatusType
-import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
+import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response

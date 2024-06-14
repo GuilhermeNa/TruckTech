@@ -6,7 +6,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
-import br.com.apps.model.model.payroll.TravelAdvance
+import br.com.apps.model.model.payroll.TravelAid
 import br.com.apps.repository.repository.advance.AdvanceRepository
 import br.com.apps.repository.repository.cost_help.CostHelpRepository
 import br.com.apps.repository.repository.loan.LoanRepository
@@ -77,7 +77,7 @@ class DiscountViewModel(
         }
     }
 
-    private suspend fun loadCostHelpData(): List<TravelAdvance> {
+    private suspend fun loadCostHelpData(): List<TravelAid> {
         val response =
             costHelpRepository.getCostHelpByDriverIdAndIsNotDiscountedYet(employeeId)
                 .asFlow().first()
@@ -117,7 +117,7 @@ class DiscountViewModel(
 }
 
 data class DiscountFData(
-    val costHelps: List<TravelAdvance>,
+    val costHelps: List<TravelAid>,
     val advances: List<Advance>,
     val loans: List<Loan>
 )

@@ -10,8 +10,8 @@ import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
-import br.com.apps.model.dto.payroll.TravelAdvanceDto
-import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.dto.payroll.TravelAidDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.dto.travel.FreightDto
@@ -31,9 +31,9 @@ import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
-import br.com.apps.model.model.payroll.TravelAdvance
-import br.com.apps.model.model.request.request.PaymentRequest
-import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.payroll.TravelAid
+import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
@@ -138,7 +138,7 @@ fun QuerySnapshot.toRequestList(): List<PaymentRequest> {
 }
 
 fun DocumentSnapshot.toRequestObject(): PaymentRequest {
-    return this.toObject(PaymentRequestDto::class.java)?.toModel()
+    return this.toObject(TravelRequestDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toRequestObject: ($this)")
 }
 
@@ -223,13 +223,13 @@ fun DocumentSnapshot.toCommonUserObject(): CommonUser {
     return this.toObject(CommonUserDto::class.java)?.toModel() as CommonUser
 }
 
-fun QuerySnapshot.toCostHelpList(): List<TravelAdvance> {
+fun QuerySnapshot.toTravelAidList(): List<TravelAid> {
     return this.mapNotNull { document ->
-        document.toCostHelpObject()
+        document.toTravelAidObject()
     }
 }
 
-fun DocumentSnapshot.toCostHelpObject(): TravelAdvance {
-    return this.toObject(TravelAdvanceDto::class.java)?.toModel()
-        ?: throw ConversionException("ConversionExpression, toCostHelpObject: ($this)")
+fun DocumentSnapshot.toTravelAidObject(): TravelAid {
+    return this.toObject(TravelAidDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toTravelAidObject: ($this)")
 }

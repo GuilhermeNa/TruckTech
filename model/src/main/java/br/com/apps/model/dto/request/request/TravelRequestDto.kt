@@ -2,7 +2,7 @@ package br.com.apps.model.dto.request.request
 
 import java.util.Date
 
-data class PaymentRequestDto(
+data class TravelRequestDto(
     val masterUid: String? = null,
     var id: String? = null,
     val truckId: String? = null,

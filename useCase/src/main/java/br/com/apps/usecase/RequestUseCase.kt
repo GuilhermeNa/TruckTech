@@ -1,11 +1,11 @@
 package br.com.apps.usecase
 
-import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.request.request.PaymentRequest
-import br.com.apps.model.model.request.request.PaymentRequestStatusType
-import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
+import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.repository.request.RequestRepository
@@ -23,7 +23,7 @@ class RequestUseCase(
     private val repository: RequestRepository,
     private val userRepository: UserRepository,
     private val userUseCase: UserUseCase
-) : CredentialsValidatorI<PaymentRequestDto> {
+) : CredentialsValidatorI<TravelRequestDto> {
 
     fun mergeRequestData(
         requestList: List<PaymentRequest>,
@@ -37,27 +37,27 @@ class RequestUseCase(
         }
     }
 
-    suspend fun createRequest(dto: PaymentRequestDto, uid: String): String {
+    suspend fun createRequest(dto: TravelRequestDto, uid: String): String {
         dto.requestNumber = userRepository.getUserRequestNumber(uid)
         val id = repository.save(dto)
         userRepository.updateRequestNumber(uid)
         return id
     }
 
-    suspend fun delete(permission: PermissionLevelType, dto: PaymentRequestDto) {
+    suspend fun delete(permission: PermissionLevelType, dto: TravelRequestDto) {
         val id = dto.id ?: throw NullPointerException(EMPTY_ID)
         val itemsId = dto.itemsList?.mapNotNull { it.id }
         validatePermission(permission, dto)
         repository.delete(id, itemsId)
     }
 
-    suspend fun save(permission: PermissionLevelType, dto: PaymentRequestDto) {
+    suspend fun save(permission: PermissionLevelType, dto: TravelRequestDto) {
         if (!dto.validateFields()) throw InvalidParameterException("Invalid Request for saving")
         validatePermission(permission, dto)
         repository.save(dto)
     }
 
-    override fun validatePermission(permission: PermissionLevelType, dto: PaymentRequestDto) {
+    override fun validatePermission(permission: PermissionLevelType, dto: TravelRequestDto) {
         val status = dto.status?.let { PaymentRequestStatusType.getType(it) }
             ?: throw InvalidParameterException("Status is null")
 
@@ -69,7 +69,7 @@ class RequestUseCase(
 
     suspend fun deleteItem(
         permission: PermissionLevelType,
-        dto: PaymentRequestDto,
+        dto: TravelRequestDto,
         itemId: String
     ) {
         val id = dto.id ?: throw NullPointerException(EMPTY_ID)
@@ -79,7 +79,7 @@ class RequestUseCase(
 
     suspend fun updateEncodedImage(
         permission: PermissionLevelType,
-        dto: PaymentRequestDto,
+        dto: TravelRequestDto,
         encodedImage: String
     ) {
         val id = dto.id ?: throw NullPointerException(EMPTY_ID)
