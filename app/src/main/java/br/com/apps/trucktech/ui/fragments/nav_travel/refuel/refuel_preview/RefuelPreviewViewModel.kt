@@ -5,14 +5,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Refuel
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.usecase.RefuelUseCase
 import kotlinx.coroutines.launch
 
 class RefuelPreviewViewModel(
-    private val refuelId: String,
-    private val repository: RefuelRepository
+    private val vmData: RefuelPreviewVmData,
+    private val repository: RefuelRepository,
+    private val useCase: RefuelUseCase
 ) : ViewModel() {
 
     /**
@@ -21,6 +25,9 @@ class RefuelPreviewViewModel(
      */
     private val _data = MutableLiveData<Response<Refuel>>()
     val data get() = _data
+
+    private val _writeAuth = MutableLiveData<Boolean>()
+    val writeAuth get() = _writeAuth
 
     /**
      * LiveData with a dark layer state, used when dialog is requested.
@@ -38,8 +45,16 @@ class RefuelPreviewViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.getRefuelById(refuelId, true).asFlow().collect {
-                _data.value = it
+            repository.getRefuelById(vmData.refuelId, true).asFlow().collect { response ->
+                _data.value = when (response) {
+                    is Response.Error -> response
+                    is Response.Success -> {
+                        response.data?.let { refuel ->
+                            _writeAuth.value = !refuel.isValid
+                            Response.Success(refuel)
+                        } ?: Response.Error(NullPointerException())
+                    }
+                }
             }
         }
     }
@@ -47,9 +62,11 @@ class RefuelPreviewViewModel(
     fun delete() =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                repository.delete(refuelId)
+                val dto = (_data.value as Response.Success).data!!.toDto()
+                useCase.delete(vmData.permission, dto)
                 emit(Response.Success())
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(Response.Error(e))
             }
         }
@@ -69,3 +86,8 @@ class RefuelPreviewViewModel(
     }
 
 }
+
+data class RefuelPreviewVmData(
+    val refuelId: String,
+    val permission: PermissionLevelType
+)

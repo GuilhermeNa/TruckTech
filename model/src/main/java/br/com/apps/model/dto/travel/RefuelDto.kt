@@ -16,12 +16,17 @@ data class RefuelDto(
     val valuePerLiter: Double? = null,
     val amountLiters: Double? = null,
     val totalValue: Double? = null,
+
     @field:JvmField
-    val isCompleteRefuel: Boolean? = null
+    val isCompleteRefuel: Boolean? = null,
+
+    @field:JvmField
+    var isValid: Boolean? = null
+
 ) {
 
     fun validateFields(): Boolean {
-        var isValid = true
+        var areFieldsValid = true
 
         if (masterUid == null ||
             truckId == null ||
@@ -33,12 +38,13 @@ data class RefuelDto(
             valuePerLiter == null ||
             amountLiters == null ||
             totalValue == null ||
-            isCompleteRefuel == null
+            isCompleteRefuel == null ||
+            isValid == null
         ) {
-            isValid = false
+            areFieldsValid = false
         }
 
-        return isValid
+        return areFieldsValid
     }
 
 }

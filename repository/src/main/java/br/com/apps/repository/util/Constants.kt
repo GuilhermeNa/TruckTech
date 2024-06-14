@@ -20,13 +20,15 @@ const val IS_PAID = "isPaid"
 
 const val REQUEST_ID = "requestId"
 
-const val PAID_BY_EMPLOYEE = "paidByEmployee"
+const val PAID_BY_EMPLOYEE = "isPaidByEmployee"
 
-const val ALREADY_REFUNDED = "alreadyRefunded"
+const val ALREADY_REFUNDED = "isAlreadyRefunded"
 
 const val IS_COMMISSION_PAID = "isCommissionPaid"
 
 const val LABEL_TYPE = "type"
+
+const val IS_VALID = "isValid"
 
 const val LABEL_IS_OPERATIONAL = "isOperational"
 
@@ -99,6 +101,8 @@ internal const val FIRESTORE_COLLECTION_ADMIN = "adminEmployee"
 internal const val FIRESTORE_COLLECTION_BANK = "bankAccount"
 
 internal const val FIRESTORE_COLLECTION_CUSTOMER = "customers"
+
+internal const val FIRESTORE_COLLECTION_COST_HELP = "cost_helps"
 
 //---------------------------------------------------------------------------------------------//
 // COMMON

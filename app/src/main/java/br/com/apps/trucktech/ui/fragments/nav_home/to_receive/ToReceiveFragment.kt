@@ -45,6 +45,7 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentToReceiveToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentToReceiveToolbar.toolbarText,
@@ -55,7 +56,10 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
 
     private fun initPaymentsPanel() {
         binding.fragmentToReceivePanelPayments.apply {
-            panelToReceiveFragmentPaymentsImage.loadImageThroughUrl(viewModel.paymentsUrlImage, requireContext())
+            panelToReceiveFragmentPaymentsImage.loadImageThroughUrl(
+                viewModel.paymentsUrlImage,
+                requireContext()
+            )
             panelToReceiveFragmentCard.setOnClickListener {
                 it.navigateTo(ToReceiveFragmentDirections.actionToReceiveFragmentToPaymentFragment())
             }
@@ -64,7 +68,10 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
 
     private fun initRefundsPanel() {
         binding.fragmentToReceivePanelRefunds.apply {
-            panelToReceiveFragmentRefundImage.loadImageThroughUrl(viewModel.refundsUrlImage, requireContext())
+            panelToReceiveFragmentRefundImage.loadImageThroughUrl(
+                viewModel.refundsUrlImage,
+                requireContext()
+            )
             panelToReceiveFragmentRefundCard.setOnClickListener {
                 it.navigateTo(ToReceiveFragmentDirections.actionToReceiveFragmentToRefundFragment())
             }
@@ -73,7 +80,10 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
 
     private fun initDiscountsPanel() {
         binding.fragmentToReceivePanelDiscounts.apply {
-            panelToReceiveFragmentDiscountsImage.loadImageThroughUrl(viewModel.discountsUrlImage, requireContext())
+            panelToReceiveFragmentDiscountsImage.loadImageThroughUrl(
+                viewModel.discountsUrlImage,
+                requireContext()
+            )
             panelToReceiveFragmentDiscountsCard.setOnClickListener {
                 it.navigateTo(ToReceiveFragmentDirections.actionToReceiveFragmentToDiscountFragment())
             }
@@ -88,8 +98,5 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
         super.onDestroyView()
         _binding = null
     }
-
-
-
 
 }

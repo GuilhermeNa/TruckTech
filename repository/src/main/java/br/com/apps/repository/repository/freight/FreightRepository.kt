@@ -31,6 +31,12 @@ class FreightRepository(
     override suspend fun getFreightById(freightId: String, flow: Boolean) =
         read.getFreightById(freightId, flow)
 
+    override suspend fun getFreightListByDriverIdAndIsNotPaidYet(
+        driverId: String,
+        flow: Boolean
+    ) =
+        read.getFreightListByDriverIdAndIsNotPaidYet(driverId, flow)
+
     override suspend fun getFreightListByDriverIdsAndPaymentStatus(
         driverIdList: List<String>,
         isPaid: Boolean,
@@ -44,6 +50,5 @@ class FreightRepository(
         flow: Boolean
     ) =
         read.getFreightListByDriverIdAndPaymentStatus(driverId, isPaid, flow)
-
 
 }

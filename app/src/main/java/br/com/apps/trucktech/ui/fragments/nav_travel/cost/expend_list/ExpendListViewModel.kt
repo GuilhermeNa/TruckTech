@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.ui.fragments.nav_travel.cost.costs_list
+package br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

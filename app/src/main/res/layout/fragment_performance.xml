@@ -58,9 +58,11 @@
         android:id="@+id/layout_error"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
+        android:paddingHorizontal="16dp"
         android:gravity="center"
         android:orientation="vertical"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
         android:visibility="gone">
 
         <TextView

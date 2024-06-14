@@ -20,20 +20,23 @@ data class ExpendDto(
     @field:JvmField
     var isPaidByEmployee: Boolean? = null,
     @field:JvmField
-    var isAlreadyRefunded: Boolean? = null
+    var isAlreadyRefunded: Boolean? = null,
+    @field:JvmField
+    var isValid: Boolean? = null
 
 ) {
 
     fun validateFields(): Boolean {
-        var isValid = true
+        var areFieldsValid = true
 
-        if (masterUid == null || truckId == null || travelId == null || driverId == null || labelId == null ||
-            company == null || date == null || value == null || isPaidByEmployee == null || isAlreadyRefunded == null
+        if (masterUid == null || truckId == null || travelId == null || driverId == null ||
+            labelId == null || company == null || date == null || value == null || isPaidByEmployee == null ||
+            isAlreadyRefunded == null || isValid == null
         ) {
-            isValid = false
+            areFieldsValid = false
         }
 
-        return isValid
+        return areFieldsValid
     }
 
 }

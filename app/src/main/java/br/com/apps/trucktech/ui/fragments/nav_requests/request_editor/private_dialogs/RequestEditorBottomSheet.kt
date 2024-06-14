@@ -49,7 +49,6 @@ class RequestEditorBottomSheet(
             dismiss()
         }
 
-      // Irei definir meu codigo aqui, high order functions, etc...
     }
 
     //---------------------------------------------------------------------------------------------//

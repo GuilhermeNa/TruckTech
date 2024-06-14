@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.ui.fragments.nav_documents.documents_list
+package br.com.apps.trucktech.ui.fragments.nav_travel.travels
 
 import android.util.Log
 import android.view.View.GONE
@@ -13,9 +13,16 @@ class TravelsListState(private val binding: FragmentTravelsBinding) : StateI {
         binding.travelsFragmentRecycler.visibility = GONE
         binding.fragTravelFab.visibility = GONE
         binding.fragTravelListDarkLayer.visibility = GONE
-        binding.fragTravelsBoxError.layout.visibility = GONE
-        binding.fragTravelsBoxError.error.visibility = GONE
-        binding.fragTravelsBoxError.empty.visibility = GONE
+        binding.fragTravelsBoxError.apply {
+            layout.visibility = GONE
+            error.visibility = GONE
+            empty.visibility = GONE
+        }
+        binding.boxLoading.apply {
+            layout.visibility = GONE
+            darkLayer.visibility = GONE
+            progressBar.visibility = GONE
+        }
     }
 
     override fun showLoaded() {
@@ -45,6 +52,18 @@ class TravelsListState(private val binding: FragmentTravelsBinding) : StateI {
         binding.fragTravelsBoxError.empty.visibility = GONE
         Log.e(TAG_DEBUG, e.message.toString())
         e.printStackTrace()
+    }
+
+    override fun showDeleting() {
+        binding.boxLoading.apply {
+            layout.visibility = VISIBLE
+        }
+    }
+
+    override fun showDeleted() {
+        binding.boxLoading.apply {
+            layout.visibility = GONE
+        }
     }
 
 }

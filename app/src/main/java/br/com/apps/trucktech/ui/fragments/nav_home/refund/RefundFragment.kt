@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.databinding.FragmentRefundBinding
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toBold
@@ -18,6 +17,7 @@ import br.com.apps.trucktech.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.expressions.toUnderline
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.public_adapters.ToReceiveRecyclerAdapter
+import br.com.apps.trucktech.util.state.State
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -57,6 +57,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentRefundToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentRefundToolbar.toolbarText,
@@ -71,19 +72,57 @@ class RefundFragment : BaseFragmentWithToolbar() {
      *   - Observes expendData for update the recyclerView and bind
      */
     private fun initStateManager() {
-        viewModel.expendData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    response.exception.printStackTrace()
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                }
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            data?.let {
+                adapter?.update(it)
+                bindText(it)
+            }
+        }
 
-                is Response.Success -> {
-                    response.data?.let { dataSet ->
-                        adapter?.update(dataSet)
-                        bindText(dataSet)
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is State.Loading -> {
+                    binding.apply {
+                        layout.visibility = View.GONE
+
+                        layoutError.apply {
+                            layout.visibility = View.GONE
+                            error.visibility = View.GONE
+                            empty.visibility = View.GONE
+                        }
                     }
                 }
+
+                is State.Loaded -> {
+                    binding.layout.visibility = View.VISIBLE
+                    binding.layoutError.apply {
+                        layout.visibility = View.GONE
+                        error.visibility = View.GONE
+                        empty.visibility = View.GONE
+                    }
+                }
+
+                is State.Empty -> {
+                    binding.layout.visibility = View.GONE
+                    binding.layoutError.apply {
+                        layout.visibility = View.VISIBLE
+                        error.visibility = View.GONE
+                        empty.visibility = View.VISIBLE
+                    }
+                }
+
+                is State.Error -> {
+                    state.error.printStackTrace()
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                    binding.layout.visibility = View.GONE
+                    binding.layoutError.apply {
+                        layout.visibility = View.VISIBLE
+                        error.visibility = View.VISIBLE
+                        empty.visibility = View.GONE
+                    }
+                }
+
+                else -> {}
             }
         }
     }

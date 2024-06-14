@@ -5,28 +5,35 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.repository.util.Response
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.freight.FreightRepository
+import br.com.apps.repository.util.Response
+import br.com.apps.usecase.FreightUseCase
 import kotlinx.coroutines.launch
 
 class FreightPreviewViewModel(
-    private val freightId: String,
-    private val repository: FreightRepository
+    private val vmData: FreightPreviewVmData,
+    private val repository: FreightRepository,
+    private val useCase: FreightUseCase
 ) : ViewModel() {
 
     /**
      * LiveData holding the response data of type [Response] with a [Freight]
      * to be displayed on screen.
      */
-    private val _freightData = MutableLiveData<Response<Freight>>()
-    val freightData get() = _freightData
+    private val _data = MutableLiveData<Response<Freight>>()
+    val data get() = _data
 
     /**
      * LiveData with a dark layer state, used when dialog is requested.
      */
     private var _darkLayer = MutableLiveData(false)
     val darkLayer get() = _darkLayer
+
+    private val _writeAuth = MutableLiveData<Boolean>()
+    val writeAuth get() = _writeAuth
 
     //---------------------------------------------------------------------------------------------//
     // -
@@ -38,17 +45,27 @@ class FreightPreviewViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.getFreightById(freightId, true).asFlow().collect {
-                _freightData.value = it
+            repository.getFreightById(vmData.freightId, true).asFlow().collect { response ->
+                _data.value = when (response) {
+                    is Response.Error -> response
+                    is Response.Success -> {
+                        response.data?.let { freight ->
+                            _writeAuth.value = !freight.isValid
+                            Response.Success(freight)
+                        } ?: Response.Error(NullPointerException())
+                    }
+                }
             }
         }
     }
 
     fun delete() = liveData<Response<Unit>>(viewModelScope.coroutineContext) {
         try {
-            repository.delete(freightId)
+            val dto = (_data.value as Response.Success).data!!.toDto()
+            useCase.delete(vmData.permission, dto)
             emit(Response.Success())
         } catch (e: Exception) {
+            e.printStackTrace()
             emit(Response.Error(e))
         }
     }
@@ -68,3 +85,8 @@ class FreightPreviewViewModel(
     }
 
 }
+
+data class FreightPreviewVmData(
+    val freightId: String,
+    val permission: PermissionLevelType
+)

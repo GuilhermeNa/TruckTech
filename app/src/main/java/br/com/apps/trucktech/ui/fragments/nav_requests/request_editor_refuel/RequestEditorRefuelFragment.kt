@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.util.FAILED_TO_SAVE
@@ -35,13 +34,14 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: RequestEditorRefuelFragmentArgs by navArgs()
-    private val idHolder by lazy {
-        IdHolder(
+    private val vmData by lazy {
+        RequestEditorRefuelVmData(
             requestId = args.requestId,
-            refuelId = args.refuelId
+            refuelReqId = args.refuelId,
+            permission = mainActVM.loggedUser.permissionLevelType
         )
     }
-    private val viewModel: RequestEditorRefuelViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: RequestEditorRefuelViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -68,6 +68,7 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentRequestEditorFreightToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentRequestEditorFreightToolbar.toolbarText,
@@ -82,18 +83,18 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
      *   - Observes refuelData for bind.
      */
     private fun initStateManager() {
-        viewModel.refuelData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {}
-                is Response.Success -> response.data?.let { bind() }
+                is Response.Success -> response.data?.let { bind(it) }
             }
         }
 
     }
 
-    fun bind() {
+    fun bind(requestItem: RequestItem) {
         binding.apply {
-            viewModel.requestItem.let {
+            requestItem.let {
                 it.kmMarking?.let { km ->
                     fragmentRequestEditorKm.setText(km.toString())
                 }

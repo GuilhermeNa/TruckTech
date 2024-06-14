@@ -1,32 +1,40 @@
 package br.com.apps.model.mapper
 
 import br.com.apps.model.dto.travel.FreightDto
+import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.toDate
 import br.com.apps.model.toLocalDateTime
 import java.math.BigDecimal
 
 fun FreightDto.toModel(): Freight {
-    return Freight(
-        masterUid = this.masterUid!!,
-        id = this.id,
-        truckId = this.truckId!!,
-        travelId = this.travelId!!,
-        driverId = this.driverId!!,
-        customerId = this.customerId!!,
-        origin = this.origin!!,
-        destiny = this.destiny!!,
-        cargo = this.cargo!!,
-        weight = this.weight?.toBigDecimal()!!,
-        value = this.value?.toBigDecimal(),
-        breakDown = this.breakDown?.let { BigDecimal(it) },
-        loadingDate = this.loadingDate?.toLocalDateTime(),
-        dailyValue = this.dailyValue?.let { BigDecimal(it) },
-        daily = this.daily,
-        dailyTotalValue = this.dailyTotalValue?.let { BigDecimal(it) },
-        commissionPercentual = this.commissionPercentual?.let { BigDecimal(it) }!!,
-        isCommissionPaid = this.isCommissionPaid!!
-    )
+
+    if (this.validateFields()) {
+        return Freight(
+            masterUid = this.masterUid!!,
+            id = this.id,
+            truckId = this.truckId!!,
+            travelId = this.travelId!!,
+            driverId = this.driverId!!,
+            customerId = this.customerId!!,
+            origin = this.origin!!,
+            destiny = this.destiny!!,
+            cargo = this.cargo!!,
+            weight = this.weight?.toBigDecimal()!!,
+            value = this.value?.toBigDecimal(),
+            breakDown = this.breakDown?.let { BigDecimal(it) },
+            loadingDate = this.loadingDate?.toLocalDateTime(),
+            dailyValue = this.dailyValue?.let { BigDecimal(it) },
+            daily = this.daily,
+            dailyTotalValue = this.dailyTotalValue?.let { BigDecimal(it) },
+            commissionPercentual = this.commissionPercentual?.let { BigDecimal(it) }!!,
+            isCommissionPaid = this.isCommissionPaid!!,
+            isValid = this.isValid!!
+        )
+    }
+
+    throw CorruptedFileException("FreightMapper, toModel ($this)")
+
 }
 
 fun Freight.toDto(): FreightDto {
@@ -48,7 +56,7 @@ fun Freight.toDto(): FreightDto {
         daily = this.daily,
         dailyTotalValue = this.dailyTotalValue?.toDouble(),
         commissionPercentual = this.commissionPercentual.toDouble(),
-        isCommissionPaid = this.isCommissionPaid
-
+        isCommissionPaid = this.isCommissionPaid,
+        isValid = this.isValid
     )
 }

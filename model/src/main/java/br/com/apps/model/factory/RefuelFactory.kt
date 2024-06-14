@@ -21,7 +21,8 @@ object RefuelFactory {
                 amountLiters = BigDecimal(viewDto.amountLiters!!),
                 valuePerLiter = BigDecimal(viewDto.valuePerLiter!!),
                 totalValue = BigDecimal(viewDto.totalValue!!),
-                isCompleteRefuel = viewDto.isCompleteRefuel!!
+                isCompleteRefuel = viewDto.isCompleteRefuel!!,
+                isValid = viewDto.isValid!!
             )
         }
         throw InvalidParameterException("RefuelFactory, create: ($viewDto)")
@@ -35,6 +36,7 @@ object RefuelFactory {
         viewDto.amountLiters?.let { refuel.amountLiters = BigDecimal(it) }
         viewDto.totalValue?.let { refuel.totalValue = BigDecimal(it) }
         viewDto.isCompleteRefuel?.let { refuel.isCompleteRefuel = it }
+        viewDto.isValid?.let { refuel.isValid = it }
     }
 
 }

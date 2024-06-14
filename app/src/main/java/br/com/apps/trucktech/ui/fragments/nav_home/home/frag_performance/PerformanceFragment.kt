@@ -124,6 +124,8 @@ class PerformanceFragment : Fragment() {
                         error.visibility = View.VISIBLE
                     }
                 }
+
+                else -> {}
             }
         }
 

@@ -106,6 +106,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentRecordsToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentRecordsToolbar.toolbarText,
@@ -119,17 +120,14 @@ class RecordsFragment : BaseFragmentWithToolbar() {
             when (viewModel.viewPagerPosition.value) {
 
                 0 -> {
-                    clearMenu()
                     view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToFreightEditorFragment(null, args.travelId))
                 }
 
                 1 -> {
-                    clearMenu()
                     view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToRefuelEditorFragment(null, args.travelId))
                 }
 
                 2 -> {
-                    clearMenu()
                     view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToCostEditorFragment(null, args.travelId))
                 }
 

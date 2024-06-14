@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_editor
+package br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,11 +10,13 @@ import br.com.apps.model.factory.ExpendFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
+import br.com.apps.usecase.ExpendUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -25,7 +27,8 @@ import java.time.ZoneId
 class ExpendEditorViewModel(
     private val vmData: ExpendEVMData,
     private val expendRepository: ExpendRepository,
-    private val labelRepository: LabelRepository
+    private val labelRepository: LabelRepository,
+    private val useCase: ExpendUseCase
 ) : ViewModel() {
 
     private var isEditing: Boolean = vmData.expendId?.let { true } ?: false
@@ -134,9 +137,10 @@ class ExpendEditorViewModel(
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = createOrUpdate(viewDto)
-                expendRepository.save(dto)
+                useCase.save(vmData.permission, dto)
                 emit(Response.Success())
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(Response.Error(e))
             }
         }
@@ -161,6 +165,7 @@ class ExpendEditorViewModel(
                     travelId = vmData.travelId
                     driverId = vmData.driverId
                     isAlreadyRefunded = false
+                    isValid = false
                 }
                 ExpendFactory.create(viewDto).toDto()
             }
@@ -174,7 +179,8 @@ class ExpendEVMData(
     val truckId: String,
     val driverId: String,
     val travelId: String,
-    val expendId: String? = null
+    val expendId: String? = null,
+    val permission: PermissionLevelType
 )
 
 class ExpendEFData(

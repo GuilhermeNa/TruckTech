@@ -9,6 +9,7 @@ import java.security.InvalidParameterException
 object ExpendFactory {
 
     fun create(viewDto: ExpendDto): Expend {
+
         if (viewDto.validateFields()) {
             return Expend(
                 masterUid = viewDto.masterUid!!,
@@ -23,9 +24,11 @@ object ExpendFactory {
                 description = viewDto.description!!,
                 value = BigDecimal(viewDto.value!!),
                 isPaidByEmployee = viewDto.isPaidByEmployee!!,
-                isAlreadyRefunded = false
+                isAlreadyRefunded = viewDto.isAlreadyRefunded!!,
+                isValid = viewDto.isValid!!
             )
         }
+
         throw InvalidParameterException("ExpendFactory, create: ($viewDto)")
     }
 
@@ -37,6 +40,8 @@ object ExpendFactory {
         viewDto.value?.let { expend.value = BigDecimal(it) }
         viewDto.isPaidByEmployee?.let { expend.isPaidByEmployee = it }
         viewDto.isAlreadyRefunded?.let { expend.isAlreadyRefunded = it }
+        viewDto.isValid?.let { expend.isValid = it }
+        expend.label = viewDto.label
     }
 
 }

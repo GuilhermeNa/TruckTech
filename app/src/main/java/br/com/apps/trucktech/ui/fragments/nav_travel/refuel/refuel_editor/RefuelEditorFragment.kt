@@ -16,8 +16,8 @@ import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
-import br.com.apps.trucktech.R
 import br.com.apps.repository.util.TAG_DEBUG
+import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRefuelEditorBinding
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.popBackStack
@@ -43,7 +43,8 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
             truckId = mainActVM.loggedUser.truckId,
             travelId = args.travelId,
             driverId = mainActVM.loggedUser.driverId,
-            refuelId = args.refuelId
+            refuelId = args.refuelId,
+            permission = mainActVM.loggedUser.permissionLevelType
         )
     }
     private val viewModel: RefuelEditorViewModel by viewModel { parametersOf(vmData) }
@@ -73,6 +74,7 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentRefuelEditorToolbar.toolbar,
             menuId = R.menu.menu_editor,
             toolbarTextView = binding.fragmentRefuelEditorToolbar.toolbarText,

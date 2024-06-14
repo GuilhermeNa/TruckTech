@@ -6,12 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.databinding.FragmentDiscountBinding
-import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.AdvanceRecyclerAdapter
+import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.CostHelpRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.LoanRecyclerAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -22,10 +20,12 @@ class DiscountFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentDiscountBinding? = null
     private val binding get() = _binding!!
+    private var stateHandler: DiscountState? = null
 
     private val employeeId by lazy { mainActVM.loggedUser.driverId }
     private val viewModel: DiscountViewModel by viewModel { parametersOf(employeeId) }
 
+    private var costHelpAdapter: CostHelpRecyclerAdapter? = null
     private var advanceAdapter: AdvanceRecyclerAdapter? = null
     private var loanAdapter: LoanRecyclerAdapter? = null
 
@@ -47,6 +47,8 @@ class DiscountFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        stateHandler = DiscountState(binding)
+        initPanelCostHelp()
         initPanelAdvance()
         initPanelLoan()
         initStateManager()
@@ -55,6 +57,7 @@ class DiscountFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentDiscountToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentDiscountToolbar.toolbarText,
@@ -70,35 +73,48 @@ class DiscountFragment : BaseFragmentWithToolbar() {
      *   - Observes loanData for update the recyclerView
      */
     private fun initStateManager() {
-        viewModel.advanceData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    response.exception.printStackTrace()
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                }
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            data?.apply {
+                if(costHelps.isNotEmpty()) costHelpAdapter?.update(costHelps)
 
-                is Response.Success -> {
-                    response.data?.let { dataSet ->
-                        advanceAdapter?.update(dataSet)
-                    }
-                }
+                if (advances.isNotEmpty()) advanceAdapter?.update(advances)
+
+                if (loans.isNotEmpty()) loanAdapter?.update(loans)
+
             }
         }
 
-        viewModel.loanData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    response.exception.printStackTrace()
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is DiscountFState.Loading -> stateHandler?.showLoading()
+
+                is DiscountFState.Loaded -> {
+                    if (state.hasAdvances) stateHandler?.showAdvances()
+                    else stateHandler?.hideAdvances()
+
+                    if (state.hasLoans) stateHandler?.showLoans()
+                    else stateHandler?.hideLoans()
+
+                    if(state.hasCostHelps) stateHandler?.showCostHelps()
+                    else stateHandler?.hideCostHelps()
                 }
 
-                is Response.Success -> {
-                    response.data?.let { dataSet ->
-                        loanAdapter?.update(dataSet)
-                    }
+                is DiscountFState.Empty -> stateHandler?.showEmpty()
+
+                is DiscountFState.Error -> {
+                    state.error.printStackTrace()
+                    stateHandler?.showError(state.error)
                 }
+
             }
         }
+
+    }
+
+    private fun initPanelCostHelp() {
+        val recyclerView = binding.fragmentDiscountPanelCostHelp.panelCostHelpRecycler
+        costHelpAdapter = CostHelpRecyclerAdapter(requireContext())
+        recyclerView.adapter = costHelpAdapter
     }
 
     /**
@@ -128,6 +144,8 @@ class DiscountFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        stateHandler = null
+        costHelpAdapter = null
         advanceAdapter = null
         loanAdapter = null
         _binding = null

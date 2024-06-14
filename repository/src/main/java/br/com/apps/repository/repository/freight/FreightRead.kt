@@ -9,6 +9,7 @@ import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.DRIVER_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_FREIGHTS
 import br.com.apps.repository.util.IS_COMMISSION_PAID
+import br.com.apps.repository.util.IS_VALID
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TRAVEL_ID
 import br.com.apps.repository.util.onComplete
@@ -17,7 +18,7 @@ import br.com.apps.repository.util.toFreightList
 import br.com.apps.repository.util.toFreightObject
 import com.google.firebase.firestore.FirebaseFirestore
 
-class FreightRead(fireStore: FirebaseFirestore): FreightReadI {
+class FreightRead(fireStore: FirebaseFirestore) : FreightReadI {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_FREIGHTS)
 
@@ -134,6 +135,19 @@ class FreightRead(fireStore: FirebaseFirestore): FreightReadI {
 
         return if (flow) listener.onSnapShot { it.toFreightObject() }
         else listener.onComplete { it.toFreightObject() }
+    }
+
+    override suspend fun getFreightListByDriverIdAndIsNotPaidYet(
+        driverId: String,
+        flow: Boolean
+    ): LiveData<Response<List<Freight>>> {
+        val listener = collection
+            .whereEqualTo(DRIVER_ID, driverId)
+            .whereEqualTo(IS_VALID, true)
+            .whereEqualTo(IS_COMMISSION_PAID, false)
+
+        return if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
     }
 
 }

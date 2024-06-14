@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
-import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.databinding.FragmentPaymentBinding
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toBold
@@ -18,6 +19,7 @@ import br.com.apps.trucktech.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.expressions.toUnderline
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.public_adapters.ToReceiveRecyclerAdapter
+import br.com.apps.trucktech.util.state.State
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -57,6 +59,7 @@ class PaymentFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentPaymentToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentPaymentToolbar.toolbarText,
@@ -71,19 +74,66 @@ class PaymentFragment : BaseFragmentWithToolbar() {
      *   - Observes freightData for update the recyclerView and bind
      */
     private fun initStateManager() {
-        viewModel.freightData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    response.exception.printStackTrace()
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            data?.let {
+                bindText(it)
+                adapter?.update(it)
+            }
+        }
+
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is State.Loading -> {
+                    binding.apply {
+                        layout.visibility = GONE
+
+                        layoutError.apply {
+                            layout.visibility = GONE
+                            error.visibility = GONE
+                            empty.visibility = GONE
+                        }
+                    }
+
                 }
 
-                is Response.Success -> {
-                    response.data?.let { dataSet ->
-                        bindText(dataSet)
-                        adapter?.update(dataSet)
+                is State.Loaded -> {
+                    binding.apply {
+                        layout.visibility = VISIBLE
+
+                        binding.layoutError.apply {
+                            layout.visibility = GONE
+                            error.visibility = GONE
+                            empty.visibility = GONE
+                        }
                     }
                 }
+
+                is State.Empty -> {
+                    binding.apply {
+                        layout.visibility = GONE
+
+                        binding.layoutError.apply {
+                            layout.visibility = VISIBLE
+                            error.visibility = GONE
+                            empty.visibility = VISIBLE
+                        }
+                    }
+                }
+
+                is State.Error -> {
+                    state.error.printStackTrace()
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                    binding.apply {
+                        layout.visibility = GONE
+                        binding.layoutError.apply {
+                            layout.visibility = VISIBLE
+                            error.visibility = VISIBLE
+                            empty.visibility = GONE
+                        }
+                    }
+                }
+
+                else -> {}
             }
         }
     }

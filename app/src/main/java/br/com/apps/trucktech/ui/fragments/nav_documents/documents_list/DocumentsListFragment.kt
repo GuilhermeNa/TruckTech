@@ -62,6 +62,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
         initStateManager()
+        initSwipeRefresh()
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -75,6 +76,12 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
         configurator.bottomNavigation(true)
     }
 
+    private fun initSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadData()
+        }
+    }
+
     /**
      * Initializes the state manager and observes [viewModel] data.
      *
@@ -82,6 +89,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
      */
     private fun initStateManager() {
         viewModel.data.observe(viewLifecycleOwner) { response ->
+            binding.swipeRefresh.isRefreshing = false
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> response.data?.let { adapter?.update(it) }
@@ -90,7 +98,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
-                is State.Loading -> {
+                State.Loading -> {
                     binding.apply {
                         freightFragmentRecycler.visibility = GONE
                         fragDocumentBoxEmpty.layout.visibility = GONE
@@ -98,7 +106,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                         fragDocumentBoxEmpty.empty.visibility = GONE
                     }
                 }
-                is State.Loaded -> {
+                State.Loaded -> {
                     binding.apply {
                         freightFragmentRecycler.visibility = VISIBLE
                         fragDocumentBoxEmpty.layout.visibility = GONE
@@ -106,7 +114,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                         fragDocumentBoxEmpty.empty.visibility = GONE
                     }
                 }
-                is State.Empty -> {
+                State.Empty -> {
                     binding.apply {
                         freightFragmentRecycler.visibility = GONE
                         fragDocumentBoxEmpty.layout.visibility = VISIBLE
@@ -122,8 +130,8 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                         fragDocumentBoxEmpty.empty.visibility = GONE
                     }
                 }
-
-
+                State.Deleted -> {}
+                State.Deleting -> {}
             }
         }
     }
@@ -152,6 +160,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.swipeRefresh.isRefreshing = false
         _binding = null
         adapter = null
     }

@@ -10,10 +10,12 @@ import br.com.apps.model.factory.FreightFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.usecase.FreightUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -26,6 +28,7 @@ class FreightEditorViewModel(
     private val vmData: FreightEVMData,
     private val repository: FreightRepository,
     private val customerRepository: CustomerRepository,
+    private val useCase: FreightUseCase,
 ) : ViewModel() {
 
     private var isEditing: Boolean = vmData.freightId?.let { true } ?: false
@@ -147,9 +150,10 @@ class FreightEditorViewModel(
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = createOrUpdate(viewDto)
-                repository.save(dto)
+                useCase.save(vmData.permissionLevel, dto)
                 emit(Response.Success())
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(Response.Error(e))
             }
         }
@@ -160,6 +164,7 @@ class FreightEditorViewModel(
             isCommissionPaid = false
             customerId = data.value!!.customerList.first { it.name == customer }.id
             customer = null
+
         }
 
         return when (isEditing) {
@@ -175,6 +180,7 @@ class FreightEditorViewModel(
                     travelId = vmData.travelId
                     driverId = vmData.driverId
                     commissionPercentual = vmData.commissionPercentual.toDouble()
+                    isValid = false
                 }
                 FreightFactory.create(viewDto).toDto()
             }
@@ -206,5 +212,6 @@ data class FreightEVMData(
     val travelId: String,
     val driverId: String,
     val freightId: String? = null,
-    val commissionPercentual: BigDecimal
+    val commissionPercentual: BigDecimal,
+    val permissionLevel: PermissionLevelType
 )

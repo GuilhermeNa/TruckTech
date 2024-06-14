@@ -5,17 +5,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class RequestEditorViewModel(
-    private val requestId: String,
-    private val repository: RequestRepository
+    private val vmData: RequestEditorVmData,
+    private val repository: RequestRepository,
+    private val useCase: RequestUseCase
 ) : ViewModel() {
 
     private val _boxPaymentImage = MutableLiveData<String>()
@@ -26,7 +31,7 @@ class RequestEditorViewModel(
      * to be displayed on screen.
      */
     private val _data = MutableLiveData<Response<PaymentRequest>>()
-    val requestData get() = _data
+    val data get() = _data
 
     /**
      * LiveData with a dark layer state, used when dialogs and bottom sheets are requested.
@@ -55,7 +60,7 @@ class RequestEditorViewModel(
     private suspend fun loadRequest(): PaymentRequest {
         val deferred = CompletableDeferred<PaymentRequest>()
 
-        repository.getRequestById(requestId).asFlow().first { response ->
+        repository.getRequestById(vmData.requestId).asFlow().first { response ->
             when (response) {
                 is Response.Error -> _data.value = response
                 is Response.Success -> {
@@ -70,7 +75,7 @@ class RequestEditorViewModel(
     }
 
     private suspend fun loadItems(complete: (List<RequestItem>) -> Unit) {
-        repository.getItemListByRequestId(requestId, true).asFlow().collect { response ->
+        repository.getItemListByRequestId(vmData.requestId, true).asFlow().collect { response ->
             when (response) {
                 is Response.Error -> _data.value = response
                 is Response.Success -> {
@@ -83,7 +88,7 @@ class RequestEditorViewModel(
     }
 
     private fun sendResponse(request: PaymentRequest) {
-        if(_boxPaymentImage.value == null) {
+        if (_boxPaymentImage.value == null) {
             request.encodedImage?.let { _boxPaymentImage.value = it }
         }
         _data.value = Response.Success(request)
@@ -92,9 +97,11 @@ class RequestEditorViewModel(
     fun deleteItem(itemId: String) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                repository.deleteItem(requestId, itemId)
+                val dto = getRequestDto()
+                useCase.deleteItem(vmData.permission, dto, itemId)
                 emit(Response.Success())
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(Response.Error(e))
             }
         }
@@ -118,9 +125,19 @@ class RequestEditorViewModel(
     }
 
     suspend fun saveEncodedImage() {
+        val dto = getRequestDto()
         val encodedImage = _boxPaymentImage.value
             ?: throw NullPointerException("Não é possível salvar a imagem, seu valor é nulo")
-        repository.updateEncodedImage(requestId = requestId, encodedImage)
+        useCase.updateEncodedImage(vmData.permission, dto, encodedImage)
+    }
+
+    private fun getRequestDto(): PaymentRequestDto {
+        return (data.value as Response.Success).data!!.toDto()
     }
 
 }
+
+data class RequestEditorVmData(
+    val requestId: String,
+    val permission: PermissionLevelType
+)

@@ -84,6 +84,7 @@ class ReceivableFragment : Fragment() {
                 is State.Loaded -> {}
                 is State.Empty -> {}
                 is State.Error -> {}
+                else -> {}
             }
         }
 

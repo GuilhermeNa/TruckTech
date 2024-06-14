@@ -19,7 +19,7 @@ data class RequestItem(
         return when (type) {
             RequestItemType.REFUEL -> "Abastecimento"
             RequestItemType.COST -> "Despesa"
-            RequestItemType.WALLET -> "Ajuda de custo"
+            RequestItemType.WALLET -> "Vale para viagem"
             else -> throw InvalidTypeException("Fun getDescription needs a valid type")
         }
     }

@@ -27,12 +27,15 @@ data class FreightDto(
 
     @field:JvmField
     var isCommissionPaid: Boolean? = null,
-    var commissionPercentual: Double? = null
+    var commissionPercentual: Double? = null,
+
+    @field:JvmField
+    var isValid: Boolean? = null
 
 ) {
 
     fun validateFields(): Boolean {
-        var isValid = true
+        var areFieldsValid = true
 
         if (masterUid == null ||
             truckId == null ||
@@ -46,12 +49,13 @@ data class FreightDto(
             value == null ||
             loadingDate == null ||
             isCommissionPaid == null ||
-            commissionPercentual == null
+            commissionPercentual == null ||
+            isValid == null
         ) {
-            isValid = false
+            areFieldsValid = false
         }
 
-        return isValid
+        return areFieldsValid
     }
 
 

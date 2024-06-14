@@ -21,6 +21,8 @@ data class Expend(
     @field:JvmField
     var isPaidByEmployee: Boolean,
     @field:JvmField
-    var isAlreadyRefunded: Boolean
+    var isAlreadyRefunded: Boolean,
+    @field:JvmField
+    var isValid: Boolean
 
 )

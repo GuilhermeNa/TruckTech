@@ -52,4 +52,9 @@ class ExpendRepository(
     override suspend fun getExpendById(expendId: String, flow: Boolean) =
         read.getExpendById(expendId, flow)
 
+    override suspend fun getExpendListByDriverIdAndIsNotRefundYet(
+        driverId: String,
+        flow: Boolean
+    ) = read.getExpendListByDriverIdAndIsNotRefundYet(driverId, flow)
+
 }

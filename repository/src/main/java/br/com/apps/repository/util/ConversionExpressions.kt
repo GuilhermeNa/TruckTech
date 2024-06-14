@@ -10,6 +10,7 @@ import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
+import br.com.apps.model.dto.payroll.TravelAdvanceDto
 import br.com.apps.model.dto.request.request.PaymentRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.dto.travel.ExpendDto
@@ -30,6 +31,7 @@ import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
+import br.com.apps.model.model.payroll.TravelAdvance
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.model.model.travel.Expend
@@ -219,4 +221,15 @@ fun DocumentSnapshot.toCustomerObject(): Customer {
 
 fun DocumentSnapshot.toCommonUserObject(): CommonUser {
     return this.toObject(CommonUserDto::class.java)?.toModel() as CommonUser
+}
+
+fun QuerySnapshot.toCostHelpList(): List<TravelAdvance> {
+    return this.mapNotNull { document ->
+        document.toCostHelpObject()
+    }
+}
+
+fun DocumentSnapshot.toCostHelpObject(): TravelAdvance {
+    return this.toObject(TravelAdvanceDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toCostHelpObject: ($this)")
 }

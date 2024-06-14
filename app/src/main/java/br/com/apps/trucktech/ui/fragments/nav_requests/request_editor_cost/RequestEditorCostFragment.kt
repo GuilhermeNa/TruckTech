@@ -2,22 +2,18 @@ package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost
 
 import android.R
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.Label.Companion.getListOfTitles
 import br.com.apps.model.model.request.request.RequestItem
-import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
-import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorCostBinding
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
@@ -34,13 +30,15 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: RequestEditorCostFragmentArgs by navArgs()
-    private val idHolder by lazy {
-        IdHolder(masterUid = mainActVM.loggedUser.masterUid,
+    private val vmData by lazy {
+        RequestEditorCostVmData(
+            masterUid = mainActVM.loggedUser.masterUid,
             requestId = args.requestId,
-            expendId = args.costId
+            costReqId = args.costId,
+            permission = mainActVM.loggedUser.permissionLevelType
         )
     }
-    private val viewModel: RequestEditorCostFragmentViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: RequestEditorCostFragmentViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -67,6 +65,7 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentRequestEditorCostToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentRequestEditorCostToolbar.toolbarText,
@@ -82,26 +81,9 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
      *   - Observes itemData for bind.
      */
     private fun initStateManager() {
-        viewModel.labelData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                    Log.e(TAG_DEBUG, response.exception.message.toString())
-                }
-
-                is Response.Success -> response.data?.let { initAutoCompleteAdapter(it) }
-            }
-        }
-
-        viewModel.itemData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                    Log.e(TAG_DEBUG, response.exception.message.toString())
-                }
-
-                is Response.Success -> response.data?.let { bind() }
-            }
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            data.labels.run { initAutoCompleteAdapter(this) }
+            data.item?.run { bind(this) }
         }
     }
 
@@ -121,9 +103,9 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
 
     }
 
-    fun bind() {
+    fun bind(requestItem: RequestItem) {
         binding.apply {
-            viewModel.requestItem.let { item ->
+            requestItem.let { item ->
                 fragmentRequestEditorCostAutoComplete.setText(viewModel.getLabelDescriptionById())
                 fragmentRequestEditorCostValue.setText(item.value?.toPlainString())
             }

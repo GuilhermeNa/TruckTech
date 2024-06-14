@@ -29,7 +29,10 @@ data class Freight(
 
     @field:JvmField
     var isCommissionPaid: Boolean,
-    var commissionPercentual: BigDecimal
+    var commissionPercentual: BigDecimal,
+
+    @field:JvmField
+    var isValid: Boolean
 
 ) {
 

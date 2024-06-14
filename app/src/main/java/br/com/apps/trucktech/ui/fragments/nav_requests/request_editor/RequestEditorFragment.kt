@@ -30,7 +30,7 @@ import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.ui.activities.CameraActivity
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapters.RequestEditorRecyclerAdapter
+import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapter.RequestEditorRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_dialogs.RequestEditorBottomSheet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -50,8 +50,16 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRequestEditorBinding? = null
     private val binding get() = _binding!!
+
     private val args: RequestEditorFragmentArgs by navArgs()
-    private val viewModel: RequestEditorViewModel by viewModel { parametersOf(args.requestId) }
+    private val vmData by lazy {
+        RequestEditorVmData(
+            requestId = args.requestId,
+            permission = mainActVM.loggedUser.permissionLevelType
+        )
+    }
+    private val viewModel: RequestEditorViewModel by viewModel { parametersOf(vmData) }
+
     private var adapter: RequestEditorRecyclerAdapter? = null
     private val activityResultLauncher =
         registerForActivityResult(
@@ -112,6 +120,7 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentRequestEditorToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentRequestEditorToolbar.toolbarText,
@@ -270,7 +279,7 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
      *
      */
     private fun initStateManager() {
-        viewModel.requestData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> {

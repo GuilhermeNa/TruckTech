@@ -50,7 +50,8 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
             masterUid = mainActVM.loggedUser.masterUid,
             uid = mainActVM.loggedUser.uid,
             truckId = mainActVM.loggedUser.truckId,
-            driverId = mainActVM.loggedUser.driverId
+            driverId = mainActVM.loggedUser.driverId,
+            permission = mainActVM.loggedUser.permissionLevelType
         )
     }
     private val viewModel: RequestsListViewModel by viewModel { parametersOf(vmData) }
@@ -75,6 +76,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         stateHandler = RequestsListState(binding)
+        initSwipeRefresh()
         initHeaderRecyclerView()
         initStateManager()
         initFab()
@@ -89,6 +91,12 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
             title = TOOLBAR_TITLE
         )
         configurator.bottomNavigation(hasBottomNavigation = true)
+    }
+
+    private fun initSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadData()
+        }
     }
 
     /**
@@ -163,6 +171,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
      */
     private fun initStateManager() {
         viewModel.data.observe(viewLifecycleOwner) { data ->
+            binding.swipeRefresh.isRefreshing = false
             data?.let { requests ->
                 if (adapter == null) {
                     initRequestRecyclerView()
@@ -174,10 +183,12 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
-                is State.Loading -> stateHandler?.showLoading()
-                is State.Loaded -> stateHandler?.showLoaded()
-                is State.Empty -> stateHandler?.showEmpty()
+                State.Loading -> stateHandler?.showLoading()
+                State.Loaded -> stateHandler?.showLoaded()
+                State.Empty -> stateHandler?.showEmpty()
                 is State.Error -> stateHandler?.showError(state.error)
+                State.Deleting -> stateHandler?.showDeleting()
+                State.Deleted -> stateHandler?.showDeleted()
             }
         }
 
@@ -248,14 +259,14 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
         recyclerView.adapter = concatAdapter
     }
 
-    private fun showAlertDialogForDelete(requestId: String, itemsIdList: List<String>?) {
+    private fun showAlertDialogForDelete(request: PaymentRequest) {
         viewModel.dialogRequested()
 
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle("Apagando requisição")
             .setMessage("Você realmente deseja apagar esta requisição e seus itens permanentemente?")
-            .setPositiveButton(OK) { _, _ -> deleteRequest(requestId, itemsIdList) }
+            .setPositiveButton(OK) { _, _ -> deleteRequest(request) }
             .setNegativeButton(CANCEL) { _, _ -> }
             .setOnDismissListener { viewModel.dialogDismissed() }
             .create().apply {
@@ -264,9 +275,9 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
             }
     }
 
-    private fun deleteRequest(requestId: String, itemsIdList: List<String>?) {
+    private fun deleteRequest(request: PaymentRequest) {
         lifecycleScope.launch {
-            viewModel.delete(requestId, itemsIdList).asFlow().collect { response ->
+            viewModel.delete(request).asFlow().collect { response ->
                 when (response) {
                     is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
                     is Response.Success -> {
@@ -293,6 +304,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.swipeRefresh.isRefreshing = false
         adapter = null
         stateHandler = null
         _binding = null

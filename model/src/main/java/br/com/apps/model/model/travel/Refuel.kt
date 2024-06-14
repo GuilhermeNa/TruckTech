@@ -17,8 +17,13 @@ data class Refuel(
     var valuePerLiter: BigDecimal,
     var amountLiters: BigDecimal,
     var totalValue: BigDecimal,
+
     @field:JvmField
-    var isCompleteRefuel: Boolean
+    var isCompleteRefuel: Boolean,
+
+    @field:JvmField
+    var isValid: Boolean
+
 ) {
 
 }

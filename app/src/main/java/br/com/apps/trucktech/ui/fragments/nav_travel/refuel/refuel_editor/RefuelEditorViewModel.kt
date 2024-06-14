@@ -9,9 +9,11 @@ import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.factory.RefuelFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Refuel
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.usecase.RefuelUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -20,7 +22,8 @@ import java.time.ZoneId
 
 class RefuelEditorViewModel(
     private val vmData: RefuelEVMData,
-    private val repository: RefuelRepository
+    private val repository: RefuelRepository,
+    private val useCase: RefuelUseCase
 ) : ViewModel() {
 
     private var isEditing: Boolean = vmData.refuelId?.let { true } ?: false
@@ -70,9 +73,10 @@ class RefuelEditorViewModel(
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = createOrUpdate(viewDto)
-                repository.save(dto)
+                useCase.save(vmData.permission, dto)
                 emit(Response.Success())
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(Response.Error(e))
             }
         }
@@ -94,6 +98,7 @@ class RefuelEditorViewModel(
                     truckId = vmData.truckId
                     travelId = vmData.travelId
                     driverId = vmData.driverId
+                    isValid = false
                 }
                 RefuelFactory.create(viewDto).toDto()
             }
@@ -116,5 +121,6 @@ data class RefuelEVMData(
     val truckId: String,
     val travelId: String,
     val driverId: String,
-    val refuelId: String? = null
+    val refuelId: String? = null,
+    val permission: PermissionLevelType
 )

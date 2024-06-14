@@ -28,14 +28,6 @@ class ThemeFragment : BaseFragmentWithToolbar() {
     private val viewModel: ThemeFragmentViewModel by viewModel()
 
     //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
     //---------------------------------------------------------------------------------------------//
 
@@ -61,6 +53,7 @@ class ThemeFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentThemeToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentThemeToolbar.toolbarText,

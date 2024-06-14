@@ -6,11 +6,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragments.nav_travel.refuel.refuel_preview.RefuelPreviewFragment">
 
-    <include
-        android:id="@+id/fragment_refuel_preview_collapsing_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        layout="@layout/layout_collapsing_toolbar"/>
+        android:layout_height="200dp"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:contentScrim="@color/purple_200"
+            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+            tools:title="Teste">
+
+            <ImageView
+                android:id="@+id/collapsing_toolbar_image"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:contentDescription="@string/freight_image"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/image_hire" />
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/icon_back" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -86,6 +114,34 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/icon_edit"
+        android:importantForAccessibility="no"
+        android:baselineAlignBottom="false"
+        app:layout_anchor="@id/collapsing_toolbar"
+        app:layout_anchorGravity="bottom|end"
+        android:layout_marginEnd="30dp"
+        android:backgroundTint="@color/dark_green"
+        app:layout_behavior=".ui.behaviors.CollapsingAwareFab"
+        android:visibility="gone"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/icon_delete"
+        android:importantForAccessibility="no"
+        android:baselineAlignBottom="false"
+        app:layout_anchor="@id/fab_edit"
+        app:layout_anchorGravity="center|left"
+        android:backgroundTint="@color/dark_red"
+        android:layout_marginEnd="120dp"
+        app:layout_behavior=".ui.behaviors.CollapsingAwareFab"
+        android:visibility="gone"/>
 
     <View
         android:id="@+id/frag_refuel_preview_dark_layer"

@@ -55,12 +55,19 @@ class TravelsListViewModel(
     suspend fun delete(idsData: TravelIdsData) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
+                setState(State.Deleting)
                 useCase.deleteTravel(idsData)
                 emit(Response.Success())
+                setState(State.Deleted)
             } catch (e: Exception) {
+                setState(State.Deleted)
                 emit(Response.Error(e))
             }
         }
+
+    private fun setState(state: State) {
+        _state.value = state
+    }
 
     fun createAndSave() = liveData<Response<Unit>>(viewModelScope.coroutineContext) {
         try {

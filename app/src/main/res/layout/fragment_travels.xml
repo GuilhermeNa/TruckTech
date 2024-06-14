@@ -10,20 +10,25 @@
         android:id="@+id/fragment_travels_toolbar"
         layout="@layout/layout_toolbar" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/travels_fragment_recycler"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="80dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
-
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fragment_travels_toolbar"
-        tools:listitem="@layout/item_travel" />
+        app:layout_constraintTop_toBottomOf="@id/fragment_travels_toolbar">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/travels_fragment_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="80dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_travel" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/frag_travel_fab"
@@ -47,5 +52,11 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         layout="@layout/box_error"/>
+
+    <include
+        android:id="@+id/box_loading"
+        layout="@layout/box_loading"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

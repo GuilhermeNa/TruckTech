@@ -35,4 +35,16 @@ class RequestsListState(private val binding: FragmentRequestsListBinding): State
         e.printStackTrace()
     }
 
+    override fun showDeleting() {
+        binding.boxLoading.apply {
+            layout.visibility = VISIBLE
+        }
+    }
+
+    override fun showDeleted() {
+        binding.boxLoading.apply {
+            layout.visibility = GONE
+        }
+    }
+
 }

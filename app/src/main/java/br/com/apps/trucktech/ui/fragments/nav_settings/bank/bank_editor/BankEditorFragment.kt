@@ -74,6 +74,7 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragBankEditorToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragBankEditorToolbar.toolbarText,

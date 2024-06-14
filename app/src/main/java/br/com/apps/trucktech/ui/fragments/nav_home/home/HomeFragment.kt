@@ -111,6 +111,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
                 }
                 is State.Empty -> {}
                 is State.Error -> stateHandler?.showError()
+                else -> {}
             }
         }
 

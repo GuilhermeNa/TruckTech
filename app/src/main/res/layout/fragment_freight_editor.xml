@@ -73,6 +73,7 @@
                         android:id="@+id/frag_freight_editor_customer_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:hint="@string/name"
                         app:endIconMode="dropdown_menu">
 
@@ -133,7 +134,8 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:hint="@string/content"
                         android:layout_height="wrap_content"
-                        android:layout_width="match_parent">
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="8dp">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/frag_freight_editor_cargo"

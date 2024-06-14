@@ -41,7 +41,8 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
             travelId = args.travelId,
             driverId = mainActVM.loggedUser.driverId,
             freightId = args.freightId,
-            commissionPercentual = mainActVM.loggedUser.commissionPercentual
+            commissionPercentual = mainActVM.loggedUser.commissionPercentual,
+            permissionLevel = mainActVM.loggedUser.permissionLevelType
         )
     }
     private val viewModel: FreightEditorViewModel by viewModel { parametersOf(vmData) }
@@ -71,6 +72,7 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentFreightEditorToolbar.toolbar,
             menuId = R.menu.menu_editor,
             toolbarTextView = binding.fragmentFreightEditorToolbar.toolbarText,
@@ -188,7 +190,6 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
                 }
 
                 is Response.Success -> requireView().apply {
-                    clearMenu()
                     snackBarGreen(SUCCESSFULLY_SAVED)
                     popBackStack()
                 }

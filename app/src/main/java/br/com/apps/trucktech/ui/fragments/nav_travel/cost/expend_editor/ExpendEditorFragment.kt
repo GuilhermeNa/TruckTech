@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_editor
+package br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor
 
 import android.content.DialogInterface
 import android.os.Bundle
@@ -42,7 +42,8 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
             truckId = mainActVM.loggedUser.truckId,
             driverId = mainActVM.loggedUser.driverId,
             travelId = args.travelId,
-            expendId = args.costId
+            expendId = args.costId,
+            permission = mainActVM.loggedUser.permissionLevelType
         )
     }
     private val viewModel: ExpendEditorViewModel by viewModel { parametersOf(vmData) }
@@ -73,6 +74,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentCostEditorToolbar.toolbar,
             menuId = R.menu.menu_editor,
             toolbarTextView = binding.fragmentCostEditorToolbar.toolbarText,

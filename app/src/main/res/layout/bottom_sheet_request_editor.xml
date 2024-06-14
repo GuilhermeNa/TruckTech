@@ -71,7 +71,7 @@
         android:drawablePadding="16dp"
         android:foreground="?android:attr/selectableItemBackground"
         android:padding="16dp"
-        android:text="@string/wallet_found"
+        android:text="@string/travel_advance"
         android:textSize="18sp"
         app:drawableStartCompat="@drawable/icon_wallet" />
 

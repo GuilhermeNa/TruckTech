@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.widget.Toolbar
 import br.com.apps.trucktech.R
-import br.com.apps.trucktech.expressions.getColorById
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.popBackStack
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -20,19 +19,11 @@ abstract class BasePreviewFragment : BaseFragmentForMainAct() {
             toolbar: Toolbar,
             backgroundImage: ImageView,
             urlImage: String,
-            title: String,
-            titleExpandedColor: Int,
-            titleCollapsedColor: Int
+            title: String
         ) {
             toolbar.inflateMenu(R.menu.menu_preview)
             this@BasePreviewFragment.toolbar = toolbar
             collapsingToolbar.title = title
-            collapsingToolbar.setCollapsedTitleTextColor(
-                requireContext().getColorById(
-                    titleCollapsedColor
-                )
-            )
-            collapsingToolbar.setExpandedTitleColor(requireContext().getColorById(titleExpandedColor))
             backgroundImage.loadImageThroughUrl(urlImage, requireContext())
         }
     }
@@ -53,14 +44,12 @@ abstract class BasePreviewFragment : BaseFragmentForMainAct() {
         toolbar?.apply {
 
             setNavigationOnClickListener {
-                toolbar!!.menu.clear()
                 it.popBackStack()
             }
 
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.menu_preview_edit -> {
-                        clearMenu()
                         onEditMenuCLick()
                         true
                     }
@@ -70,45 +59,42 @@ abstract class BasePreviewFragment : BaseFragmentForMainAct() {
                         true
                     }
 
-                else -> false
+                    else -> false
+                }
             }
+
         }
-
-    }
-}
-
-    fun clearMenu() {
-        toolbar!!.menu.clear()
     }
 
     abstract fun onDeleteMenuClick()
 
     abstract fun onEditMenuCLick()
 
+
+
 //---------------------------------------------------------------------------------------------//
 // ON VIEW CREATED
 //---------------------------------------------------------------------------------------------//
 
-override fun onDestroyView() {
-    toolbar = null
-    super.onDestroyView()
-}
+    override fun onDestroyView() {
+        super.onDestroyView()
+        toolbar!!.menu.clear()
+        toolbar = null
+    }
 
 //---------------------------------------------------------------------------------------------//
 // INTERFACE
 //---------------------------------------------------------------------------------------------//
 
-interface BasePreviewConfigurator {
-    fun collapsingToolbar(
-        collapsingToolbar: CollapsingToolbarLayout,
-        toolbar: Toolbar,
-        backgroundImage: ImageView,
-        urlImage: String,
-        title: String,
-        titleExpandedColor: Int,
-        titleCollapsedColor: Int
-    )
-}
+    interface BasePreviewConfigurator {
+        fun collapsingToolbar(
+            collapsingToolbar: CollapsingToolbarLayout,
+            toolbar: Toolbar,
+            backgroundImage: ImageView,
+            urlImage: String,
+            title: String
+        )
+    }
 
 }
 

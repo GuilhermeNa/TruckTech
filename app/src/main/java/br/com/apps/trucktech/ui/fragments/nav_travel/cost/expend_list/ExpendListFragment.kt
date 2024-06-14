@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.ui.fragments.nav_travel.cost.costs_list
+package br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list
 
 import android.os.Bundle
 import android.util.Log
@@ -103,6 +103,8 @@ class ExpendListFragment : Fragment() {
                     requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                     Log.e(TAG_DEBUG, state.error.message.toString())
                 }
+
+                else -> {}
             }
         }
 

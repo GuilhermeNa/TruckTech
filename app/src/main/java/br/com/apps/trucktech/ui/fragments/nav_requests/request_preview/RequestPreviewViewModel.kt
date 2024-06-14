@@ -5,19 +5,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.request.PaymentRequest
+import br.com.apps.model.model.request.request.PaymentRequestStatusType
 import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 class RequestPreviewViewModel(
-    private val requestId: String,
-    private val repository: RequestRepository
+    private val vmData: RequestPreviewVmData,
+    private val repository: RequestRepository,
+    private val useCase: RequestUseCase
 ) : ViewModel() {
 
     /**
@@ -25,7 +30,10 @@ class RequestPreviewViewModel(
      * to be displayed on screen.
      */
     private val _data = MutableLiveData<Response<PaymentRequest>>()
-    val requestData get() = _data
+    val data get() = _data
+
+    private val _menu = MutableLiveData<Boolean>()
+    val menu get() = _menu
 
     /**
      * LiveData with a dark layer state, used when dialogs and bottom sheets are requested.
@@ -40,6 +48,7 @@ class RequestPreviewViewModel(
     init {
         loadData { request, items ->
             request.itemsList = items.toMutableList()
+            _menu.value = request.status == PaymentRequestStatusType.SENT
             _data.postValue(Response.Success(request))
         }
     }
@@ -78,7 +87,7 @@ class RequestPreviewViewModel(
     }
 
     private suspend fun loadRequest(complete: (requests: PaymentRequest) -> Unit) {
-        repository.getRequestById(requestId, true).asFlow().collect { response ->
+        repository.getRequestById(vmData.requestId, true).asFlow().collect { response ->
             when (response) {
                 is Response.Error -> _data.value = response
                 is Response.Success -> {
@@ -90,7 +99,7 @@ class RequestPreviewViewModel(
     }
 
     private suspend fun loadItems(complete: (items: List<RequestItem>) -> Unit) {
-        repository.getItemListByRequestId(requestId, true).asFlow().collect { response ->
+        repository.getItemListByRequestId(vmData.requestId, true).asFlow().collect { response ->
             when (response) {
                 is Response.Error -> _data.value = response
                 is Response.Success -> response.data?.let { complete(it) } ?: complete(emptyList())
@@ -130,8 +139,8 @@ class RequestPreviewViewModel(
     fun delete() =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val itemsId = (_data.value as Response.Success).data!!.itemsList!!.mapNotNull { it.id }
-                repository.delete(requestId, itemsId)
+                val dto = (data.value as Response.Success).data!!.toDto()
+                useCase.delete(vmData.permission, dto)
                 emit(Response.Success())
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -140,3 +149,8 @@ class RequestPreviewViewModel(
         }
 
 }
+
+data class RequestPreviewVmData(
+    val requestId: String,
+    val permission: PermissionLevelType
+)

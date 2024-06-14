@@ -3,12 +3,13 @@ package br.com.apps.trucktech.ui.fragments.nav_home.time_line
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import br.com.apps.trucktech.databinding.FragmentTimelineBinding
 import br.com.apps.trucktech.sampleEventsList
-import br.com.apps.trucktech.ui.fragments.nav_home.time_line.private_adapters.TimelineRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.ui.fragments.nav_home.time_line.private_adapters.TimelineRecyclerAdapter
 
 private const val TOOLBAR_TITLE = "Linha do tempo"
 
@@ -49,11 +50,17 @@ class TimelineFragment : BaseFragmentWithToolbar() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
+        binding.layoutError.apply {
+            empty.visibility = VISIBLE
+            error.visibility = VISIBLE
+        }
+
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentTimelineToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentTimelineToolbar.toolbarText,

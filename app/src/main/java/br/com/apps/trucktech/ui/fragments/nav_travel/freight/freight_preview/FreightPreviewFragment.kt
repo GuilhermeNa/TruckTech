@@ -5,8 +5,6 @@ import android.text.SpannableString
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
 import androidx.fragment.app.Fragment
@@ -20,8 +18,6 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentFreightPreviewBinding
-import br.com.apps.trucktech.expressions.getColorById
-import br.com.apps.trucktech.expressions.getColorStateListById
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
@@ -50,9 +46,16 @@ class FreightPreviewFragment : BasePreviewFragment() {
 
     private var _binding: FragmentFreightPreviewBinding? = null
     private val binding get() = _binding!!
+    private var stateHandler: FreightPreviewState? = null
 
     private val args: FreightPreviewFragmentArgs by navArgs()
-    private val viewModel: FreightPreviewViewModel by viewModel { parametersOf(args.freightId) }
+    private val vmData by lazy {
+        FreightPreviewVmData(
+            freightId = args.freightId,
+            permission = mainActVM.loggedUser.permissionLevelType
+        )
+    }
+    private val viewModel: FreightPreviewViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -63,6 +66,7 @@ class FreightPreviewFragment : BasePreviewFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentFreightPreviewBinding.inflate(inflater, container, false)
+        stateHandler = FreightPreviewState(requireContext(), binding)
         return binding.root
     }
 
@@ -73,35 +77,17 @@ class FreightPreviewFragment : BasePreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
-        onPrepareMenu()
+        initFabs()
     }
 
     override fun configureBaseFragment(configurator: BasePreviewConfigurator) {
         configurator.collapsingToolbar(
-            collapsingToolbar = binding.fragmentFreightPreviewCollapsingToolbar.collapsingToolbar,
-            toolbar = binding.fragmentFreightPreviewCollapsingToolbar.toolbar,
-            backgroundImage = binding.fragmentFreightPreviewCollapsingToolbar.collapsingToolbarImage,
+            collapsingToolbar = binding.collapsingToolbar,
+            toolbar = binding.toolbar,
+            backgroundImage = binding.collapsingToolbarImage,
             urlImage = COLLAPSING_TOOLBAR_URL_IMAGE,
-            title = FREIGHT,
-            titleExpandedColor = R.color.white,
-            titleCollapsedColor = R.color.white
+            title = FREIGHT
         )
-
-    }
-
-    private fun onPrepareMenu() {
-        binding.fragmentFreightPreviewCollapsingToolbar.toolbar.apply {
-            navigationIcon?.setTint(requireContext().getColorById(R.color.white))
-
-            menu.apply {
-                val iconDelete = findItem(R.id.menu_preview_delete)
-                val iconEdit = findItem(R.id.menu_preview_edit)
-
-                iconDelete.iconTintList = requireContext().getColorStateListById(R.color.white)
-                iconEdit.iconTintList = requireContext().getColorStateListById(R.color.white)
-            }
-
-        }
     }
 
     /**
@@ -112,7 +98,7 @@ class FreightPreviewFragment : BasePreviewFragment() {
      *
      */
     private fun initStateManager() {
-        viewModel.freightData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> response.data?.let { bind(it) }
@@ -120,10 +106,31 @@ class FreightPreviewFragment : BasePreviewFragment() {
         }
 
         viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
-            when (isRequested) {
-                true -> binding.fragFreightPreviewDarkLayer.visibility = VISIBLE
-                false -> binding.fragFreightPreviewDarkLayer.visibility = GONE
+            stateHandler?.hasDarkLayer(isRequested)
+        }
+
+        viewModel.writeAuth.observe(viewLifecycleOwner) { hasAuth ->
+            stateHandler?.hideWriteOptions()
+            var isExpanded = false
+            var scrollRange = -1
+
+            binding.appBar.addOnOffsetChangedListener { appBar, yOffSet ->
+                if (scrollRange == -1) scrollRange = -appBar.totalScrollRange
+
+                when {
+                    (yOffSet > scrollRange) && !isExpanded -> {
+                        stateHandler?.showAppBarExpanded(hasAuth)
+                        isExpanded = true
+                    }
+
+                    (yOffSet == scrollRange) && isExpanded -> {
+                        stateHandler?.showAppBarCollapsed(hasAuth)
+                        isExpanded = false
+                    }
+
+                }
             }
+            viewModel.writeAuth.removeObservers(viewLifecycleOwner)
         }
 
     }
@@ -177,10 +184,10 @@ class FreightPreviewFragment : BasePreviewFragment() {
      *  2. Sends a request to the [viewModel] to delete the [Freight].
      */
     override fun onDeleteMenuClick() {
-        showAlertDialog()
+        showDeleteDialog()
     }
 
-    private fun showAlertDialog() {
+    private fun showDeleteDialog() {
         viewModel.requestDarkLayer()
 
         MaterialAlertDialogBuilder(requireContext())
@@ -202,7 +209,6 @@ class FreightPreviewFragment : BasePreviewFragment() {
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
                 is Response.Success -> {
-                    clearMenu()
                     requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                     requireView().popBackStack()
                 }
@@ -214,10 +220,19 @@ class FreightPreviewFragment : BasePreviewFragment() {
      * Navigate to the editor fragment.
      */
     override fun onEditMenuCLick() {
+        onEditClick()
+    }
+
+    private fun onEditClick() {
         requireView().navigateTo(
             FreightPreviewFragmentDirections
                 .actionFreightPreviewFragmentToFreightEditorFragment(args.freightId, args.travelId)
         )
+    }
+
+    private fun initFabs() {
+        binding.fabDelete.setOnClickListener { showDeleteDialog() }
+        binding.fabEdit.setOnClickListener { onEditClick() }
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -226,6 +241,7 @@ class FreightPreviewFragment : BasePreviewFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        stateHandler = null
         _binding = null
     }
 

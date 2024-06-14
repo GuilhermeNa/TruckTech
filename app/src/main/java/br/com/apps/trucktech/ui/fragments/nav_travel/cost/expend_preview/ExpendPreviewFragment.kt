@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.ui.fragments.nav_travel.cost.cost_preview
+package br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_preview
 
 import android.os.Bundle
 import android.view.Gravity
@@ -15,8 +15,6 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentExpendPreviewBinding
-import br.com.apps.trucktech.expressions.getColorById
-import br.com.apps.trucktech.expressions.getColorStateListById
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateWithSafeArgs
 import br.com.apps.trucktech.expressions.popBackStack
@@ -37,9 +35,16 @@ class ExpendPreviewFragment : BasePreviewFragment() {
 
     private var _binding: FragmentExpendPreviewBinding? = null
     private val binding get() = _binding!!
+    private var stateHandler: ExpendPreviewState? = null
 
     private val args: ExpendPreviewFragmentArgs by navArgs()
-    private val viewModel: ExpendPreviewViewModel by viewModel{ parametersOf(args.costId) }
+    private val vmData by lazy {
+        ExpendPreviewVmData(
+            expendId = args.costId,
+            permission = mainActVM.loggedUser.permissionLevelType
+        )
+    }
+    private val viewModel: ExpendPreviewViewModel by viewModel{ parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -50,6 +55,7 @@ class ExpendPreviewFragment : BasePreviewFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentExpendPreviewBinding.inflate(inflater, container, false)
+        stateHandler = ExpendPreviewState(binding, requireContext())
         return binding.root
     }
 
@@ -60,34 +66,17 @@ class ExpendPreviewFragment : BasePreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
-        onPrepareMenu()
+        initFabs()
     }
 
     override fun configureBaseFragment(configurator: BasePreviewConfigurator) {
         configurator.collapsingToolbar(
-            collapsingToolbar = binding.fragmentCostPreviewCollapsingToolbar.collapsingToolbar,
-            toolbar = binding.fragmentCostPreviewCollapsingToolbar.toolbar,
-            backgroundImage = binding.fragmentCostPreviewCollapsingToolbar.collapsingToolbarImage,
+            collapsingToolbar = binding.collapsingToolbar,
+            toolbar = binding.toolbar,
+            backgroundImage = binding.collapsingToolbarImage,
             urlImage = COLLAPSING_TOOLBAR_URL_IMAGE,
             title = EXPEND,
-            titleExpandedColor = R.color.white,
-            titleCollapsedColor = R.color.white,
         )
-    }
-
-    private fun onPrepareMenu() {
-        binding.fragmentCostPreviewCollapsingToolbar.toolbar.apply {
-            navigationIcon?.setTint(requireContext().getColorById(R.color.white))
-
-            menu.apply {
-                val iconDelete = findItem(R.id.menu_preview_delete)
-                val iconEdit = findItem(R.id.menu_preview_edit)
-
-                iconDelete.iconTintList = requireContext().getColorStateListById(R.color.white)
-                iconEdit.iconTintList = requireContext().getColorStateListById(R.color.white)
-            }
-
-        }
     }
 
     /**
@@ -110,10 +99,31 @@ class ExpendPreviewFragment : BasePreviewFragment() {
         }
 
         viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
-            when (isRequested) {
-                true -> binding.fragExpendPreviewDarkLayer.visibility = View.VISIBLE
-                false -> binding.fragExpendPreviewDarkLayer.visibility = View.GONE
+            stateHandler?.hasDarkLayer(isRequested)
+        }
+
+        viewModel.writeAuth.observe(viewLifecycleOwner) { hasAuth ->
+            stateHandler?.hideWriteOptions()
+            var isExpanded = false
+            var scrollRange = -1
+
+            binding.appBar.addOnOffsetChangedListener { appBar, yOffSet ->
+                if (scrollRange == -1) scrollRange = -appBar.totalScrollRange
+
+                when {
+                    (yOffSet > scrollRange) && !isExpanded -> {
+                        stateHandler?.showAppBarExpanded(hasAuth)
+                        isExpanded = true
+                    }
+
+                    (yOffSet == scrollRange) && isExpanded -> {
+                        stateHandler?.showAppBarCollapsed(hasAuth)
+                        isExpanded = false
+                    }
+
+                }
             }
+            viewModel.writeAuth.removeObservers(viewLifecycleOwner)
         }
 
     }
@@ -121,8 +131,8 @@ class ExpendPreviewFragment : BasePreviewFragment() {
     private fun bind(expend: Expend) {
         binding.apply {
             fragmentCostPreviewCompany.text = expend.company
-            fragmentCostPreviewValue.text = expend.value?.toCurrencyPtBr()
-            fragmentCostPreviewDate.text = expend.date?.getCompleteDateInPtBr()
+            fragmentCostPreviewValue.text = expend.value.toCurrencyPtBr()
+            fragmentCostPreviewDate.text = expend.date.getCompleteDateInPtBr()
             fragmentCostPreviewDescription.text = expend.description
         }
     }
@@ -132,9 +142,9 @@ class ExpendPreviewFragment : BasePreviewFragment() {
      *  1. Displays a confirmation dialog to delete the [Expend].
      *  2. Sends a request to the [viewModel] to delete the [Expend].
      */
-    override fun onDeleteMenuClick() { showAlertDialog() }
+    override fun onDeleteMenuClick() { showDeleteDialog() }
 
-    private fun showAlertDialog() {
+    private fun showDeleteDialog() {
         viewModel.requestDarkLayer()
 
         MaterialAlertDialogBuilder(requireContext())
@@ -155,7 +165,6 @@ class ExpendPreviewFragment : BasePreviewFragment() {
             when(response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
                 is Response.Success -> {
-                    clearMenu()
                     requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                     requireView().popBackStack()
                 }
@@ -167,10 +176,19 @@ class ExpendPreviewFragment : BasePreviewFragment() {
      * Navigate to the editor fragment.
      */
     override fun onEditMenuCLick() {
+        onEditClick()
+    }
+
+    private fun onEditClick() {
         requireView().navigateWithSafeArgs(
             ExpendPreviewFragmentDirections
                 .actionCostPreviewFragmentToCostEditorFragment(args.costId, args.travelId)
         )
+    }
+
+    private fun initFabs() {
+        binding.fabDelete.setOnClickListener { showDeleteDialog() }
+        binding.fabEdit.setOnClickListener { onEditClick() }
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -179,6 +197,7 @@ class ExpendPreviewFragment : BasePreviewFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        stateHandler = null
         _binding = null
     }
 

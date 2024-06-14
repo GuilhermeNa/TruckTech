@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapters
+package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -17,7 +17,7 @@ import br.com.apps.trucktech.expressions.toCurrencyPtBr
 class RequestEditorRecyclerAdapter(
     val context: Context,
     dataSet: List<RequestItem>,
-    val itemClickListener: (itemCLickData: RequestItemClickData) -> Unit,
+    val itemClickListener: (itemCLickData: RequestItemClickData) -> Unit = {},
     val deleteClickListener: (id: String) -> Unit = {}
 ) : RecyclerView.Adapter<RequestEditorRecyclerAdapter.ViewHolder>() {
 

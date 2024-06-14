@@ -41,4 +41,7 @@ interface FreightReadI {
     suspend fun getFreightById(freightId: String, flow: Boolean = false)
             : LiveData<Response<Freight>>
 
+    suspend fun getFreightListByDriverIdAndIsNotPaidYet(driverId: String, flow: Boolean = false)
+    : LiveData<Response<List<Freight>>>
+
 }

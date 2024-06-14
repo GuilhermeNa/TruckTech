@@ -12,24 +12,6 @@ class ScrollAwareFab(
     attrs: AttributeSet?
 ) : FloatingActionButton.Behavior(context, attrs) {
 
-    override fun onStartNestedScroll(
-        coordinatorLayout: CoordinatorLayout,
-        child: FloatingActionButton,
-        directTargetChild: View,
-        target: View,
-        axes: Int,
-        type: Int
-    ): Boolean {
-        return axes == ViewCompat.SCROLL_AXIS_VERTICAL || super.onStartNestedScroll(
-            coordinatorLayout,
-            child,
-            directTargetChild,
-            target,
-            axes,
-            type
-        )
-    }
-
     override fun onNestedScroll(
         coordinatorLayout: CoordinatorLayout,
         child: FloatingActionButton,
@@ -46,18 +28,31 @@ class ScrollAwareFab(
             dyConsumed, dxUnconsumed, dyUnconsumed, type, consumed
         )
 
-        if (dyConsumed > 0
-            && child.visibility == View.VISIBLE
-        ) {
+        if (dyConsumed > 0 && child.visibility == View.VISIBLE) {
             hideFab(child)
-
-        } else if (dyConsumed < 0
-            && child.visibility != View.VISIBLE
-        ) {
+        }
+        else if (dyConsumed < 0 && child.visibility != View.VISIBLE) {
             child.show()
-
         }
 
+    }
+
+    override fun onStartNestedScroll(
+        coordinatorLayout: CoordinatorLayout,
+        child: FloatingActionButton,
+        directTargetChild: View,
+        target: View,
+        axes: Int,
+        type: Int
+    ): Boolean {
+        return axes == ViewCompat.SCROLL_AXIS_VERTICAL || super.onStartNestedScroll(
+            coordinatorLayout,
+            child,
+            directTargetChild,
+            target,
+            axes,
+            type
+        )
     }
 
     private fun hideFab(child: FloatingActionButton) {

@@ -66,6 +66,7 @@ class BankListFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentBankToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentBankToolbar.toolbarText,
@@ -146,6 +147,8 @@ class BankListFragment : BaseFragmentWithToolbar() {
                         fragBankBoxEmpty.empty.visibility = GONE
                     }
                 }
+
+                else -> {}
             }
         }
 

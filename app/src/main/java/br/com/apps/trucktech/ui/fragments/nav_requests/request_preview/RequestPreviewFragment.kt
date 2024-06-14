@@ -42,9 +42,16 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRequestPreviewBinding? = null
     private val binding get() = _binding!!
+    private var stateHandler: RequestPreviewState? = null
 
     private val args: RequestPreviewFragmentArgs by navArgs()
-    private val viewModel: RequestPreviewViewModel by viewModel { parametersOf(args.requestId) }
+    private val vmData by lazy {
+        RequestPreviewVmData(
+            requestId = args.requestId,
+            permission = mainActVM.loggedUser.permissionLevelType
+        )
+    }
+    private val viewModel: RequestPreviewViewModel by viewModel { parametersOf(vmData) }
     private var adapter: RequestPreviewRecyclerAdapter? = null
 
     //---------------------------------------------------------------------------------------------//
@@ -56,6 +63,7 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRequestPreviewBinding.inflate(inflater, container, false)
+        stateHandler = RequestPreviewState(binding)
         return binding.root
     }
 
@@ -70,9 +78,11 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
+        val toolbar = binding.fragmentRequestPreviewToolbar.toolbar
         configurator.toolbar(
             hasToolbar = true,
-            toolbar = binding.fragmentRequestPreviewToolbar.toolbar,
+            hasNavigation = true,
+            toolbar = toolbar,
             menuId = R.menu.menu_preview,
             toolbarTextView = binding.fragmentRequestPreviewToolbar.toolbarText,
             title = TOOLBAR_TITLE
@@ -121,11 +131,12 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
 
     private fun delete() {
         viewModel.delete().observe(viewLifecycleOwner) { response ->
-            when(response) {
+            when (response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_REMOVE)
                     Log.e(TAG_DEBUG, response.exception.message.toString())
                 }
+
                 is Response.Success -> {
                     requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                     requireView().popBackStack()
@@ -141,8 +152,8 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
      *   - Observes dark layer to manage the interaction.
      */
     private fun initStateManager() {
-        viewModel.requestData.observe(viewLifecycleOwner) { response ->
-            when(response) {
+        viewModel.data.observe(viewLifecycleOwner) { response ->
+            when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> {
                     response.data?.let { request ->
@@ -153,10 +164,17 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
             }
         }
 
+        viewModel.menu.observe(viewLifecycleOwner) { hasMenu ->
+            when (hasMenu) {
+                true -> stateHandler?.showWriteOptions()
+                false -> stateHandler?.hideWriteOptions()
+            }
+        }
+
         viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
             when (isRequested) {
-                true -> binding.fragRequestPreviewDarkLayer.visibility = View.VISIBLE
-                false -> binding.fragRequestPreviewDarkLayer.visibility = View.GONE
+                true -> stateHandler?.showDarkLayer()
+                false -> stateHandler?.hideDarkLayer()
             }
         }
 
@@ -185,8 +203,9 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        stateHandler = null
         adapter = null
+        _binding = null
     }
 
 }

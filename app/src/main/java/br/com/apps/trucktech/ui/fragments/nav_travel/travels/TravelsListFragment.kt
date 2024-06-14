@@ -27,7 +27,6 @@ import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.activities.main.VisualComponents
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
-import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.TravelsListState
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.private_adapters.TravelsListRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
 import br.com.apps.trucktech.util.state.State
@@ -79,6 +78,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         stateHandler = TravelsListState(binding)
+        initSwipeRefresh()
         initStateManager()
         initFab()
     }
@@ -92,6 +92,12 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             title = TOOLBAR_TITLE
         )
         configurator.bottomNavigation(hasBottomNavigation = true)
+    }
+
+    private fun initSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadData()
+        }
     }
 
     /**
@@ -140,15 +146,18 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
      */
     private fun initStateManager() {
         viewModel.data.observe(viewLifecycleOwner) { data ->
+            binding.swipeRefresh.isRefreshing = false
             data?.let { initRecyclerView(it) }
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
-                is State.Loading -> stateHandler?.showLoading()
-                is State.Loaded -> stateHandler?.showLoaded()
-                is State.Empty -> stateHandler?.showEmpty()
+                State.Loading -> stateHandler?.showLoading()
+                State.Loaded -> stateHandler?.showLoaded()
+                State.Empty -> stateHandler?.showEmpty()
                 is State.Error -> stateHandler?.showError(state.error)
+                State.Deleting -> stateHandler?.showDeleting()
+                State.Deleted -> stateHandler?.showDeleted()
             }
         }
 
@@ -201,7 +210,6 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             requireContext(),
             itemsMap.value,
             itemCLickListener = {
-                clearMenu()
                 requireView().navigateWithSafeArgs(
                     TravelsListFragmentDirections.actionTravelsFragmentToRecordsFragment(
                         it
@@ -260,6 +268,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.swipeRefresh.isRefreshing = false
         stateHandler = null
         _binding = null
     }

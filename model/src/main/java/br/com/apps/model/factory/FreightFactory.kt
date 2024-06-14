@@ -25,7 +25,8 @@ object FreightFactory {
                 loadingDate = dto.loadingDate!!.toLocalDateTime(),
 
                 isCommissionPaid = dto.isCommissionPaid!!,
-                commissionPercentual = BigDecimal(dto.commissionPercentual!!)
+                commissionPercentual = BigDecimal(dto.commissionPercentual!!),
+                isValid = dto.isValid!!
             )
         }
 
@@ -45,6 +46,7 @@ object FreightFactory {
         viewDto.dailyValue?.run { freight.dailyValue = BigDecimal(this) }
         viewDto.dailyTotalValue?.run { freight.dailyTotalValue = BigDecimal(this) }
         viewDto.commissionPercentual?.run { freight.commissionPercentual = BigDecimal(this) }
+        viewDto.isValid?.run { freight.isValid = this }
     }
 
 }

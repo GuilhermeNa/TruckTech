@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import br.com.apps.trucktech.ui.fragments.nav_travel.cost.costs_list.ExpendListFragment
+import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list.ExpendListFragment
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freights_list.FreightsListFragment
 import br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuels_list.RefuelsListFragment
 

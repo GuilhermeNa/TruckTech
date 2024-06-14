@@ -2,6 +2,8 @@ package br.com.apps.trucktech.ui.public_adapters
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +35,7 @@ class RecordsItemRecyclerAdapter<T>(
         val title = binding.itemRecyclerTitleTxt
         val description = binding.itemRecyclerDescriptionTxt
         val value = binding.itemRecyclerValueTxt
+        val isValidImg = binding.isValidImage
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -85,6 +88,7 @@ class RecordsItemRecyclerAdapter<T>(
             title.text = freight.customer?.name
             description.text = freight.getTextDescription()
             value.text = freight.value?.toCurrencyPtBr()
+            isValidImg.visibility = if(freight.isValid) VISIBLE else GONE
             image.run {
                 setImageResource(R.drawable.image_icon_freight)
                 if (image.isLightTheme()) {
@@ -100,11 +104,12 @@ class RecordsItemRecyclerAdapter<T>(
 
     private fun bindFuel(holder: ViewHolder, refuel: Refuel) {
         holder.apply {
-            month.text = refuel.date?.getMonthInPtBrAbbreviated()
-            day.text = refuel.date?.getDayFormatted()
+            month.text = refuel.date.getMonthInPtBrAbbreviated()
+            day.text = refuel.date.getDayFormatted()
             title.text = refuel.station
-            description.text = refuel.isCompleteRefuel?.let { getRefuelDescription(it) }
-            value.text = refuel.totalValue?.toCurrencyPtBr()
+            description.text = getRefuelDescription(refuel.isCompleteRefuel)
+            value.text = refuel.totalValue.toCurrencyPtBr()
+            isValidImg.visibility = if(refuel.isValid) VISIBLE else GONE
             image.run {
                 setImageResource(R.drawable.image_icon_fuel_pump)
                 if (image.isLightTheme()) {
@@ -120,11 +125,12 @@ class RecordsItemRecyclerAdapter<T>(
 
     private fun bindCost(holder: ViewHolder, travelCost: Expend) {
         holder.apply {
-            month.text = travelCost.date?.getMonthInPtBrAbbreviated()
-            day.text = travelCost.date?.getDayFormatted()
+            month.text = travelCost.date.getMonthInPtBrAbbreviated()
+            day.text = travelCost.date.getDayFormatted()
             title.text = travelCost.company
             description.text = travelCost.description
-            value.text = travelCost.value?.toCurrencyPtBr()
+            value.text = travelCost.value.toCurrencyPtBr()
+            isValidImg.visibility = if(travelCost.isValid) VISIBLE else GONE
             image.run {
                 setImageResource(R.drawable.image_icon_maintenance)
 

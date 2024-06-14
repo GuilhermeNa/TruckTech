@@ -69,6 +69,7 @@ class ChangePasswordFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentChangePasswordToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentChangePasswordToolbar.toolbarText,

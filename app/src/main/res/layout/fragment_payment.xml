@@ -1,27 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     tools:context=".ui.fragments.nav_home.payment.PaymentFragment">
 
     <include
         android:id="@+id/fragment_payment_toolbar"
-        layout="@layout/layout_toolbar"/>
+        layout="@layout/layout_toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fragment_payment_toolbar">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:textSize="18sp"
-            android:text="@string/commission"/>
+            android:text="@string/commission"
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/fragment_payment_description"
@@ -30,15 +37,22 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
             android:textSize="14sp"
-            tools:text="Você tem 3 fretes a receber, totalizando R$ 3.805,00."/>
+            tools:text="Você tem 3 fretes a receber, totalizando R$ 3.805,00." />
 
-       <androidx.recyclerview.widget.RecyclerView
-           android:id="@+id/fragment_payment_recycler"
-           android:layout_marginTop="16dp"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           tools:listitem="@layout/item_to_receive"
-           app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fragment_payment_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_to_receive" />
 
     </LinearLayout>
-</LinearLayout>
+
+    <include
+        android:id="@+id/layout_error"
+        layout="@layout/box_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

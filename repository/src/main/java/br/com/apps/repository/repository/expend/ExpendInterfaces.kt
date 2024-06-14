@@ -35,6 +35,9 @@ interface ExpendReadI {
     suspend fun getExpendById(expendId: String, flow: Boolean = false)
             : LiveData<Response<Expend>>
 
+    suspend fun getExpendListByDriverIdAndIsNotRefundYet(driverId: String, flow: Boolean = false)
+            : LiveData<Response<List<Expend>>>
+
 }
 
 interface ExpendWriteI {

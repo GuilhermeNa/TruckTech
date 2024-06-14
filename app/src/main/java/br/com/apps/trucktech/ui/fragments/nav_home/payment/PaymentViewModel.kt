@@ -7,6 +7,9 @@ import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.trucktech.util.buildUiResponse
+import br.com.apps.trucktech.util.state.State
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class PaymentViewModel(
@@ -14,26 +17,31 @@ class PaymentViewModel(
     private val repository: FreightRepository
 ) : ViewModel() {
 
+    private val _state = MutableLiveData<State>()
+    val state get() = _state
+
     /**
      * LiveData holding the response data of type [Response] with a [Freight]
      * to be displayed on screen.
      */
-    private val _freightData = MutableLiveData<Response<List<Freight>>>()
-    val freightData get() = _freightData
+    private val _data = MutableLiveData<List<Freight>>()
+    val data get() = _data
 
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
     init {
+        _state.value = State.Loading
         loadData()
     }
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.getFreightListByDriverIdAndPaymentStatus(driverId, isPaid = false)
-                .asFlow().collect {
-                    _freightData.value = it
+            repository.getFreightListByDriverIdAndIsNotPaidYet(driverId)
+                .asFlow().first {
+                    it.buildUiResponse(_state, _data)
+                    true
                 }
         }
     }

@@ -49,6 +49,7 @@ class DocumentFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentDocumentToolbar.toolbar
         )
         configurator.bottomNavigation(hasBottomNavigation = false)

@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
@@ -30,8 +29,14 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: RequestEditorWalletFragmentArgs by navArgs()
-    private val idHolder by lazy { IdHolder(requestId = args.requestId, walletId = args.walletId) }
-    private val viewModel: RequestEditorWalletFragmentViewModel by viewModel { parametersOf(idHolder) }
+    private val vmData by lazy {
+        RequestEditorWalletVmData(
+            requestId = args.requestId,
+            walletId = args.walletId,
+            permission = mainActVM.loggedUser.permissionLevelType
+        )
+    }
+    private val viewModel: RequestEditorWalletFragmentViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -58,6 +63,7 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragmentRequestEditorWalletToolbar.toolbar,
             menuId = null,
             toolbarTextView = binding.fragmentRequestEditorWalletToolbar.toolbarText,
@@ -72,20 +78,20 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
      *   - Observes itemData for bind.
      */
     private fun initStateManager() {
-        viewModel.itemData.observe(viewLifecycleOwner) { response ->
+        viewModel.data.observe(viewLifecycleOwner) { response ->
             when(response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                     Log.e(TAG_DEBUG, response.exception.message.toString())
                 }
-                is Response.Success -> response.data?.let { bind() }
+                is Response.Success -> response.data?.let { bind(it) }
             }
         }
     }
 
-    private fun bind() {
+    private fun bind(requestItem: RequestItem) {
         binding.apply {
-            viewModel.requestItem.value?.let { value ->
+            requestItem.value?.let { value ->
                 fragmentRequestEditorWalletValue.setText(value.toPlainString())
             }
         }

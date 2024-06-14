@@ -2,9 +2,11 @@ package br.com.apps.usecase
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.EMPTY_DATASET
@@ -20,7 +22,7 @@ import java.security.InvalidParameterException
 class ExpendUseCase(
     private val repository: ExpendRepository,
     private val labelRepository: LabelRepository
-) {
+): CredentialsValidatorI<ExpendDto> {
 
     /**
      * Retrieves all expends related to a specific [Travel].
@@ -116,6 +118,25 @@ class ExpendUseCase(
             val expends = expendList.filter { it.travelId == travelId }
             travel.expendsList = expends
         }
+    }
+
+    suspend fun delete(permission: PermissionLevelType, dto: ExpendDto) {
+        validatePermission(permission, dto)
+        repository.delete(dto.id!!)
+    }
+
+    suspend fun save(permission: PermissionLevelType, dto: ExpendDto) {
+        if (!dto.validateFields()) throw InvalidParameterException("Invalid Refuel for saving")
+        validatePermission(permission, dto)
+        repository.save(dto)
+    }
+
+    override fun validatePermission(permission: PermissionLevelType, dto: ExpendDto) {
+        dto.isValid?.let {
+            if (dto.isValid!! && permission != PermissionLevelType.MANAGER)
+                throw InvalidParameterException("Invalid credentials for $permission")
+
+        } ?: throw NullPointerException("Validation is null")
     }
 
 

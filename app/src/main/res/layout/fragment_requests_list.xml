@@ -30,14 +30,22 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/fragment_requests_list_recycler"
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_refresh"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="80dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_request" />
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/fragment_requests_list_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="80dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_request" />
+
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fragment_requests_list_fab"
@@ -65,5 +73,11 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         layout="@layout/box_error"/>
+
+    <include
+        android:id="@+id/box_loading"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        layout="@layout/box_loading"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

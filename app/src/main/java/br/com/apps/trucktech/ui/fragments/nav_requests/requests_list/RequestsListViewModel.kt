@@ -6,9 +6,11 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.PaymentRequestDto
+import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.request.PaymentRequest
 import br.com.apps.model.model.request.request.PaymentRequestStatusType
 import br.com.apps.model.model.request.request.RequestItem
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.repository.request.RequestRepository
@@ -102,7 +104,6 @@ class RequestsListViewModel(
 
                     is Response.Success -> response.data?.let { deferred.complete(it) }
                         ?: deferred.complete(emptyList())
-
                 }
                 true
             }
@@ -158,12 +159,16 @@ class RequestsListViewModel(
     /**
      * Delete an item
      */
-    suspend fun delete(requestId: String, itemsIdList: List<String>?) =
+    suspend fun delete(request: PaymentRequest) =
         liveData<Response<Unit>>((viewModelScope.coroutineContext)) {
             try {
-                repository.delete(requestId, itemsIdList)
+                setState(State.Deleting)
+                val dto = request.toDto()
+                useCase.delete(vmData.permission, dto)
                 emit(Response.Success())
+                setState(State.Deleted)
             } catch (e: Exception) {
+                setState(State.Deleted)
                 emit(Response.Error(e))
             }
         }
@@ -225,11 +230,16 @@ class RequestsListViewModel(
         _dialog.value = false
     }
 
+    private fun setState(state: State) {
+        _state.value = state
+    }
+
 }
 
 data class RequestLVMData(
     val masterUid: String,
     val uid: String,
     val truckId: String,
-    val driverId: String
+    val driverId: String,
+    val permission: PermissionLevelType
 )

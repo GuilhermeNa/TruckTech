@@ -16,12 +16,10 @@ import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
 
 class RequestsListRecyclerAdapter(
-
     private val context: Context,
     dataSet: List<PaymentRequest>,
     var itemCLickListener: (id: String) -> Unit = {},
-    val deleteClickListener:(id: String, itemsId: List<String>?) -> Unit
-
+    val deleteClickListener: (request: PaymentRequest) -> Unit
 ) : RecyclerView.Adapter<RequestsListRecyclerAdapter.ViewHolder>() {
 
     private val dataSet = dataSet.toMutableList()
@@ -57,10 +55,7 @@ class RequestsListRecyclerAdapter(
         override fun onMenuItemClick(item: MenuItem?): Boolean {
             item?.let {
                 when (it.itemId) {
-                    R.id.menu_delete_delete -> {
-                        val itemsIdList = request.itemsList?.mapNotNull { item -> item.id }
-                        request.id?.let { id -> deleteClickListener(id, itemsIdList) }
-                    }
+                    R.id.menu_delete_delete -> deleteClickListener(request)
                     else -> {}
                 }
             }

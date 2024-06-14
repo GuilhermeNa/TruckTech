@@ -40,12 +40,11 @@ class DocumentsListFragmentViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
+        _state.value = State.Loading
         loadData()
     }
 
-    private fun loadData() {
-        _state.value = State.Loading
-
+    fun loadData() {
         viewModelScope.launch {
 
             val docListDef = loadDocumentData()

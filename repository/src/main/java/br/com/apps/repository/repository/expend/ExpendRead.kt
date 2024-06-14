@@ -9,6 +9,7 @@ import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.ALREADY_REFUNDED
 import br.com.apps.repository.util.DRIVER_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_EXPENDS
+import br.com.apps.repository.util.IS_VALID
 import br.com.apps.repository.util.PAID_BY_EMPLOYEE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TRAVEL_ID
@@ -18,7 +19,7 @@ import br.com.apps.repository.util.toExpendList
 import br.com.apps.repository.util.toExpendObject
 import com.google.firebase.firestore.FirebaseFirestore
 
-class ExpendRead(fireStore: FirebaseFirestore): ExpendReadI {
+class ExpendRead(fireStore: FirebaseFirestore) : ExpendReadI {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_EXPENDS)
 
@@ -131,11 +132,26 @@ class ExpendRead(fireStore: FirebaseFirestore): ExpendReadI {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Expend] list.
      */
-    override suspend fun getExpendById(expendId: String, flow: Boolean): LiveData<Response<Expend>> {
+    override suspend fun getExpendById(
+        expendId: String,
+        flow: Boolean
+    ): LiveData<Response<Expend>> {
         val listener = collection.document(expendId)
 
         return if (flow) listener.onSnapShot { it.toExpendObject() }
         else listener.onComplete { it.toExpendObject() }
+    }
+
+    override suspend fun getExpendListByDriverIdAndIsNotRefundYet(
+        driverId: String, flow: Boolean
+    ): LiveData<Response<List<Expend>>> {
+        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+            .whereEqualTo(IS_VALID, true)
+            .whereEqualTo(PAID_BY_EMPLOYEE, true)
+            .whereEqualTo(ALREADY_REFUNDED, false)
+
+        return if (flow) listener.onSnapShot { it.toExpendList() }
+        else listener.onComplete { it.toExpendList() }
     }
 
 }

@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.factory.RequestItemFactory
 import br.com.apps.model.mapper.toDto
@@ -13,41 +12,26 @@ import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
 import br.com.apps.model.model.request.request.RequestItem
 import br.com.apps.model.model.request.request.RequestItemType
+import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.usecase.LabelUseCase
+import br.com.apps.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class RequestEditorCostFragmentViewModel(
-    private val idHolder: IdHolder,
+    private val vmData: RequestEditorCostVmData,
     private val labelUseCase: LabelUseCase,
-    private val repository: RequestRepository
+    private val repository: RequestRepository,
+    private val useCase: RequestUseCase
 ) : ViewModel() {
 
-    val masterUid = idHolder.masterUid ?: throw NullPointerException("Null masterUid")
-    val requestId = idHolder.requestId ?: throw NullPointerException("Null requestId")
+    private var isEditing: Boolean = vmData.costReqId?.let { true } ?: false
 
-    /**
-     * Holds a [RequestItem] when the data is loaded, to be saved when necessary.
-     */
-    lateinit var requestItem: RequestItem
-
-    /**
-     * LiveData holding the response data of type [Response] with a list of [Label]
-     * to be displayed on screen.
-     */
-    private val _labelData = MutableLiveData<Response<List<Label>>>()
-    val labelData get() = _labelData
-
-    /**
-     * LiveData holding the response data of type [Response] with a list of [RequestItem]
-     * to be displayed on screen.
-     */
-    private val _itemData = MutableLiveData<Response<RequestItem>>()
-    val itemData get() = _itemData
+    private val _data = MutableLiveData<RequestEditorCostFData>()
+    val data get() = _data
 
     //---------------------------------------------------------------------------------------------//
     // -
@@ -57,50 +41,47 @@ class RequestEditorCostFragmentViewModel(
         loadData()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadData() {
         viewModelScope.launch {
-            val deferredA = CompletableDeferred<Unit>()
-            val deferredB = CompletableDeferred<RequestItem?>()
+            val labels = loadLabels()
+            val item = vmData.costReqId?.let { loadItem(it) }
 
-            launch { loadLabelData { deferredA.complete(Unit) } }
-            launch { loadItemData { deferredB.complete(it) } }
+            _data.value = RequestEditorCostFData(
+                labels = labels,
+                item = item
+            )
 
-            awaitAll(deferredA, deferredB)
+        }
+    }
 
-            deferredB.getCompleted()?.let {
-                _itemData.value = Response.Success(it)
+    private suspend fun loadLabels(): List<Label> {
+        val deferred = CompletableDeferred<List<Label>>()
+
+        labelUseCase.getOperationalLabels(vmData.masterUid, LabelType.COST, true)
+            .asFlow().first { response ->
+                val data = when (response) {
+                    is Response.Error -> throw response.exception
+                    is Response.Success -> response.data ?: throw NullPointerException()
+                }
+                deferred.complete(data)
             }
 
-        }
+        return deferred.await()
     }
 
-    private fun loadLabelData(complete: () -> Unit) {
-        viewModelScope.launch {
-            labelUseCase.getOperationalLabels(masterUid, LabelType.COST, true).asFlow()
-                .collect {
-                    _labelData.value = it
-                    complete()
-                }
-        }
-    }
+    private suspend fun loadItem(itemId: String): RequestItem {
+        val deferred = CompletableDeferred<RequestItem>()
 
-    private fun loadItemData(complete: (data: RequestItem?) -> Unit) {
-        viewModelScope.launch {
-            idHolder.expendId?.let { itemId ->
-                repository.getItemById(requestId, itemId).asFlow().collect { response ->
-                    when (response) {
-                        is Response.Error -> _itemData.value = response
-                        is Response.Success -> {
-                            response.data?.let {
-                                requestItem = it
-                                complete(it)
-                            }
-                        }
-                    }
+        repository.getItemById(vmData.requestId, itemId)
+            .asFlow().first { response ->
+                val data = when (response) {
+                    is Response.Error -> throw response.exception
+                    is Response.Success -> response.data ?: throw NullPointerException()
                 }
-            } ?: complete(null)
-        }
+                deferred.complete(data)
+            }
+
+        return deferred.await()
     }
 
     /**
@@ -110,20 +91,26 @@ class RequestEditorCostFragmentViewModel(
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = createOrUpdate(viewDto)
-                repository.saveItem(dto)
+                useCase.saveItem(vmData.permission, dto)
                 emit(Response.Success())
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(Response.Error(e))
             }
         }
 
     private fun createOrUpdate(viewDto: RequestItemDto): RequestItemDto {
-        return if (::requestItem.isInitialized) {
-            RequestItemFactory.update(requestItem, viewDto)
-            requestItem.toDto()
-        } else {
-            viewDto.requestId = this@RequestEditorCostFragmentViewModel.requestId
-            RequestItemFactory.create(viewDto, RequestItemType.COST).toDto()
+        return when (isEditing) {
+            true -> {
+                val item = data.value!!.item!!
+                RequestItemFactory.update(item, viewDto)
+                item.toDto()
+            }
+
+            false -> {
+                viewDto.requestId = vmData.requestId
+                RequestItemFactory.create(viewDto, RequestItemType.COST).toDto()
+            }
         }
     }
 
@@ -132,9 +119,9 @@ class RequestEditorCostFragmentViewModel(
      * Returns the name of the label if found, or null otherwise.
      */
     fun getLabelDescriptionById(): String? {
-        val labelId = requestItem.labelId
-        val labelsList = (labelData.value as Response.Success<List<Label>>).data
-        val label = labelsList?.firstOrNull { it.id == labelId }
+        val labelId = data.value!!.item!!.labelId
+        val labelsList = data.value!!.labels
+        val label = labelsList.firstOrNull { it.id == labelId }
         return label?.name
     }
 
@@ -144,8 +131,8 @@ class RequestEditorCostFragmentViewModel(
      */
     fun getLabelIdByName(autoCompleteText: String): String {
         var labelId = ""
-        val labelList = (labelData.value as Response.Success).data
-        labelList?.let { labelsList ->
+        val labelList = data.value!!.labels
+        labelList.let { labelsList ->
             val label = labelsList.firstOrNull { it.name == autoCompleteText }
             labelId = label?.id.toString()
         }
@@ -153,3 +140,15 @@ class RequestEditorCostFragmentViewModel(
     }
 
 }
+
+data class RequestEditorCostVmData(
+    val masterUid: String,
+    val requestId: String,
+    val costReqId: String? = null,
+    val permission: PermissionLevelType
+)
+
+data class RequestEditorCostFData(
+    val labels: List<Label>,
+    val item: RequestItem? = null
+)

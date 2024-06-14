@@ -108,6 +108,8 @@ class RefuelsListFragment : Fragment() {
                     requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                     Log.e(TAG_DEBUG, state.error.message.toString())
                 }
+
+                else -> {}
             }
         }
 

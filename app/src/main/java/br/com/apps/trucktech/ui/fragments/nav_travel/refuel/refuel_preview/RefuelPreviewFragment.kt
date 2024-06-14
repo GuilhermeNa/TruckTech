@@ -17,8 +17,6 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRefuelPreviewBinding
-import br.com.apps.trucktech.expressions.getColorById
-import br.com.apps.trucktech.expressions.getColorStateListById
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
@@ -43,9 +41,16 @@ class RefuelPreviewFragment : BasePreviewFragment() {
 
     private var _binding: FragmentRefuelPreviewBinding? = null
     private val binding get() = _binding!!
+    private var stateHandler: RefuelPreviewState? = null
 
     private val args: RefuelPreviewFragmentArgs by navArgs()
-    private val viewModel: RefuelPreviewViewModel by viewModel { parametersOf(args.refuelId) }
+    private val vmData by lazy {
+        RefuelPreviewVmData(
+            refuelId = args.refuelId,
+            permission = mainActVM.loggedUser.permissionLevelType
+        )
+    }
+    private val viewModel: RefuelPreviewViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -56,6 +61,7 @@ class RefuelPreviewFragment : BasePreviewFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRefuelPreviewBinding.inflate(inflater, container, false)
+        stateHandler = RefuelPreviewState(binding, requireContext())
         return binding.root
     }
 
@@ -66,34 +72,17 @@ class RefuelPreviewFragment : BasePreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
-        onPrepareMenu()
+        initFabs()
     }
 
     override fun configureBaseFragment(configurator: BasePreviewConfigurator) {
         configurator.collapsingToolbar(
-            collapsingToolbar = binding.fragmentRefuelPreviewCollapsingToolbar.collapsingToolbar,
-            toolbar = binding.fragmentRefuelPreviewCollapsingToolbar.toolbar,
-            backgroundImage = binding.fragmentRefuelPreviewCollapsingToolbar.collapsingToolbarImage,
+            collapsingToolbar = binding.collapsingToolbar,
+            toolbar = binding.toolbar,
+            backgroundImage = binding.collapsingToolbarImage,
             urlImage = COLLAPSING_TOOLBAR_URL_IMAGE,
-            title = REFUEL,
-            titleExpandedColor = R.color.white,
-            titleCollapsedColor = R.color.white,
+            title = REFUEL
         )
-    }
-
-    private fun onPrepareMenu() {
-        binding.fragmentRefuelPreviewCollapsingToolbar.toolbar.apply {
-            navigationIcon?.setTint(requireContext().getColorById(R.color.white))
-
-            menu.apply {
-                val iconDelete = findItem(R.id.menu_preview_delete)
-                val iconEdit = findItem(R.id.menu_preview_edit)
-
-                iconDelete.iconTintList = requireContext().getColorStateListById(R.color.white)
-                iconEdit.iconTintList = requireContext().getColorStateListById(R.color.white)
-            }
-
-        }
     }
 
     /**
@@ -111,10 +100,31 @@ class RefuelPreviewFragment : BasePreviewFragment() {
         }
 
         viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->
-            when(isRequested) {
-                true -> binding.fragRefuelPreviewDarkLayer.visibility = View.VISIBLE
-                false -> binding.fragRefuelPreviewDarkLayer.visibility = View.GONE
+            stateHandler?.hasDarkLayer(isRequested)
+        }
+
+        viewModel.writeAuth.observe(viewLifecycleOwner) { hasAuth ->
+            stateHandler?.hideWriteOptions()
+            var isExpanded = false
+            var scrollRange = -1
+
+            binding.appBar.addOnOffsetChangedListener { appBar, yOffSet ->
+                if (scrollRange == -1) scrollRange = -appBar.totalScrollRange
+
+                when {
+                    (yOffSet > scrollRange) && !isExpanded -> {
+                        stateHandler?.showAppBarExpanded(hasAuth)
+                        isExpanded = true
+                    }
+
+                    (yOffSet == scrollRange) && isExpanded -> {
+                        stateHandler?.showAppBarCollapsed(hasAuth)
+                        isExpanded = false
+                    }
+
+                }
             }
+            viewModel.writeAuth.removeObservers(viewLifecycleOwner)
         }
 
     }
@@ -122,10 +132,10 @@ class RefuelPreviewFragment : BasePreviewFragment() {
     fun bind(refuel: Refuel) {
         binding.apply {
             fragmentRefuelPreviewStation.text = refuel.station
-            fragmentRefuelPreviewValue.text = refuel.totalValue?.toCurrencyPtBr()
+            fragmentRefuelPreviewValue.text = refuel.totalValue.toCurrencyPtBr()
 
             val dateFormatted =
-                SpannableString(refuel.date?.getCompleteDateInPtBr()).toBold().toUnderline()
+                SpannableString(refuel.date.getCompleteDateInPtBr()).toBold().toUnderline()
 
             fragmentRefuelPreviewDescription.text = buildSpannedString {
                 append("No dia ")
@@ -141,10 +151,10 @@ class RefuelPreviewFragment : BasePreviewFragment() {
      *  2. Sends a request to the [viewModel] to delete the [Refuel].
      */
     override fun onDeleteMenuClick() {
-        showAlertDialog()
+        showDeleteDialog()
     }
 
-    private fun showAlertDialog() {
+    private fun showDeleteDialog() {
         viewModel.requestDarkLayer()
 
         MaterialAlertDialogBuilder(requireContext())
@@ -165,7 +175,6 @@ class RefuelPreviewFragment : BasePreviewFragment() {
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
                 is Response.Success -> {
-                    clearMenu()
                     requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                     requireView().popBackStack()
                 }
@@ -177,10 +186,19 @@ class RefuelPreviewFragment : BasePreviewFragment() {
      * Navigate to the editor fragment.
      */
     override fun onEditMenuCLick() {
+        onEditClick()
+    }
+
+    private fun onEditClick() {
         requireView().navigateTo(
             RefuelPreviewFragmentDirections
                 .actionRefuelPreviewFragmentToRefuelEditorFragment(args.refuelId, args.travelId)
         )
+    }
+
+    private fun initFabs() {
+        binding.fabDelete.setOnClickListener { showDeleteDialog() }
+        binding.fabEdit.setOnClickListener { onEditClick() }
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -189,6 +207,7 @@ class RefuelPreviewFragment : BasePreviewFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        stateHandler = null
         _binding = null
     }
 

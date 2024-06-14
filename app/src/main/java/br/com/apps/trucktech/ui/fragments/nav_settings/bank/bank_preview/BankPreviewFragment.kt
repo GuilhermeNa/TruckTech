@@ -74,6 +74,7 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
+            hasNavigation = true,
             toolbar = binding.fragBankPreviewToolbar.toolbar,
             menuId = R.menu.menu_preview,
             toolbarTextView = binding.fragBankPreviewToolbar.toolbarText,
