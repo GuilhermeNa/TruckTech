@@ -147,7 +147,7 @@ class HomeViewModel(
 
     //TODO performance
     private suspend fun fetchTravels(driverId: String): List<Travel> {
-        val response = travelRepository.getTravelListByDriverId(driverId).asFlow().first()
+        val response = travelRepository.getTravelListByDriverIdAndIsFinished(driverId).asFlow().first()
         return when (response) {
             is Response.Error -> throw response.exception
             is Response.Success -> response.data ?: throw NullPointerException()

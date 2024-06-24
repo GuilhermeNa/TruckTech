@@ -109,7 +109,7 @@ class TravelTest {
 
     @Test
     fun `should return true if initial date is before final date`() {
-        val isDateGood = travel.checkDatesOrder()
+        val isDateGood = travel.isDatesInCorrectlyOrder()
         Assert.assertEquals(true, isDateGood)
     }
 
@@ -132,10 +132,10 @@ class TravelTest {
             finalDate = null
         )
 
-        val result1 = travelWithWrongDates.checkDatesOrder()
-        val result2 = travelWithNullDates.checkDatesOrder()
-        val result3 = travelWithNullInitialDate.checkDatesOrder()
-        val result4 = travelWithNullFinalDate.checkDatesOrder()
+        val result1 = travelWithWrongDates.isDatesInCorrectlyOrder()
+        val result2 = travelWithNullDates.isDatesInCorrectlyOrder()
+        val result3 = travelWithNullInitialDate.isDatesInCorrectlyOrder()
+        val result4 = travelWithNullFinalDate.isDatesInCorrectlyOrder()
 
         Assert.assertEquals(false, result1)
         Assert.assertEquals(false, result2)
@@ -145,7 +145,7 @@ class TravelTest {
 
     @Test
     fun `should return true if there is any duplicated item in list`() {
-        val isItemDuplicated = travel.checkForDuplicatedItems()
+        val isItemDuplicated = travel.thereIsDuplicatedItems()
         Assert.assertEquals(false, isItemDuplicated)
     }
 
@@ -161,9 +161,9 @@ class TravelTest {
             expendsList = listOf(Expend(id = "6"), Expend(id = "6"))
         )
 
-        val isFreightDuplicated = freightDuplicated.checkForDuplicatedItems()
-        val isRefuelDuplicated = refuelDuplicated.checkForDuplicatedItems()
-        val isExpendDuplicated = expendDuplicated.checkForDuplicatedItems()
+        val isFreightDuplicated = freightDuplicated.thereIsDuplicatedItems()
+        val isRefuelDuplicated = refuelDuplicated.thereIsDuplicatedItems()
+        val isExpendDuplicated = expendDuplicated.thereIsDuplicatedItems()
 
         Assert.assertEquals(true, isFreightDuplicated)
         Assert.assertEquals(true, isRefuelDuplicated)
@@ -191,12 +191,12 @@ class TravelTest {
             expendsList = null
         )
 
-        val isFreightWithNullItem = freightWithNullItem.checkForDuplicatedItems()
-        val isRefuelWithNullItem = refuelWithNullItem.checkForDuplicatedItems()
-        val isExpendWithNullItem = expendWithNullItem.checkForDuplicatedItems()
-        val isFreightListNull = freightListNull.checkForDuplicatedItems()
-        val isRefuelListNull = refuelListNull.checkForDuplicatedItems()
-        val isExpendListNull = expendListNull.checkForDuplicatedItems()
+        val isFreightWithNullItem = freightWithNullItem.thereIsDuplicatedItems()
+        val isRefuelWithNullItem = refuelWithNullItem.thereIsDuplicatedItems()
+        val isExpendWithNullItem = expendWithNullItem.thereIsDuplicatedItems()
+        val isFreightListNull = freightListNull.thereIsDuplicatedItems()
+        val isRefuelListNull = refuelListNull.thereIsDuplicatedItems()
+        val isExpendListNull = expendListNull.thereIsDuplicatedItems()
 
         Assert.assertEquals(false, isFreightWithNullItem)
         Assert.assertEquals(false, isRefuelWithNullItem)

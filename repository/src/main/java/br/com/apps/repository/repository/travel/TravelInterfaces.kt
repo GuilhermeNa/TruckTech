@@ -18,6 +18,9 @@ interface TravelWriteI {
 
 interface TravelReadI {
 
+    suspend fun getTravelListByDriverIdAndIsFinished(driverId: String, flow: Boolean = false)
+            : LiveData<Response<List<Travel>>>
+
     suspend fun getTravelListByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<Travel>>>
 

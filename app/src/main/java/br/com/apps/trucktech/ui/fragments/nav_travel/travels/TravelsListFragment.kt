@@ -1,7 +1,6 @@
 package br.com.apps.trucktech.ui.fragments.nav_travel.travels
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -14,10 +13,10 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.FAILED_TO_REMOVE
+import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
-import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentTravelsBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
@@ -30,7 +29,6 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.private_adapters.TravelsListRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
 import br.com.apps.trucktech.util.state.State
-import br.com.apps.usecase.TravelIdsData
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -125,8 +123,8 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
         viewModel.createAndSave().observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
-                    requireView().snackBarRed(FAILED_TO_REMOVE)
-                    Log.e(TAG_DEBUG, response.exception.message.toString())
+                    requireView().snackBarRed(FAILED_TO_SAVE)
+                    response.exception.printStackTrace()
                 }
 
                 is Response.Success -> {
@@ -158,15 +156,17 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
                 is State.Error -> stateHandler?.showError(state.error)
                 State.Deleting -> stateHandler?.showDeleting()
                 State.Deleted -> stateHandler?.showDeleted()
+                else -> {}
             }
         }
 
         viewModel.dialog.observe(viewLifecycleOwner) { dialog ->
-            when(dialog) {
+            when (dialog) {
                 true -> {
                     binding.fragTravelListDarkLayer.visibility = VISIBLE
                     mainActVM.setComponents(VisualComponents(hasBottomNavigation = false))
                 }
+
                 false -> {
                     binding.fragTravelListDarkLayer.visibility = GONE
                     mainActVM.setComponents(VisualComponents(hasBottomNavigation = true))
@@ -211,7 +211,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             itemsMap.value,
             itemCLickListener = {
                 requireView().navigateWithSafeArgs(
-                    TravelsListFragmentDirections.actionTravelsFragmentToRecordsFragment(
+                    TravelsListFragmentDirections.actionTravelsFragmentToTravelPreviewFragment(
                         it
                     )
                 )
@@ -220,14 +220,14 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
         )
     )
 
-    private fun showAlertDialog(idsData: TravelIdsData) {
+    private fun showAlertDialog(travel: Travel) {
         viewModel.dialogRequested()
 
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle("Removendo viagem")
             .setMessage("Você realmente deseja remover esta viagem e todos os seus itens?")
-            .setPositiveButton("Ok") { _, _ -> delete(idsData) }
+            .setPositiveButton("Ok") { _, _ -> delete(travel) }
             .setNegativeButton("Cancelar") { _, _ -> }
             .setOnDismissListener { viewModel.dialogDismissed() }
             .create().apply {
@@ -236,9 +236,9 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             }
     }
 
-    private fun delete(idsData: TravelIdsData) {
+    private fun delete(travel: Travel) {
         lifecycleScope.launch {
-            viewModel.delete(idsData).observe(viewLifecycleOwner) { response ->
+            viewModel.delete(travel).observe(viewLifecycleOwner) { response ->
                 when (response) {
                     is Response.Success -> {
                         requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
@@ -246,7 +246,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
                     }
 
                     is Response.Error -> {
-                        requireView().snackBarGreen(FAILED_TO_REMOVE)
+                        requireView().snackBarRed(FAILED_TO_REMOVE)
                     }
                 }
             }

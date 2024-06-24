@@ -38,9 +38,9 @@ import br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsViewMode
 import br.com.apps.trucktech.ui.fragments.nav_settings.themes.ThemeFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEVMData
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEditorViewModel
+import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list.ExpendListViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_preview.ExpendPreviewViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_preview.ExpendPreviewVmData
-import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list.ExpendListViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_editor.FreightEVMData
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_editor.FreightEditorViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_preview.FreightPreviewViewModel
@@ -52,6 +52,8 @@ import br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuel_editor.Refuel
 import br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuel_preview.RefuelPreviewViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuel_preview.RefuelPreviewVmData
 import br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuels_list.RefuelsListViewModel
+import br.com.apps.trucktech.ui.fragments.nav_travel.travel_preview.TravelPreviewViewModel
+import br.com.apps.trucktech.ui.fragments.nav_travel.travel_preview.TravelPreviewVmData
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.TravelLVMData
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.TravelsListViewModel
 import br.com.apps.usecase.useCaseModules
@@ -217,6 +219,7 @@ val viewModelModules = module {
     }
     viewModel<PerformanceViewModel> { PerformanceViewModel(get()) }
     viewModel<ReceivableViewModel> { ReceivableViewModel() }
+    viewModel<TravelPreviewViewModel> { (vmData: TravelPreviewVmData) -> TravelPreviewViewModel(vmData, get()) }
 }
 
 val appModules = listOf(

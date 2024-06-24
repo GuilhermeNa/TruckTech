@@ -31,6 +31,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRecordsBinding? = null
     private val binding get() = _binding!!
+    private var stateHandler: RecordsStateHandler? = null
 
     private val args: RecordsFragmentArgs by navArgs()
     private val viewModel: RecordsViewModel by viewModel()
@@ -46,7 +47,10 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         if (requestKey == PAGE_FREIGHT) {
             val freightId = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToFreightPreviewFragment(freightId!!, args.travelId)
+                RecordsFragmentDirections.actionRecordsFragmentToFreightPreviewFragment(
+                    freightId!!,
+                    args.travelId
+                )
             )
         }
     }
@@ -54,7 +58,10 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         if (requestKey == PAGE_REFUEL) {
             val refuelId = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToRefuelPreviewFragment(refuelId!!, args.travelId)
+                RecordsFragmentDirections.actionRecordsFragmentToRefuelPreviewFragment(
+                    refuelId!!,
+                    args.travelId
+                )
             )
         }
     }
@@ -62,7 +69,10 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         if (requestKey == PAGE_COST) {
             val expendId = result.getString(KEY_ID)
             requireView().navigateTo(
-                RecordsFragmentDirections.actionRecordsFragmentToCostPreviewFragment(expendId!!, args.travelId)
+                RecordsFragmentDirections.actionRecordsFragmentToCostPreviewFragment(
+                    expendId!!,
+                    args.travelId
+                )
             )
         }
     }
@@ -88,6 +98,7 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRecordsBinding.inflate(inflater, container, false)
+        stateHandler = RecordsStateHandler(binding)
         return binding.root
     }
 
@@ -97,10 +108,12 @@ class RecordsFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initStateManager()
         initFab()
         initViewPager()
         initTabLayout()
         initFragmentManagerResultListener()
+
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -115,20 +128,49 @@ class RecordsFragment : BaseFragmentWithToolbar() {
         configurator.bottomNavigation(hasBottomNavigation = false)
     }
 
+    private fun initStateManager() {
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is StateR.Error -> stateHandler?.showError(state.error)
+
+                is StateR.LoadedR -> when (state) {
+                    StateR.LoadedR.IsFinished -> stateHandler?.showLoadedWhenIsFinished()
+                    StateR.LoadedR.IsUnfinished -> stateHandler?.showLoadedWhenUnfinished()
+                }
+
+            }
+        }
+    }
+
     private fun initFab() {
         binding.recordsFragmentFab.setOnClickListener { view ->
             when (viewModel.viewPagerPosition.value) {
 
                 0 -> {
-                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToFreightEditorFragment(null, args.travelId))
+                    view.navigateTo(
+                        RecordsFragmentDirections.actionRecordsFragmentToFreightEditorFragment(
+                            null,
+                            args.travelId
+                        )
+                    )
                 }
 
                 1 -> {
-                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToRefuelEditorFragment(null, args.travelId))
+                    view.navigateTo(
+                        RecordsFragmentDirections.actionRecordsFragmentToRefuelEditorFragment(
+                            null,
+                            args.travelId
+                        )
+                    )
                 }
 
                 2 -> {
-                    view.navigateTo(RecordsFragmentDirections.actionRecordsFragmentToCostEditorFragment(null, args.travelId))
+                    view.navigateTo(
+                        RecordsFragmentDirections.actionRecordsFragmentToCostEditorFragment(
+                            null,
+                            args.travelId
+                        )
+                    )
                 }
 
                 else -> throw IllegalArgumentException("Position does not represents any valid fragment")
@@ -183,10 +225,12 @@ class RecordsFragment : BaseFragmentWithToolbar() {
     //---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
-        _binding = null
+        super.onDestroyView()
+        stateHandler = null
         viewPager2?.unregisterOnPageChangeCallback(onPageChangeCallback)
         viewPager2 = null
-        super.onDestroyView()
+        _binding = null
+
     }
 
 }

@@ -142,5 +142,13 @@
     <string name="no_data_found">Nada encontrado</string>
     <string name="failed_to_load">Falha na busca</string>
     <string name="no_travel_found">Você ainda não possui viagens cadastradas. Para visualizar seu desempenho, adicione novas viagens.</string>
+    <string name="balance">Saldo</string>
+    <string name="travel_aid">Vale para viagem</string>
+    <string name="amount">Quantidade</string>
+    <string name="freights">Fretes</string>
+    <string name="refuels">Abastecimentos</string>
+    <string name="expends">Despesas</string>
+    <string name="finish">Finalizar</string>
+    <string name="view">Visualizar</string>
 
 </resources>

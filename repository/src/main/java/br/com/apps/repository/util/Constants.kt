@@ -30,9 +30,13 @@ const val LABEL_TYPE = "type"
 
 const val IS_VALID = "isValid"
 
+const val IS_FINISHED = "isFinished"
+
 const val LABEL_IS_OPERATIONAL = "isOperational"
 
 const val ENCODED_IMAGE = "encodedImage"
+
+const val ODOMETER_MEASURE = "odometerMeasure"
 
 //---------------------------------------------------------------------------------------------//
 // SUCCESS MESSAGES
@@ -102,7 +106,7 @@ internal const val FIRESTORE_COLLECTION_BANK = "bankAccount"
 
 internal const val FIRESTORE_COLLECTION_CUSTOMER = "customers"
 
-internal const val FIRESTORE_COLLECTION_COST_HELP = "cost_helps"
+internal const val FIRESTORE_COLLECTION_COST_HELP = "travel_aids"
 
 //---------------------------------------------------------------------------------------------//
 // COMMON

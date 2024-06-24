@@ -11,8 +11,8 @@ import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
 import br.com.apps.model.dto.payroll.TravelAidDto
-import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.RefuelDto
@@ -31,13 +31,13 @@ import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
-import br.com.apps.model.model.payroll.TravelAid
 import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.model.model.travel.TravelAid
 import br.com.apps.model.model.user.CommonUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot

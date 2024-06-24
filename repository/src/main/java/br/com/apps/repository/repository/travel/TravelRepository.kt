@@ -5,7 +5,7 @@ import br.com.apps.model.dto.travel.TravelDto
 class TravelRepository(
     private val read: TravelRead,
     private val write: TravelWrite
-): TravelRepositoryI {
+) : TravelRepositoryI {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE
@@ -14,6 +14,9 @@ class TravelRepository(
     override suspend fun save(dto: TravelDto) = write.save(dto)
 
     override suspend fun delete(travelId: String) = write.delete(travelId)
+
+    override suspend fun getTravelListByDriverIdAndIsFinished(driverId: String, flow: Boolean) =
+        read.getTravelListByDriverIdAndIsFinished(driverId, flow)
 
     //---------------------------------------------------------------------------------------------//
     // READ

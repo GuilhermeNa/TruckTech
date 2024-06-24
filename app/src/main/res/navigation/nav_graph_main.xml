@@ -73,8 +73,8 @@
             android:label="fragment_travels"
             tools:layout="@layout/fragment_travels">
             <action
-                android:id="@+id/action_travelsFragment_to_recordsFragment"
-                app:destination="@id/recordsFragment" />
+                android:id="@+id/action_travelsFragment_to_travelPreviewFragment"
+                app:destination="@id/travelPreviewFragment" />
         </fragment>
         <fragment
             android:id="@+id/recordsFragment"
@@ -186,6 +186,18 @@
             <argument
                 android:name="travelId"
                 app:argType="string" />
+        </fragment>
+        <fragment
+            android:id="@+id/travelPreviewFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.travel_preview.TravelPreviewFragment"
+            android:label="fragment_travel_preview"
+            tools:layout="@layout/fragment_travel_preview" >
+            <argument
+                android:name="travelId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_travelPreviewFragment_to_recordsFragment"
+                app:destination="@id/recordsFragment" />
         </fragment>
     </navigation>
 

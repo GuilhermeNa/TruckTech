@@ -7,7 +7,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import br.com.apps.trucktech.databinding.FragmentTimelineBinding
-import br.com.apps.trucktech.sampleEventsList
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_home.time_line.private_adapters.TimelineRecyclerAdapter
 
@@ -72,7 +71,7 @@ class TimelineFragment : BaseFragmentWithToolbar() {
 
     private fun initRecyclerView() {
         val recyclerView = binding.fragmentTimeLineRecycler
-        val adapter = TimelineRecyclerAdapter(requireContext(), sampleEventsList)
+        val adapter = TimelineRecyclerAdapter(requireContext(), emptyList())
         recyclerView.adapter = adapter
     }
 

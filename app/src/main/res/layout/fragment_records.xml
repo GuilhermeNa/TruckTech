@@ -17,6 +17,7 @@
         android:layout_height="wrap_content"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -33,7 +34,15 @@
             android:contentDescription="@string/floating_action_button_for_add_data"
             android:src="@drawable/level_list_icons_register"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/box_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        layout="@layout/box_error"/>
+
 </LinearLayout>

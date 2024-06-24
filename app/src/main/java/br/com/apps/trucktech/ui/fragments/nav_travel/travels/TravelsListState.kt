@@ -5,9 +5,10 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentTravelsBinding
+import br.com.apps.trucktech.util.state.StateDeleteI
 import br.com.apps.trucktech.util.state.StateI
 
-class TravelsListState(private val binding: FragmentTravelsBinding) : StateI {
+class TravelsListState(private val binding: FragmentTravelsBinding) : StateI, StateDeleteI {
 
     override fun showLoading() {
         binding.travelsFragmentRecycler.visibility = GONE
@@ -41,6 +42,10 @@ class TravelsListState(private val binding: FragmentTravelsBinding) : StateI {
         binding.fragTravelsBoxError.layout.visibility = VISIBLE
         binding.fragTravelsBoxError.error.visibility = GONE
         binding.fragTravelsBoxError.empty.visibility = VISIBLE
+    }
+
+    override fun showUpdating() {
+        TODO("Not yet implemented")
     }
 
     override fun showError(e: Exception) {

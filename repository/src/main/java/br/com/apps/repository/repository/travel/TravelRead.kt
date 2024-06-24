@@ -5,6 +5,7 @@ import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.DRIVER_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_TRAVELS
+import br.com.apps.repository.util.IS_FINISHED
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.onComplete
 import br.com.apps.repository.util.onSnapShot
@@ -15,6 +16,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 class TravelRead(fireStore: FirebaseFirestore) : TravelReadI {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_TRAVELS)
+    override suspend fun getTravelListByDriverIdAndIsFinished(
+        driverId: String,
+        flow: Boolean
+    ): LiveData<Response<List<Travel>>> {
+        val listener = collection.whereEqualTo(DRIVER_ID, driverId).whereEqualTo(IS_FINISHED, true)
+
+        return if (flow) listener.onSnapShot { it.toTravelList() }
+        else listener.onComplete { it.toTravelList() }
+    }
 
     /**
      * Fetches the [Travel] dataSet for the specified driver ID.

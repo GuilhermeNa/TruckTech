@@ -4,18 +4,15 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.TimeLineEvent
 import br.com.apps.trucktech.databinding.ItemTimeLineBinding
 import br.com.apps.trucktech.databinding.ItemTimeLineFirstBinding
 import br.com.apps.trucktech.databinding.ItemTimeLineLastBinding
 import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
-import br.com.apps.trucktech.model.events.TimeLineEvent
 
 class TimelineRecyclerAdapter(
-
     private val context: Context,
     private val dataSet: List<TimeLineEvent>,
-
-
     ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val firstItem = 0

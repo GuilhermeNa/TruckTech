@@ -20,7 +20,7 @@ data class Freight(
     var cargo: String,
 
     var breakDown: BigDecimal? = null,
-    var value: BigDecimal? = null,
+    var value: BigDecimal,
     var loadingDate: LocalDateTime? = null,
 
     var dailyValue: BigDecimal? = null,

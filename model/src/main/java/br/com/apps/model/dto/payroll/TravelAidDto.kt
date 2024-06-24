@@ -6,6 +6,7 @@ data class TravelAidDto(
     val masterUid: String? = null,
     val id: String? = null,
     val employeeId: String? = null,
+    val travelId: String? = null,
 
     val date: Date? = null,
     val value: Double? = null,
@@ -18,6 +19,7 @@ data class TravelAidDto(
 
         if (masterUid == null ||
             employeeId == null ||
+            travelId == null ||
             date == null ||
             value == null ||
             isPaid == null

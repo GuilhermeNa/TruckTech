@@ -6,15 +6,12 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.travel.TravelDto
-import br.com.apps.model.factory.TravelFactory
-import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.util.buildUiResponse
 import br.com.apps.trucktech.util.state.State
-import br.com.apps.usecase.TravelIdsData
 import br.com.apps.usecase.TravelUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -52,16 +49,20 @@ class TravelsListViewModel(
         }
     }
 
-    suspend fun delete(idsData: TravelIdsData) =
+    suspend fun delete(travel: Travel) =
+
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
+            setState(State.Deleting)
+
             try {
-                setState(State.Deleting)
-                useCase.deleteTravel(idsData)
-                emit(Response.Success())
+                useCase.deleteTravel(travel)
                 setState(State.Deleted)
+                emit(Response.Success())
+
             } catch (e: Exception) {
                 setState(State.Deleted)
                 emit(Response.Error(e))
+
             }
         }
 
@@ -80,15 +81,17 @@ class TravelsListViewModel(
     }
 
     private fun createDto(): TravelDto {
-        val dto = TravelDto(
-        masterUid = vmData.masterUid,
-        truckId = vmData.truckId,
-        driverId = vmData.driverId,
-        isFinished = false,
-        initialDate = LocalDateTime.now().toDate()
+        return TravelDto(
+            masterUid = vmData.masterUid,
+            truckId = vmData.truckId,
+            driverId = vmData.driverId,
+            isFinished = false,
+            initialDate = LocalDateTime.now().toDate(),
+            initialOdometerMeasurement = 349592.0
         )
-        return TravelFactory.create(dto).toDto()
     }
+
+    //TODO criar o objeto da forma correta
 
     fun dialogDismissed() {
         _dialog.value = false

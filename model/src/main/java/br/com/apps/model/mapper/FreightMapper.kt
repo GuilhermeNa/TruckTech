@@ -21,7 +21,7 @@ fun FreightDto.toModel(): Freight {
             destiny = this.destiny!!,
             cargo = this.cargo!!,
             weight = this.weight?.toBigDecimal()!!,
-            value = this.value?.toBigDecimal(),
+            value = this.value!!.toBigDecimal(),
             breakDown = this.breakDown?.let { BigDecimal(it) },
             loadingDate = this.loadingDate?.toLocalDateTime(),
             dailyValue = this.dailyValue?.let { BigDecimal(it) },

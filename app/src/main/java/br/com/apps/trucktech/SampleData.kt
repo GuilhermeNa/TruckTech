@@ -1,15 +1,10 @@
 package br.com.apps.trucktech
 
-import br.com.apps.model.model.travel.Travel
-import br.com.apps.trucktech.model.employee.AuthorizationLevelType
-import br.com.apps.trucktech.model.employee.Driver
-import br.com.apps.trucktech.model.events.TimeLineEvent
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
-val sampleDriver = Driver(
+/*val sampleDriver = Driver(
     id = "idOne",
     name = "José Anacrizio",
     userName = "JoseAnacrizio",
@@ -20,7 +15,7 @@ val sampleDriver = Driver(
 val sampleTruck = Truck(
     id = 1L,
     name = "RIF0A17"
-)
+)*/
 
 /*val sampleBanksList = listOf(
     BankAccount(
@@ -43,27 +38,7 @@ val sampleTruck = Truck(
     )
 )*/
 
-val sampleTravelsList = listOf(
-    Travel(
-        id = "1L",
-        truckId = "1L",
-        driverId = "1L",
-        initialDate = LocalDateTime.now(),
-        finalDate = null,
-        isFinished = false
-    ),
-    Travel(
-        id = "2L",
-        truckId = "1L",
-        driverId = "1L",
-        initialDate = LocalDateTime.parse("2024-06-18T12:30:45", formatter),
-        finalDate = LocalDateTime.parse("2024-06-29T12:30:45", formatter),
-        isFinished = true
-    )
-
-)
-
-val sampleEventsList = listOf(
+/*val sampleEventsList = listOf(
     TimeLineEvent(
         id = 1,
         truckId = 1L,
@@ -96,5 +71,5 @@ val sampleEventsList = listOf(
         date = LocalDateTime.parse("2024-01-19T12:30:45", formatter),
         description = "Você saiu de férias"
     )
-)
+)*/
 

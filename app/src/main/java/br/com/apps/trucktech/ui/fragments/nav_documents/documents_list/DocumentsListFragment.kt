@@ -132,6 +132,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                 }
                 State.Deleted -> {}
                 State.Deleting -> {}
+                else -> {}
             }
         }
     }

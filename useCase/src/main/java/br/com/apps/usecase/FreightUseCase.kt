@@ -38,7 +38,7 @@ class FreightUseCase(
     }
 
     suspend fun save(permission: PermissionLevelType, dto: FreightDto) {
-        if (!dto.validateFields()) throw InvalidParameterException("Invalid Freight for saving")
+        if (!dto.validateFields()) throw InvalidParameterException("Invalid Fields")
         validatePermission(permission, dto)
         fRepository.save(dto)
     }

@@ -5,9 +5,10 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestsListBinding
+import br.com.apps.trucktech.util.state.StateDeleteI
 import br.com.apps.trucktech.util.state.StateI
 
-class RequestsListState(private val binding: FragmentRequestsListBinding): StateI {
+class RequestsListState(private val binding: FragmentRequestsListBinding): StateI, StateDeleteI {
 
     override fun showLoading() {}
 
@@ -25,6 +26,8 @@ class RequestsListState(private val binding: FragmentRequestsListBinding): State
         binding.fragRequestsBoxError.error.visibility = GONE
         binding.fragmentRequestsListFab.visibility = VISIBLE
     }
+
+    override fun showUpdating() {    }
 
     override fun showError(e: Exception) {
         binding.fragRequestsBoxError.layout.visibility = VISIBLE

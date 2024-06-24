@@ -6,8 +6,8 @@ import br.com.apps.repository.repository.advance.AdvanceRead
 import br.com.apps.repository.repository.advance.AdvanceRepository
 import br.com.apps.repository.repository.auth.AuthenticationRepository
 import br.com.apps.repository.repository.bank.BankRepository
-import br.com.apps.repository.repository.cost_help.CostHelpRead
-import br.com.apps.repository.repository.cost_help.CostHelpRepository
+import br.com.apps.repository.repository.cost_help.TravelAidRead
+import br.com.apps.repository.repository.cost_help.TravelAidRepository
 import br.com.apps.repository.repository.customer.CustomerRead
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.document.DocumentRead
@@ -72,7 +72,7 @@ val repositoryModules = module {
     single<AdvanceRepository> { AdvanceRepository(get()) }
     single<BankRepository> { BankRepository(get()) }
     single<CustomerRepository> { CustomerRepository(get()) }
-    single<CostHelpRepository> { CostHelpRepository(get()) }
+    single<TravelAidRepository> { TravelAidRepository(get()) }
 }
 
 val writeModules = module {
@@ -104,7 +104,7 @@ val readModules = module {
     single<LabelRead> { LabelRead(get()) }
     single<EmployeeRead> { EmployeeRead(get()) }
     single<CustomerRead> { CustomerRead(get()) }
-    single<CostHelpRead> { CostHelpRead(get()) }
+    single<TravelAidRead> { TravelAidRead(get()) }
 }
 
 val fireBaseModules = module {

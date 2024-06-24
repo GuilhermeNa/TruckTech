@@ -7,6 +7,7 @@ import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.DRIVER_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_REFUELS
+import br.com.apps.repository.util.ODOMETER_MEASURE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TRAVEL_ID
 import br.com.apps.repository.util.onComplete
@@ -14,6 +15,7 @@ import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toRefuelList
 import br.com.apps.repository.util.toRefuelObject
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class RefuelRead(fireStore: FirebaseFirestore) : RefuelReadI {
 
@@ -43,7 +45,7 @@ class RefuelRead(fireStore: FirebaseFirestore) : RefuelReadI {
      */
     override suspend fun getRefuelListByTravelId(travelId: String, flow: Boolean)
             : LiveData<Response<List<Refuel>>> {
-        val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+        val listener = collection.whereEqualTo(TRAVEL_ID, travelId).orderBy(ODOMETER_MEASURE, Query.Direction.ASCENDING)
 
         return if (flow) listener.onSnapShot { it.toRefuelList() }
         else listener.onComplete { it.toRefuelList() }

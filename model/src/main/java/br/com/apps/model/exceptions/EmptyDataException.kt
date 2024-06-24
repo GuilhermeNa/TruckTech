@@ -1,3 +1,3 @@
 package br.com.apps.model.exceptions
 
-class EmptyDataException: Exception()
+class EmptyDataException(message: String): Exception(message)

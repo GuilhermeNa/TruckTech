@@ -6,9 +6,9 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
-import br.com.apps.model.model.payroll.TravelAid
+import br.com.apps.model.model.travel.TravelAid
 import br.com.apps.repository.repository.advance.AdvanceRepository
-import br.com.apps.repository.repository.cost_help.CostHelpRepository
+import br.com.apps.repository.repository.cost_help.TravelAidRepository
 import br.com.apps.repository.repository.loan.LoanRepository
 import br.com.apps.repository.util.Response
 import kotlinx.coroutines.flow.first
@@ -18,7 +18,7 @@ class DiscountViewModel(
     private val employeeId: String,
     private val loanRepository: LoanRepository,
     private val advanceRepository: AdvanceRepository,
-    private val costHelpRepository: CostHelpRepository
+    private val costHelpRepository: TravelAidRepository
 ) : ViewModel() {
 
     private val _state = MutableLiveData<DiscountFState>()

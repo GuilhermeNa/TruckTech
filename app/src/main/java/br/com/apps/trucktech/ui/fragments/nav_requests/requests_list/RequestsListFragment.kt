@@ -189,6 +189,9 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                 is State.Error -> stateHandler?.showError(state.error)
                 State.Deleting -> stateHandler?.showDeleting()
                 State.Deleted -> stateHandler?.showDeleted()
+                State.Added -> TODO()
+                State.Adding -> TODO()
+                State.Updating -> TODO()
             }
         }
 
