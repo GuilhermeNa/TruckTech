@@ -69,6 +69,15 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
+        prepareToolbar()
+
+    }
+
+    private fun prepareToolbar() {
+        binding.fragBankPreviewToolbar.toolbar.menu.apply {
+            findItem(R.id.menu_preview_edit).isVisible = true
+            findItem(R.id.menu_preview_delete).isVisible = true
+        }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -129,6 +138,7 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
                         requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                         requireView().popBackStack()
                     }
+                    else -> {}
                 }
             }
         }
@@ -145,6 +155,7 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> response.data?.let { bind(it) }
+                else -> {}
             }
         }
 
@@ -159,7 +170,7 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
 
     private fun bind(data: BankPFData) {
         binding.apply {
-            fragBankPreviewImage.loadImageThroughUrl(data.urlImage, requireContext())
+            fragBankPreviewImage.loadImageThroughUrl(data.urlImage)
             fragBankPreviewBank.text = data.bankAcc.bankName
             fragBankPreviewBranch.text = data.bankAcc.branch.toString()
             fragBankPreviewNumber.text = data.bankAcc.accNumber.toString()

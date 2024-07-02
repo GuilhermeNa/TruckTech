@@ -23,6 +23,9 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.util.MonetaryMaskUtil
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceShow
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -69,6 +72,13 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
         binding.fragExpendEditorDescription.setLines(3)
         initStateManager()
         initDateViewClickListener()
+        initTextWatcher()
+    }
+
+    private fun initTextWatcher() {
+        binding.fragExpendEditorValue.run {
+            addTextChangedListener(MonetaryMaskUtil(this))
+        }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -165,7 +175,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
                 val viewDto = ExpendDto(
                     labelId = viewModel.data.value!!.labelList.getIdByName(name),
                     company = company,
-                    value = value.toDouble(),
+                    value = value.formatPriceSave().toDouble(),
                     description = description,
                     isPaidByEmployee = isPaidByDriver.toBoolean()
                 )
@@ -232,7 +242,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
         binding.apply {
             fragExpendEditorAutoComplete.setText(expend.label?.name)
             fragExpendEditorCompany.setText(expend.company)
-            fragExpendEditorValue.setText(expend.value.toPlainString())
+            fragExpendEditorValue.setText(expend.value.formatPriceShow())
             fragExpendEditorDescription.setText(expend.description)
             expend.isPaidByEmployee.let { fragExpendPaidByEmployeeCheckbox.isChecked = it }
         }

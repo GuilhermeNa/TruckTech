@@ -15,9 +15,6 @@ class RefuelRepository(
 
     override suspend fun delete(refuelId: String) = write.delete(refuelId)
 
-    override suspend fun deleteRefuelForThisTravel(travelId: String, refuelId: String) =
-        write.deleteRefuelForThisTravel(travelId, refuelId)
-
     //---------------------------------------------------------------------------------------------//
     // READ
     //---------------------------------------------------------------------------------------------//

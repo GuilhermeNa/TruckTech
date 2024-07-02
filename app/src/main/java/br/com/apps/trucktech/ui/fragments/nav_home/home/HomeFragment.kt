@@ -48,7 +48,10 @@ class HomeFragment : BaseFragmentWithToolbar() {
             lifecycleScope.launch {
                 mainActVM.initUserData(it).asFlow().first { response ->
                     when (response) {
-                        is Response.Error -> viewModel.setState(State.Error(response.exception))
+                        is Response.Error -> {
+                            response.exception.printStackTrace()
+                            viewModel.setState(State.Error(response.exception))
+                        }
                         is Response.Success -> response.data?.let { viewModel.loadData(it) }
                             ?: viewModel.setState(State.Error(NullPointerException()))
                     }

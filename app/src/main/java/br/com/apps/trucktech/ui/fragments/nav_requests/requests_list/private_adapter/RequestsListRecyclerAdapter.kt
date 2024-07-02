@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
 import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestBinding
@@ -44,10 +45,12 @@ class RequestsListRecyclerAdapter(
 
         init {
             card.setOnLongClickListener {
-                PopupMenu(context, itemView).apply {
-                    menuInflater.inflate(R.menu.menu_delete, menu)
-                    setOnMenuItemClickListener(this@ViewHolder)
-                }.show()
+                if (request.status == PaymentRequestStatusType.SENT) {
+                    PopupMenu(context, itemView).apply {
+                        menuInflater.inflate(R.menu.menu_delete, menu)
+                        setOnMenuItemClickListener(this@ViewHolder)
+                    }.show()
+                }
                 true
             }
         }

@@ -1,7 +1,7 @@
 package br.com.apps.usecase
 
-import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType

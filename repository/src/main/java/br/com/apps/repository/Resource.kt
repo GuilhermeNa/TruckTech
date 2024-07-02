@@ -10,6 +10,6 @@ class Resource<T>(
 fun <T> Response<T>.extractData(): T {
     return when(this) {
         is Response.Error -> throw this.exception
-        is Response.Success -> this.data ?: throw NullPointerException("The data is null data")
+        is Response.Success -> this.data ?: throw NullPointerException("The data is null")
     }
 }

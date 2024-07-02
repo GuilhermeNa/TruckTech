@@ -1,44 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragments.nav_settings.bank.bank_list.BankListFragment">
 
     <include
         android:id="@+id/fragment_bank_toolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        layout="@layout/layout_toolbar"
         app:layout_constraintEnd_toEndOf="parent"
-        layout="@layout/layout_toolbar"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fragment_bank_recycler"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        tools:listitem="@layout/item_bank"
+        android:paddingTop="16dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_bank_toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:paddingTop="16dp"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_bank_toolbar"
+        tools:listitem="@layout/item_bank" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/frag_bank_list_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:importantForAccessibility="no"
         android:src="@drawable/icon_add"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp"
-        android:importantForAccessibility="no" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <include
         android:id="@+id/frag_bank_box_empty"
-        android:layout_height="match_parent"
+        layout="@layout/box_error"
         android:layout_width="match_parent"
-        layout="@layout/box_error"/>
+        android:layout_height="match_parent" />
+
+    <include
+        android:id="@+id/box_gif"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        layout="@layout/box_gif"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

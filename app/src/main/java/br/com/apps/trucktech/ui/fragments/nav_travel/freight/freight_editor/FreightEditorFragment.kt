@@ -21,6 +21,9 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.util.MonetaryMaskUtil
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceShow
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -67,6 +70,19 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
         initDateViewClickListener()
+        initTextWatcher()
+    }
+
+    private fun initTextWatcher() {
+        binding.apply {
+            fragFreightEditorWeight.run {
+                addTextChangedListener(MonetaryMaskUtil(this))
+            }
+
+            fragFreightEditorValue.run {
+                addTextChangedListener(MonetaryMaskUtil(this))
+            }
+        }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -171,8 +187,8 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
                     origin = origin,
                     destiny = destiny,
                     cargo = cargo,
-                    weight = weight.toDouble(),
-                    value = value.toDouble()
+                    weight = weight.formatPriceSave().toDouble(),
+                    value = value.formatPriceSave().toDouble()
                 )
 
                 save(viewDto)
@@ -241,8 +257,8 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
             fragFreightEditorOrigin.setText(freight.origin)
             fragFreightEditorDestiny.setText(freight.destiny)
             fragFreightEditorCargo.setText(freight.cargo)
-            fragFreightEditorWeight.setText(freight.weight.toPlainString())
-            fragFreightEditorValue.setText(freight.value?.toPlainString())
+            fragFreightEditorWeight.setText(freight.weight.formatPriceShow())
+            fragFreightEditorValue.setText(freight.value.formatPriceShow())
         }
     }
 

@@ -3,6 +3,8 @@ package br.com.apps.trucktech.ui.fragments.nav_travel.travel_preview
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -20,6 +22,7 @@ import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.trucktech.expressions.toNumberDecimalPtBr
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -120,17 +123,18 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
      */
     private fun initFab() {
         binding.boxHeader.fab.setOnClickListener {
-                viewModel.endTravel().observe(viewLifecycleOwner) { response ->
-                    when(response) {
-                        is Response.Error -> {
-                            response.exception.printStackTrace()
-                            requireView().snackBarRed(FAILED_WHEN_FINISHING)
-                        }
-                        is Response.Success -> {
-                            requireView().snackBarGreen(SUCCESS_WHEN_FINISHING)
-                        }
+            viewModel.endTravel().observe(viewLifecycleOwner) { response ->
+                when (response) {
+                    is Response.Error -> {
+                        response.exception.printStackTrace()
+                        requireView().snackBarRed(FAILED_WHEN_FINISHING)
+                    }
+
+                    is Response.Success -> {
+                        requireView().snackBarGreen(SUCCESS_WHEN_FINISHING)
                     }
                 }
+            }
         }
     }
 
@@ -288,6 +292,20 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
             boxDate.apply {
                 boxTravelPreviewInitialDate.text = t.initialDate.getCompleteDateInPtBr()
                 boxTravelPreviewFinalDate.text = t.finalDate?.getCompleteDateInPtBr() ?: ""
+            }
+
+            //ODOMETER
+            boxOdometer.apply {
+                boxTravelPreviewInitialMeasure.text = t.initialOdometerMeasurement.toNumberDecimalPtBr() + " - km"
+                boxTravelPreviewFinalMeasure.apply {
+                    visibility =
+                        if (t.finalOdometerMeasurement == null) {
+                            GONE
+                        } else {
+                            text = t.finalOdometerMeasurement!!.toNumberDecimalPtBr() + " - km"
+                            VISIBLE
+                        }
+                }
             }
 
             //HEADER

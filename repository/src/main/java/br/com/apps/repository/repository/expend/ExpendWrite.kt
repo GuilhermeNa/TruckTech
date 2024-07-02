@@ -5,7 +5,6 @@ import br.com.apps.model.model.travel.Expend
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_EXPENDS
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import java.security.InvalidParameterException
 
 class ExpendWrite(fireStore: FirebaseFirestore): ExpendWriteI {
@@ -18,10 +17,7 @@ class ExpendWrite(fireStore: FirebaseFirestore): ExpendWriteI {
      * @param expendId The ID of the expenditure document to be deleted.
      */
     override suspend fun delete(expendId: String) {
-        collection
-            .document(expendId)
-            .delete()
-            .await()
+        collection.document(expendId).delete()
     }
 
     /**
@@ -39,25 +35,16 @@ class ExpendWrite(fireStore: FirebaseFirestore): ExpendWriteI {
         }
     }
 
-    private suspend fun create(dto: ExpendDto): String {
+    private fun create(dto: ExpendDto): String {
         val document = collection.document()
         dto.id = document.id
-
-        document
-            .set(dto)
-            .await()
-
+        document.set(dto)
         return document.id
     }
 
-    private suspend fun update(dto: ExpendDto) {
+    private fun update(dto: ExpendDto) {
         val id = dto.id ?: throw InvalidParameterException(EMPTY_ID)
-
-        collection
-            .document(id)
-            .set(dto)
-            .await()
-
+        collection.document(id).set(dto)
     }
 
 }

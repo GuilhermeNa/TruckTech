@@ -85,6 +85,8 @@ class MainActivityViewModel(
                 name = ("$name$surname"),
                 plate = truck.plate,
                 email = user.email,
+                averageAim = BigDecimal(truck.averageAim),
+                performanceAim = BigDecimal(truck.performanceAim),
                 urlImage = user.urlImage,
                 permissionLevelType = user.permission,
                 commissionPercentual = truck.commissionPercentual
@@ -108,6 +110,8 @@ data class LoggedUser(
     val name: String,
     val plate: String,
     val email: String,
+    val averageAim: BigDecimal,
+    val performanceAim: BigDecimal,
     val urlImage: String? = null,
     val permissionLevelType: PermissionLevelType,
     val commissionPercentual: BigDecimal

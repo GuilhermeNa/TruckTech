@@ -41,7 +41,7 @@ class DocumentFragment : BaseFragmentWithToolbar() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         args.document.run {
-            binding.fragmentDocumentImage.loadImageThroughUrl(urlImage, requireContext())
+            binding.fragmentDocumentImage.loadImageThroughUrl(urlImage)
             binding.fragmentDocumentToolbar.toolbarText.text = name ?: "Documento"
         }
     }

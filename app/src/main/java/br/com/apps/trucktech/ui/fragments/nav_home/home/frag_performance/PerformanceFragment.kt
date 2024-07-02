@@ -18,7 +18,6 @@ import br.com.apps.trucktech.ui.fragments.nav_home.home.private_adapters.HomeFra
 import br.com.apps.trucktech.ui.fragments.nav_home.home.private_adapters.PeriodRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.HeaderDefaultHorizontalAdapter
 import br.com.apps.trucktech.util.state.State
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.relex.circleindicator.CircleIndicator3
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -70,11 +69,10 @@ class PerformanceFragment : Fragment() {
 
     private fun initializeViewModel() {
         lifecycleScope.launch {
-            parentViewModel.data.asFlow().first { data ->
+            parentViewModel.data.asFlow().collect { data ->
                 data?.travels?.let {
-                    viewModel.initialize(it)
+                    viewModel.initialize(it, data.averageAim, data.performanceAim)
                 } ?: viewModel.setState(State.Error(NullPointerException()))
-                true
             }
         }
     }

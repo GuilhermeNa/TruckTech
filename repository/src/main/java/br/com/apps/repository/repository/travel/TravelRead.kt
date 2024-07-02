@@ -12,6 +12,8 @@ import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toTravelList
 import br.com.apps.repository.util.toTravelObject
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class TravelRead(fireStore: FirebaseFirestore) : TravelReadI {
 
@@ -20,10 +22,13 @@ class TravelRead(fireStore: FirebaseFirestore) : TravelReadI {
         driverId: String,
         flow: Boolean
     ): LiveData<Response<List<Travel>>> {
-        val listener = collection.whereEqualTo(DRIVER_ID, driverId).whereEqualTo(IS_FINISHED, true)
+        return withContext(Dispatchers.IO) {
+            val listener =
+                collection.whereEqualTo(DRIVER_ID, driverId).whereEqualTo(IS_FINISHED, true)
 
-        return if (flow) listener.onSnapShot { it.toTravelList() }
-        else listener.onComplete { it.toTravelList() }
+            return@withContext if (flow) listener.onSnapShot { it.toTravelList() }
+            else listener.onComplete { it.toTravelList() }
+        }
     }
 
     /**
@@ -35,10 +40,12 @@ class TravelRead(fireStore: FirebaseFirestore) : TravelReadI {
      */
     override suspend fun getTravelListByDriverId(driverId: String, flow: Boolean)
             : LiveData<Response<List<Travel>>> {
-        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-        return if (flow) listener.onSnapShot { it.toTravelList() }
-        else listener.onComplete { it.toTravelList() }
+            return@withContext if (flow) listener.onSnapShot { it.toTravelList() }
+            else listener.onComplete { it.toTravelList() }
+        }
     }
 
     /**
@@ -50,10 +57,12 @@ class TravelRead(fireStore: FirebaseFirestore) : TravelReadI {
      */
     override suspend fun getTravelById(travelId: String, flow: Boolean)
             : LiveData<Response<Travel>> {
-        val listener = collection.document(travelId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.document(travelId)
 
-        return if (flow) listener.onSnapShot { it.toTravelObject() }
-        else listener.onComplete { it.toTravelObject() }
+            return@withContext if (flow) listener.onSnapShot { it.toTravelObject() }
+            else listener.onComplete { it.toTravelObject() }
+        }
     }
 
 }

@@ -24,6 +24,9 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.util.MonetaryMaskUtil
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceShow
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -69,6 +72,28 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
         initDateViewClickListener()
+        initTextWatcher()
+    }
+
+    private fun initTextWatcher() {
+        binding.apply {
+            fragRefuelEditorOdometer.run {
+                addTextChangedListener(MonetaryMaskUtil(this))
+            }
+
+            fragRefuelEditorAmountLiters.run {
+                addTextChangedListener(MonetaryMaskUtil(this))
+            }
+
+            fragRefuelEditorValuePerLiter.run {
+                addTextChangedListener(MonetaryMaskUtil(this))
+            }
+
+            fragRefuelEditorTotalValue.run {
+                addTextChangedListener(MonetaryMaskUtil(this))
+            }
+
+        }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -166,10 +191,10 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
             if (fieldsAreValid) {
                 val viewDto = RefuelDto(
                     station = station,
-                    odometerMeasure = odometer.toDouble(),
-                    amountLiters = amountLiters.toDouble(),
-                    valuePerLiter = valuePerLiter.toDouble(),
-                    totalValue = totalValue.toDouble(),
+                    odometerMeasure = odometer.formatPriceSave().toDouble(),
+                    amountLiters = amountLiters.formatPriceSave().toDouble(),
+                    valuePerLiter = valuePerLiter.formatPriceSave().toDouble(),
+                    totalValue = totalValue.formatPriceSave().toDouble(),
                     isCompleteRefuel = isComplete
                 )
                 save(viewDto)
@@ -217,10 +242,10 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
     private fun bind(refuel: Refuel) {
         binding.apply {
             fragRefuelEditorStation.setText(refuel.station)
-            fragRefuelEditorOdometer.setText(refuel.odometerMeasure.toPlainString())
-            fragRefuelEditorAmountLiters.setText(refuel.amountLiters.toPlainString())
-            fragRefuelEditorValuePerLiter.setText(refuel.valuePerLiter.toPlainString())
-            fragRefuelEditorTotalValue.setText(refuel.totalValue.toPlainString())
+            fragRefuelEditorOdometer.setText(refuel.odometerMeasure.formatPriceShow())
+            fragRefuelEditorAmountLiters.setText(refuel.amountLiters.formatPriceShow())
+            fragRefuelEditorValuePerLiter.setText(refuel.valuePerLiter.formatPriceShow())
+            fragRefuelEditorTotalValue.setText(refuel.totalValue.formatPriceShow())
             refuel.isCompleteRefuel.let { fragRefuelEditorCheckbox.isChecked = it }
         }
     }

@@ -14,8 +14,7 @@ class BoxTimeLineViewManager(
     fun initialize() {
         binding.apply {
             panelTimeLineImage.loadImageThroughUrl(
-                "https://cdn.sanity.io/images/599r6htc/localized/e09081e08bcc400a488dd7c1fa88a4d1493b52aa-1108x1108.png?w=514&q=75&fit=max&auto=format",
-                context
+                "https://cdn.sanity.io/images/599r6htc/localized/e09081e08bcc400a488dd7c1fa88a4d1493b52aa-1108x1108.png?w=514&q=75&fit=max&auto=format"
             )
             panelTimeLineCard.setOnClickListener {
                 it.navigateTo(HomeFragmentDirections.actionHomeFragmentToTimelineFragment())

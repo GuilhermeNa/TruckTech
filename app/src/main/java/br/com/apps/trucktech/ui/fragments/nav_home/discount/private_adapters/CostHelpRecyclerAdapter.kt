@@ -49,8 +49,7 @@ class CostHelpRecyclerAdapter(
         holder.apply {
             try {
                 image.loadImageThroughUrl(
-                    url = "https://wtdistribuidora.com.br/uploads/blog/97/83a2ff783cb23fb1db944ddd279411ff.jpg",
-                    context = context
+                    url = "https://wtdistribuidora.com.br/uploads/blog/97/83a2ff783cb23fb1db944ddd279411ff.jpg"
                 )
                 val day = item.date.getDayFormatted()
                 val month = item.date.getMonthInPtBrAbbreviated()

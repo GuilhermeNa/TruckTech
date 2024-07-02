@@ -2,10 +2,11 @@ package br.com.apps.trucktech.util.state
 
 sealed class State {
     object Loading: State()
+
     object Loaded: State()
     object Empty: State()
-    object Updating: State()
     data class Error(val error: Exception) : State()
+    object Updating: State()
 
     object Deleting: State()
     object Deleted: State()

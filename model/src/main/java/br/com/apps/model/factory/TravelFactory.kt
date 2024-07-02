@@ -15,6 +15,7 @@ object TravelFactory {
                 truckId = viewDto.truckId!!,
                 driverId = viewDto.driverId!!,
                 isFinished = viewDto.isFinished!!,
+                considerAverage = viewDto.considerAverage!!,
                 initialDate = viewDto.initialDate!!.toLocalDateTime(),
                 initialOdometerMeasurement = BigDecimal(viewDto.initialOdometerMeasurement!!)
             )

@@ -2,12 +2,10 @@ package br.com.apps.repository.repository.refuel
 
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_REFUELS
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_TRAVELS
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import java.security.InvalidParameterException
 
 class RefuelWrite(fireStore: FirebaseFirestore): RefuelWriteI {
@@ -30,25 +28,16 @@ class RefuelWrite(fireStore: FirebaseFirestore): RefuelWriteI {
         }
     }
 
-    private suspend fun create(dto: RefuelDto): String {
+    private fun create(dto: RefuelDto): String {
         val document = collection.document()
         dto.id = document.id
-
-        document
-            .set(dto)
-            .await()
-
+        document.set(dto)
         return document.id
     }
 
-    private suspend fun update(dto: RefuelDto) {
+    private fun update(dto: RefuelDto) {
         val id = dto.id ?: throw InvalidParameterException(EMPTY_ID)
-
-        collection
-            .document(id)
-            .set(dto)
-            .await()
-
+        collection.document(id).set(dto)
     }
 
     /**
@@ -57,25 +46,7 @@ class RefuelWrite(fireStore: FirebaseFirestore): RefuelWriteI {
      * @param refuelId The ID of the document to be deleted.
      */
     override suspend fun delete(refuelId: String) {
-        collection
-            .document(refuelId)
-            .delete()
-            .await()
-    }
-
-    /**
-     * Deletes a specific [Refuel] entry associated with a [Travel].
-     *
-     * @param travelId The ID of the travel from which to delete the refuel entry.
-     * @param refuelId The ID of the refuel entry to delete.
-     */
-    override suspend fun deleteRefuelForThisTravel(travelId: String, refuelId: String) {
-        parentCollection
-            .document(travelId)
-            .collection(FIRESTORE_COLLECTION_REFUELS)
-            .document(refuelId)
-            .delete()
-            .await()
+        collection.document(refuelId).delete()
     }
 
 }

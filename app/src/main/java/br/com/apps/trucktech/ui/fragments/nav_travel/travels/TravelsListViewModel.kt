@@ -13,6 +13,7 @@ import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.util.buildUiResponse
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.TravelUseCase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -40,9 +41,14 @@ class TravelsListViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
+    init {
+        setState(State.Loading)
+    }
+
     fun loadData() {
         viewModelScope.launch {
-            useCase.getCompleteTravelListByDriverId(vmData.driverId).asFlow().first { response ->
+            delay(1000)
+            useCase.getTravelListByDriverId(vmData.driverId).asFlow().first { response ->
                 response.buildUiResponse(_state, _data)
                 true
             }
@@ -50,7 +56,6 @@ class TravelsListViewModel(
     }
 
     suspend fun delete(travel: Travel) =
-
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             setState(State.Deleting)
 
@@ -70,9 +75,10 @@ class TravelsListViewModel(
         _state.value = state
     }
 
-    fun createAndSave() = liveData<Response<Unit>>(viewModelScope.coroutineContext) {
+    fun createAndSave(odometerMeasurement: Double) =
+        liveData<Response<Unit>>(viewModelScope.coroutineContext) {
         try {
-            val dto = createDto()
+            val dto = createDto(odometerMeasurement)
             repository.save(dto)
             emit(Response.Success())
         } catch (e: Exception) {
@@ -80,25 +86,29 @@ class TravelsListViewModel(
         }
     }
 
-    private fun createDto(): TravelDto {
+    private fun createDto(odometerMeasurement: Double): TravelDto {
         return TravelDto(
             masterUid = vmData.masterUid,
             truckId = vmData.truckId,
             driverId = vmData.driverId,
             isFinished = false,
             initialDate = LocalDateTime.now().toDate(),
-            initialOdometerMeasurement = 349592.0
+            considerAverage = false,
+            initialOdometerMeasurement = odometerMeasurement
         )
     }
 
-    //TODO criar o objeto da forma correta
-
-    fun dialogDismissed() {
-        _dialog.value = false
+    fun setDialog(hasDialog: Boolean) {
+        _dialog.value = hasDialog
     }
 
-    fun dialogRequested() {
-        _dialog.value = true
+    fun getLastTravelFinalOdometer(): Double? {
+        val travels = data.value ?: return null
+        return if (travels.isNotEmpty()) {
+            travels.first().finalOdometerMeasurement?.toDouble()
+        } else {
+            null
+        }
     }
 
 }

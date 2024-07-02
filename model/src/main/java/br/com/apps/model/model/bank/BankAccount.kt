@@ -2,12 +2,14 @@ package br.com.apps.model.model.bank
 
 import br.com.apps.model.exceptions.InvalidTypeException
 import br.com.apps.model.model.payment_method.PixType
+import java.time.LocalDateTime
 
 data class BankAccount(
     val masterUid: String,
     val id: String? = null,
     val employeeId: String,
 
+    var insertionDate: LocalDateTime,
     var code: Int,
     var bankName: String,
     var branch: Int,

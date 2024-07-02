@@ -3,58 +3,76 @@ package br.com.apps.trucktech.ui.fragments.nav_travel.travels
 import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.animation.AnimationUtils
+import androidx.lifecycle.LifecycleCoroutineScope
 import br.com.apps.repository.util.TAG_DEBUG
+import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentTravelsBinding
+import br.com.apps.trucktech.expressions.loadGif
 import br.com.apps.trucktech.util.state.StateDeleteI
 import br.com.apps.trucktech.util.state.StateI
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class TravelsListState(private val binding: FragmentTravelsBinding) : StateI, StateDeleteI {
+class TravelsListState(
+    private val binding: FragmentTravelsBinding,
+    private val lifecycleScope: LifecycleCoroutineScope
+) : StateI, StateDeleteI {
 
     override fun showLoading() {
-        binding.travelsFragmentRecycler.visibility = GONE
-        binding.fragTravelFab.visibility = GONE
-        binding.fragTravelListDarkLayer.visibility = GONE
-        binding.fragTravelsBoxError.apply {
-            layout.visibility = GONE
-            error.visibility = GONE
-            empty.visibility = GONE
-        }
-        binding.boxLoading.apply {
-            layout.visibility = GONE
-            darkLayer.visibility = GONE
-            progressBar.visibility = GONE
+        binding.apply {
+            boxGif.loadingGif.loadGif(R.drawable.gif_travel, binding.root.context)
+            travelsFragmentRecycler.visibility = GONE
+            fragTravelFab.visibility = GONE
+            fragmentTravelsToolbar.toolbar.visibility = GONE
         }
     }
 
     override fun showLoaded() {
-        binding.travelsFragmentRecycler.visibility = VISIBLE
-        binding.fragTravelFab.visibility = VISIBLE
-        binding.fragTravelListDarkLayer.visibility = GONE
-        binding.fragTravelsBoxError.layout.visibility = GONE
-        binding.fragTravelsBoxError.error.visibility = GONE
-        binding.fragTravelsBoxError.empty.visibility = GONE
+        binding.travelsFragmentRecycler.apply {
+            if (visibility == GONE) {
+                val layoutAnim = AnimationUtils.loadLayoutAnimation(
+                    binding.root.context,
+                    R.anim.layout_controller_animation_slide_in_left
+                )
+                lifecycleScope.launch {
+                    delay(500)
+                    visibility = VISIBLE
+                    layoutAnimation = layoutAnim
+                }
+            }
+        }
+
+        binding.fragTravelsBoxError.apply {
+            if (layout.visibility == VISIBLE) {
+                layout.visibility = GONE
+                error.visibility = GONE
+                empty.visibility = GONE
+            }
+        }
+
     }
 
     override fun showEmpty() {
         binding.travelsFragmentRecycler.visibility = GONE
-        binding.fragTravelFab.visibility = VISIBLE
-        binding.fragTravelListDarkLayer.visibility = GONE
-        binding.fragTravelsBoxError.layout.visibility = VISIBLE
-        binding.fragTravelsBoxError.error.visibility = GONE
-        binding.fragTravelsBoxError.empty.visibility = VISIBLE
+
+        binding.fragTravelsBoxError.apply {
+            layout.visibility = VISIBLE
+            error.visibility = GONE
+            empty.visibility = VISIBLE
+        }
+
     }
 
-    override fun showUpdating() {
-        TODO("Not yet implemented")
-    }
+    override fun showUpdating() {}
 
     override fun showError(e: Exception) {
         binding.travelsFragmentRecycler.visibility = GONE
-        binding.fragTravelFab.visibility = VISIBLE
-        binding.fragTravelListDarkLayer.visibility = GONE
-        binding.fragTravelsBoxError.layout.visibility = VISIBLE
-        binding.fragTravelsBoxError.error.visibility = VISIBLE
-        binding.fragTravelsBoxError.empty.visibility = GONE
+        binding.fragTravelsBoxError.apply {
+            layout.visibility = VISIBLE
+            error.visibility = VISIBLE
+            empty.visibility = GONE
+        }
         Log.e(TAG_DEBUG, e.message.toString())
         e.printStackTrace()
     }
@@ -66,6 +84,7 @@ class TravelsListState(private val binding: FragmentTravelsBinding) : StateI, St
     }
 
     override fun showDeleted() {
+        binding.boxGif.layout.visibility = GONE
         binding.boxLoading.apply {
             layout.visibility = GONE
         }

@@ -30,6 +30,7 @@ class PeriodRecyclerAdapter(
         RecyclerView.ViewHolder(binding.root) {
         val firstText = binding.itemPeriodRecyclerFirst
         val secondText = binding.itemPeriodRecyclerSecond
+        val notification = binding.notification
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -60,16 +61,24 @@ class PeriodRecyclerAdapter(
     private fun bind(holder: ViewHolder, item: String) {
         holder.apply {
             val first = item.substringBefore(" ")
-            val second = item.substringAfter(" ")
+            val second = item.substringAfter(" ").substringBeforeLast(" ")
+            val third = item.substringAfterLast(" ").toIntOrNull()
+
             firstText.text = first
-
-            if (first != second) {
-                secondText.visibility = VISIBLE
-                secondText.text = second
-            } else {
-                secondText.visibility = GONE
+            secondText.apply {
+                if (second == "null") visibility = GONE
+                else {
+                    visibility = VISIBLE
+                    text = second
+                }
             }
-
+            notification.apply {
+                if (third == null || third == 1) visibility = GONE
+                else {
+                    visibility = VISIBLE
+                    text = third.toString()
+                }
+            }
         }
     }
 

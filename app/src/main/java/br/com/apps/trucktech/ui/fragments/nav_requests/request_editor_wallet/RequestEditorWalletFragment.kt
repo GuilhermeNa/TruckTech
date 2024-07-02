@@ -18,6 +18,9 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.util.MonetaryMaskUtil
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceShow
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -58,6 +61,13 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
         initSaveButton()
+        initTextWatcher()
+    }
+
+    private fun initTextWatcher() {
+        binding.fragmentRequestEditorWalletValue.run {
+            addTextChangedListener(MonetaryMaskUtil(this))
+        }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -92,7 +102,7 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
     private fun bind(requestItem: RequestItem) {
         binding.apply {
             requestItem.value?.let { value ->
-                fragmentRequestEditorWalletValue.setText(value.toPlainString())
+                fragmentRequestEditorWalletValue.setText(value.formatPriceShow())
             }
         }
     }
@@ -119,7 +129,7 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
 
                 if (fieldsAreValid) {
                     val viewDto = RequestItemDto(
-                        value = value.toDouble()
+                        value = value.formatPriceSave().toDouble()
                     )
 
                     save(viewDto)

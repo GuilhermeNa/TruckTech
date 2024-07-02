@@ -66,6 +66,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRequestsListBinding.inflate(inflater, container, false)
+        stateHandler = RequestsListState(binding, lifecycleScope)
         return binding.root
     }
 
@@ -75,10 +76,9 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        stateHandler = RequestsListState(binding)
+        initStateManager()
         initSwipeRefresh()
         initHeaderRecyclerView()
-        initStateManager()
         initFab()
     }
 
@@ -182,6 +182,8 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
+            if (state != State.Loading) stateHandler?.showAfterLoading()
+
             when (state) {
                 State.Loading -> stateHandler?.showLoading()
                 State.Loaded -> stateHandler?.showLoaded()

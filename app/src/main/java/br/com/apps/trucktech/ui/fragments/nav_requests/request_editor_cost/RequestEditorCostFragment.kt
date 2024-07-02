@@ -19,6 +19,9 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.util.MonetaryMaskUtil
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceShow
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -60,6 +63,11 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
         initSaveButton()
+        initTextMask()
+    }
+
+    private fun initTextMask() {
+        binding.fragmentRequestEditorCostValue.run { addTextChangedListener(MonetaryMaskUtil(this)) }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -107,7 +115,7 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
         binding.apply {
             requestItem.let { item ->
                 fragmentRequestEditorCostAutoComplete.setText(viewModel.getLabelDescriptionById())
-                fragmentRequestEditorCostValue.setText(item.value?.toPlainString())
+                fragmentRequestEditorCostValue.setText(item.value?.formatPriceShow())
             }
         }
     }
@@ -144,7 +152,7 @@ class RequestEditorCostFragment : BaseFragmentWithToolbar() {
                 if (fieldsAreValid) {
                     val viewDto = RequestItemDto(
                         labelId = labelId,
-                        value = value.toDouble()
+                        value = value.formatPriceSave().toDouble()
                     )
 
                     save(viewDto)

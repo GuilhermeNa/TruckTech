@@ -4,8 +4,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.model.travel.PerformanceItem
 import br.com.apps.trucktech.databinding.ItemPerformanceBinding
-import br.com.apps.trucktech.ui.fragments.nav_home.home.frag_performance.PerformanceItem
 
 class HomeFragmentPerformanceViewPagerAdapter(private var context: Context) :
     RecyclerView.Adapter<HomeFragmentPerformanceViewPagerAdapter.ViewHolder>() {

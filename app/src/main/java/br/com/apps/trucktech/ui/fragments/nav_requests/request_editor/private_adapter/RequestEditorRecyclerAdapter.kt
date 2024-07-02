@@ -86,8 +86,7 @@ class RequestEditorRecyclerAdapter(
         holder.apply {
             try {
                 image.loadImageThroughUrl(
-                    url = item.getImage(),
-                    context = context
+                    url = item.getImage()
                 )
                 description.text = item.getDescription()
                 value.text = item.value?.toCurrencyPtBr()

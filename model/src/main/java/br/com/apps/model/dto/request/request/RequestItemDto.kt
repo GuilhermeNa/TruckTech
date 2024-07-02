@@ -5,6 +5,7 @@ data class RequestItemDto(
     val labelId: String? = null,
     var requestId: String? = null,
 
+    val docUrl: String? = null,
     val kmMarking: Int? = null,
     val value: Double? = null,
     var type: String? = null
@@ -13,8 +14,10 @@ data class RequestItemDto(
     fun validateFields(): Boolean {
         var isValid = true
 
-        if (requestId == null ||
-            value == null
+        if (
+            requestId == null ||
+            value == null ||
+            type == null
         ) {
             isValid = false
         }

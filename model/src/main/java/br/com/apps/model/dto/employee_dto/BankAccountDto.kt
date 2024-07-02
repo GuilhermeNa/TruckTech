@@ -1,9 +1,13 @@
 package br.com.apps.model.dto.employee_dto
 
+import java.util.Date
+
 data class BankAccountDto(
     var masterUid: String? = null,
     var id: String? = null,
     var employeeId: String? = null,
+
+    var insertionDate: Date? = null,
     var bankName: String? = null,
     var branch: Int? = null,
     var accNumber: Int? = null,
@@ -18,6 +22,7 @@ data class BankAccountDto(
 
         if (masterUid == null ||
             employeeId == null ||
+            insertionDate == null ||
             code == null ||
             bankName == null ||
             branch == null ||

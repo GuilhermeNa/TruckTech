@@ -34,4 +34,14 @@
         android:layout_width="match_parent"
         layout="@layout/box_error"/>
 
+    <include
+        android:id="@+id/box_gif"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        layout="@layout/box_gif"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

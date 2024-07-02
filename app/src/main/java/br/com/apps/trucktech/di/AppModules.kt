@@ -130,7 +130,6 @@ val viewModelModules = module {
         RequestsListViewModel(
             vmData,
             get(),
-            get(),
             get()
         )
     }

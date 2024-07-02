@@ -2,6 +2,7 @@ package br.com.apps.trucktech.ui.fragments.nav_home.home.frag_performance
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import br.com.apps.model.model.travel.PerformanceItem
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.trucktech.expressions.getDayFormatted
 import br.com.apps.trucktech.expressions.getKeyByValue
@@ -10,7 +11,6 @@ import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.TravelUseCase
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.security.InvalidParameterException
 import java.time.LocalDateTime
 
 private const val TRAVEL = "Viagem"
@@ -20,7 +20,15 @@ private const val YEAR = "Ano"
 class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
 
     private lateinit var dataSet: List<Travel>
+    private lateinit var averageAim: BigDecimal
+    private lateinit var performanceAim: BigDecimal
 
+    /**
+     * View data:
+     * This HashMap contains an Integer that serves as an identifier for the adapter position, and
+     * a pair consisting of a String and a list of performance items. The String represents data for the
+     * first adapter that displays the period, and the list of items represents data for the ViewPager.
+     */
     private val _data = MutableLiveData<HashMap<Int, Pair<String, List<PerformanceItem>>>>()
     val data get() = _data
 
@@ -52,9 +60,10 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
     // -
     //---------------------------------------------------------------------------------------------//
 
-    fun initialize(dataSet: List<Travel>) {
-
+    fun initialize(dataSet: List<Travel>, averageAim: BigDecimal, performanceAim: BigDecimal) {
         this@PerformanceViewModel.dataSet = dataSet
+        this@PerformanceViewModel.averageAim = averageAim
+        this@PerformanceViewModel.performanceAim = performanceAim
 
         val viewData = filterDataByHeader()
 
@@ -69,108 +78,6 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
 
     fun setState(state: State) {
         _state.value = state
-    }
-
-    /**
-     * Filters the data based on the selected header position.
-     * Returns a HashMap containing the filtered data grouped by header position.
-     *
-     * @return A HashMap where the key is the header position, and the value is a Pair consisting of the header name
-     *         and the corresponding list of performance items.
-     * @throws IllegalArgumentException if the header position is invalid.
-     */
-    private fun filterDataByHeader(): HashMap<Int, Pair<String, List<PerformanceItem>>> {
-        return when (headerPos) {
-            0 -> getDailyDataSet()
-            1 -> getMonthlyDataSet()
-            2 -> getYearlyDataSet()
-            else -> throw IllegalArgumentException()
-        }
-    }
-
-    private fun getDailyDataSet(): HashMap<Int, Pair<String, List<PerformanceItem>>> {
-        val hashMap = HashMap<Int, Pair<String, List<PerformanceItem>>>()
-
-        dataSet.sortedByDescending { it.initialDate }.forEachIndexed { index, travel ->
-            val periodAdapterData =
-                travel.initialDate?.getDailyTitle() ?: throw InvalidParameterException()
-            val viewPagerData = getPerformanceItems(listOf(travel))
-
-            hashMap[index] = Pair(periodAdapterData, viewPagerData)
-        }
-
-        return hashMap
-    }
-
-    private fun getMonthlyDataSet(): HashMap<Int, Pair<String, List<PerformanceItem>>> {
-        val hashMap = HashMap<Int, Pair<String, List<PerformanceItem>>>()
-        var index = 0
-
-        dataSet.sortedByDescending { it.initialDate }
-            .groupBy { it.initialDate?.month ?: throw InvalidParameterException() }
-            .forEach { (_, travelList) ->
-                val recyclerData = travelList.first().initialDate?.getMonthInPtBrAbbreviated()
-                    ?: throw InvalidParameterException()
-                val viewPagerData = getPerformanceItems(travelList)
-                hashMap[index] = Pair(recyclerData, viewPagerData)
-                index++
-            }
-
-        return hashMap
-    }
-
-    private fun getYearlyDataSet(): HashMap<Int, Pair<String, List<PerformanceItem>>> {
-        val hashMap = HashMap<Int, Pair<String, List<PerformanceItem>>>()
-        var index = 0
-
-        dataSet
-            .sortedByDescending { it.initialDate }
-            .groupBy { it.initialDate?.year ?: throw InvalidParameterException() }
-            .forEach { (_, travelList) ->
-                val recyclerData = travelList.first().initialDate?.year.toString().substring(2)
-                val viewPagerData = getPerformanceItems(travelList)
-                hashMap[index] = Pair(recyclerData, viewPagerData)
-                index++
-            }
-
-        return hashMap
-    }
-
-    private fun LocalDateTime.getDailyTitle(): String {
-        val day = this.getDayFormatted()
-        val month = this.getMonthInPtBrAbbreviated()
-        return "$month $day"
-    }
-
-    private fun getPerformanceItems(travelList: List<Travel>): List<PerformanceItem> {
-        val averageGoal = BigDecimal(2.50)
-        val averageHit = useCase.getRefuelAverage(travelList)
-        val averagePercent =
-            averageHit.divide(averageGoal, 2, RoundingMode.HALF_EVEN)
-                .multiply(BigDecimal(100))
-
-        val profitGoal = BigDecimal(50)
-        val profitHit = useCase.getProfitPercentage(travelList)
-        val profitPercent =
-            profitHit.divide(profitGoal, 2, RoundingMode.HALF_EVEN)
-                .multiply(BigDecimal(100))
-
-        return listOf(
-            PerformanceItem(
-                title = "Média",
-                meta = "2.50",
-                hit = averageHit.toString(),
-                percent = "${averagePercent.toInt()}%",
-                progressBar = averagePercent.toInt()
-            ),
-            PerformanceItem(
-                title = "Desempenho",
-                meta = "${profitGoal.toPlainString()}%",
-                hit = "${profitHit.toInt()}%",
-                percent = "${profitPercent.toInt()}%",
-                progressBar = profitPercent.toInt()
-            )
-        )
     }
 
     /**
@@ -214,12 +121,149 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
         return data[periodPos]?.second ?: emptyList()
     }
 
-}
+    /**
+     * This method will group travel data according to the criteria defined in the view's header,
+     * whether it is for individual, monthly, or annual searches.
+     *
+     * @return The data for the view.
+     * @throws IllegalArgumentException if the header position is invalid.
+     */
+    private fun filterDataByHeader(): HashMap<Int, Pair<String, List<PerformanceItem>>> {
+        return when (headerPos) {
+            0 -> getDailyDataSet()
+            1 -> getMonthlyDataSet()
+            2 -> getYearlyDataSet()
+            else -> throw IllegalArgumentException()
+        }
+    }
 
-data class PerformanceItem(
-    val title: String,
-    val meta: String,
-    val hit: String,
-    val percent: String,
-    var progressBar: Int
-)
+    private fun getDailyDataSet(): HashMap<Int, Pair<String, List<PerformanceItem>>> {
+        val hashMap = HashMap<Int, Pair<String, List<PerformanceItem>>>()
+        val travels = dataSet.sortedByDescending { it.initialDate }
+        var mapIndex = 0
+
+        travels.forEachIndexed { index, travel ->
+            if (travel.considerAverage) {
+                val nextInd = (index + 1)
+                val isTheLastOfList = nextInd == travels.size
+                val isTheNextOk = nextInd < travels.size && travels[index + 1].considerAverage
+                val isTheNextInvalid = nextInd < travels.size && !travels[index + 1].considerAverage
+
+                val subList = when {
+                    isTheLastOfList -> listOf(travel)
+
+                    isTheNextOk -> listOf(travel)
+
+                    isTheNextInvalid -> {
+                        val partialEndIndex =
+                            travels.drop(nextInd).indexOfFirst { it.considerAverage }
+                        val endIndex = partialEndIndex + nextInd
+                        travels.subList(index, endIndex)
+                    }
+
+                    else -> emptyList()
+                }
+
+                val periodAdapterData = "${subList.last().initialDate.getDayFormatted()} " +
+                        "${subList.last().initialDate.getMonthInPtBrAbbreviated()} " +
+                        "${subList.size}"
+                val viewPagerData = getPerformanceItems(subList)
+                hashMap[mapIndex] = Pair(periodAdapterData, viewPagerData)
+                mapIndex++
+            }
+        }
+
+        return hashMap
+    }
+
+    private fun getMonthlyDataSet(): HashMap<Int, Pair<String, List<PerformanceItem>>> {
+        val hashMap = HashMap<Int, Pair<String, List<PerformanceItem>>>()
+        val limitDate = LocalDateTime.now().minusMonths(6).withDayOfMonth(1)
+        val travels = dataSet.sortedByDescending { it.initialDate }
+            .filter { it.initialDate.isAfter(limitDate) }
+            .groupBy { it.initialDate.month }
+            .mapValues { (_, list) -> list.toMutableList() }
+            .toList()
+
+        var mapIndex = 0
+
+        travels.forEachIndexed { index, pair ->
+            val nextInd = (index + 1)
+            val isNextMonthInvalid =
+                nextInd < travels.size && !travels[nextInd].second.first().considerAverage
+
+            when {
+                isNextMonthInvalid -> {
+                    val nextMonthList = travels[nextInd].second
+                    val thisMonthList = pair.second
+
+                    val transferIndex = thisMonthList.indexOfLast { it.considerAverage }
+
+                    thisMonthList.subList(transferIndex, thisMonthList.size).forEach {
+                        nextMonthList.add(0, it)
+                        thisMonthList.remove(it)
+                    }
+
+                }
+
+                else -> {}
+            }
+
+            val periodAdapterData =
+                "${pair.second.first().initialDate.getMonthInPtBrAbbreviated()} null null"
+            val viewPagerData = getPerformanceItems(pair.second)
+            hashMap[mapIndex] = Pair(periodAdapterData, viewPagerData)
+            mapIndex++
+
+        }
+
+        return hashMap
+    }
+
+    private fun getYearlyDataSet(): HashMap<Int, Pair<String, List<PerformanceItem>>> {
+        val hashMap = HashMap<Int, Pair<String, List<PerformanceItem>>>()
+        var mapIndex = 0
+
+        dataSet
+            .sortedByDescending { it.initialDate }
+            .groupBy { it.initialDate.year }
+            .forEach { (_, travelList) ->
+                val periodAdapterData =
+                    "${travelList.first().initialDate.year.toString().substring(2)} null null"
+                val viewPagerData = getPerformanceItems(travelList)
+                hashMap[mapIndex] = Pair(periodAdapterData, viewPagerData)
+                mapIndex++
+            }
+
+        return hashMap
+    }
+
+    private fun getPerformanceItems(travelList: List<Travel>): List<PerformanceItem> {
+        val averageHit = useCase.getRefuelAverage(travelList)
+        val averagePercent = averageHit.divide(averageAim, 2, RoundingMode.HALF_EVEN)
+                .multiply(BigDecimal(100))
+
+        val profitHit = useCase.getProfitPercentage(travelList)
+        val profitPercent = profitHit.divide(performanceAim, 2, RoundingMode.HALF_EVEN)
+                .multiply(BigDecimal(100))
+
+        return listOf(
+            PerformanceItem(
+                title = "Média",
+                meta = averageAim.toPlainString(),
+                hit = averageHit.toString(),
+                percent = "${averagePercent.toInt()}%",
+                progressBar = averagePercent.toInt()
+            ),
+            PerformanceItem(
+                title = "Desempenho",
+                meta = "$performanceAim%",
+                hit = "${profitHit.toInt()}%",
+                percent = "${profitPercent.toInt()}%",
+                progressBar = profitPercent.toInt()
+            )
+        )
+    }
+
+
+}

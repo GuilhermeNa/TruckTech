@@ -12,7 +12,6 @@ import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
 import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.model.toDate
-import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
@@ -20,6 +19,7 @@ import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
@@ -35,7 +35,6 @@ class RequestsListViewModel(
     private val vmData: RequestLVMData,
     private val repository: RequestRepository,
     private val useCase: RequestUseCase,
-    private val userRepository: UserRepository
 ) : ViewModel() {
 
     /**
@@ -72,10 +71,12 @@ class RequestsListViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
-    fun loadData() {
-        _state.value = State.Loading
+    init { setState(State.Loading) }
 
+    fun loadData() {
         viewModelScope.launch {
+            delay(1000)
+
             try {
 
                 val requests = loadRequestsAwait()
@@ -84,7 +85,9 @@ class RequestsListViewModel(
                 val items = loadItemsAwait(idList)
                 useCase.mergeRequestData(requests, items)
 
-                if (requests.isEmpty()) _state.value = State.Empty
+                if (requests.isEmpty()) setState(State.Empty)
+                else setState(State.Loaded)
+
                 _data.value = requests
 
             } catch (e: Exception) {
@@ -136,7 +139,7 @@ class RequestsListViewModel(
      * Send the [PaymentRequest] to be created or updated.
      */
     suspend fun save() =
-        liveData(viewModelScope.coroutineContext) {
+        liveData(viewModelScope.coroutineContext) { //TODO testando este metodo
             try {
                 val dto = createDto()
                 val id = useCase.createRequest(dto, vmData.uid)

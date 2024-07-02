@@ -1,4 +1,4 @@
-package br.com.apps.repository.repository.cost_help
+package br.com.apps.repository.repository.travel_aid
 
 import androidx.lifecycle.LiveData
 import br.com.apps.model.model.travel.TravelAid
@@ -14,6 +14,9 @@ interface TravelAidReadI {
     ): LiveData<Response<List<TravelAid>>>
 
     suspend fun getTravelAidListByTravelId(travelId: String, flow: Boolean = false)
+            : LiveData<Response<List<TravelAid>>>
+
+    suspend fun getTravelAidListByTravelIds(travelIdList: List<String>, flow: Boolean = false)
             : LiveData<Response<List<TravelAid>>>
 
 }

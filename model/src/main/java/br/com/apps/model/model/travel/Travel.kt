@@ -2,6 +2,7 @@ package br.com.apps.model.model.travel
 
 import br.com.apps.model.exceptions.EmptyDataException
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.security.InvalidParameterException
 import java.time.LocalDateTime
 
@@ -13,6 +14,7 @@ data class Travel(
 
     @field:JvmField
     var isFinished: Boolean,
+    var considerAverage: Boolean,
 
     val initialDate: LocalDateTime,
     var finalDate: LocalDateTime? = null,
@@ -28,15 +30,7 @@ data class Travel(
 ) {
 
     fun getCommissionValue(): BigDecimal {
-        var commission = BigDecimal.ZERO
-
-        freightsList?.let { freights ->
-            freights.forEach { f ->
-                commission = commission.add(f.getCommissionValue())
-            }
-        }
-
-        return commission
+        return freightsList?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
     }
 
     fun getTravelAuthenticationPercent(): Double {
@@ -200,7 +194,7 @@ data class Travel(
 
     fun isDeletable(): Boolean {
         if (isFinished) return false
-        if(id == null) return false
+        if (id == null) return false
         freightsList?.let {
             it.forEach { f ->
                 if (f.isValid) return false
@@ -225,6 +219,35 @@ data class Travel(
         return true
     }
 
+    fun getProfitPercent(): BigDecimal {
+        val profit = getListTotalValue(FREIGHT)
+        val waste =
+            getListTotalValue(REFUEL) +
+                    getListTotalValue(EXPEND) +
+                    getCommissionValue()
+
+        return if (profit != BigDecimal.ZERO && waste != BigDecimal.ZERO)
+            waste
+                .divide(profit, 2, RoundingMode.HALF_EVEN)
+                .subtract(BigDecimal(1.0))
+                .multiply(BigDecimal(100.0))
+                .abs()
+        else BigDecimal.ZERO
+
+    }
+
+    fun getFuelAverage(): BigDecimal {
+            return refuelsList?.let { refuels ->
+            val liters = refuels.sumOf { it.amountLiters }
+            val distance = getDifferenceBetweenInitialAndFinalOdometerMeasure()
+            distance.divide(liters, 2, RoundingMode.HALF_EVEN)
+        } ?: BigDecimal.ZERO
+    }
+
+    fun shouldConsiderAverage(): Boolean {
+        return refuelsList?.last()?.isCompleteRefuel ?: false
+    }
+
     companion object {
         const val FREIGHT = 0
         const val EXPEND = 1
@@ -233,3 +256,11 @@ data class Travel(
     }
 
 }
+
+data class PerformanceItem(
+    val title: String,
+    val meta: String,
+    val hit: String,
+    val percent: String,
+    var progressBar: Int
+)

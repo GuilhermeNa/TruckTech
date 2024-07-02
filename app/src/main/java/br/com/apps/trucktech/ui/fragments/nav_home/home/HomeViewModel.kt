@@ -22,12 +22,11 @@ import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.ui.activities.main.LoggedUser
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.TravelUseCase
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
-private const val TRAVEL = "Viagem"
-private const val MONTH = "Mês"
-private const val YEAR = "Ano"
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class HomeViewModel(
     private val travelRepository: TravelRepository,
@@ -63,33 +62,23 @@ class HomeViewModel(
 
         viewModelScope.launch {
             try {
-
-                //TODO toReceive data
-                val freights = fetchFreights(driverId)
-                val expends = fetchExpends(driverId)
-                val advances = fetchAdvances(driverId)
-                val loans = fetchLoans(driverId)
-
-                //TODO performance
-                val travels = fetchTravels(driverId)
-                val refuels = fetchRefuels(driverId)
-
-                //TODO fines
-                val fines = fetchFines(driverId)
-
-                travelUseCase.mergeTravelData(travels, freights, expends, refuels)
-
-                setState(State.Loaded)
+                val travelsDef = async { fetchTravels(driverId) }
+                val advancesDef = async { fetchAdvances(driverId) }
+                val loansDef = async { fetchLoans(driverId) }
+                val finesDef = async { fetchFines(driverId) }
 
                 _data.postValue(
                     HomeFData(
-                        travels = travels,
-                        advances = advances,
-                        fines = fines,
-                        loans = loans
+                        travels = travelsDef.await(),
+                        advances = advancesDef.await(),
+                        fines = finesDef.await(),
+                        loans = loansDef.await(),
+                        averageAim = loggedUser.averageAim.setScale(2, RoundingMode.HALF_EVEN),
+                        performanceAim = loggedUser.performanceAim
                     )
                 )
 
+                setState(State.Loaded)
             } catch (e: Exception) {
                 e.printStackTrace()
                 setState(State.Error(e))
@@ -147,7 +136,7 @@ class HomeViewModel(
 
     //TODO performance
     private suspend fun fetchTravels(driverId: String): List<Travel> {
-        val response = travelRepository.getTravelListByDriverIdAndIsFinished(driverId).asFlow().first()
+        val response = travelUseCase.getTravelListByDriverId(driverId).asFlow().first()
         return when (response) {
             is Response.Error -> throw response.exception
             is Response.Success -> response.data ?: throw NullPointerException()
@@ -177,7 +166,9 @@ data class HomeFData(
     val travels: List<Travel>? = null,
     val advances: List<Advance>? = null,
     val fines: List<Fine>? = null,
-    val loans: List<Loan>? = null
+    val loans: List<Loan>? = null,
+    val averageAim: BigDecimal,
+    val performanceAim: BigDecimal,
 )
 
 

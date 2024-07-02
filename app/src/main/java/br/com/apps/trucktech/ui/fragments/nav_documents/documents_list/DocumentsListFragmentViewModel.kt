@@ -11,8 +11,9 @@ import br.com.apps.model.model.label.LabelType
 import br.com.apps.repository.repository.document.DocumentRepository
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.trucktech.exceptions.NoLabelsFoundException
 import br.com.apps.trucktech.util.state.State
-import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -25,11 +26,13 @@ class DocumentsListFragmentViewModel(
     val masterUid = idHolder.masterUid ?: throw IllegalArgumentException("masterUid is null")
     val truckId = idHolder.truckId ?: throw IllegalArgumentException("truckId is null")
 
+    private lateinit var labels: List<Label>
+
     /**
      * LiveData holding the response data of type [Response] with a list of [Document]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<Response<List<Document>>>()
+    private val _data = MutableLiveData<List<Document>>()
     val data get() = _data
 
     private val _state = MutableLiveData<State>()
@@ -40,78 +43,69 @@ class DocumentsListFragmentViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        _state.value = State.Loading
+        setState(State.Loading)
         loadData()
+    }
+
+    private fun setState(state: State) {
+        _state.value = state
     }
 
     fun loadData() {
         viewModelScope.launch {
+            delay(1000)
 
-            val docListDef = loadDocumentData()
-            val labelListDef = loadLabelData()
+            try {
+                labels = loadLabels()
+                loadDocuments { sendResponse(it) }
 
-            val docList = docListDef.await()
-            val labList = labelListDef.await()
-
-            mergeData(docList, labList)
-            sendResponse(docList)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                setState(State.Error(e))
+            }
 
         }
     }
 
-    private suspend fun loadDocumentData(): CompletableDeferred<List<Document>> {
-        val deferred = CompletableDeferred<List<Document>>()
+    private suspend fun loadDocuments(onComplete: (data: List<Document>) -> Unit) {
+        val response = documentRepository.getDocumentListByTruckId(truckId).asFlow().first()
 
-        documentRepository.getDocumentListByTruckId(truckId)
-            .asFlow().first { response ->
-                when (response) {
-                    is Response.Error -> {
-                        _state.value = State.Error(response.exception)
-                        _data.value = response
-                    }
-                    is Response.Success -> response.data?.let { deferred.complete(it) }
-                }
-                true
-            }
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> onComplete(response.data ?: emptyList())
+        }
 
-        return deferred
     }
 
-    private suspend fun loadLabelData(): CompletableDeferred<List<Label>> {
-        val deferred = CompletableDeferred<List<Label>>()
+    private suspend fun loadLabels(): List<Label> {
+        val response =
+            labelRepository
+                .getLabelListByMasterUidAndType(LabelType.DOCUMENT.description, masterUid)
+                .asFlow().first()
 
-        labelRepository.getLabelListByMasterUidAndType(LabelType.DOCUMENT.description, masterUid)
-            .asFlow().first { response ->
-                when (response) {
-                    is Response.Error -> {
-                        _state.value = State.Error(response.exception)
-                        _data.value = response
-                    }
-                    is Response.Success -> response.data?.let { deferred.complete(it) }
-                }
-                true
-            }
-
-        return deferred
-    }
-
-    private fun mergeData(documents: List<Document>?, labelResponse: List<Label>) {
-        documents?.map { document ->
-            val id = document.labelId
-            val label = labelResponse.firstOrNull { it.id == id }
-            document.name = label?.name
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NoLabelsFoundException()
         }
     }
 
     private fun sendResponse(docList: List<Document>) {
         if (docList.isEmpty()) {
-            _state.value = State.Empty
-        }
-        else {
-            _state.value = State.Loaded
+            setState(State.Empty)
+        } else {
+            mergeData(docList)
+            setState(State.Loaded)
+            _data.value = docList
         }
 
-        _data.postValue(Response.Success(data = docList))
+    }
+
+    private fun mergeData(documents: List<Document>) {
+        documents.map { document ->
+            val id = document.labelId
+            val label = labels.firstOrNull { it.id == id }
+            document.name = label?.name
+        }
     }
 
 }

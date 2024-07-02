@@ -6,8 +6,8 @@ import br.com.apps.repository.repository.advance.AdvanceRead
 import br.com.apps.repository.repository.advance.AdvanceRepository
 import br.com.apps.repository.repository.auth.AuthenticationRepository
 import br.com.apps.repository.repository.bank.BankRepository
-import br.com.apps.repository.repository.cost_help.TravelAidRead
-import br.com.apps.repository.repository.cost_help.TravelAidRepository
+import br.com.apps.repository.repository.travel_aid.TravelAidRead
+import br.com.apps.repository.repository.travel_aid.TravelAidRepository
 import br.com.apps.repository.repository.customer.CustomerRead
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.document.DocumentRead

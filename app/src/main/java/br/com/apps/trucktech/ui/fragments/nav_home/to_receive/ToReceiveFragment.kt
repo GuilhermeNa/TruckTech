@@ -57,8 +57,7 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
     private fun initPaymentsPanel() {
         binding.fragmentToReceivePanelPayments.apply {
             panelToReceiveFragmentPaymentsImage.loadImageThroughUrl(
-                viewModel.paymentsUrlImage,
-                requireContext()
+                viewModel.paymentsUrlImage
             )
             panelToReceiveFragmentCard.setOnClickListener {
                 it.navigateTo(ToReceiveFragmentDirections.actionToReceiveFragmentToPaymentFragment())
@@ -69,8 +68,7 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
     private fun initRefundsPanel() {
         binding.fragmentToReceivePanelRefunds.apply {
             panelToReceiveFragmentRefundImage.loadImageThroughUrl(
-                viewModel.refundsUrlImage,
-                requireContext()
+                viewModel.refundsUrlImage
             )
             panelToReceiveFragmentRefundCard.setOnClickListener {
                 it.navigateTo(ToReceiveFragmentDirections.actionToReceiveFragmentToRefundFragment())
@@ -81,8 +79,7 @@ class ToReceiveFragment : BaseFragmentWithToolbar() {
     private fun initDiscountsPanel() {
         binding.fragmentToReceivePanelDiscounts.apply {
             panelToReceiveFragmentDiscountsImage.loadImageThroughUrl(
-                viewModel.discountsUrlImage,
-                requireContext()
+                viewModel.discountsUrlImage
             )
             panelToReceiveFragmentDiscountsCard.setOnClickListener {
                 it.navigateTo(ToReceiveFragmentDirections.actionToReceiveFragmentToDiscountFragment())

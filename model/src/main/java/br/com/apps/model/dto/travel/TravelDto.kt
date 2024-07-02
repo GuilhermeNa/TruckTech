@@ -13,7 +13,8 @@ data class TravelDto(
     val driverId: String? = null,
 
     @field:JvmField
-    val isFinished: Boolean? = false,
+    val isFinished: Boolean? = null,
+    val considerAverage: Boolean? = null,
 
     val initialDate: Date? = null,
     val finalDate: Date? = null,
@@ -34,6 +35,7 @@ data class TravelDto(
             truckId == null ||
             driverId == null ||
             isFinished == null ||
+            considerAverage == null ||
             initialDate == null ||
             initialOdometerMeasurement == null
         ) {
@@ -50,6 +52,7 @@ data class TravelDto(
             truckId == null ||
             driverId == null ||
             isFinished == null ||
+            considerAverage == null ||
             initialDate == null ||
             finalDate == null ||
             initialOdometerMeasurement == null ||

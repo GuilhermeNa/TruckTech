@@ -14,6 +14,8 @@ class TravelPreviewStateHandler(private val binding: FragmentTravelPreviewBindin
             toolbar.visibility = GONE
             boxHeader.layout.visibility = GONE
             boxDate.layout.visibility = GONE
+            horizontalView.visibility = GONE
+            boxOdometer.layout.visibility = GONE
             boxFreight.layout.visibility = GONE
             boxRefuel.layout.visibility = GONE
             boxExpend.layout.visibility = GONE
@@ -26,6 +28,8 @@ class TravelPreviewStateHandler(private val binding: FragmentTravelPreviewBindin
         binding.apply {
             toolbar.visibility = VISIBLE
             boxDate.layout.visibility = GONE
+            horizontalView.visibility = GONE
+            boxOdometer.layout.visibility = GONE
             boxHeader.layout.visibility = GONE
             boxAid.layout.visibility = GONE
             boxFreight.layout.visibility = GONE
@@ -44,6 +48,8 @@ class TravelPreviewStateHandler(private val binding: FragmentTravelPreviewBindin
         binding.apply {
             toolbar.visibility = VISIBLE
             boxHeader.layout.visibility = GONE
+            horizontalView.visibility = GONE
+            boxOdometer.layout.visibility = GONE
             boxAid.layout.visibility = GONE
             boxFreight.layout.visibility = GONE
             boxRefuel.layout.visibility = GONE
@@ -66,6 +72,8 @@ class TravelPreviewStateHandler(private val binding: FragmentTravelPreviewBindin
     fun showLoaded() {
         binding.apply {
             toolbar.visibility = VISIBLE
+            horizontalView.visibility = VISIBLE
+            boxOdometer.layout.visibility = VISIBLE
             boxAid.layout.visibility = VISIBLE
             boxFreight.layout.visibility = VISIBLE
             boxRefuel.layout.visibility = VISIBLE
@@ -92,6 +100,7 @@ class TravelPreviewStateHandler(private val binding: FragmentTravelPreviewBindin
                 boxTravelPreviewInitialDate.visibility = VISIBLE
                 boxTravelPreviewFinalDate.visibility = VISIBLE
             }
+            boxOdometer.boxTravelPreviewFinalMeasure.visibility = VISIBLE
         }
     }
 
@@ -120,6 +129,8 @@ class TravelPreviewStateHandler(private val binding: FragmentTravelPreviewBindin
                     boxTravelPreviewInitialDate.visibility = VISIBLE
                     boxTravelPreviewFinalDate.visibility = GONE
                 }
+
+                boxOdometer.boxTravelPreviewFinalMeasure.visibility = GONE
             }
         }
     }
@@ -139,6 +150,7 @@ class TravelPreviewStateHandler(private val binding: FragmentTravelPreviewBindin
                 boxTravelPreviewInitialDate.visibility = VISIBLE
                 boxTravelPreviewFinalDate.visibility = GONE
             }
+            boxOdometer.boxTravelPreviewFinalMeasure.visibility = GONE
         }
     }
 

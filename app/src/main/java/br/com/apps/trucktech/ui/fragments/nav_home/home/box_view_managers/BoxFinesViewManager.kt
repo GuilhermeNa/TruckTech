@@ -16,8 +16,7 @@ class BoxFinesViewManager(
     fun initialize(fines: List<Fine>?) {
         binding.apply {
             panelFinesImage.loadImageThroughUrl(
-                "https://gringo.com.vc/wp-content/uploads/2022/06/Multa_18032016_1738_1280_960-1024x768.jpg",
-                context
+                "https://gringo.com.vc/wp-content/uploads/2022/06/Multa_18032016_1738_1280_960-1024x768.jpg"
             )
 
             panelFinesNewText.text = getNewFinesText()

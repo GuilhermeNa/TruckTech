@@ -13,6 +13,8 @@ fun TruckDto.toModel(): Truck {
             id = this.id,
             driverId = this.driverId!!,
             masterUid = this.masterUid!!,
+            averageAim = this.averageAim!!,
+            performanceAim = this.performanceAim!!,
             plate = this.plate ?: "-",
             color = this.color ?: "-",
             commissionPercentual = BigDecimal(this.commissionPercentual!!)

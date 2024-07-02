@@ -8,6 +8,8 @@ const val EMPTY_ID = "Empty id"
 
 const val MASTER_UID = "masterUid"
 
+const val INSERTION_DATE = "insertionDate"
+
 const val DRIVER_ID = "driverId"
 
 const val TRAVEL_ID = "travelId"
@@ -53,6 +55,8 @@ const val SUCCESSFULLY_REMOVED = "Removido com sucesso"
 const val UNKNOWN_EXCEPTION = "Erro desconhecido"
 
 const val FAILED_TO_SAVE = "Falha ao salvar"
+
+const val FAILED_TO_LOAD_BANKS = "Falha ao carregar bancos"
 
 const val INVALID_OBJECT_ID = "Id inválido"
 

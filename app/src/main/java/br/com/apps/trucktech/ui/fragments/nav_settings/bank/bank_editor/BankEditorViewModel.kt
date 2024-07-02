@@ -13,14 +13,16 @@ import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.model.model.payment_method.PixType
-import br.com.apps.repository.repository.employee.EmployeeRepository
+import br.com.apps.model.toDate
 import br.com.apps.repository.repository.bank.BankRepository
+import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BankEditorViewModel(
@@ -104,10 +106,12 @@ class BankEditorViewModel(
     private suspend fun responseWhenCreating(bankListDef: CompletableDeferred<List<Bank>>): Response.Success<BankEditorData> {
         bankListDef.await()
         val bankList = bankListDef.getCompleted()
+        val pixList = PixType.getMappedPixTypeAndDescription().entries.map { it.value }.sorted()
+
         return Response.Success(
             BankEditorData(
                 bankList = bankList,
-                pixList = PixType.getMappedPixTypeAndDescription().entries.map { it.value }
+                pixList = pixList
             )
         )
     }
@@ -122,7 +126,7 @@ class BankEditorViewModel(
         return Response.Success(
             BankEditorData(
                 bankList = bankList,
-                pixList = PixType.getMappedPixTypeAndDescription().entries.map { it.value },
+                pixList = PixType.getMappedPixTypeAndDescription().entries.map { it.value }.sorted(),
                 bankAcc = bankAcc
             )
         )
@@ -150,6 +154,7 @@ class BankEditorViewModel(
 
         } else {
             viewDto.run {
+                this.insertionDate = LocalDateTime.now().toDate()
                 this.masterUid = this@BankEditorViewModel.masterUid
                 this.employeeId = this@BankEditorViewModel.employeeId
             }
@@ -184,3 +189,4 @@ data class BankEditorData(
     val pixList: List<String>,
     val bankAcc: BankAccount? = null
 )
+

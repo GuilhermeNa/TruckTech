@@ -13,8 +13,6 @@ interface RefuelWriteI {
 
     suspend fun delete(refuelId: String)
 
-    suspend fun deleteRefuelForThisTravel(travelId: String, refuelId: String)
-
 }
 
 interface RefuelReadI {

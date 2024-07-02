@@ -24,7 +24,7 @@ abstract class BasePreviewFragment : BaseFragmentForMainAct() {
             toolbar.inflateMenu(R.menu.menu_preview)
             this@BasePreviewFragment.toolbar = toolbar
             collapsingToolbar.title = title
-            backgroundImage.loadImageThroughUrl(urlImage, requireContext())
+            backgroundImage.loadImageThroughUrl(urlImage)
         }
     }
 

@@ -32,7 +32,7 @@ class SettingsRecyclerAdapter(
         private val title = binding.headerSettingsName
 
         fun bind(item: SettingsItem) {
-            image.loadImageThroughUrl(item.imageUrl, context)
+            image.loadImageThroughUrl(item.imageUrl)
             title.text = item.title
         }
 

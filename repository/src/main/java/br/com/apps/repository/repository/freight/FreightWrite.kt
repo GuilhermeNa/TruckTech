@@ -5,7 +5,6 @@ import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_FREIGHTS
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import java.security.InvalidParameterException
 
 class FreightWrite(fireStore: FirebaseFirestore): FreightWriteI {
@@ -27,20 +26,16 @@ class FreightWrite(fireStore: FirebaseFirestore): FreightWriteI {
         }
     }
 
-    private suspend fun create(dto: FreightDto): String {
+    private fun create(dto: FreightDto): String {
         val document = collection.document()
         dto.id = document.id
-        document.set(dto).await()
+        document.set(dto)
         return document.id
     }
 
-    private suspend fun update(dto: FreightDto) {
+    private fun update(dto: FreightDto) {
         val id = dto.id ?: throw InvalidParameterException(EMPTY_ID)
-
-        collection
-            .document(id)
-            .set(dto)
-            .await()
+        collection.document(id).set(dto)
     }
 
     /**
@@ -49,10 +44,7 @@ class FreightWrite(fireStore: FirebaseFirestore): FreightWriteI {
      * @param freightId The ID of the document to be deleted.
      */
     override suspend fun delete(freightId: String) {
-        collection
-            .document(freightId)
-            .delete()
-            .await()
+        collection.document(freightId).delete()
     }
 
 }

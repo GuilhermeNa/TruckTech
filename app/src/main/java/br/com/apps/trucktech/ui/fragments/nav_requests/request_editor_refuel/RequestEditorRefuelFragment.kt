@@ -18,6 +18,11 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.util.MonetaryMaskUtil
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatIntSave
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatIntShow
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceShow
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -63,6 +68,14 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
         initSaveButton()
+        initTextMask()
+    }
+
+    private fun initTextMask() {
+        binding.apply {
+            fragmentRequestEditorKm.run { addTextChangedListener(MonetaryMaskUtil(this)) }
+            fragmentRequestEditorValue.run { addTextChangedListener(MonetaryMaskUtil(this)) }
+        }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -96,10 +109,10 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
         binding.apply {
             requestItem.let {
                 it.kmMarking?.let { km ->
-                    fragmentRequestEditorKm.setText(km.toString())
+                    fragmentRequestEditorKm.setText(km.formatIntShow())
                 }
                 it.value?.let { value ->
-                    fragmentRequestEditorValue.setText(value.toPlainString())
+                    fragmentRequestEditorValue.setText(value.formatPriceShow())
                 }
             }
         }
@@ -131,8 +144,8 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
 
                 if (fieldsAreValid) {
                     val viewDto = RequestItemDto(
-                        kmMarking = kmMarking.toInt(),
-                        value = value.toDouble()
+                        kmMarking = kmMarking.formatIntSave().toInt(),
+                        value = value.formatPriceSave().toDouble()
                     )
                     save(viewDto)
                 }

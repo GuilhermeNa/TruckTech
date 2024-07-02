@@ -17,6 +17,8 @@ import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toFreightList
 import br.com.apps.repository.util.toFreightObject
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class FreightRead(fireStore: FirebaseFirestore) : FreightReadI {
 
@@ -33,10 +35,12 @@ class FreightRead(fireStore: FirebaseFirestore) : FreightReadI {
         driverId: String,
         flow: Boolean
     ): LiveData<Response<List<Freight>>> {
-        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-        return if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+            else listener.onComplete { it.toFreightList() }
+        }
     }
 
     /**
@@ -52,15 +56,17 @@ class FreightRead(fireStore: FirebaseFirestore) : FreightReadI {
         isPaid: Boolean,
         flow: Boolean
     ): LiveData<Response<List<Freight>>> {
-        if (driverIdList.isEmpty())
-            return MutableLiveData(Response.Error(EmptyIdException("FreightRead: emptyId")))
+        return withContext(Dispatchers.IO) {
+            if (driverIdList.isEmpty())
+                return@withContext MutableLiveData(Response.Error(EmptyIdException("FreightRead: emptyId")))
 
-        val listener = collection
-            .whereIn(DRIVER_ID, driverIdList)
-            .whereEqualTo(IS_COMMISSION_PAID, isPaid)
+            val listener = collection
+                .whereIn(DRIVER_ID, driverIdList)
+                .whereEqualTo(IS_COMMISSION_PAID, isPaid)
 
-        return if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+            else listener.onComplete { it.toFreightList() }
+        }
     }
 
     /**
@@ -76,12 +82,14 @@ class FreightRead(fireStore: FirebaseFirestore) : FreightReadI {
         isPaid: Boolean,
         flow: Boolean
     ): LiveData<Response<List<Freight>>> {
-        val listener = collection
-            .whereEqualTo(DRIVER_ID, driverId)
-            .whereEqualTo(IS_COMMISSION_PAID, isPaid)
+        return withContext(Dispatchers.IO) {
+            val listener = collection
+                .whereEqualTo(DRIVER_ID, driverId)
+                .whereEqualTo(IS_COMMISSION_PAID, isPaid)
 
-        return if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+            else listener.onComplete { it.toFreightList() }
+        }
     }
 
     /**
@@ -95,10 +103,12 @@ class FreightRead(fireStore: FirebaseFirestore) : FreightReadI {
         travelId: String,
         flow: Boolean
     ): LiveData<Response<List<Freight>>> {
-        val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
 
-        return if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+            else listener.onComplete { it.toFreightList() }
+        }
     }
 
     /**
@@ -112,12 +122,14 @@ class FreightRead(fireStore: FirebaseFirestore) : FreightReadI {
         travelIdList: List<String>,
         flow: Boolean
     ): LiveData<Response<List<Freight>>> {
-        if (travelIdList.isEmpty()) return MutableLiveData(Response.Success(emptyList()))
+        return withContext(Dispatchers.IO) {
+            if (travelIdList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
 
-        val listener = collection.whereIn(TRAVEL_ID, travelIdList)
+            val listener = collection.whereIn(TRAVEL_ID, travelIdList)
 
-        return if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+            else listener.onComplete { it.toFreightList() }
+        }
     }
 
     /**
@@ -131,23 +143,27 @@ class FreightRead(fireStore: FirebaseFirestore) : FreightReadI {
         freightId: String,
         flow: Boolean
     ): LiveData<Response<Freight>> {
-        val listener = collection.document(freightId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.document(freightId)
 
-        return if (flow) listener.onSnapShot { it.toFreightObject() }
-        else listener.onComplete { it.toFreightObject() }
+            return@withContext if (flow) listener.onSnapShot { it.toFreightObject() }
+            else listener.onComplete { it.toFreightObject() }
+        }
     }
 
     override suspend fun getFreightListByDriverIdAndIsNotPaidYet(
         driverId: String,
         flow: Boolean
     ): LiveData<Response<List<Freight>>> {
-        val listener = collection
-            .whereEqualTo(DRIVER_ID, driverId)
-            .whereEqualTo(IS_VALID, true)
-            .whereEqualTo(IS_COMMISSION_PAID, false)
+        return withContext(Dispatchers.IO) {
+            val listener = collection
+                .whereEqualTo(DRIVER_ID, driverId)
+                .whereEqualTo(IS_VALID, true)
+                .whereEqualTo(IS_COMMISSION_PAID, false)
 
-        return if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+            else listener.onComplete { it.toFreightList() }
+        }
     }
 
 }

@@ -4,6 +4,7 @@
     <!-- LIGHT_THEME -->
     <color name="white">#FFFFFFFF</color>
     <color name="light_green">#EDFDDA</color>
+    <color name="green">#6FCA04</color>
     <color name="light_cyan">#C4EAFB</color>
     <color name="dark_red">#860A0A</color>
     <color name="yellow">#ACA142</color>

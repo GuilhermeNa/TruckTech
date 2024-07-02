@@ -10,22 +10,20 @@ import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.model.travel.TravelAid
 import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.repository.extractData
-import br.com.apps.repository.repository.cost_help.TravelAidRepository
 import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.repository.travel.TravelRepository
+import br.com.apps.repository.repository.travel_aid.TravelAidRepository
+import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.util.awaitValue
+import br.com.apps.usecase.util.awaitData
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.Serializable
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.security.InvalidParameterException
@@ -36,11 +34,6 @@ class TravelUseCase(
     private val refuelRepository: RefuelRepository,
     private val expendRepository: ExpendRepository,
     private val aidRepository: TravelAidRepository,
-
-    private val freightUseCase: FreightUseCase,
-    private val refuelUseCase: RefuelUseCase,
-    private val expendUseCase: ExpendUseCase,
-    private val aidUseCase: TravelAidUseCase
 ) : CredentialsValidatorI<TravelDto> {
 
     /**
@@ -58,10 +51,34 @@ class TravelUseCase(
         refuelList: List<Refuel>? = null,
         aidList: List<TravelAid>? = null
     ) {
-        freightList?.let { freightUseCase.mergeFreightList(travelList, it) }
-        expendList?.let { expendUseCase.mergeExpendList(travelList, it) }
-        refuelList?.let { refuelUseCase.mergeRefuelList(travelList, it) }
-        aidList?.let { aidUseCase.mergeAidList(travelList, it) }
+        freightList?.let {
+            travelList.forEach { travel ->
+                val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
+                val freights = freightList.filter { it.travelId == travelId }
+                travel.freightsList = freights
+            }
+        }
+        expendList?.let {
+            travelList.forEach { travel ->
+                val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
+                val expends = expendList.filter { it.travelId == travelId }
+                travel.expendsList = expends
+            }
+        }
+        refuelList?.let {
+            travelList.forEach { travel ->
+                val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
+                val refuels = refuelList.filter { it.travelId == travelId }
+                travel.refuelsList = refuels
+            }
+        }
+        aidList?.let {
+            travelList.forEach { travel ->
+                val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
+                val aid = aidList.filter { it.travelId == travelId }
+                travel.aidList = aid
+            }
+        }
     }
 
     /**
@@ -72,22 +89,9 @@ class TravelUseCase(
      * @param travelList The list of travels for which the profit percentage needs to be calculated.
      * @return The profit percentage as a BigDecimal value.
      */
-    fun getProfitPercentage(travelList: List<Travel>): BigDecimal {
-        var profitSum = BigDecimal.ZERO
-        var wasteSum = BigDecimal.ZERO
-
-        travelList.map { travel ->
-            profitSum = profitSum.add(travel.freightsList?.sumOf { it.value!! })
-            wasteSum = wasteSum.add(travel.expendsList?.sumOf { it.value })
-            wasteSum = wasteSum.add(travel.refuelsList?.sumOf { it.totalValue })
-        }
-
-        val percentage =
-            if (profitSum != BigDecimal.ZERO) {
-                wasteSum.divide(profitSum, 2, RoundingMode.HALF_EVEN).subtract(BigDecimal(1))
-            } else BigDecimal.ZERO
-
-        return percentage.abs().multiply(BigDecimal(100))
+    fun getProfitPercentage(travels: List<Travel>): BigDecimal {
+        val total = travels.sumOf { it.getProfitPercent() }
+        return total.divide(BigDecimal(travels.size), 2, RoundingMode.HALF_EVEN)
     }
 
     /**
@@ -96,18 +100,17 @@ class TravelUseCase(
      * @param travelList The list of travels for which the refuel average needs to be calculated.
      * @return The average refuel cost per kilometer as a BigDecimal value.
      */
-    fun getRefuelAverage(travelList: List<Travel>): BigDecimal {
-        val sumOfGasCost =
-            travelList.flatMap { it.refuelsList!! }.sumOf { it.totalValue }
+    fun getRefuelAverage(travels: List<Travel>): BigDecimal {
+        return if (travels.size == 1)
+            travels[0].getFuelAverage()
+        else {
+            val initialOdometer = travels.last().initialOdometerMeasurement
+            val finalOdometer = travels.first().finalOdometerMeasurement
+            val liters = travels.flatMap { it.refuelsList!! }.sumOf { it.amountLiters }
 
-        val sumOfKm =
-            travelList.last().finalOdometerMeasurement
-                ?.subtract(travelList.first().initialOdometerMeasurement)
+            val distance = finalOdometer?.subtract(initialOdometer)
 
-        return if (sumOfGasCost != null && sumOfGasCost > BigDecimal.ZERO) {
-            sumOfKm!!.divide(sumOfGasCost, 2, RoundingMode.HALF_EVEN)
-        } else {
-            BigDecimal.ZERO
+            distance?.divide(liters, 2, RoundingMode.HALF_EVEN) ?: BigDecimal.ZERO
         }
     }
 
@@ -186,19 +189,19 @@ class TravelUseCase(
             try {
 
                 val travelResp = async {
-                    repository.getTravelById(travelId).awaitValue().extractData()
+                    repository.getTravelById(travelId).awaitData()
                 }
                 val freightsResp = async {
-                    freightRepository.getFreightListByTravelId(travelId).awaitValue().extractData()
+                    freightRepository.getFreightListByTravelId(travelId).awaitData()
                 }
                 val refuelsResp = async {
-                    refuelRepository.getRefuelListByTravelId(travelId).awaitValue().extractData()
+                    refuelRepository.getRefuelListByTravelId(travelId).awaitData()
                 }
                 val expendsResp = async {
-                    expendRepository.getExpendListByTravelId(travelId).awaitValue().extractData()
+                    expendRepository.getExpendListByTravelId(travelId).awaitData()
                 }
                 val aidsResp = async {
-                    aidRepository.getTravelAidListByTravelId(travelId).awaitValue().extractData()
+                    aidRepository.getTravelAidListByTravelId(travelId).awaitData()
                 }
 
                 val travel = travelResp.await().also {
@@ -218,14 +221,57 @@ class TravelUseCase(
     }
 
     /**
+     * Retrieves a complete list of travels associated with a driver ID.
+     * The function merges data from different repositories, such as travel, freight, refuel, and expend lists.
+     *
+     * @param driverId The ID of the driver for whom to retrieve the travel list.
+     * @return A LiveData object that emits responses containing the complete travel list.
+     */
+    suspend fun getTravelListByDriverId(driverId: String, flow: Boolean = false)
+            : LiveData<Response<List<Travel>>> {
+        return coroutineScope {
+            try {
+                val travels = repository.getTravelListByDriverId(driverId).awaitData()
+                val ids = travels.mapNotNull { it.id }
+
+                val freightsDef = async {
+                    freightRepository.getFreightListByTravelIds(ids).awaitData()
+                }
+                val refuelsDef = async {
+                    refuelRepository.getRefuelListByTravelIds(ids).awaitData()
+                }
+                val expendsDef = async {
+                    expendRepository.getExpendListByTravelIds(ids).awaitData()
+                }
+                val aidsDef = async {
+                    aidRepository.getTravelAidListByTravelIds(ids).awaitData()
+                }
+
+                mergeTravelData(
+                    travelList = travels,
+                    freightList = freightsDef.await(),
+                    refuelList = refuelsDef.await(),
+                    expendList = expendsDef.await(),
+                    aidList = aidsDef.await()
+                )
+
+                return@coroutineScope MutableLiveData(Response.Success(travels))
+
+            } catch (e: Exception) {
+                return@coroutineScope MutableLiveData(Response.Error(e))
+            }
+        }
+    }
+
+    /**
      * delete
      */
     suspend fun deleteTravel(travel: Travel) {
-        withContext(Dispatchers.Main) {
+        coroutineScope {
             if (!travel.isDeletable()) throw InvalidParameterException("This travel cannot be deleted")
-            launch { travel.freightsList?.forEach { it.id?.let { id -> freightRepository.delete(id) } } }
-            launch { travel.refuelsList?.forEach { it.id?.let { id -> refuelRepository.delete(id) } } }
-            launch { travel.expendsList?.forEach { it.id?.let { id -> expendRepository.delete(id) } } }
+            travel.freightsList?.forEach { it.id?.let { id -> freightRepository.delete(id) } }
+            travel.refuelsList?.forEach { it.id?.let { id -> refuelRepository.delete(id) } }
+            travel.expendsList?.forEach { it.id?.let { id -> expendRepository.delete(id) } }
             repository.delete(travel.id!!)
         }
 
@@ -243,25 +289,5 @@ class TravelUseCase(
         } ?: throw NullPointerException("Validation is null")
     }
 
-    /*    suspend fun deleteTravel(idsData: TravelIdsData) {
-            val travelId = idsData.travelId
-
-            withContext(Dispatchers.Main) {
-                launch { idsData.freightIds.forEach { id -> freightRepository.delete(id) } }
-                launch { idsData.refuelIds.forEach { id -> refuelRepository.delete(id) } }
-                launch { idsData.expendIds.forEach { id -> expendRepository.delete(id) } }
-
-                repository.delete(travelId)
-            }
-
-        }*/
-
 }
 
-data class TravelIdsData(
-    val travelId: String,
-    val freightIds: List<String>,
-    val refuelIds: List<String>,
-    val expendIds: List<String>,
-    val aidIds: List<String>
-) : Serializable

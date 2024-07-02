@@ -21,6 +21,7 @@ object RequestItemFactory {
     fun create(viewDto: RequestItemDto, type: RequestItemType): RequestItem {
         val item = RequestItem(
             requestId = viewDto.requestId!!,
+            docUrl = viewDto.docUrl,
             value = BigDecimal(viewDto.value!!),
             type = type
         )
@@ -67,6 +68,7 @@ object RequestItemFactory {
      */
     fun update(item: RequestItem, viewDto: RequestItemDto) {
         viewDto.labelId?.let { item.labelId = it }
+        viewDto.docUrl?.let { item.docUrl = it }
         viewDto.kmMarking?.let { item.kmMarking = it }
         viewDto.value?.let { item.value = BigDecimal(it) }
         viewDto.type?.let { item.type = RequestItemType.getType(it) }

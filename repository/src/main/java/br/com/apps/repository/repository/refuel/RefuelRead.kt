@@ -16,6 +16,8 @@ import br.com.apps.repository.util.toRefuelList
 import br.com.apps.repository.util.toRefuelObject
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class RefuelRead(fireStore: FirebaseFirestore) : RefuelReadI {
 
@@ -30,10 +32,12 @@ class RefuelRead(fireStore: FirebaseFirestore) : RefuelReadI {
      */
     override suspend fun getRefuelListByDriverId(driverId: String, flow: Boolean)
             : LiveData<Response<List<Refuel>>> {
-        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-        return if (flow) listener.onSnapShot { it.toRefuelList() }
-        else listener.onComplete { it.toRefuelList() }
+            return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
+            else listener.onComplete { it.toRefuelList() }
+        }
     }
 
     /**
@@ -45,10 +49,13 @@ class RefuelRead(fireStore: FirebaseFirestore) : RefuelReadI {
      */
     override suspend fun getRefuelListByTravelId(travelId: String, flow: Boolean)
             : LiveData<Response<List<Refuel>>> {
-        val listener = collection.whereEqualTo(TRAVEL_ID, travelId).orderBy(ODOMETER_MEASURE, Query.Direction.ASCENDING)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+                .orderBy(ODOMETER_MEASURE, Query.Direction.ASCENDING)
 
-        return if (flow) listener.onSnapShot { it.toRefuelList() }
-        else listener.onComplete { it.toRefuelList() }
+            return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
+            else listener.onComplete { it.toRefuelList() }
+        }
     }
 
     /**
@@ -60,12 +67,14 @@ class RefuelRead(fireStore: FirebaseFirestore) : RefuelReadI {
      */
     override suspend fun getRefuelListByTravelIds(idList: List<String>, flow: Boolean)
             : LiveData<Response<List<Refuel>>> {
-        if (idList.isEmpty()) return MutableLiveData(Response.Success(emptyList()))
+        return withContext(Dispatchers.IO) {
+            if (idList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
 
-        val listener = collection.whereIn(TRAVEL_ID, idList)
+            val listener = collection.whereIn(TRAVEL_ID, idList)
 
-        return if (flow) listener.onSnapShot { it.toRefuelList() }
-        else listener.onComplete { it.toRefuelList() }
+            return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
+            else listener.onComplete { it.toRefuelList() }
+        }
     }
 
     /**
@@ -77,10 +86,12 @@ class RefuelRead(fireStore: FirebaseFirestore) : RefuelReadI {
      */
     override suspend fun getRefuelById(refuelId: String, flow: Boolean)
             : LiveData<Response<Refuel>> {
-        val listener = collection.document(refuelId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.document(refuelId)
 
-        return if (flow) listener.onSnapShot { it.toRefuelObject() }
-        else listener.onComplete { it.toRefuelObject() }
+            return@withContext if (flow) listener.onSnapShot { it.toRefuelObject() }
+            else listener.onComplete { it.toRefuelObject() }
+        }
     }
 
 }

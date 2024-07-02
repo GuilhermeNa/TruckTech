@@ -1,6 +1,5 @@
 package br.com.apps.repository.repository
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.user_dto.CommonUserDto
@@ -83,18 +82,13 @@ class UserRepository(private val fireStore: FirebaseFirestore) {
     suspend fun getUserRequestNumber(uid: String): Int {
         var orderCode = -1
         var orderNumber = -1
-        val listener = collection.document(uid)
+        val doc = collection.document(uid).get().await()
 
-        listener.get().addOnCompleteListener { task ->
-            task.exception?.let { e -> throw e }
-            task.result?.let { doc ->
-                orderCode = doc.toCommonUserObject().orderCode
-                orderNumber = doc.toCommonUserObject().orderNumber
-                Log.d("teste", "pre")
-            }
-        }.await()
+        if(doc.exists()) {
+            orderCode = doc.toCommonUserObject().orderCode
+            orderNumber = doc.toCommonUserObject().orderNumber
+        }
 
-        Log.d("teste", "apos")
         if (orderCode != -1 && orderNumber != -1) {
             val year = LocalDateTime.now().getYearReference()
             val month = LocalDateTime.now().getMonthFormatted()
@@ -108,7 +102,6 @@ class UserRepository(private val fireStore: FirebaseFirestore) {
         }
 
         throw InvalidParameterException("Failed to generate a request number")
-
     }
 
     suspend fun updateRequestNumber(uid: String) {

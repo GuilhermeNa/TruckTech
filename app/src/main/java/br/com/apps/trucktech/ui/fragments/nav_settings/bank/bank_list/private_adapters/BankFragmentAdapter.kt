@@ -9,7 +9,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.repository.util.INVALID_OBJECT_ID
 import br.com.apps.trucktech.R
@@ -20,13 +19,18 @@ import java.security.InvalidParameterException
 
 class BankFragmentAdapter(
     private val context: Context,
-    dataSet: List<BankAccount>,
-    private val clickListener: (id: String) -> Unit,
+    _clickedPos: Int,
+    data: BankLFData,
+    private val clickListener: (id: String, pos: Int) -> Unit,
     private val defineNewMainAccount: (id: String) -> Unit
 ) : RecyclerView.Adapter<BankFragmentAdapter.ViewHolder>() {
 
-    private val dataSet = dataSet.toMutableList()
-    private var bankList = emptyList<Bank>()
+    private var bankList = data.bankList
+
+    private val _dataSet = data.bankAccList.toMutableList()
+    val data get() = _dataSet
+
+    private var clickedPos = _clickedPos
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDERS
@@ -43,7 +47,7 @@ class BankFragmentAdapter(
 
         init {
             itemView.setOnLongClickListener {
-                if (::bankAccount.isInitialized && bankAccount.mainAccount == false) {
+                if (::bankAccount.isInitialized && !bankAccount.mainAccount) {
                     PopupMenu(context, itemView).apply {
                         menuInflater.inflate(R.menu.menu_define_main_acc, menu)
                         setOnMenuItemClickListener(this@ViewHolder)
@@ -83,7 +87,7 @@ class BankFragmentAdapter(
     //--------------------------------------------------------------------------------------------//
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val bankAccount = dataSet[position]
+        val bankAccount = _dataSet[position]
         bind(holder, bankAccount)
         holder.bankAccount = bankAccount
         initCLickListener(holder, bankAccount)
@@ -92,18 +96,21 @@ class BankFragmentAdapter(
     private fun initCLickListener(holder: ViewHolder, bankAccount: BankAccount) {
         holder.itemView.setOnClickListener {
             val id = bankAccount.id ?: throw InvalidParameterException(INVALID_OBJECT_ID)
-            clickListener(id)
+            setClickedPos(data.indexOf(bankAccount))
+            clickListener(id, clickedPos)
         }
     }
 
-    override fun getItemCount(): Int = dataSet.size
+    private fun setClickedPos(pos: Int) { clickedPos = pos }
+
+    override fun getItemCount(): Int = _dataSet.size
 
     private fun bind(holder: ViewHolder, bankAccount: BankAccount) {
         holder.apply {
             val urlImage = bankList.first { it.code == bankAccount.code }.urlImage
-            bankImage.loadImageThroughUrl(urlImage, context)
+            bankImage.loadImageThroughUrl(urlImage)
             name.text = bankAccount.bankName
-            bankAccount.mainAccount?.let { isTrue ->
+            bankAccount.mainAccount.let { isTrue ->
                 if (isTrue) checkImage.visibility = VISIBLE
                 else checkImage.visibility = GONE
             }
@@ -113,10 +120,23 @@ class BankFragmentAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun update(dataSet: BankLFData) {
         this.bankList = dataSet.bankList
-
-        this.dataSet.clear()
-        this.dataSet.addAll(dataSet.bankAccList)
+        this._dataSet.clear()
+        this._dataSet.addAll(dataSet.bankAccList)
         notifyDataSetChanged()
     }
+
+    fun remove() {
+        if(clickedPos != -1) {
+            this._dataSet.removeAt(clickedPos)
+            notifyItemRemoved(clickedPos)
+        }
+    }
+
+    fun add(account: BankAccount) {
+        val onTop = 0
+        _dataSet.add(onTop, account)
+        notifyItemInserted(onTop)
+    }
+
 
 }

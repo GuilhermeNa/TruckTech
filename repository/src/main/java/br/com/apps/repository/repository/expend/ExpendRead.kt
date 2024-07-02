@@ -18,6 +18,8 @@ import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toExpendList
 import br.com.apps.repository.util.toExpendObject
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ExpendRead(fireStore: FirebaseFirestore) : ExpendReadI {
 
@@ -34,10 +36,12 @@ class ExpendRead(fireStore: FirebaseFirestore) : ExpendReadI {
         driverId: String,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> {
-        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-        return if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+            return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
+            else listener.onComplete { it.toExpendList() }
+        }
     }
 
     /**
@@ -55,15 +59,17 @@ class ExpendRead(fireStore: FirebaseFirestore) : ExpendReadI {
         alreadyRefunded: Boolean,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> {
-        if (driverIdList.isEmpty())
-            return MutableLiveData(Response.Error(EmptyIdException("ExpendRead: emptyId")))
+        return withContext(Dispatchers.IO) {
+            if (driverIdList.isEmpty())
+                return@withContext MutableLiveData(Response.Error(EmptyIdException("ExpendRead: emptyId")))
 
-        val listener = collection.whereIn(DRIVER_ID, driverIdList)
-            .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
-            .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
+            val listener = collection.whereIn(DRIVER_ID, driverIdList)
+                .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
+                .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
-        return if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+            return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
+            else listener.onComplete { it.toExpendList() }
+        }
     }
 
     /**
@@ -81,12 +87,14 @@ class ExpendRead(fireStore: FirebaseFirestore) : ExpendReadI {
         alreadyRefunded: Boolean,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> {
-        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
-            .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
-            .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+                .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
+                .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
-        return if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+            return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
+            else listener.onComplete { it.toExpendList() }
+        }
     }
 
     /**
@@ -100,10 +108,12 @@ class ExpendRead(fireStore: FirebaseFirestore) : ExpendReadI {
         travelId: String,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> {
-        val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
 
-        return if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+            return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
+            else listener.onComplete { it.toExpendList() }
+        }
     }
 
     /**
@@ -114,15 +124,17 @@ class ExpendRead(fireStore: FirebaseFirestore) : ExpendReadI {
      * @return A [Response] with the [Expend] list.
      */
     override suspend fun getExpendListByTravelIds(
-        driverIdList: List<String>,
+        travelIdList: List<String>,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> {
-        if (driverIdList.isEmpty()) return MutableLiveData(Response.Success(emptyList()))
+        return withContext(Dispatchers.IO) {
+            if (travelIdList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
 
-        val listener = collection.whereIn(TRAVEL_ID, driverIdList)
+            val listener = collection.whereIn(TRAVEL_ID, travelIdList)
 
-        return if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+            return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
+            else listener.onComplete { it.toExpendList() }
+        }
     }
 
     /**
@@ -136,22 +148,26 @@ class ExpendRead(fireStore: FirebaseFirestore) : ExpendReadI {
         expendId: String,
         flow: Boolean
     ): LiveData<Response<Expend>> {
-        val listener = collection.document(expendId)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.document(expendId)
 
-        return if (flow) listener.onSnapShot { it.toExpendObject() }
-        else listener.onComplete { it.toExpendObject() }
+            return@withContext if (flow) listener.onSnapShot { it.toExpendObject() }
+            else listener.onComplete { it.toExpendObject() }
+        }
     }
 
     override suspend fun getExpendListByDriverIdAndIsNotRefundYet(
         driverId: String, flow: Boolean
     ): LiveData<Response<List<Expend>>> {
-        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
-            .whereEqualTo(IS_VALID, true)
-            .whereEqualTo(PAID_BY_EMPLOYEE, true)
-            .whereEqualTo(ALREADY_REFUNDED, false)
+        return withContext(Dispatchers.IO) {
+            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+                .whereEqualTo(IS_VALID, true)
+                .whereEqualTo(PAID_BY_EMPLOYEE, true)
+                .whereEqualTo(ALREADY_REFUNDED, false)
 
-        return if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+            return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
+            else listener.onComplete { it.toExpendList() }
+        }
     }
 
 }

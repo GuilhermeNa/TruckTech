@@ -2,6 +2,7 @@ package br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_editor
 
 import android.R
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +25,8 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import com.vicmikhailau.maskededittext.MaskedFormatter
+import com.vicmikhailau.maskededittext.MaskedWatcher
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -51,7 +54,7 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
-    //---------------------------------------------------------------------------------------------/
+    //---------------------------------------------------------------------------------------------//
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,7 +66,7 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE
-    //---------------------------------------------------------------------------------------------/
+    //---------------------------------------------------------------------------------------------//
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -92,9 +95,9 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
                 is Response.Success -> {
                     response.data?.apply {
+                        bankAcc?.let { bind(it) }
                         initBankAutoComplete(bankList)
                         initPixAutoComplete(pixList)
-                        bankAcc?.let { bind(it) }
                     }
                 }
             }
@@ -120,6 +123,44 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
         )
         val autoComplete = binding.fragmentBankEditorAutoComplete
         autoComplete.setAdapter(adapter)
+
+        var watcher: MaskedWatcher? = null
+        autoComplete.setOnItemClickListener { _, _, position, _ ->
+            watcher?.let { binding.fragBankEditorPix.removeTextChangedListener(watcher) }
+            binding.fragBankEditorPix.setText("")
+
+            watcher = when (position) {
+                0 -> binding.fragBankEditorPix.run {
+                    inputType = InputType.TYPE_CLASS_PHONE
+                    MaskedWatcher(MaskedFormatter("(##) # ####-####"), this)
+                }
+
+
+                1 -> binding.fragBankEditorPix.run {
+                    inputType = InputType.TYPE_CLASS_PHONE
+                    MaskedWatcher(MaskedFormatter("##.###.###/####-##"), this)
+                }
+
+
+                2 -> binding.fragBankEditorPix.run {
+                    inputType = InputType.TYPE_CLASS_PHONE
+                    MaskedWatcher(MaskedFormatter("###.###.###-##"), this)
+                }
+
+
+                3 -> binding.fragBankEditorPix.run {
+                    inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                    null
+                }
+
+                else -> null
+
+            }
+
+            watcher?.let { binding.fragBankEditorPix.addTextChangedListener(it) }
+
+        }
+
     }
 
     private fun bind(bankAccount: BankAccount) {
@@ -209,7 +250,7 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE
-    //---------------------------------------------------------------------------------------------/
+    //---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
         super.onDestroyView()

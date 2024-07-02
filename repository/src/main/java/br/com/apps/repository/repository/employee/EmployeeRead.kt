@@ -10,6 +10,7 @@ import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_ADMIN
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_BANK
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_DRIVER
+import br.com.apps.repository.util.INSERTION_DATE
 import br.com.apps.repository.util.MASTER_UID
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.onComplete
@@ -20,6 +21,7 @@ import br.com.apps.repository.util.toEmployeeList
 import br.com.apps.repository.util.toEmployeeObject
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class EmployeeRead(fireStore: FirebaseFirestore) : EmployeeReadI {
 
@@ -97,6 +99,7 @@ class EmployeeRead(fireStore: FirebaseFirestore) : EmployeeReadI {
             : LiveData<Response<List<BankAccount>>> {
         val collection = getCollectionReference(type)
         val listener = collection.document(id).collection(FIRESTORE_COLLECTION_BANK)
+            .orderBy(INSERTION_DATE, Query.Direction.DESCENDING)
 
         return if (flow) listener.onSnapShot { it.toBankAccountList() }
         else listener.onComplete { it.toBankAccountList() }

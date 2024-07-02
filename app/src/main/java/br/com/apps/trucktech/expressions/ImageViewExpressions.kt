@@ -10,8 +10,20 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.load
 
-fun ImageView.loadImageThroughUrl(url: String? = null, context: Context){
+fun ImageView.loadImageThroughUrl(url: Any? = null){
+    load(url) {
+        fallback(R.drawable.placeholder)
+        error(R.drawable.placeholder)
+        placeholder(R.drawable.placeholder)
+    }
+}
 
+fun ImageView.loadGif(url: Any? = null, context: Context){
+    val imageLoaderGifSupport = getGifLoader(context)
+    load(url, imageLoaderGifSupport)
+}
+
+private fun getGifLoader(context: Context): ImageLoader {
     val imageLoaderGifSupport = ImageLoader.Builder(context)
         .components {
             if (Build.VERSION.SDK_INT >= 28) {
@@ -21,14 +33,9 @@ fun ImageView.loadImageThroughUrl(url: String? = null, context: Context){
             }
         }
         .build()
-
-    load(url, imageLoaderGifSupport) {
-        fallback(R.drawable.placeholder)
-        error(R.drawable.placeholder)
-        placeholder(R.drawable.placeholder)
-    }
-
+    return imageLoaderGifSupport
 }
+
 
 fun ImageView.isLightTheme(): Boolean {
     val currentNightMode = this.context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK

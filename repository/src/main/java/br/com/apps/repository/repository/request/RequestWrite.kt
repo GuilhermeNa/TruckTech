@@ -1,13 +1,12 @@
 package br.com.apps.repository.repository.request
 
-import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.request.request.RequestItemDto
+import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.ENCODED_IMAGE
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_ITEMS
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_REQUESTS
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import java.security.InvalidParameterException
 
 class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
@@ -30,7 +29,7 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
         }
     }
 
-    private suspend fun createItem(itemDto: RequestItemDto): String {
+    private fun createItem(itemDto: RequestItemDto): String {
         val requestId = itemDto.requestId
             ?: throw NullPointerException("RequestRepository, createItem: requestId is null")
 
@@ -38,27 +37,18 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
             collection.document(requestId).collection(FIRESTORE_COLLECTION_ITEMS).document()
 
         itemDto.id = document.id
-
-        document
-            .set(itemDto)
-            .await()
-
+        document.set(itemDto)
         return document.id
     }
 
-    private suspend fun updateItem(itemDto: RequestItemDto) {
+    private fun updateItem(itemDto: RequestItemDto) {
         val requestId = itemDto.requestId
             ?: throw NullPointerException("RequestRepository, updateItem: requestId is null")
 
         val itemId = itemDto.id
             ?: throw NullPointerException("RequestRepository, updateItem: id is null")
 
-        collection.document(requestId)
-            .collection(FIRESTORE_COLLECTION_ITEMS)
-            .document(itemId)
-            .set(itemDto)
-            .await()
-
+        collection.document(requestId).collection(FIRESTORE_COLLECTION_ITEMS).document(itemId).set(itemDto)
     }
 
     /**
@@ -68,10 +58,7 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
      * @param encodedImage The encoded image in String to be updated in the document.
      */
     override suspend fun updateEncodedImage(requestId: String, encodedImage: String) {
-        collection
-            .document(requestId)
-            .update(ENCODED_IMAGE, encodedImage)
-            .await()
+        collection.document(requestId).update(ENCODED_IMAGE, encodedImage)
     }
 
     /**
@@ -90,25 +77,16 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
         }
     }
 
-    private suspend fun create(dto: TravelRequestDto): String {
+    private fun create(dto: TravelRequestDto): String {
         val document = collection.document()
         dto.id = document.id
-
-        document
-            .set(dto)
-            .await()
-
+        document.set(dto)
         return document.id
     }
 
-    private suspend fun update(dto: TravelRequestDto): String {
+    private fun update(dto: TravelRequestDto): String {
         val id = dto.id ?: throw InvalidParameterException(EMPTY_ID)
-
-        collection
-            .document(id)
-            .set(dto)
-            .await()
-
+        collection.document(id).set(dto)
         return id
     }
 
@@ -120,12 +98,7 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
         itemIdList?.forEach { itemId ->
             deleteItem(requestId, itemId)
         }
-
-        collection
-            .document(requestId)
-            .delete()
-            .await()
-
+        collection.document(requestId).delete()
     }
 
     /**
@@ -135,12 +108,7 @@ class RequestWrite(fireStore: FirebaseFirestore): RequestWriteI {
      * @param itemId The ID of the item to be deleted.
      */
     override suspend fun deleteItem(requestId: String, itemId: String) {
-        collection
-            .document(requestId)
-            .collection(FIRESTORE_COLLECTION_ITEMS)
-            .document(itemId)
-            .delete()
-            .await()
+        collection.document(requestId).collection(FIRESTORE_COLLECTION_ITEMS).document(itemId).delete()
     }
 
 }

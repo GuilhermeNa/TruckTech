@@ -3,6 +3,7 @@ package br.com.apps.model.factory
 import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.payment_method.PixType
+import br.com.apps.model.toLocalDateTime
 import java.security.InvalidParameterException
 
 object BankAccountFactory {
@@ -12,6 +13,7 @@ object BankAccountFactory {
             return BankAccount(
                 masterUid = viewDto.masterUid!!,
                 employeeId = viewDto.employeeId!!,
+                insertionDate = viewDto.insertionDate!!.toLocalDateTime(),
                 code = viewDto.code!!.toInt(),
                 bankName = viewDto.bankName!!,
                 branch = viewDto.branch!!,

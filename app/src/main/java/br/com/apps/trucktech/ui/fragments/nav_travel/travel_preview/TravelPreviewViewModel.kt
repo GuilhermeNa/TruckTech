@@ -89,6 +89,7 @@ class TravelPreviewViewModel(
                 finalOdometerMeasurement = refuelsList?.last()?.odometerMeasure
                 finalDate = LocalDateTime.now()
                 isFinished = true
+                considerAverage = travel.shouldConsiderAverage()
                 validateForSaving()
             }.toDto()
             useCase.setTravelFinished(vmData.permission, dto)

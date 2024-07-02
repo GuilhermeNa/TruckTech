@@ -58,11 +58,7 @@ class EmployeeWrite(fireStore: FirebaseFirestore) : EmployeeWriteI {
      */
     override suspend fun deleteBankAcc(employeeId: String, bankId: String, type: EmployeeType) {
         val collection = getCollectionReference(type)
-
-        collection.document(employeeId)
-            .collection(FIRESTORE_COLLECTION_BANK)
-            .document(bankId)
-            .delete().await()
+        collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK).document(bankId).delete()
     }
 
     /**
@@ -79,19 +75,17 @@ class EmployeeWrite(fireStore: FirebaseFirestore) : EmployeeWriteI {
 
     }
 
-    private suspend fun createBankAcc(dto: BankAccountDto, collection: CollectionReference) {
+    private fun createBankAcc(dto: BankAccountDto, collection: CollectionReference) {
         val document = collection.document(dto.employeeId!!)
             .collection(FIRESTORE_COLLECTION_BANK).document()
-
         dto.id = document.id
-        document.set(dto).await()
+        document.set(dto)
     }
 
-    private suspend fun updateBankAcc(dto: BankAccountDto, collection: CollectionReference) {
+    private fun updateBankAcc(dto: BankAccountDto, collection: CollectionReference) {
         val document = collection.document(dto.employeeId!!)
                 .collection(FIRESTORE_COLLECTION_BANK).document(dto.id!!)
-
-        document.set(dto).await()
+        document.set(dto)
     }
 
     /**
@@ -107,11 +101,11 @@ class EmployeeWrite(fireStore: FirebaseFirestore) : EmployeeWriteI {
 
         oldMainAccId?.let {
             collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK)
-                .document(it).update("mainAccount", false).await()
+                .document(it).update("mainAccount", false)
         }
 
         collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK)
-            .document(newMainAccId).update("mainAccount", true).await()
+            .document(newMainAccId).update("mainAccount", true)
 
     }
 

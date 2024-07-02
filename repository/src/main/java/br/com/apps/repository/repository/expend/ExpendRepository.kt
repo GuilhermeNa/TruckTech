@@ -46,8 +46,8 @@ class ExpendRepository(
     override suspend fun getExpendListByTravelId(travelId: String, flow: Boolean) =
         read.getExpendListByTravelId(travelId, flow)
 
-    override suspend fun getExpendListByTravelIds(driverIdList: List<String>, flow: Boolean) =
-        read.getExpendListByTravelIds(driverIdList, flow)
+    override suspend fun getExpendListByTravelIds(travelIdList: List<String>, flow: Boolean) =
+        read.getExpendListByTravelIds(travelIdList, flow)
 
     override suspend fun getExpendById(expendId: String, flow: Boolean) =
         read.getExpendById(expendId, flow)

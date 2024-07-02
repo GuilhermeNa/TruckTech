@@ -7,12 +7,13 @@ import java.math.BigDecimal
 data class RequestItem(
     val id: String? = null,
     var labelId: String? = null,
-    val requestId: String? = null,
+    val requestId: String,
 
+    var docUrl: String? = null,
     val label: Label? = null,
     var kmMarking: Int? = null,
-    var value: BigDecimal? = BigDecimal.ZERO,
-    var type: RequestItemType? = null
+    var value: BigDecimal,
+    var type: RequestItemType
 ) {
 
     fun getDescription(): String {

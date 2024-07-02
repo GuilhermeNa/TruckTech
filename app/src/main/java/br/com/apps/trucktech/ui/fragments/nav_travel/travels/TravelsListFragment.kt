@@ -7,6 +7,8 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -30,6 +32,8 @@ import br.com.apps.trucktech.ui.fragments.nav_travel.travels.private_adapters.Tr
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
 import br.com.apps.trucktech.util.state.State
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -66,6 +70,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTravelsBinding.inflate(inflater, container, false)
+        stateHandler = TravelsListState(binding, lifecycleScope)
         return binding.root
     }
 
@@ -75,9 +80,8 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        stateHandler = TravelsListState(binding)
-        initSwipeRefresh()
         initStateManager()
+        initSwipeRefresh()
         initFab()
     }
 
@@ -103,24 +107,80 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
      */
     private fun initFab() {
         binding.fragTravelFab.setOnClickListener {
-            viewModel.dialogRequested()
+            viewModel.setDialog(hasDialog = true)
+            var keepDarkLayer = false
 
             MaterialAlertDialogBuilder(requireContext())
-                .setIcon(R.drawable.icon_logout)
+                .setIcon(R.drawable.icon_add_road)
                 .setTitle("Nova viagem")
                 .setMessage("Você confirma a adição de uma nova viagem?")
-                .setPositiveButton("Ok") { _, _ -> createNewTravel() }
+                .setPositiveButton("Ok") { _, _ ->
+                    keepDarkLayer = true
+                    launchCreatingNewTravel()
+                }
                 .setNegativeButton("Cancelar") { _, _ -> }
-                .setOnDismissListener { viewModel.dialogDismissed() }
+                .setOnDismissListener {
+                    if (!keepDarkLayer)
+                        viewModel.setDialog(hasDialog = false)
+                }
                 .create().apply {
                     window?.setGravity(Gravity.CENTER)
                     show()
                 }
+
         }
     }
 
-    private fun createNewTravel() {
-        viewModel.createAndSave().observe(viewLifecycleOwner) { response ->
+    private fun launchCreatingNewTravel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val measure =
+                    viewModel.getLastTravelFinalOdometer()
+                        ?: showOdometerMeasureDialog()
+
+                createNewTravel(measure)
+
+            } catch (e: Exception) {
+                requireView().snackBarRed(FAILED_TO_SAVE)
+            } finally {
+                viewModel.setDialog(hasDialog = false)
+            }
+
+        }
+    }
+
+    private suspend fun showOdometerMeasureDialog(): Double {
+        val deferred = CompletableDeferred<Double>()
+
+        val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_input_text, null)
+        val field = view.findViewById<EditText>(R.id.dialog_edit_text)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(view)
+            .setIcon(R.drawable.icon_adjust)
+            .setTitle("Quilometragem inicial")
+            .setMessage("Defina a quilometragem inicial para esta viagem:")
+            .setPositiveButton("Ok") { _, _ ->
+                val text = field.text.toString()
+                if (text.isNotBlank()) deferred.complete(text.toDouble())
+                else deferred.completeExceptionally(InvalidParameterException())
+            }
+            .setNegativeButton("Cancelar") { _, _ ->
+                deferred.completeExceptionally(InvalidParameterException())
+            }
+            .setOnCancelListener {
+                deferred.completeExceptionally(InvalidParameterException())
+            }
+            .create().apply {
+                window?.setGravity(Gravity.CENTER)
+                show()
+            }
+
+        return deferred.await()
+    }
+
+    private fun createNewTravel(odometerMeasurement: Double) {
+        viewModel.createAndSave(odometerMeasurement).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_SAVE)
@@ -143,21 +203,23 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
      *   - Observes bottomNav to manage the interaction.
      */
     private fun initStateManager() {
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            if(viewModel.state.value != State.Loading) showAfterLoaded()
+
+            when (state) {
+                is State.Loading -> stateHandler?.showLoading()
+                is State.Loaded -> stateHandler?.showLoaded()
+                is State.Empty -> stateHandler?.showEmpty()
+                is State.Error -> stateHandler?.showError(state.error)
+                is State.Deleting -> stateHandler?.showDeleting()
+                is State.Deleted -> stateHandler?.showDeleted()
+                else -> {}
+            }
+        }
+
         viewModel.data.observe(viewLifecycleOwner) { data ->
             binding.swipeRefresh.isRefreshing = false
             data?.let { initRecyclerView(it) }
-        }
-
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                State.Loading -> stateHandler?.showLoading()
-                State.Loaded -> stateHandler?.showLoaded()
-                State.Empty -> stateHandler?.showEmpty()
-                is State.Error -> stateHandler?.showError(state.error)
-                State.Deleting -> stateHandler?.showDeleting()
-                State.Deleted -> stateHandler?.showDeleted()
-                else -> {}
-            }
         }
 
         viewModel.dialog.observe(viewLifecycleOwner) { dialog ->
@@ -172,6 +234,43 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
                     mainActVM.setComponents(VisualComponents(hasBottomNavigation = true))
                 }
             }
+        }
+    }
+
+    private fun showAfterLoaded() {
+        binding.apply {
+            boxGif.layout.apply {
+                if(visibility == VISIBLE) {
+                    visibility = GONE
+                    animation = AnimationUtils.loadAnimation(binding.root.context, R.anim.fade_and_shrink)
+                }
+            }
+
+            lifecycleScope.launch {
+                delay(250)
+
+                fragTravelFab.apply {
+                    if (visibility == GONE) {
+                        visibility = VISIBLE
+                        animation = AnimationUtils.loadAnimation(
+                            requireContext(),
+                            R.anim.slide_in_from_bottom
+                        )
+                    }
+                }
+
+                fragmentTravelsToolbar.toolbar.apply {
+                    if (visibility == GONE) {
+                        visibility = VISIBLE
+                        animation = AnimationUtils.loadAnimation(
+                            requireContext(),
+                            R.anim.slide_in_from_top
+                        )
+                    }
+                }
+
+            }
+
         }
     }
 
@@ -216,12 +315,12 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
                     )
                 )
             },
-            deleteClickListener = ::showAlertDialog
+            deleteClickListener = ::showDeleteDialog
         )
     )
 
-    private fun showAlertDialog(travel: Travel) {
-        viewModel.dialogRequested()
+    private fun showDeleteDialog(travel: Travel) {
+        viewModel.setDialog(hasDialog = true)
 
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
@@ -229,7 +328,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             .setMessage("Você realmente deseja remover esta viagem e todos os seus itens?")
             .setPositiveButton("Ok") { _, _ -> delete(travel) }
             .setNegativeButton("Cancelar") { _, _ -> }
-            .setOnDismissListener { viewModel.dialogDismissed() }
+            .setOnDismissListener { viewModel.setDialog(hasDialog = false) }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
