@@ -21,7 +21,7 @@ import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.ui.activities.main.LoggedUser
 import br.com.apps.trucktech.util.state.State
-import br.com.apps.usecase.TravelUseCase
+import br.com.apps.usecase.usecase.TravelUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -136,7 +136,7 @@ class HomeViewModel(
 
     //TODO performance
     private suspend fun fetchTravels(driverId: String): List<Travel> {
-        val response = travelUseCase.getTravelListByDriverId(driverId).asFlow().first()
+        val response = travelUseCase.getTravelListByDriverIdAndIsFinished(driverId).asFlow().first()
         return when (response) {
             is Response.Error -> throw response.exception
             is Response.Success -> response.data ?: throw NullPointerException()

@@ -13,7 +13,8 @@ import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.RefuelUseCase
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.usecase.usecase.RefuelUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -72,8 +73,11 @@ class RefuelEditorViewModel(
     fun save(viewDto: RefuelDto) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = createOrUpdate(viewDto)
-                useCase.save(vmData.permission, dto)
+                val writeReq = WriteRequest(
+                    authLevel = vmData.permission,
+                    data = createOrUpdate(viewDto)
+                )
+                useCase.save(writeReq)
                 emit(Response.Success())
             } catch (e: Exception) {
                 e.printStackTrace()

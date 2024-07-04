@@ -8,7 +8,7 @@ import br.com.apps.trucktech.expressions.getDayFormatted
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.trucktech.util.state.State
-import br.com.apps.usecase.TravelUseCase
+import br.com.apps.usecase.usecase.TravelUseCase
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDateTime
@@ -210,7 +210,7 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
             }
 
             val periodAdapterData =
-                "${pair.second.first().initialDate.getMonthInPtBrAbbreviated()} null null"
+                "${pair.second.last().initialDate.getMonthInPtBrAbbreviated()} null null"
             val viewPagerData = getPerformanceItems(pair.second)
             hashMap[mapIndex] = Pair(periodAdapterData, viewPagerData)
             mapIndex++

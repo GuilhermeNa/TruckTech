@@ -18,7 +18,7 @@ class RequestEditorRecyclerAdapter(
     val context: Context,
     dataSet: List<RequestItem>,
     val itemClickListener: (itemCLickData: RequestItemClickData) -> Unit = {},
-    val deleteClickListener: (id: String) -> Unit = {}
+    val deleteClickListener: (itemDto: RequestItem) -> Unit = {}
 ) : RecyclerView.Adapter<RequestEditorRecyclerAdapter.ViewHolder>() {
 
     private val dataSet = dataSet.toMutableList()
@@ -51,7 +51,7 @@ class RequestEditorRecyclerAdapter(
             item?.let {
                 when (it.itemId) {
                     R.id.menu_delete_delete -> {
-                        requestItem.id?.let { id -> deleteClickListener(id) }
+                      deleteClickListener(requestItem)
                     }
 
                     else -> {}

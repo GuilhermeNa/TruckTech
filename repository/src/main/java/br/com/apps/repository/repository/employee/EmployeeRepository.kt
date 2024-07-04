@@ -5,9 +5,9 @@ import br.com.apps.model.dto.employee_dto.EmployeeDto
 import br.com.apps.model.model.employee.EmployeeType
 
 class EmployeeRepository(
-    private val write: EmployeeWrite,
-    private val read: EmployeeRead
-) : EmployeeRepositoryI {
+    private val write: EmployeeWriteImpl,
+    private val read: EmployeeReadImpl
+) : EmployeeRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE

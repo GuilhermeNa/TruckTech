@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import br.com.apps.repository.util.CANCEL
-import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.OK
 import br.com.apps.repository.util.Response
@@ -27,6 +26,7 @@ import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.private_adapter.RequestPreviewRecyclerAdapter
+import br.com.apps.trucktech.util.state.State
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -152,15 +152,19 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
      *   - Observes dark layer to manage the interaction.
      */
     private fun initStateManager() {
-        viewModel.data.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                is Response.Success -> {
-                    response.data?.let { request ->
-                        request.itemsList?.let { adapter?.update(it) }
-                        bind(request)
-                    }
-                }
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when(state) {
+                is State.Loading -> stateHandler?.showLoading()
+                is State.Loaded -> stateHandler?.showLoaded()
+                is State.Error -> stateHandler?.showError(state.error)
+                else -> {}
+            }
+        }
+
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            data?.let { request ->
+                request.itemsList?.let { adapter?.update(it) }
+                bind(request)
             }
         }
 

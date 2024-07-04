@@ -10,7 +10,8 @@ import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.RefuelUseCase
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.usecase.usecase.RefuelUseCase
 import kotlinx.coroutines.launch
 
 class RefuelPreviewViewModel(
@@ -62,8 +63,11 @@ class RefuelPreviewViewModel(
     fun delete() =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = (_data.value as Response.Success).data!!.toDto()
-                useCase.delete(vmData.permission, dto)
+                val writeReq = WriteRequest(
+                    authLevel = vmData.permission,
+                    data = (_data.value as Response.Success).data!!.toDto()
+                )
+                useCase.delete(writeReq)
                 emit(Response.Success())
             } catch (e: Exception) {
                 e.printStackTrace()

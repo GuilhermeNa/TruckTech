@@ -40,6 +40,10 @@ const val ENCODED_IMAGE = "encodedImage"
 
 const val ODOMETER_MEASURE = "odometerMeasure"
 
+const val DOC_URL = "docUrl"
+
+const val MAIN_ACCOUNT = "mainAccount"
+
 //---------------------------------------------------------------------------------------------//
 // SUCCESS MESSAGES
 //---------------------------------------------------------------------------------------------//

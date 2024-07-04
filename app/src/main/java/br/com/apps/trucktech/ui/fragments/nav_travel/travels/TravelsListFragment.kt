@@ -242,7 +242,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             boxGif.layout.apply {
                 if(visibility == VISIBLE) {
                     visibility = GONE
-                    animation = AnimationUtils.loadAnimation(binding.root.context, R.anim.fade_and_shrink)
+                    animation = AnimationUtils.loadAnimation(binding.root.context, R.anim.fade_out_and_shrink)
                 }
             }
 

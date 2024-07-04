@@ -21,7 +21,7 @@ suspend fun <T> LiveData<T>.awaitValue(): T = suspendCancellableCoroutine { cont
 suspend fun <T> LiveData<Response<T>>.awaitData(): T = suspendCancellableCoroutine { cont ->
     val observer = object : Observer<Response<T>> {
         override fun onChanged(value: Response<T>) {
-            when(value) {
+            when (value) {
                 is Response.Error -> cont.resumeWithException(value.exception)
                 is Response.Success -> value.data?.let { cont.resume(it) }
                     ?: cont.resumeWithException(NullPointerException())
@@ -34,3 +34,28 @@ suspend fun <T> LiveData<Response<T>>.awaitData(): T = suspendCancellableCorouti
     this.observeForever(observer)
 }
 
+suspend fun <T> LiveData<Response<T>>.observeFlow(onComplete: (T) -> Unit): T =
+    suspendCancellableCoroutine { cont ->
+        val observer = object : Observer<Response<T>> {
+            override fun onChanged(value: Response<T>) {
+                when (value) {
+                    is Response.Error -> {
+                        cont.resumeWithException(value.exception)
+                        this@observeFlow.removeObserver(this)
+                    }
+
+                    is Response.Success -> {
+                        value.data?.let { onComplete(it) }
+                        if(value.data == null) {
+                            cont.resumeWithException(NullPointerException())
+                            this@observeFlow.removeObserver(this)
+                        }
+                    }
+                }
+            }
+        }
+        this.observeForever(observer)
+        cont.invokeOnCancellation {
+            this.removeObserver(observer)
+        }
+    }

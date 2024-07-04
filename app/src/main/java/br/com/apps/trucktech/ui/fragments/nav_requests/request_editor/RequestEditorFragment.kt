@@ -10,10 +10,9 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
@@ -23,7 +22,7 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRequestEditorBinding
-import br.com.apps.trucktech.expressions.decodeBitMap
+import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
@@ -33,7 +32,6 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapter.RequestEditorRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_dialogs.RequestEditorBottomSheet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -65,23 +63,22 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
         registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
-            if (result.resultCode == Activity.RESULT_OK && result.data != null)
-                processActivityLauncherResult(result)
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val data = result.data!!
+                processActivityLauncherResult(data)
+            }
         }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
     //---------------------------------------------------------------------------------------------//
 
-    private fun processActivityLauncherResult(result: ActivityResult) {
+    private fun processActivityLauncherResult(data: Intent) {
         try {
 
-            result.data?.let { data ->
-                val encodedImage = data.getStringExtra(RESULT_KEY)
-                encodedImage?.run {
-                    viewModel.imageHaveBeenLoaded(this)
-                    lifecycleScope.launch { viewModel.saveEncodedImage() }
-                }
+            val ba = data.getByteArrayExtra(RESULT_KEY)
+            ba?.run {
+                viewModel.imageHaveBeenLoaded(this)
             }
 
         } catch (e: Exception) {
@@ -197,14 +194,14 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
         recyclerView.adapter = adapter
     }
 
-    private fun showAlertDialogForDelete(itemId: String) {
+    private fun showAlertDialogForDelete(item: RequestItem) {
         viewModel.requestDarkLayer()
 
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle("Apagando item")
             .setMessage("Você realmente deseja apagar este item permanentemente?")
-            .setPositiveButton(OK) { _, _ -> deleteItem(itemId) }
+            .setPositiveButton(OK) { _, _ -> deleteItem(item) }
             .setNegativeButton(CANCEL) { _, _ -> }
             .setOnDismissListener { viewModel.dismissDarkLayer() }
             .create().apply {
@@ -214,8 +211,8 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
 
     }
 
-    private fun deleteItem(itemId: String) {
-        viewModel.deleteItem(itemId).observe(viewLifecycleOwner) { response ->
+    private fun deleteItem(item: RequestItem) {
+        viewModel.deleteItem(item).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE_ITEM)
 
@@ -292,13 +289,14 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
             }
         }
 
-        viewModel.boxPaymentImage.observe(viewLifecycleOwner) { encodedImage ->
-            val imageBitmap = encodedImage.decodeBitMap()
+        viewModel.urlImage.observe(viewLifecycleOwner) { image ->
+
             binding.boxFragRequestEditorPayment.apply {
                 panelAddPixLayoutWaitingUpload.visibility = GONE
                 panelAddPixLayoutAlreadyUploaded.visibility = VISIBLE
-                panelAddPixImage.setImageBitmap(imageBitmap)
+                panelAddPixImage.loadImageThroughUrl(image)
             }
+
         }
 
         viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->

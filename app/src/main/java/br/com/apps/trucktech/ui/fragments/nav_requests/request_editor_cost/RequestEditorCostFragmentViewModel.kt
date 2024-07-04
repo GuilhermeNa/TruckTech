@@ -1,5 +1,6 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
@@ -13,11 +14,14 @@ import br.com.apps.model.model.label.LabelType
 import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.LabelUseCase
-import br.com.apps.usecase.RequestUseCase
+import br.com.apps.usecase.usecase.LabelUseCase
+import br.com.apps.usecase.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -25,10 +29,14 @@ class RequestEditorCostFragmentViewModel(
     private val vmData: RequestEditorCostVmData,
     private val labelUseCase: LabelUseCase,
     private val repository: RequestRepository,
-    private val useCase: RequestUseCase
+    private val useCase: RequestUseCase,
+    private val storage: StorageRepository
 ) : ViewModel() {
 
     private var isEditing: Boolean = vmData.costReqId?.let { true } ?: false
+
+    private val _loadedImage = MutableLiveData<Any?>()
+    val loadedImage get() = _loadedImage
 
     private val _data = MutableLiveData<RequestEditorCostFData>()
     val data get() = _data
@@ -76,7 +84,12 @@ class RequestEditorCostFragmentViewModel(
             .asFlow().first { response ->
                 val data = when (response) {
                     is Response.Error -> throw response.exception
-                    is Response.Success -> response.data ?: throw NullPointerException()
+                    is Response.Success -> {
+                        response.data?.let { item ->
+                            item.docUrl?.let { url -> _loadedImage.value = url }
+                            item
+                        } ?: throw NullPointerException()
+                    }
                 }
                 deferred.complete(data)
             }
@@ -87,12 +100,18 @@ class RequestEditorCostFragmentViewModel(
     /**
      * Transforms the mapped fields into a DTO. Creates a new [RequestItem] or updates it if it already exists.
      */
-    fun save(viewDto: RequestItemDto) =
+    fun save(viewDto: RequestItemDto, ba: ByteArray?) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = createOrUpdate(viewDto)
-                useCase.saveItem(vmData.permission, dto)
+                val id = useCase.saveItem(vmData.permission, dto)
+                dto.id = id
                 emit(Response.Success())
+
+                loadedImage.value?.let {
+                    saveImage(ba!!, dto)
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 emit(Response.Error(e))
@@ -104,11 +123,13 @@ class RequestEditorCostFragmentViewModel(
             true -> {
                 val item = data.value!!.item!!
                 RequestItemFactory.update(item, viewDto)
+                if (loadedImage.value == null) item.docUrl = null
                 item.toDto()
             }
 
             false -> {
                 viewDto.requestId = vmData.requestId
+                viewDto.type = RequestItemType.COST.description
                 RequestItemFactory.create(viewDto, RequestItemType.COST).toDto()
             }
         }
@@ -137,6 +158,39 @@ class RequestEditorCostFragmentViewModel(
             labelId = label?.id.toString()
         }
         return labelId
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private suspend fun saveImage(ba: ByteArray, dto: RequestItemDto) {
+        GlobalScope.launch {
+            try {
+                val url = storage.postImage(ba, "requests/${dto.id}.jpeg")
+                repository.updateItemImageUrl(dto, url)
+            } catch (e: Exception) {
+                Log.d("teste", "saveImage: $e")
+                e.printStackTrace()
+            }
+
+        }
+    }
+
+    fun updateImage(urlImage: ByteArray) {
+        _loadedImage.value = urlImage
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun deleteImage() {
+        _loadedImage.value = null
+        val id = data.value?.item?.id
+        GlobalScope.launch {
+            try {
+                id?.let { storage.deleteImage("requests/$id.jpg") }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+        }
     }
 
 }

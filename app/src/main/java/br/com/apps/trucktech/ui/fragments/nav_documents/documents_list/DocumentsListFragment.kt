@@ -103,6 +103,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                 is State.Loading -> {
                     binding.apply {
                         boxGif.loadingGif.loadGif(R.drawable.gif_document, requireContext())
+                        fragDocumentBoxEmpty.layout.visibility = GONE
                         freightFragmentRecycler.visibility = GONE
                         fragmentDocumentsListToolbar.toolbar.visibility = GONE
                     }
@@ -134,21 +135,51 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                 is State.Empty -> {
                     binding.apply {
                         freightFragmentRecycler.visibility = GONE
-                        fragDocumentBoxEmpty.apply {
-                            layout.visibility = VISIBLE
-                            error.visibility = GONE
-                            empty.visibility = VISIBLE
+                        lifecycleScope.launch {
+                            fragDocumentBoxEmpty.apply {
+                                if (layout.visibility == GONE) {
+                                    delay(250)
+                                    error.visibility = GONE
+                                    empty.visibility = VISIBLE
+                                    layout.apply {
+                                        visibility = VISIBLE
+                                        animation = AnimationUtils.loadAnimation(
+                                            requireContext(),
+                                            R.anim.fade_in_and_shrink
+                                        )
+                                    }
+                                } else {
+                                    error.visibility = GONE
+                                    empty.visibility = VISIBLE
+                                }
+                            }
                         }
+
                     }
                 }
 
                 is State.Error -> {
                     binding.apply {
                         freightFragmentRecycler.visibility = GONE
-                        fragDocumentBoxEmpty.apply {
-                            layout.visibility = VISIBLE
-                            error.visibility = VISIBLE
-                            empty.visibility = GONE
+
+                        lifecycleScope.launch {
+                            fragDocumentBoxEmpty.apply {
+                                if (layout.visibility == GONE) {
+                                    delay(250)
+                                    error.visibility = VISIBLE
+                                    empty.visibility = GONE
+                                    layout.apply {
+                                        visibility = VISIBLE
+                                        animation = AnimationUtils.loadAnimation(
+                                            binding.root.context,
+                                            R.anim.fade_in_and_shrink
+                                        )
+                                    }
+                                } else {
+                                    error.visibility = VISIBLE
+                                    empty.visibility = GONE
+                                }
+                            }
                         }
                     }
                 }
@@ -164,12 +195,13 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                 if (this.visibility == VISIBLE) {
                     visibility = GONE
                     animation =
-                        AnimationUtils.loadAnimation(requireContext(), R.anim.fade_and_shrink)
+                        AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out_and_shrink)
                 }
             }
             fragmentDocumentsListToolbar.toolbar.apply {
-                if(this.visibility == GONE) {
-                    val anim = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_in_from_top)
+                if (this.visibility == GONE) {
+                    val anim =
+                        AnimationUtils.loadAnimation(requireContext(), R.anim.slide_in_from_top)
                     visibility = VISIBLE
                     animation = anim
                 }

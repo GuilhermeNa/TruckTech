@@ -106,12 +106,36 @@ class LoginState(
     fun showTryingToLogin() {
         binding.apply {
             boxLoading.layout.visibility = VISIBLE
+            scroll.apply {
+                isEnabled = false
+                isClickable = false
+            }
+            fragLayoutUser.apply {
+                isEnabled = false
+                isClickable = false
+            }
+            fragLayoutPassword.apply {
+                isEnabled = false
+                isClickable = false
+            }
         }
     }
 
     fun showLoginFailed() {
         binding.apply {
             boxLoading.layout.visibility = GONE
+            scroll.apply {
+                isEnabled = true
+                isClickable = true
+            }
+            fragLayoutUser.apply {
+                isEnabled = true
+                isClickable = true
+            }
+            fragLayoutPassword.apply {
+                isEnabled = true
+                isClickable = true
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Truck tech</string>
+    <string name="app_name">Trucker</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -137,7 +137,6 @@
     <string name="paid_by_employee">Pago pelo motorista</string>
     <string name="forget_pass">Esqueci a senha</string>
     <string name="loading">Carregando...</string>
-    <string name="project_name">Truck tech</string>
     <string name="help">Ajuda</string>
     <string name="no_data_found">Nada encontrado</string>
     <string name="failed_to_load">Falha na busca</string>

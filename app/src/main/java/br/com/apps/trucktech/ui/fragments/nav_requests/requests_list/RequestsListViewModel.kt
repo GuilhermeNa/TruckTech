@@ -6,7 +6,6 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.TravelRequestDto
-import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
 import br.com.apps.model.model.request.travel_requests.RequestItem
@@ -17,7 +16,7 @@ import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.util.state.State
-import br.com.apps.usecase.RequestUseCase
+import br.com.apps.usecase.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -71,7 +70,9 @@ class RequestsListViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init { setState(State.Loading) }
+    init {
+        setState(State.Loading)
+    }
 
     fun loadData() {
         viewModelScope.launch {
@@ -166,8 +167,8 @@ class RequestsListViewModel(
         liveData<Response<Unit>>((viewModelScope.coroutineContext)) {
             try {
                 setState(State.Deleting)
-                val dto = request.toDto()
-                useCase.delete(vmData.permission, dto)
+
+                useCase.delete(vmData.permission, request)
                 emit(Response.Success())
                 setState(State.Deleted)
             } catch (e: Exception) {

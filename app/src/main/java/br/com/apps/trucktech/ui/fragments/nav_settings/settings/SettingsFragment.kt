@@ -33,8 +33,14 @@ class SettingsFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
-    private val userName by lazy { mainActVM.loggedUser.name }
-    private val viewModel: SettingsViewModel by viewModel { parametersOf(userName) }
+
+    private val vmData by lazy {
+        SettingsVmData(
+            userName = mainActVM.loggedUser.name,
+            urlImage = mainActVM.loggedUser.urlImage
+        )
+    }
+    private val viewModel: SettingsViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW

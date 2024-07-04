@@ -100,7 +100,10 @@ class FreightPreviewFragment : BasePreviewFragment() {
     private fun initStateManager() {
         viewModel.data.observe(viewLifecycleOwner) { response ->
             when (response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                is Response.Error -> {
+                    response.exception.printStackTrace()
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                }
                 is Response.Success -> response.data?.let { bind(it) }
             }
         }

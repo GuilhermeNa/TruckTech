@@ -15,7 +15,8 @@ import br.com.apps.model.toDate
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.FreightUseCase
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.usecase.usecase.FreightUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -150,7 +151,11 @@ class FreightEditorViewModel(
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = createOrUpdate(viewDto)
-                useCase.save(vmData.permissionLevel, dto)
+                val writeRep = WriteRequest(
+                    authLevel = vmData.permissionLevel,
+                    data = dto
+                )
+                useCase.save(writeRep)
                 emit(Response.Success())
             } catch (e: Exception) {
                 e.printStackTrace()

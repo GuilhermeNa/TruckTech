@@ -10,7 +10,8 @@ import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.ExpendUseCase
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.usecase.usecase.ExpendUseCase
 import kotlinx.coroutines.launch
 
 class  ExpendPreviewViewModel(
@@ -62,8 +63,11 @@ class  ExpendPreviewViewModel(
 
     fun delete() = liveData<Response<Unit>>(viewModelScope.coroutineContext) {
         try {
-            val dto = (data.value as Response.Success).data!!.toDto()
-            useCase.delete(vmData.permission, dto)
+            val writeReq = WriteRequest(
+                authLevel = vmData.permission,
+                data = (data.value as Response.Success).data!!.toDto()
+            )
+            useCase.delete(writeReq)
             emit(Response.Success())
         } catch (e: Exception) {
             e.printStackTrace()

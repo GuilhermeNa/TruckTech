@@ -22,6 +22,7 @@ class RequestsListState(
     override fun showLoading() {
         binding.apply {
             boxGif.loadingGif.loadGif(R.drawable.gif_request, binding.root.context)
+            fragRequestsBoxError.layout.visibility = GONE
             fragmentRequestsListToolbar.toolbar.visibility = GONE
             fragmentRequestsListHeaderRecycler.visibility = GONE
             fragmentRequestsListRecycler.visibility = GONE
@@ -66,20 +67,62 @@ class RequestsListState(
     }
 
     override fun showEmpty() {
-        binding.fragRequestsBoxError.apply {
-            layout.visibility = VISIBLE
-            empty.visibility = VISIBLE
-            error.visibility = GONE
+        binding.apply {
+            if (fragmentRequestsListHeaderRecycler.visibility == VISIBLE) {
+                fragmentRequestsListHeaderRecycler.visibility = GONE
+            }
+
+            lifecycleScope.launch {
+                fragRequestsBoxError.apply {
+                    if (layout.visibility == GONE) {
+                        delay(250)
+                        empty.visibility = VISIBLE
+                        error.visibility = GONE
+                        layout.apply {
+                            visibility = VISIBLE
+                            animation = AnimationUtils.loadAnimation(
+                                binding.root.context,
+                                R.anim.fade_in_and_shrink
+                            )
+                        }
+                    } else {
+                        empty.visibility = VISIBLE
+                        error.visibility = GONE
+                    }
+                }
+            }
+
         }
     }
 
     override fun showUpdating() {}
 
     override fun showError(e: Exception) {
-        binding.fragRequestsBoxError.apply {
-            layout.visibility = VISIBLE
-            error.visibility = VISIBLE
-            empty.visibility = GONE
+        binding.apply {
+            if (fragmentRequestsListHeaderRecycler.visibility == VISIBLE) {
+                fragmentRequestsListHeaderRecycler.visibility = GONE
+            }
+
+            lifecycleScope.launch {
+                fragRequestsBoxError.apply {
+                    if (layout.visibility == GONE) {
+                        delay(250)
+                        error.visibility = VISIBLE
+                        empty.visibility = GONE
+                        layout.apply {
+                            visibility = VISIBLE
+                            animation = AnimationUtils.loadAnimation(
+                                binding.root.context,
+                                R.anim.fade_in_and_shrink
+                            )
+                        }
+                    } else {
+                        error.visibility = VISIBLE
+                        empty.visibility = GONE
+                    }
+                }
+            }
+
         }
         Log.e(TAG_DEBUG, e.message.toString())
         e.printStackTrace()
@@ -103,7 +146,10 @@ class RequestsListState(
                 if (visibility == VISIBLE) {
                     visibility = GONE
                     animation =
-                        AnimationUtils.loadAnimation(binding.root.context, R.anim.fade_and_shrink)
+                        AnimationUtils.loadAnimation(
+                            binding.root.context,
+                            R.anim.fade_out_and_shrink
+                        )
                 }
             }
 

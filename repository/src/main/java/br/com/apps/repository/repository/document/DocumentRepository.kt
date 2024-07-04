@@ -1,15 +1,12 @@
 package br.com.apps.repository.repository.document
 
 import br.com.apps.model.dto.DocumentDto
-import br.com.apps.repository.repository.document.DocumentRead
-import br.com.apps.repository.repository.document.DocumentRepositoryI
-import br.com.apps.repository.repository.document.DocumentWrite
 
 
 class DocumentRepository(
-    private val write: DocumentWrite,
-    private val read: DocumentRead
-) : DocumentRepositoryI {
+    private val write: DocumentWriteImpl,
+    private val read: DocumentReadImpl
+) : DocumentRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE

@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.advance
 
-class AdvanceRepository(private val read: AdvanceRead): AdvanceRepositoryI {
+class AdvanceRepository(private val read: AdvanceReadImpl): AdvanceRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // READ

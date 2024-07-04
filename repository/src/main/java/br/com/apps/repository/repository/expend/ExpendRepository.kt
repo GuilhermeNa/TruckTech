@@ -3,15 +3,15 @@ package br.com.apps.repository.repository.expend
 import br.com.apps.model.dto.travel.ExpendDto
 
 class ExpendRepository(
-    private val write: ExpendWrite,
-    private val read: ExpendRead
-) : ExpendRepositoryI {
+    private val write: ExpendWriteImpl,
+    private val read: ExpendReadImpl
+) : ExpendRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun delete(expendId: String) = write.delete(expendId)
+    override suspend fun delete(expendId: String?) = write.delete(expendId)
 
     override suspend fun save(dto: ExpendDto) = write.save(dto)
 

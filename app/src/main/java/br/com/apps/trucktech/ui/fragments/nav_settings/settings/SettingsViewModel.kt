@@ -4,7 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import br.com.apps.trucktech.R
 
-class SettingsViewModel(userName: String) : ViewModel() {
+class SettingsViewModel(vmData: SettingsVmData) : ViewModel() {
 
     /**
      * LiveData with a dark layer state, used when dialog is requested.
@@ -23,8 +23,8 @@ class SettingsViewModel(userName: String) : ViewModel() {
      */
     val settingsItems = listOf(
         SettingsItem(
-            imageUrl = "https://www3.al.sp.gov.br/repositorio/deputadoPortal/fotos/20230315-170849-id=1649-GRD.jpeg",
-            title = userName
+            imageUrl = vmData.urlImage,
+            title = vmData.userName
         ),
         SettingsItem(
             imageId = R.drawable.icon_key,
@@ -94,4 +94,9 @@ data class SettingsItem(
     val imageUrl: String? = null,
     val title: String? = null,
     val description: String? = null
+)
+
+data class SettingsVmData(
+    val userName: String,
+    val urlImage: String? = null
 )

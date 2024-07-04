@@ -3,9 +3,9 @@ package br.com.apps.repository.repository.fleet
 import br.com.apps.model.dto.TruckDto
 
 class FleetRepository(
-    private val write: FleetWrite,
-    private val read: FleetRead
-): FleetRepositoryI {
+    private val write: FleetWriteImpl,
+    private val read: FleetReadImpl
+): FleetRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE

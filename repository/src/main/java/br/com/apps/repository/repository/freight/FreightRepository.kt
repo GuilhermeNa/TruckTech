@@ -3,9 +3,9 @@ package br.com.apps.repository.repository.freight
 import br.com.apps.model.dto.travel.FreightDto
 
 class FreightRepository(
-    private val read: FreightRead,
-    private val write: FreightWrite
-): FreightRepositoryI {
+    private val read: FreightReadImpl,
+    private val write: FreightWriteImpl
+): FreightRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE
@@ -13,7 +13,7 @@ class FreightRepository(
 
     override suspend fun save(dto: FreightDto) = write.save(dto)
 
-    override suspend fun delete(freightId: String) = write.delete(freightId)
+    override suspend fun delete(freightId: String?) = write.delete(freightId)
 
     //---------------------------------------------------------------------------------------------//
     // READ

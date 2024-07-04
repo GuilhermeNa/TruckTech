@@ -1,7 +1,7 @@
 package br.com.apps.repository.repository.auth
 
 import androidx.lifecycle.LiveData
-import br.com.apps.repository.Resource
+import br.com.apps.repository.util.Resource
 import br.com.apps.repository.util.Response
 import com.google.firebase.auth.FirebaseUser
 

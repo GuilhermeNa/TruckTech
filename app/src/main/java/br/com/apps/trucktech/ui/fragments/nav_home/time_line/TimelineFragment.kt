@@ -3,6 +3,7 @@ package br.com.apps.trucktech.ui.fragments.nav_home.time_line
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -51,7 +52,7 @@ class TimelineFragment : BaseFragmentWithToolbar() {
         initRecyclerView()
         binding.layoutError.apply {
             empty.visibility = VISIBLE
-            error.visibility = VISIBLE
+            error.visibility = GONE
         }
 
     }

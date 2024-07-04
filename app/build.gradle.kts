@@ -150,4 +150,7 @@ dependencies {
     //MaskedEditText
     implementation ("io.github.vicmikhailau:MaskedEditText:5.0.1")
 
+    //Shrimmer
+    implementation ("com.facebook.shimmer:shimmer:0.5.0")
+
 }

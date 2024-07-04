@@ -42,6 +42,18 @@ import br.com.apps.model.model.user.CommonUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 
+// Utility extension functions for Firebase Firestore snapshots to convert various document types
+// to corresponding model objects.
+
+// These extension functions provide convenient conversion methods:
+
+// Sample:
+//   - toTravelList(): Converts a Firestore `QuerySnapshot` containing documents
+//     into a list of travel objects.
+//   - toTravelObject(): Converts a Firestore `DocumentSnapshot` representing a travel document
+//     into a single `Travel` object.
+
+
 fun QuerySnapshot.toTravelList(): List<Travel> {
     return this.mapNotNull { travelDocument ->
         travelDocument.toTravelObject()

@@ -22,6 +22,7 @@ class TravelsListState(
     override fun showLoading() {
         binding.apply {
             boxGif.loadingGif.loadGif(R.drawable.gif_travel, binding.root.context)
+            fragTravelsBoxError.layout.visibility = GONE
             travelsFragmentRecycler.visibility = GONE
             fragTravelFab.visibility = GONE
             fragmentTravelsToolbar.toolbar.visibility = GONE
@@ -56,22 +57,50 @@ class TravelsListState(
     override fun showEmpty() {
         binding.travelsFragmentRecycler.visibility = GONE
 
-        binding.fragTravelsBoxError.apply {
-            layout.visibility = VISIBLE
-            error.visibility = GONE
-            empty.visibility = VISIBLE
+        lifecycleScope.launch {
+            binding.fragTravelsBoxError.apply {
+                if (layout.visibility == GONE) {
+                    delay(250)
+                    error.visibility = GONE
+                    empty.visibility = VISIBLE
+                    layout.apply {
+                        visibility = VISIBLE
+                        animation = AnimationUtils.loadAnimation(
+                            binding.root.context,
+                            R.anim.fade_in_and_shrink
+                        )
+                    }
+                } else {
+                    error.visibility = GONE
+                    empty.visibility = VISIBLE
+                }
+            }
         }
-
     }
 
     override fun showUpdating() {}
 
     override fun showError(e: Exception) {
         binding.travelsFragmentRecycler.visibility = GONE
-        binding.fragTravelsBoxError.apply {
-            layout.visibility = VISIBLE
-            error.visibility = VISIBLE
-            empty.visibility = GONE
+
+        lifecycleScope.launch {
+            binding.fragTravelsBoxError.apply {
+                if (layout.visibility == GONE) {
+                    delay(250)
+                    error.visibility = VISIBLE
+                    empty.visibility = GONE
+                    layout.apply {
+                        visibility = VISIBLE
+                        animation = AnimationUtils.loadAnimation(
+                            binding.root.context,
+                            R.anim.fade_in_and_shrink
+                        )
+                    }
+                } else {
+                    error.visibility = VISIBLE
+                    empty.visibility = GONE
+                }
+            }
         }
         Log.e(TAG_DEBUG, e.message.toString())
         e.printStackTrace()

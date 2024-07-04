@@ -10,21 +10,25 @@ import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.RequestUseCase
+import br.com.apps.usecase.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class RequestEditorViewModel(
     private val vmData: RequestEditorVmData,
     private val repository: RequestRepository,
-    private val useCase: RequestUseCase
+    private val useCase: RequestUseCase,
+    private val storage: StorageRepository
 ) : ViewModel() {
 
-    private val _boxPaymentImage = MutableLiveData<String>()
-    val boxPaymentImage get() = _boxPaymentImage
+    private val _urlImage = MutableLiveData<Any>()
+    val urlImage get() = _urlImage
 
     /**
      * LiveData holding the response data of type [Response] with a [PaymentRequest]
@@ -88,18 +92,19 @@ class RequestEditorViewModel(
     }
 
     private fun sendResponse(request: PaymentRequest) {
-        if (_boxPaymentImage.value == null) {
-            request.encodedImage?.let { _boxPaymentImage.value = it }
+        if (_urlImage.value == null) {
+            request.encodedImage?.let { _urlImage.value = it }
         }
         _data.value = Response.Success(request)
     }
 
-    fun deleteItem(itemId: String) =
+    fun deleteItem(item: RequestItem) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = getRequestDto()
-                useCase.deleteItem(vmData.permission, dto, itemId)
+                useCase.deleteItem(vmData.permission, dto, item)
                 emit(Response.Success())
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 emit(Response.Error(e))
@@ -120,15 +125,21 @@ class RequestEditorViewModel(
         _darkLayer.value = false
     }
 
-    fun imageHaveBeenLoaded(encodedImage: String) {
-        _boxPaymentImage.value = encodedImage
+    fun imageHaveBeenLoaded(image: ByteArray) {
+        _urlImage.value = image
+        saveEncodedImage()
     }
 
-    suspend fun saveEncodedImage() {
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun saveEncodedImage() {
         val dto = getRequestDto()
-        val encodedImage = _boxPaymentImage.value
-            ?: throw NullPointerException("Não é possível salvar a imagem, seu valor é nulo")
-        useCase.updateEncodedImage(vmData.permission, dto, encodedImage)
+        val ba = _urlImage.value as ByteArray
+
+        GlobalScope.launch {
+            val url = storage.postImage(ba, "requests/${dto.id}.jpeg")
+            repository.updateRequestImageUrl(dto.id!!, url)
+        }
+
     }
 
     private fun getRequestDto(): TravelRequestDto {

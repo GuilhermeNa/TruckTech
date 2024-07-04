@@ -35,6 +35,7 @@ import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankListFr
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_preview.BankPreviewViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.change_password.ChangePasswordFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsViewModel
+import br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsVmData
 import br.com.apps.trucktech.ui.fragments.nav_settings.themes.ThemeFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEVMData
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEditorViewModel
@@ -56,7 +57,7 @@ import br.com.apps.trucktech.ui.fragments.nav_travel.travel_preview.TravelPrevie
 import br.com.apps.trucktech.ui.fragments.nav_travel.travel_preview.TravelPreviewVmData
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.TravelLVMData
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.TravelsListViewModel
-import br.com.apps.usecase.useCaseModules
+import br.com.apps.usecase.di.useCaseModules
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -107,6 +108,7 @@ val viewModelModules = module {
         FreightPreviewViewModel(
             vmData,
             get(),
+            get(),
             get()
         )
     }
@@ -118,7 +120,7 @@ val viewModelModules = module {
         )
     }
     viewModel<AuthViewModel> { AuthViewModel(get()) }
-    viewModel<RequestEditorViewModel> { (vmData: RequestEditorVmData) -> RequestEditorViewModel(vmData, get(), get()) }
+    viewModel<RequestEditorViewModel> { (vmData: RequestEditorVmData) -> RequestEditorViewModel(vmData, get(), get(), get()) }
     viewModel<RequestPreviewViewModel> { (vmData: RequestPreviewVmData) ->
         RequestPreviewViewModel(
             vmData,
@@ -154,7 +156,7 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<SettingsViewModel> { (userName: String) -> SettingsViewModel(userName) }
+    viewModel<SettingsViewModel> { (vmData: SettingsVmData) -> SettingsViewModel(vmData) }
     viewModel<ThemeFragmentViewModel> { ThemeFragmentViewModel() }
     viewModel<TimelineFragmentViewModel> { TimelineFragmentViewModel() }
     viewModel<TravelsListViewModel> { (vmData: TravelLVMData) ->
@@ -172,12 +174,14 @@ val viewModelModules = module {
         RequestEditorRefuelViewModel(
             vmData,
             get(),
+            get(),
             get()
         )
     }
     viewModel<RequestEditorCostFragmentViewModel> { (vmData: RequestEditorCostVmData) ->
         RequestEditorCostFragmentViewModel(
             vmData,
+            get(),
             get(),
             get(),
             get()

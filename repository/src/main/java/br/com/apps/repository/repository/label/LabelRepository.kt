@@ -3,9 +3,9 @@ package br.com.apps.repository.repository.label
 import br.com.apps.model.dto.LabelDto
 
 class LabelRepository(
-    private val write: LabelWrite,
-    private val read: LabelRead
-): LabelRepositoryI {
+    private val write: LabelWriteImpl,
+    private val read: LabelReadImpl
+): LabelRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE

@@ -15,7 +15,7 @@ import br.com.apps.repository.util.RESULT_KEY
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ActivityCameraBinding
-import br.com.apps.trucktech.expressions.encodeBitmap
+import br.com.apps.trucktech.expressions.getByteArray
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 private const val IMAGE_ORIGIN = "Origem da imagem"
@@ -105,8 +105,8 @@ class CameraActivity : AppCompatActivity() {
         try {
 
             val bitmapImage = extractBitmapResultFromCamera(result)
-            val encodedImage = bitmapImage.encodeBitmap()
-            setActivityResult(encodedImage)
+            val byteArray = bitmapImage.getByteArray()
+            setActivityResult(byteArray)
 
         } catch (e: Exception) {
             Log.e(TAG_DEBUG, "CameraActivity, processCameraResult: ${e.message.toString()}")
@@ -126,9 +126,9 @@ class CameraActivity : AppCompatActivity() {
         return bitmap
     }
 
-    private fun setActivityResult(imageString: String) {
+    private fun setActivityResult(ba: ByteArray) {
         val intent = Intent()
-        intent.putExtra(RESULT_KEY, imageString)
+        intent.putExtra(RESULT_KEY, ba)
         setResult(Activity.RESULT_OK, intent)
         finish()
     }
@@ -141,10 +141,11 @@ class CameraActivity : AppCompatActivity() {
         try {
 
             val bitmap = extractBitmapResultFromGallery(result)
-            val encodedImage = bitmap.encodeBitmap()
-            setActivityResult(encodedImage)
+            val byteArray = bitmap.getByteArray()
+            setActivityResult(byteArray)
 
         } catch (e: Exception) {
+            e.printStackTrace()
             Log.e(TAG_DEBUG, "CameraActivity, processGalleryResult: ${e.message.toString()}")
         }
     }

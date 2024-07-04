@@ -32,4 +32,8 @@ data class TravelRequestDto(
         return isValid
     }
 
+    fun findItemById(itemId: String): RequestItemDto? {
+        return itemsList?.firstOrNull { it.id == itemId }
+    }
+
 }

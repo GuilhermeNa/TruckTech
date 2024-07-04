@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
 import br.com.apps.model.model.request.travel_requests.RequestItem
@@ -14,7 +13,8 @@ import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
-import br.com.apps.usecase.RequestUseCase
+import br.com.apps.trucktech.util.state.State
+import br.com.apps.usecase.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -25,11 +25,14 @@ class RequestPreviewViewModel(
     private val useCase: RequestUseCase
 ) : ViewModel() {
 
+    private val _state = MutableLiveData<State>()
+    val state get() = _state
+
     /**
      * LiveData holding the response data of type [Response] with a [PaymentRequest]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<Response<PaymentRequest>>()
+    private val _data = MutableLiveData<PaymentRequest>()
     val data get() = _data
 
     private val _menu = MutableLiveData<Boolean>()
@@ -46,53 +49,67 @@ class RequestPreviewViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
+        setState(State.Loading)
+
         loadData { request, items ->
             request.itemsList = items.toMutableList()
             _menu.value = request.status == PaymentRequestStatusType.SENT
-            _data.postValue(Response.Success(request))
+            _data.postValue(request)
+           setState(State.Loaded)
         }
+
     }
 
-    fun loadData(complete: (requests: PaymentRequest, items: List<RequestItem>) -> Unit) {
+    private fun setState(state: State) {
+        if(_state.value != state) _state.value = state
+    }
+
+    private fun loadData(complete: (requests: PaymentRequest, items: List<RequestItem>) -> Unit) {
         var isFirstBoot = true
         lateinit var request: PaymentRequest
         lateinit var items: List<RequestItem>
 
         viewModelScope.launch {
-            val requestResponse = CompletableDeferred<PaymentRequest>()
-            val itemsResponse = CompletableDeferred<List<RequestItem>>()
+            try {
 
-            launch {
-                loadRequest {
-                    request = it
-                    if (isFirstBoot) requestResponse.complete(request)
-                    else complete(request, items)
+                val requestResponse = CompletableDeferred<PaymentRequest>()
+                val itemsResponse = CompletableDeferred<List<RequestItem>>()
+
+                launch {
+                    loadRequest {
+                        request = it
+                        if (isFirstBoot) requestResponse.complete(request)
+                        else complete(request, items)
+                    }
                 }
-            }
 
-            launch {
-                loadItems {
-                    items = it
-                    if (isFirstBoot) itemsResponse.complete(items)
-                    else complete(request, items)
+                launch {
+                    loadItems {
+                        items = it
+                        if (isFirstBoot) itemsResponse.complete(items)
+                        else complete(request, items)
+                    }
                 }
+
+                awaitAll(requestResponse, itemsResponse)
+                isFirstBoot = false
+                complete(request, items)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                setState(State.Error(e))
             }
-
-            awaitAll(requestResponse, itemsResponse)
-            isFirstBoot = false
-
-            complete(request, items)
-
         }
+
     }
 
     private suspend fun loadRequest(complete: (requests: PaymentRequest) -> Unit) {
         repository.getRequestById(vmData.requestId, true).asFlow().collect { response ->
             when (response) {
-                is Response.Error -> _data.value = response
+                is Response.Error -> throw response.exception
                 is Response.Success -> {
                     if (response.data != null) complete(response.data!!)
-                    else _data.value = Response.Error(NullPointerException())
+                    else throw NullPointerException()
                 }
             }
         }
@@ -101,7 +118,7 @@ class RequestPreviewViewModel(
     private suspend fun loadItems(complete: (items: List<RequestItem>) -> Unit) {
         repository.getItemListByRequestId(vmData.requestId, true).asFlow().collect { response ->
             when (response) {
-                is Response.Error -> _data.value = response
+                is Response.Error -> throw response.exception
                 is Response.Success -> response.data?.let { complete(it) } ?: complete(emptyList())
             }
         }
@@ -139,8 +156,7 @@ class RequestPreviewViewModel(
     fun delete() =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = (data.value as Response.Success).data!!.toDto()
-                useCase.delete(vmData.permission, dto)
+                useCase.delete(vmData.permission, data.value!!)
                 emit(Response.Success())
             } catch (e: Exception) {
                 e.printStackTrace()

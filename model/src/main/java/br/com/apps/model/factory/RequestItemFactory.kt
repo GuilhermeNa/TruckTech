@@ -19,6 +19,7 @@ object RequestItemFactory {
      * @throws IllegalArgumentException if the requestId or value fields are blank.
      */
     fun create(viewDto: RequestItemDto, type: RequestItemType): RequestItem {
+
         val item = RequestItem(
             requestId = viewDto.requestId!!,
             docUrl = viewDto.docUrl,
@@ -26,8 +27,9 @@ object RequestItemFactory {
             type = type
         )
 
-        if (!viewDto.validateFields())
+        if (!viewDto.validateFields()) {
             throw InvalidParameterException("RequestItemFactory, create: ($viewDto)")
+        }
 
         throw return when (type) {
             RequestItemType.REFUEL -> appendRefuelItemData(item, viewDto)

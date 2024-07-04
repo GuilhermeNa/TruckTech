@@ -3,9 +3,9 @@ package br.com.apps.repository.repository.refuel
 import br.com.apps.model.dto.travel.RefuelDto
 
 class RefuelRepository(
-    private val write: RefuelWrite,
-    private val read: RefuelRead
-): RefuelRepositoryI {
+    private val write: RefuelWriteImpl,
+    private val read: RefuelReadImpl
+): RefuelRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE
@@ -13,7 +13,7 @@ class RefuelRepository(
 
     override suspend fun save(dto: RefuelDto) = write.save(dto)
 
-    override suspend fun delete(refuelId: String) = write.delete(refuelId)
+    override suspend fun delete(refuelId: String?) = write.delete(refuelId)
 
     //---------------------------------------------------------------------------------------------//
     // READ

@@ -13,7 +13,7 @@ import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.RequestUseCase
+import br.com.apps.usecase.usecase.RequestUseCase
 import kotlinx.coroutines.launch
 
 class RequestEditorWalletFragmentViewModel(
@@ -76,6 +76,7 @@ class RequestEditorWalletFragmentViewModel(
 
             false -> {
                 viewDto.requestId = vmData.requestId
+                viewDto.type = RequestItemType.WALLET.description
                 RequestItemFactory.create(viewDto, RequestItemType.WALLET).toDto()
             }
         }

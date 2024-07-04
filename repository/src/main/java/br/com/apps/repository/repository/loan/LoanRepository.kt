@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.loan
 
-class LoanRepository(private val read: LoanRead): LoanRepositoryI {
+class LoanRepository(private val read: LoanReadImpl): LoanRepositoryInterface {
 
     override suspend fun getLoanListByEmployeeIdAndPaymentStatus(
         employeeId: String,

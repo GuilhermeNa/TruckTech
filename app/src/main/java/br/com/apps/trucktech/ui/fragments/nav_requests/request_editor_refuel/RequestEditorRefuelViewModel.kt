@@ -11,19 +11,26 @@ import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.RequestUseCase
+import br.com.apps.usecase.usecase.RequestUseCase
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class RequestEditorRefuelViewModel(
     private val vmData: RequestEditorRefuelVmData,
     private val repository: RequestRepository,
-    private val useCase: RequestUseCase
+    private val useCase: RequestUseCase,
+    private val storage: StorageRepository
 ) : ViewModel() {
 
     private var isEditing: Boolean = vmData.refuelReqId?.let { true } ?: false
+
+    private val _loadedImage = MutableLiveData<Any?>()
+    val loadedImage get() = _loadedImage
 
     /**
      * LiveData holding the response data of type [Response] with a list of [RequestItem]
@@ -45,20 +52,39 @@ class RequestEditorRefuelViewModel(
      */
     fun loadData(itemId: String) {
         viewModelScope.launch {
-            val liveData = repository.getItemById(requestId = vmData.requestId, itemId = itemId)
-            _data.value = liveData.asFlow().first()
+            val response =
+                repository.getItemById(requestId = vmData.requestId, itemId = itemId).asFlow()
+                    .first()
+
+            _data.value = when (response) {
+                is Response.Error -> Response.Error(response.exception)
+                is Response.Success -> {
+                    response.data?.let {
+                        it.docUrl?.let { doc -> _loadedImage.value = doc }
+                        Response.Success(it)
+                    } ?: Response.Error(NullPointerException())
+                }
+            }
+
         }
     }
 
     /**
      * Transforms the mapped fields into a DTO. Creates a new [RequestItem] or updates it if it already exists.
      */
-    fun save(viewDto: RequestItemDto) =
+    fun save(viewDto: RequestItemDto, ba: ByteArray?) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = createOrUpdate(viewDto)
-                useCase.saveItem(vmData.permission, dto)
+                val id = useCase.saveItem(vmData.permission, dto)
+                dto.id = id
                 emit(Response.Success())
+
+                loadedImage.value?.let {
+                    saveImage(ba!!, dto)
+                }
+
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 emit(Response.Error(e))
@@ -70,13 +96,47 @@ class RequestEditorRefuelViewModel(
             true -> {
                 val item = (data.value as Response.Success).data!!
                 RequestItemFactory.update(item, viewDto)
+                if (loadedImage.value == null) item.docUrl = null
                 item.toDto()
             }
 
             false -> {
                 viewDto.requestId = vmData.requestId
+                viewDto.type = RequestItemType.REFUEL.description
                 RequestItemFactory.create(viewDto, RequestItemType.REFUEL).toDto()
             }
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private suspend fun saveImage(ba: ByteArray, dto: RequestItemDto) {
+        GlobalScope.launch {
+            try {
+                val url = storage.postImage(ba, "requests/${dto.id}.jpeg")
+                repository.updateItemImageUrl(dto, url)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+        }
+    }
+
+    fun updateImage(urlImage: ByteArray) {
+        _loadedImage.value = urlImage
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun deleteImage() {
+        _loadedImage.value = null
+        val id = (data.value as Response.Success).data?.id
+        GlobalScope.launch {
+            try {
+                id?.let { storage.deleteImage("requests/$id.jpg") }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
         }
     }
 

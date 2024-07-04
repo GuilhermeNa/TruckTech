@@ -113,6 +113,7 @@ class BankListFragment : BaseFragmentWithToolbar() {
                 is State.Loading -> {
                     binding.apply {
                         boxGif.loadingGif.loadGif(R.drawable.gif_bank, requireContext())
+                        fragBankBoxEmpty.layout.visibility = GONE
                         fragmentBankRecycler.visibility = GONE
                         fragBankListFab.visibility = GONE
                         fragmentBankToolbar.toolbar.visibility = GONE
@@ -147,11 +148,27 @@ class BankListFragment : BaseFragmentWithToolbar() {
                 is State.Empty -> {
                     binding.apply {
                         fragmentBankRecycler.visibility = GONE
-                        fragBankBoxEmpty.apply {
-                            layout.visibility = VISIBLE
-                            error.visibility = GONE
-                            empty.visibility = VISIBLE
+
+                        lifecycleScope.launch {
+                            fragBankBoxEmpty.apply {
+                                if (layout.visibility == GONE) {
+                                    delay(250)
+                                    empty.visibility = VISIBLE
+                                    error.visibility = GONE
+                                    layout.apply {
+                                        visibility = VISIBLE
+                                        animation = AnimationUtils.loadAnimation(
+                                            binding.root.context,
+                                            R.anim.fade_in_and_shrink
+                                        )
+                                    }
+                                } else {
+                                    empty.visibility = VISIBLE
+                                    error.visibility = GONE
+                                }
+                            }
                         }
+
                     }
                 }
 
@@ -162,11 +179,27 @@ class BankListFragment : BaseFragmentWithToolbar() {
                     }
                     requireView().snackBarRed(message)
                     binding.apply {
+
                         fragmentBankRecycler.visibility = GONE
-                        fragBankBoxEmpty.apply {
-                            layout.visibility = VISIBLE
-                            error.visibility = VISIBLE
-                            empty.visibility = GONE
+
+                        lifecycleScope.launch {
+                            fragBankBoxEmpty.apply {
+                                if (layout.visibility == GONE) {
+                                    delay(250)
+                                    error.visibility = VISIBLE
+                                    empty.visibility = GONE
+                                    layout.apply {
+                                        visibility = VISIBLE
+                                        animation = AnimationUtils.loadAnimation(
+                                            binding.root.context,
+                                            R.anim.fade_in_and_shrink
+                                        )
+                                    }
+                                } else {
+                                    error.visibility = VISIBLE
+                                    empty.visibility = GONE
+                                }
+                            }
                         }
                     }
                 }
@@ -206,7 +239,7 @@ class BankListFragment : BaseFragmentWithToolbar() {
             boxGif.layout.apply {
                 if (this.visibility == VISIBLE) {
                     visibility = GONE
-                    animation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_and_shrink)
+                    animation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out_and_shrink)
                 }
             }
 

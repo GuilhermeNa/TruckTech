@@ -13,6 +13,7 @@
         android:id="@+id/fragment_document_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingHorizontal="8dp"
         tools:context=".ui.fragments.nav_documents.document.DocumentFragment"
         android:contentDescription="@string/document" />
 

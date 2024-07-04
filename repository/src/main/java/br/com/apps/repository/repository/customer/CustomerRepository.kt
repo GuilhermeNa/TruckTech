@@ -1,8 +1,8 @@
 package br.com.apps.repository.repository.customer
 
 class CustomerRepository(
-    private val read: CustomerRead
-) : CustomerRepositoryI {
+    private val read: CustomerReadImpl
+) : CustomerRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // READ
@@ -10,5 +10,8 @@ class CustomerRepository(
 
     override suspend fun getCustomerListByMasterUid(masterUid: String, flow: Boolean) =
         read.getCustomerListByMasterUid(masterUid, flow)
+
+    override suspend fun getCustomerById(id: String, flow: Boolean) =
+        read.getCustomerById(id, flow)
 
 }

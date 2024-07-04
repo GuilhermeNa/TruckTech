@@ -10,7 +10,7 @@ import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.trucktech.util.buildUiResponse
-import br.com.apps.usecase.ExpendUseCase
+import br.com.apps.usecase.usecase.ExpendUseCase
 import kotlinx.coroutines.launch
 
 class ExpendListViewModel(

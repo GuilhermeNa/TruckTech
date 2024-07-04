@@ -3,9 +3,9 @@ package br.com.apps.repository.repository.fine
 import br.com.apps.model.dto.FineDto
 
 class FineRepository(
-    private val write: FineWrite,
-    private val read: FineRead
-): FineRepositoryI {
+    private val write: FineWriteImpl,
+    private val read: FineReadImpl
+): FineRepositoryInterface {
 
     //---------------------------------------------------------------------------------------------//
     // WRITE

@@ -1,22 +1,28 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_refuel
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.repository.util.FAILED_TO_SAVE
+import br.com.apps.repository.util.RESULT_KEY
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
-import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRequestEditorRefuelBinding
+import br.com.apps.trucktech.expressions.getByteArray
+import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
+import br.com.apps.trucktech.ui.activities.CameraActivity
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.util.MonetaryMaskUtil
 import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatIntSave
@@ -28,11 +34,6 @@ import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Requisição de Abastecimento"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [RequestEditorRefuelFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRequestEditorRefuelBinding? = null
@@ -47,6 +48,26 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
         )
     }
     private val viewModel: RequestEditorRefuelViewModel by viewModel { parametersOf(vmData) }
+    private val activityResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val data = result.data!!
+                processActivityLauncherResult(data)
+            }
+        }
+
+    private fun processActivityLauncherResult(data: Intent) {
+        try {
+
+            val byteArray = data.getByteArrayExtra(RESULT_KEY)
+            byteArray?.let { viewModel.updateImage(it) }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -69,6 +90,30 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
         initStateManager()
         initSaveButton()
         initTextMask()
+        initAddClickListener()
+    }
+
+    private fun initAddClickListener() {
+        binding.boxImageLoader.layoutWaitingUpload.apply {
+            setOnClickListener {
+                val intent = Intent(requireContext(), CameraActivity::class.java)
+                activityResultLauncher.launch(intent)
+            }
+        }
+
+        binding.boxImageLoader.layoutDelete.apply {
+            setOnClickListener {
+                viewModel.deleteImage()
+            }
+        }
+
+        binding.boxImageLoader.layoutEdit.apply {
+            setOnClickListener {
+                val intent = Intent(requireContext(), CameraActivity::class.java)
+                activityResultLauncher.launch(intent)
+            }
+        }
+
     }
 
     private fun initTextMask() {
@@ -101,6 +146,22 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
                 is Response.Error -> {}
                 is Response.Success -> response.data?.let { bind(it) }
             }
+        }
+
+        viewModel.loadedImage.observe(viewLifecycleOwner) { urlImage ->
+            if(urlImage != null) {
+                binding.boxImageLoader.apply {
+                    layoutWaitingUpload.visibility = GONE
+                    layoutAlreadyUploaded.visibility = VISIBLE
+                    image.loadImageThroughUrl(urlImage)
+                }
+            } else {
+                binding.boxImageLoader.apply {
+                    layoutWaitingUpload.visibility = VISIBLE
+                    layoutAlreadyUploaded.visibility = GONE
+                }
+            }
+
         }
 
     }
@@ -154,12 +215,13 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
     }
 
     private fun save(viewDto: RequestItemDto) {
-        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
+        val ba = viewModel.loadedImage.value?.let { binding.boxImageLoader.image.getByteArray() }
+
+        viewModel.save(viewDto, ba).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
-                    requireView().snackBarRed(FAILED_TO_SAVE)
-                    Log.e(TAG_DEBUG, response.exception.message.toString())
                     response.exception.printStackTrace()
+                    requireView().snackBarRed(FAILED_TO_SAVE)
                 }
 
                 is Response.Success -> {

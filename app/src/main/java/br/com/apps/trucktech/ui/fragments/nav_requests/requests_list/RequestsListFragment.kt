@@ -1,5 +1,8 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.requests_list
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -23,6 +26,7 @@ import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
+import br.com.apps.trucktech.expressions.toast
 import br.com.apps.trucktech.ui.activities.main.VisualComponents
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.private_adapter.RequestsListRecyclerAdapter
@@ -133,13 +137,30 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Nova requisição")
             .setMessage("Você confirma a adição uma nova requisição?")
-            .setPositiveButton("Ok") { _, _ -> createNewRequest() }
+            .setPositiveButton("Ok") { _, _ ->
+                if(isConnectedToInternet()) createNewRequest()
+                else requireContext().toast("Sem conexão")
+            }
             .setNegativeButton("Cancelar") { _, _ -> }
             .setOnDismissListener { viewModel.dialogDismissed() }
             .create().apply {
                 window?.setGravity(Gravity.CENTER)
                 show()
             }
+    }
+
+    private fun isConnectedToInternet(): Boolean {
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+
+        return capabilities != null &&
+                (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+
     }
 
     private fun createNewRequest() {
@@ -191,9 +212,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                 is State.Error -> stateHandler?.showError(state.error)
                 State.Deleting -> stateHandler?.showDeleting()
                 State.Deleted -> stateHandler?.showDeleted()
-                State.Added -> TODO()
-                State.Adding -> TODO()
-                State.Updating -> TODO()
+                else -> {}
             }
         }
 

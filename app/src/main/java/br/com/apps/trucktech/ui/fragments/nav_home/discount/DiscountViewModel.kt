@@ -79,7 +79,7 @@ class DiscountViewModel(
 
     private suspend fun loadCostHelpData(): List<TravelAid> {
         val response =
-            costHelpRepository.getCostHelpByDriverIdAndIsNotDiscountedYet(employeeId)
+            costHelpRepository.getTravelAidByDriverIdAndIsNotDiscountedYet(employeeId)
                 .asFlow().first()
 
         return when (response) {

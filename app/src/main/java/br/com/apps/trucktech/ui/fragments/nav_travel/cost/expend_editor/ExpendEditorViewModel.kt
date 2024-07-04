@@ -16,7 +16,8 @@ import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.ExpendUseCase
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.usecase.usecase.ExpendUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -137,7 +138,11 @@ class ExpendEditorViewModel(
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val dto = createOrUpdate(viewDto)
-                useCase.save(vmData.permission, dto)
+                val writeReq = WriteRequest(
+                    authLevel = vmData.permission,
+                    dto
+                )
+                useCase.save(writeReq)
                 emit(Response.Success())
             } catch (e: Exception) {
                 e.printStackTrace()

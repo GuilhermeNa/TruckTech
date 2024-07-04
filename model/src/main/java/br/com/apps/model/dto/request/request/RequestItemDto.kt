@@ -5,7 +5,7 @@ data class RequestItemDto(
     val labelId: String? = null,
     var requestId: String? = null,
 
-    val docUrl: String? = null,
+    var docUrl: String? = null,
     val kmMarking: Int? = null,
     val value: Double? = null,
     var type: String? = null

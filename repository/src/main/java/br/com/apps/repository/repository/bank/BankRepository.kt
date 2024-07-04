@@ -8,7 +8,7 @@ import br.com.apps.repository.util.onComplete
 import br.com.apps.repository.util.toBankList
 import com.google.firebase.firestore.FirebaseFirestore
 
-class BankRepository(fireStore: FirebaseFirestore): BankI {
+class BankRepository(fireStore: FirebaseFirestore): BankInterface {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_DEFAULT_BANKS)
 
@@ -16,6 +16,5 @@ class BankRepository(fireStore: FirebaseFirestore): BankI {
         val listener = collection
         return listener.onComplete { it.toBankList() }
     }
-
 
 }

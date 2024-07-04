@@ -1,5 +1,7 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.exceptions.InvalidAuthLevelException
+import br.com.apps.model.model.user.PermissionLevelType
 import java.util.Date
 
 data class RefuelDto(
@@ -45,6 +47,29 @@ data class RefuelDto(
         }
 
         return areFieldsValid
+    }
+
+    fun validatePermission(authLevel: PermissionLevelType?) {
+        if (authLevel == null) throw NullPointerException("AuthLevel is null")
+        if (isValid == null) throw NullPointerException("isValid is null")
+        if (isValid!! && authLevel != PermissionLevelType.MANAGER) throw InvalidAuthLevelException()
+
+    }
+
+    fun validateDataForSaving() {
+        if (masterUid == null ||
+            truckId == null ||
+            travelId == null ||
+            driverId == null ||
+            date == null ||
+            station == null ||
+            odometerMeasure == null ||
+            valuePerLiter == null ||
+            amountLiters == null ||
+            totalValue == null ||
+            isCompleteRefuel == null ||
+            isValid == null
+        ) throw InvalidAuthLevelException()
     }
 
 }

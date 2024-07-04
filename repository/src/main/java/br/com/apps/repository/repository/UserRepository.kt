@@ -6,7 +6,7 @@ import br.com.apps.model.dto.user_dto.CommonUserDto
 import br.com.apps.model.dto.user_dto.UserDto
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.user.User
-import br.com.apps.repository.Resource
+import br.com.apps.repository.util.Resource
 import br.com.apps.repository.util.toCommonUserObject
 import br.com.apps.trucktech.expressions.getMonthFormatted
 import br.com.apps.trucktech.expressions.getYearReference

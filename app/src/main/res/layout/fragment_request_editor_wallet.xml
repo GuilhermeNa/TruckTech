@@ -34,15 +34,6 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <include
-        android:id="@+id/box_image_loader"
-        layout="@layout/box_image_loader"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="32dp"
-        app:layout_constraintTop_toBottomOf="@id/fragment_request_editor_wallet_layout_value" />
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/fragment_request_editor_wallet_button"
         android:layout_width="match_parent"
@@ -53,7 +44,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/box_image_loader"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_request_editor_wallet_layout_value"
         app:layout_constraintVertical_bias="0.2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

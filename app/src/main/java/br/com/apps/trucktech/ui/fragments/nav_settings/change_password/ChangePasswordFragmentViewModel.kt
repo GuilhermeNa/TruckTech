@@ -3,7 +3,7 @@ package br.com.apps.trucktech.ui.fragments.nav_settings.change_password
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.usecase.AuthenticationUseCase
+import br.com.apps.usecase.usecase.AuthenticationUseCase
 
 class ChangePasswordFragmentViewModel(private val useCase: AuthenticationUseCase): ViewModel() {
 

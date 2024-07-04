@@ -1,6 +1,9 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.exceptions.InvalidAuthLevelException
+import br.com.apps.model.exceptions.InvalidForSavingException
 import br.com.apps.model.model.label.Label
+import br.com.apps.model.model.user.PermissionLevelType
 import java.util.Date
 
 data class ExpendDto(
@@ -37,6 +40,27 @@ data class ExpendDto(
         }
 
         return areFieldsValid
+    }
+
+    fun validatePermission(authLevel: PermissionLevelType?) {
+        if (authLevel == null) throw NullPointerException("AuthLevel is null")
+        if (isValid == null) throw NullPointerException("isValid is null")
+        if (isValid!! && authLevel != PermissionLevelType.MANAGER) throw InvalidAuthLevelException()
+    }
+
+    fun validateDataForSaving() {
+        if (masterUid == null ||
+            truckId == null ||
+            travelId == null ||
+            driverId == null ||
+            labelId == null ||
+            company == null ||
+            date == null ||
+            value == null ||
+            isPaidByEmployee == null ||
+            isAlreadyRefunded == null ||
+            isValid == null
+        ) throw InvalidForSavingException()
     }
 
 }

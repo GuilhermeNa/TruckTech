@@ -11,7 +11,7 @@ import br.com.apps.model.model.user.CommonUser
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.fleet.FleetRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.UserUseCase
+import br.com.apps.usecase.usecase.UserUseCase
 import kotlinx.coroutines.flow.first
 import java.math.BigDecimal
 

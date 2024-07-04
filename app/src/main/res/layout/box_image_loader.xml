@@ -7,22 +7,21 @@
     android:layout_height="150dp"
     app:cardCornerRadius="20dp">
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/layout_waiting_upload"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
         android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:foreground="?attr/selectableItemBackground">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/add_image"
+            android:layout_gravity="center"
             app:drawableTopCompat="@drawable/icon_add_dashed" />
-    </LinearLayout>
+
+    </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_already_uploaded"
@@ -33,32 +32,56 @@
         android:orientation="horizontal"
         android:visibility="gone">
 
-        <LinearLayout
-            android:id="@+id/box_add_pix_edit"
+        <FrameLayout
+            android:id="@+id/layout_edit"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:clickable="true"
             android:foreground="?attr/selectableItemBackground"
-            android:gravity="center"
-            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@id/layout_delete"
 
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/image"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="UseCompoundDrawables">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:importantForAccessibility="no"
-                android:src="@drawable/icon_edit" />
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/change" />
-        </LinearLayout>
+                android:layout_gravity="center"
+                android:text="@string/change"
+                app:drawableTopCompat="@drawable/icon_edit" />
+
+        </FrameLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/layout_delete"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_edit">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/delete"
+                app:drawableTopCompat="@drawable/icon_delete" />
+
+        </FrameLayout>
 
         <ImageView
             android:id="@+id/image"

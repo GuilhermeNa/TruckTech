@@ -2,20 +2,22 @@ package br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_preview
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.FreightUseCase
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.usecase.usecase.FreightUseCase
 import kotlinx.coroutines.launch
 
 class FreightPreviewViewModel(
     private val vmData: FreightPreviewVmData,
     private val repository: FreightRepository,
+    private val customerRepository: CustomerRepository,
     private val useCase: FreightUseCase
 ) : ViewModel() {
 
@@ -45,7 +47,7 @@ class FreightPreviewViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.getFreightById(vmData.freightId, true).asFlow().collect { response ->
+            useCase.getFreightByIdFlow(vmData.freightId) { response ->
                 _data.value = when (response) {
                     is Response.Error -> response
                     is Response.Success -> {
@@ -61,8 +63,12 @@ class FreightPreviewViewModel(
 
     fun delete() = liveData<Response<Unit>>(viewModelScope.coroutineContext) {
         try {
-            val dto = (_data.value as Response.Success).data!!.toDto()
-            useCase.delete(vmData.permission, dto)
+            val writeReq = WriteRequest(
+                authLevel = vmData.permission,
+                data = (data.value as Response.Success).data!!.toDto()
+            )
+            useCase.delete(writeReq)
+            //useCase.delete(vmData.permission, dto)
             emit(Response.Success())
         } catch (e: Exception) {
             e.printStackTrace()
