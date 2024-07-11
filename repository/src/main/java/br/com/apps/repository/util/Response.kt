@@ -22,3 +22,10 @@ sealed class Response<out T> {
     data class Error(val exception: Exception): Response<Nothing>()
 
 }
+
+fun <T> Response<T>.extractResponse(): T{
+    when(this) {
+        is Response.Error -> throw this.exception
+        is Response.Success -> return this.data ?: throw NullPointerException()
+    }
+}

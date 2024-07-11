@@ -3,7 +3,7 @@ package br.com.apps.repository.repository.fine
 import androidx.lifecycle.LiveData
 import br.com.apps.model.dto.FineDto
 import br.com.apps.model.model.Fine
-import br.com.apps.model.model.Truck
+import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.repository.util.Response
 

@@ -21,7 +21,6 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.public_adapters.ToReceiveRecyclerAdapter
 import br.com.apps.trucktech.util.state.State
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Pagamentos"
 
@@ -30,8 +29,7 @@ class PaymentFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentPaymentBinding? = null
     private val binding get() = _binding!!
 
-    private val driverId by lazy { mainActVM.loggedUser.driverId }
-    private val viewModel: PaymentViewModel by viewModel { parametersOf(driverId) }
+    private val viewModel: PaymentViewModel by viewModel()
     private var adapter: ToReceiveRecyclerAdapter<Freight>? = null
 
     //---------------------------------------------------------------------------------------------//
@@ -74,11 +72,18 @@ class PaymentFragment : BaseFragmentWithToolbar() {
      *   - Observes freightData for update the recyclerView and bind
      */
     private fun initStateManager() {
-        viewModel.data.observe(viewLifecycleOwner) { data ->
-            data?.let {
-                bindText(it)
-                adapter?.update(it)
-            }
+        mainActVM.cachedTravels.observe(viewLifecycleOwner) { travels ->
+            travels?.let { t ->
+
+                viewModel.updateData(t).let {  freight ->
+                    if(freight.isNotEmpty()) {
+                        bindText(freight)
+                        adapter?.update(freight)
+                    }
+                }
+
+            } ?: viewModel.setState(State.Error(NullPointerException()))
+
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->

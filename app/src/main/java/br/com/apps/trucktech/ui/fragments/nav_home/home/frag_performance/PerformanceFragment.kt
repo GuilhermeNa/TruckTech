@@ -5,20 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import br.com.apps.trucktech.databinding.FragmentPerformanceBinding
-import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeViewModel
+import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentForMainAct
 import br.com.apps.trucktech.ui.fragments.nav_home.home.private_adapters.HomeFragmentPerformanceViewPagerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_home.home.private_adapters.PeriodRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.HeaderDefaultHorizontalAdapter
 import br.com.apps.trucktech.util.state.State
-import kotlinx.coroutines.launch
 import me.relex.circleindicator.CircleIndicator3
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -27,12 +23,11 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
  * Use the [PerformanceFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class PerformanceFragment : Fragment() {
+class PerformanceFragment : BaseFragmentForMainAct() {
 
     private var _binding: FragmentPerformanceBinding? = null
     private val binding get() = _binding!!
 
-    private val parentViewModel by viewModels<HomeViewModel>({ requireParentFragment() })
     private val viewModel: PerformanceViewModel by viewModel()
 
     private var viewPagerAdapter: HomeFragmentPerformanceViewPagerAdapter? = null
@@ -58,7 +53,7 @@ class PerformanceFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initializeViewModel()
+        initializeViewModelData()
         initStateManager()
         initHeaderRecycler()
         initPeriodRecycler()
@@ -67,13 +62,15 @@ class PerformanceFragment : Fragment() {
         initCircleIndicator()
     }
 
-    private fun initializeViewModel() {
-        lifecycleScope.launch {
-            parentViewModel.data.asFlow().collect { data ->
-                data?.travels?.let {
-                    viewModel.initialize(it, data.averageAim, data.performanceAim)
-                } ?: viewModel.setState(State.Error(NullPointerException()))
-            }
+    private fun initializeViewModelData() {
+        mainActVM.cachedTravels.observe(viewLifecycleOwner) { data ->
+            data?.let { travels ->
+                viewModel.initialize(
+                    dataSet = travels,
+                    averageAim = mainActVM.loggedUser.averageAim,
+                    performanceAim = mainActVM.loggedUser.performanceAim
+                )
+            } ?: viewModel.setState(State.Error(NullPointerException()))
         }
     }
 

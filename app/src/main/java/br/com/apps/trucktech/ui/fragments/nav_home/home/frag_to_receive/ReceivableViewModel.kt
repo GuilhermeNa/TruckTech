@@ -1,32 +1,40 @@
 package br.com.apps.trucktech.ui.fragments.nav_home.home.frag_to_receive
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.trucktech.util.state.State
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 class ReceivableViewModel : ViewModel() {
 
-    private val _data = MutableLiveData<ReceivableFData>()
-    val data get() = _data
+    private var _isFirstBoot = true
+    val isFirstBoot get() = _isFirstBoot
 
-    private val _state = MutableLiveData<State>()
-    val state get() = _state
-
-    //---------------------------------------------------------------------------------------------//
-    // -
-    //---------------------------------------------------------------------------------------------//
-
-    fun setState(state: State) {
-        _state.value = state
+    private fun setFirstBoot() {
+        _isFirstBoot = false
     }
 
-    fun initialize(travels: List<Travel>, loans: List<Loan>, advances: List<Advance>) {
-        _data.postValue(ReceivableFData(travels, advances, loans))
+    fun initFragmentData(travels: List<Travel>?, loans: List<Loan>?, advances: List<Advance>?)
+            : ReceivableFData? {
+
+        setFirstBoot()
+
+        return if (travels != null && loans != null && advances != null) {
+
+            ReceivableFData(travels.filter { it.isFinished }, advances, loans)
+        } else null
+
+    }
+
+    fun updateData(travels: List<Travel>, advances: List<Advance>, loans: List<Loan>) =
+        ReceivableFData(travels.filter { it.isFinished }, advances, loans)
+
+    fun toFloat(commissionPercent: Int): Float {
+        return BigDecimal(commissionPercent)
+            .divide(BigDecimal(100), 2, RoundingMode.HALF_EVEN)
+            .toFloat()
     }
 
 }

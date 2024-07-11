@@ -1,12 +1,12 @@
 package br.com.apps.model.mapper
 
-import br.com.apps.model.dto.DocumentDto
-import br.com.apps.model.model.Document
+import br.com.apps.model.dto.TruckDocumentDto
+import br.com.apps.model.model.TruckDocument
 import br.com.apps.model.toDate
 import br.com.apps.model.toLocalDateTime
 
-fun DocumentDto.toModel(): Document {
-    return Document(
+fun TruckDocumentDto.toModel(): TruckDocument {
+    return TruckDocument(
         masterUid = this.masterUid,
         id = this.id,
         truckId = this.truckId,
@@ -21,8 +21,8 @@ fun DocumentDto.toModel(): Document {
     )
 }
 
-fun Document.toDto(): DocumentDto {
-    return DocumentDto(
+fun TruckDocument.toDto(): TruckDocumentDto {
+    return TruckDocumentDto(
         masterUid = this.masterUid,
         id = this.id,
         truckId = this.truckId,

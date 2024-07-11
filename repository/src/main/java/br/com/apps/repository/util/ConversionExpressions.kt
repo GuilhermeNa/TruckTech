@@ -1,13 +1,14 @@
 package br.com.apps.repository.util
 
 import br.com.apps.model.dto.CustomerDto
-import br.com.apps.model.dto.DocumentDto
 import br.com.apps.model.dto.FineDto
 import br.com.apps.model.dto.LabelDto
-import br.com.apps.model.dto.TruckDto
+import br.com.apps.model.dto.TruckDocumentDto
 import br.com.apps.model.dto.bank.BankDto
 import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
+import br.com.apps.model.dto.fleet.TrailerDto
+import br.com.apps.model.dto.fleet.TruckDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
 import br.com.apps.model.dto.payroll.TravelAidDto
@@ -22,12 +23,13 @@ import br.com.apps.model.exceptions.ConversionException
 import br.com.apps.model.mapper.EmployeeMapper.Companion.toModel
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.Customer
-import br.com.apps.model.model.Document
 import br.com.apps.model.model.Fine
-import br.com.apps.model.model.Truck
+import br.com.apps.model.model.TruckDocument
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.Employee
+import br.com.apps.model.model.fleet.Trailer
+import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
@@ -165,14 +167,14 @@ fun DocumentSnapshot.toRequestItemObject(): RequestItem {
         ?: throw ConversionException("ConversionExpression, toRequestItemObject: ($this)")
 }
 
-fun QuerySnapshot.toDocumentList(): List<Document> {
+fun QuerySnapshot.toDocumentList(): List<TruckDocument> {
     return this.mapNotNull { document ->
         document.toDocumentObject()
     }
 }
 
-fun DocumentSnapshot.toDocumentObject(): Document {
-    return this.toObject(DocumentDto::class.java)?.toModel()
+fun DocumentSnapshot.toDocumentObject(): TruckDocument {
+    return this.toObject(TruckDocumentDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toDocumentObject: ($this)")
 }
 
@@ -244,4 +246,15 @@ fun QuerySnapshot.toTravelAidList(): List<TravelAid> {
 fun DocumentSnapshot.toTravelAidObject(): TravelAid {
     return this.toObject(TravelAidDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toTravelAidObject: ($this)")
+}
+
+fun QuerySnapshot.toTrailerList(): List<Trailer> {
+    return this.mapNotNull { document ->
+        document.toTrailerObject()
+    }
+}
+
+fun DocumentSnapshot.toTrailerObject(): Trailer {
+    return this.toObject(TrailerDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toTrailerObject: ($this)")
 }

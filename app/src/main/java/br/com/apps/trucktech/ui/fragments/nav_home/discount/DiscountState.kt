@@ -59,6 +59,7 @@ class DiscountState(private val binding: FragmentDiscountBinding) : DiscountFSta
 
     override fun showEmpty() {
         binding.apply {
+            fragmentDiscountPanelCostHelp.layout.visibility = GONE
             fragmentDiscountPanelLoan.layout.visibility = GONE
             fragmentDiscountPanelAdvance.layout.visibility = GONE
 

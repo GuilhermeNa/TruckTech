@@ -6,20 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import br.com.apps.trucktech.databinding.FragmentReceivableBinding
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentForMainAct
 import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeFragmentDirections
-import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeViewModel
-import br.com.apps.trucktech.util.state.State
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 private const val TO_RECEIVE_BOX_DESCRIPTION =
     "Este é o resumo do seu saldo a receber, clique em 'detalhes' para saber mais."
@@ -29,12 +25,11 @@ private const val TO_RECEIVE_BOX_DESCRIPTION =
  * Use the [ReceivableFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ReceivableFragment : Fragment() {
+class ReceivableFragment : BaseFragmentForMainAct() {
 
     private var _binding: FragmentReceivableBinding? = null
     private val binding get() = _binding!!
 
-    private val parentViewModel by viewModels<HomeViewModel>({ requireParentFragment() })
     private val viewModel: ReceivableViewModel by viewModel()
 
     //---------------------------------------------------------------------------------------------//
@@ -55,39 +50,40 @@ class ReceivableFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initializeViewModel()
         initStateManager()
     }
 
-    private fun initializeViewModel() {
-        lifecycleScope.launch {
-            parentViewModel.data.asFlow().first { data ->
-                data.apply {
-                    if (travels != null && loans != null && advances != null)
-                        viewModel.initialize(travels, loans, advances)
-                    else
-                        viewModel.setState(State.Error(NullPointerException()))
-                }
-                true
-            }
+    private fun initStateManager() {
+        if (viewModel.isFirstBoot) launchFirstBoot()
+        else launchAfterFirstBoot()
+    }
+
+    private fun launchAfterFirstBoot() {
+        mainActVM.cachedTravels.observe(viewLifecycleOwner) {
+            viewModel.updateData(it, mainActVM.getAdvances(), mainActVM.getLoans())
+                .run { bind(this) }
+        }
+
+        mainActVM.cachedAdvances.observe(viewLifecycleOwner) {
+            viewModel.updateData(mainActVM.getTravels(), it, mainActVM.getLoans())
+                .run { bind(this) }
+        }
+
+        mainActVM.cachedLoans.observe(viewLifecycleOwner) {
+            viewModel.updateData(mainActVM.getTravels(), mainActVM.getAdvances(), it)
+                .run { bind(this) }
         }
     }
 
-    private fun initStateManager() {
-        viewModel.data.observe(viewLifecycleOwner) { data ->
-            data?.let { bind(it) }
-        }
-
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            when(state) {
-                is State.Loading -> {}
-                is State.Loaded -> {}
-                is State.Empty -> {}
-                is State.Error -> {}
-                else -> {}
+    private fun launchFirstBoot() {
+        lifecycleScope.launch {
+            val travels = mainActVM.cachedTravels.asFlow().first()
+            val loans = mainActVM.cachedLoans.asFlow().first()
+            val advances = mainActVM.cachedAdvances.asFlow().first()
+            viewModel.initFragmentData(travels, loans, advances)?.run {
+                bind(this)
             }
         }
-
     }
 
     private fun bind(data: ReceivableFData) {
@@ -106,7 +102,7 @@ class ReceivableFragment : Fragment() {
                 if (expendPercent > 0) {
                     this.visibility = View.VISIBLE
                     val myParam = this.layoutParams as ConstraintLayout.LayoutParams
-                    val bias = toFloat(commissionPercent)
+                    val bias = viewModel.toFloat(commissionPercent)
                     myParam.horizontalBias = bias
                     this.layoutParams = myParam
                 } else {
@@ -119,7 +115,7 @@ class ReceivableFragment : Fragment() {
                 panelToReceivePercentualDiscounts.text = "${discountPercent}%"
                 panelToReceiveNegativeBar.run {
                     val myParam = this.layoutParams as ConstraintLayout.LayoutParams
-                    val percentWidth = toFloat(discountPercent)
+                    val percentWidth = viewModel.toFloat(discountPercent)
                     myParam.matchConstraintPercentWidth = percentWidth
                     this.layoutParams = myParam
                     visibility = View.VISIBLE
@@ -134,19 +130,11 @@ class ReceivableFragment : Fragment() {
                 it.navigateTo(HomeFragmentDirections.actionHomeFragmentToToReceiveFragment())
             }
         }
-
-
     }
 
-    private fun toFloat(commissionPercent: Int): Float {
-        return BigDecimal(commissionPercent)
-            .divide(BigDecimal(100), 2, RoundingMode.HALF_EVEN)
-            .toFloat()
-    }
-
-    //---------------------------------------------------------------------------------------------//
-    // ON DESTROY VIEW
-    //---------------------------------------------------------------------------------------------//
+//---------------------------------------------------------------------------------------------//
+// ON DESTROY VIEW
+//---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -154,3 +142,4 @@ class ReceivableFragment : Fragment() {
     }
 
 }
+

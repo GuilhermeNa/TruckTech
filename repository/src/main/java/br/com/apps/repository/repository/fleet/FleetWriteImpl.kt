@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.fleet
 
-import br.com.apps.model.dto.TruckDto
+import br.com.apps.model.dto.fleet.TruckDto
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_TRUCKS
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await

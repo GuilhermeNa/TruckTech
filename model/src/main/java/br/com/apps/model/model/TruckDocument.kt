@@ -3,8 +3,7 @@ package br.com.apps.model.model
 import java.io.Serializable
 import java.time.LocalDateTime
 
-
-data class Document(
+data class TruckDocument(
     val masterUid: String? = null,
     val id: String? = null,
     val truckId: String? = null,

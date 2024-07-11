@@ -1,13 +1,13 @@
 package br.com.apps.model.mapper
 
-import br.com.apps.model.dto.TruckDto
+import br.com.apps.model.dto.fleet.TruckDto
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.model.Truck
+import br.com.apps.model.model.fleet.FleetType
+import br.com.apps.model.model.fleet.Truck
 import java.math.BigDecimal
 
 
 fun TruckDto.toModel(): Truck {
-
     if(this.validateFields()) {
         return Truck(
             id = this.id,
@@ -17,10 +17,9 @@ fun TruckDto.toModel(): Truck {
             performanceAim = this.performanceAim!!,
             plate = this.plate ?: "-",
             color = this.color ?: "-",
-            commissionPercentual = BigDecimal(this.commissionPercentual!!)
+            commissionPercentual = BigDecimal(this.commissionPercentual!!),
+            fleetType = FleetType.getType(this.fleetType!!)
         )
     }
-
     throw CorruptedFileException("TruckMapper, toModel ($this)")
-
 }

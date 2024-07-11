@@ -2,7 +2,7 @@ package br.com.apps.model.dto
 
 import java.util.Date
 
-data class DocumentDto(
+data class TruckDocumentDto(
     val masterUid: String? = null,
     var id: String? = null,
     val truckId: String? = null,

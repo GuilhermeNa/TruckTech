@@ -137,10 +137,10 @@ class TravelUseCase(
                 }
 
                 val travel = travelResp.await().also {
-                    it.freightsList = freightsResp.await()
-                    it.refuelsList = refuelsResp.await()
-                    it.expendsList = expendsResp.await()
-                    it.aidList = aidsResp.await()
+                    it?.freightsList = freightsResp.await()
+                    it?.refuelsList = refuelsResp.await()
+                    it?.expendsList = expendsResp.await()
+                    it?.aidList = aidsResp.await()
                 }
 
                 return@coroutineScope MutableLiveData(Response.Success(travel))
@@ -164,7 +164,7 @@ class TravelUseCase(
         return coroutineScope {
             try {
                 val travels = repository.getTravelListByDriverId(driverId).awaitData()
-                val ids = travels.mapNotNull { it.id }
+                val ids = travels!!.mapNotNull { it.id }
 
                 val freightsDef = async {
                     freightRepository.getFreightListByTravelIds(ids).awaitData()
@@ -180,7 +180,7 @@ class TravelUseCase(
                 }
 
                 mergeTravelData(
-                    travelList = travels,
+                    travelList = travels!!,
                     freightList = freightsDef.await(),
                     refuelList = refuelsDef.await(),
                     expendList = expendsDef.await(),
@@ -200,7 +200,7 @@ class TravelUseCase(
         return coroutineScope {
             try {
                 val travels = repository.getTravelListByDriverIdAndIsFinished(driverId).awaitData()
-                val ids = travels.mapNotNull { it.id }
+                val ids = travels!!.mapNotNull { it.id }
 
                 val freightsDef = async {
                     freightRepository.getFreightListByTravelIds(ids).awaitData()
@@ -216,7 +216,7 @@ class TravelUseCase(
                 }
 
                 mergeTravelData(
-                    travelList = travels,
+                    travelList = travels!!,
                     freightList = freightsDef.await(),
                     refuelList = refuelsDef.await(),
                     expendList = expendsDef.await(),
@@ -228,6 +228,13 @@ class TravelUseCase(
             } catch (e: Exception) {
                 return@coroutineScope MutableLiveData(Response.Error(e))
             }
+        }
+    }
+
+    suspend fun createANewTravel() {
+        coroutineScope {
+
+
         }
     }
 
@@ -255,6 +262,31 @@ class TravelUseCase(
             if (isFinished && permission != PermissionLevelType.MANAGER)
                 throw InvalidParameterException("Invalid credentials for $permission")
         } ?: throw NullPointerException("Validation is null")
+    }
+
+    fun getExpendListWitchIsNotRefundYet(travelList: List<Travel>): List<Expend> {
+        return travelList
+            .flatMap { it.expendsList ?: emptyList() }
+            .filter { expend ->
+                expend.isPaidByEmployee &&
+                !expend.isAlreadyRefunded &&
+                expend.isValid
+            }
+    }
+
+    fun getFreightListWitchIsNotPaidYet(travelList: List<Travel>): List<Freight> {
+        return travelList
+            .flatMap { it.freightsList ?: emptyList() }
+            .filter { freight ->
+                freight.isValid &&
+                !freight.isCommissionPaid
+            }
+    }
+
+    fun getTravelAidListWitchIsNotRefundYet(travelList: List<Travel>): List<TravelAid> {
+        return travelList
+            .flatMap { it.aidList ?: emptyList() }
+            .filter { aid -> !aid.isPaid }
     }
 
 }

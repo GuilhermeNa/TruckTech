@@ -132,6 +132,19 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun showAlertDialog() {
+        fun isConnectedToInternet(): Boolean {
+            val connectivityManager =
+                requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+
+            return capabilities != null &&
+                    (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+
+        }
         viewModel.dialogRequested()
 
         MaterialAlertDialogBuilder(requireContext())
@@ -147,20 +160,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                 window?.setGravity(Gravity.CENTER)
                 show()
             }
-    }
-
-    private fun isConnectedToInternet(): Boolean {
-        val connectivityManager =
-            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-
-        return capabilities != null &&
-                (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-
     }
 
     private fun createNewRequest() {
@@ -210,8 +209,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                 State.Loaded -> stateHandler?.showLoaded()
                 State.Empty -> stateHandler?.showEmpty()
                 is State.Error -> stateHandler?.showError(state.error)
-                State.Deleting -> stateHandler?.showDeleting()
-                State.Deleted -> stateHandler?.showDeleted()
                 else -> {}
             }
         }
@@ -300,11 +297,14 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun deleteRequest(request: PaymentRequest) {
+        stateHandler?.showDeleting()
+
         lifecycleScope.launch {
             viewModel.delete(request).asFlow().collect { response ->
                 when (response) {
                     is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
                     is Response.Success -> {
+                        stateHandler?.showDeleted()
                         viewModel.loadData()
                         requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                     }

@@ -14,6 +14,7 @@ import br.com.apps.model.toDate
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
+import br.com.apps.trucktech.expressions.atBrZone
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.RequestUseCase
@@ -156,7 +157,7 @@ class RequestsListViewModel(
             masterUid = vmData.masterUid,
             truckId = vmData.truckId,
             driverId = vmData.driverId,
-            date = LocalDateTime.now().toDate(),
+            date = LocalDateTime.now().atBrZone().toDate(),
             status = PaymentRequestStatusType.SENT.description,
         )
 
@@ -166,13 +167,9 @@ class RequestsListViewModel(
     suspend fun delete(request: PaymentRequest) =
         liveData<Response<Unit>>((viewModelScope.coroutineContext)) {
             try {
-                setState(State.Deleting)
-
                 useCase.delete(vmData.permission, request)
                 emit(Response.Success())
-                setState(State.Deleted)
             } catch (e: Exception) {
-                setState(State.Deleted)
                 emit(Response.Error(e))
             }
         }

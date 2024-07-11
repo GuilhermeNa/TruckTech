@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.IdHolder
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentDocumentsListBinding
 import br.com.apps.trucktech.expressions.loadGif
@@ -36,13 +35,13 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentDocumentsListBinding? = null
     private val binding get() = _binding!!
 
-    private val idHolder by lazy {
-        IdHolder(
+    private val vmData by lazy {
+        DocumentListVmData(
             masterUid = mainActVM.loggedUser.masterUid,
-            truckId = mainActVM.loggedUser.truckId
+            fleetIds = mainActVM.loggedUser.truck.getFleetIds()
         )
     }
-    private val viewModel: DocumentsListFragmentViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: DocumentsListFragmentViewModel by viewModel { parametersOf(vmData) }
     private var adapter: DocumentsListFragmentAdapter? = null
 
     //---------------------------------------------------------------------------------------------//

@@ -17,13 +17,14 @@ import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
+import br.com.apps.trucktech.expressions.atBrZone
 import br.com.apps.usecase.usecase.ExpendUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 
 class ExpendEditorViewModel(
     private val vmData: ExpendEVMData,
@@ -112,7 +113,7 @@ class ExpendEditorViewModel(
     }
 
     private fun processData(labels: List<Label>, expend: Expend?) {
-        _date.value = expend?.date ?: LocalDateTime.now()
+        _date.value = expend?.date ?: LocalDateTime.now().atBrZone()
 
         expend?.let { it.label = labels.firstOrNull { l -> l.id == it.labelId } }
 
@@ -126,8 +127,9 @@ class ExpendEditorViewModel(
      * Interact with the [_date] LiveData, changing it.
      */
     fun newDateHaveBeenSelected(dateInLong: Long) {
-        val datetime =
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(dateInLong), ZoneId.systemDefault())
+        val datetime = LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(dateInLong), ZoneOffset.UTC
+        )
         _date.value = datetime
     }
 

@@ -9,6 +9,7 @@ import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.util.Response
+import br.com.apps.trucktech.expressions.atBrZone
 import br.com.apps.usecase.usecase.TravelUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -87,7 +88,7 @@ class TravelPreviewViewModel(
             val travel = data.value!!
             val dto = travel.apply {
                 finalOdometerMeasurement = refuelsList?.last()?.odometerMeasure
-                finalDate = LocalDateTime.now()
+                finalDate = LocalDateTime.now().atBrZone()
                 isFinished = true
                 considerAverage = travel.shouldConsiderAverage()
                 validateForSaving()

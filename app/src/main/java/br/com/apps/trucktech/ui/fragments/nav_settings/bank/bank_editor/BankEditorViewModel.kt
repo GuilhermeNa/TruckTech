@@ -17,6 +17,7 @@ import br.com.apps.model.toDate
 import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.trucktech.expressions.atBrZone
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
@@ -154,7 +155,7 @@ class BankEditorViewModel(
 
         } else {
             viewDto.run {
-                this.insertionDate = LocalDateTime.now().toDate()
+                this.insertionDate = LocalDateTime.now().atBrZone().toDate()
                 this.masterUid = this@BankEditorViewModel.masterUid
                 this.employeeId = this@BankEditorViewModel.employeeId
             }

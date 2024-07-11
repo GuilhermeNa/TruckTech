@@ -132,7 +132,7 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
     private fun initBoxSummary() {
         binding.boxFragRequestPreviewDescription.apply {
             driverField.text = mainActVM.loggedUser.name
-            plateField.text = mainActVM.loggedUser.plate
+            plateField.text = mainActVM.loggedUser.truck.plate
             valueField.text = "-"
         }
     }

@@ -1,36 +1,19 @@
 package br.com.apps.usecase.usecase
 
 import br.com.apps.model.dto.travel.RefuelDto
-import br.com.apps.model.model.travel.Refuel
-import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.repository.refuel.RefuelRepository
-import br.com.apps.repository.util.EMPTY_DATASET
-import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
 import br.com.apps.repository.util.validateAndProcess
-import java.security.InvalidParameterException
 
 class RefuelUseCase(private val repository: RefuelRepository) {
 
     /**
-     * Merges the provided list of refuels into the corresponding travels in the travel list.
-     * Each refuel is associated with a travel based on the travel ID.
+     * Deletes a refuel DTO from the repository.
      *
-     * @param travelList The list of travels into which refuels will be merged.
-     * @param refuelListNullable The nullable list of refuels to merge into the travels.
-     * @throws InvalidParameterException if the provided refuel list is null.
-     * @throws InvalidParameterException if any travel in the travel list has a null ID.
+     * @param writeReq The WriteRequest containing the refuel DTO to delete and the authorization level.
+     * @throws Exception If permission validation fails (`Response.Error`).
      */
-    fun mergeRefuelList(travelList: List<Travel>, refuelListNullable: List<Refuel>?) {
-        val refuelList = refuelListNullable ?: throw InvalidParameterException(EMPTY_DATASET)
-        travelList.forEach { travel ->
-            val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
-            val refuels = refuelList.filter { it.travelId == travelId }
-            travel.refuelsList = refuels
-        }
-    }
-
     suspend fun delete(writeReq: WriteRequest<RefuelDto>) {
         val dto = writeReq.data
         val auth = writeReq.authLevel
@@ -46,6 +29,12 @@ class RefuelUseCase(private val repository: RefuelRepository) {
 
     }
 
+    /**
+     * Saves a refuel DTO to the repository.
+     *
+     * @param writeReq The WriteRequest containing the refuel DTO to save and the authorization level.
+     * @throws Exception If permission or data validation fails (`Response.Error`).
+     */
     suspend fun save(writeReq: WriteRequest<RefuelDto>) {
         val dto = writeReq.data
         val auth = writeReq.authLevel

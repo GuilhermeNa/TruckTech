@@ -1,6 +1,9 @@
 package br.com.apps.model.model.travel
 
+import br.com.apps.model.exceptions.DateOrderException
+import br.com.apps.model.exceptions.DuplicatedItemsException
 import br.com.apps.model.exceptions.EmptyDataException
+import br.com.apps.model.exceptions.OdometerOrderException
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.security.InvalidParameterException
@@ -100,25 +103,25 @@ data class Travel(
 
     fun validateForSaving() {
         freightsList?.also {
-            if (it.isEmpty()) throw EmptyDataException("Empty Freight List")
+            if (it.isEmpty()) throw EmptyDataException("Nenhuma viagem encontrada")
             it.forEach { f ->
-                if (!f.isValid) throw InvalidParameterException("Invalid Freight")
+                if (!f.isValid) throw InvalidParameterException("Frete não validado")
             }
-        } ?: throw NullPointerException("Null Freight List")
+        } ?: throw NullPointerException("Falha ao carregar fretes")
 
         refuelsList?.forEach { r ->
-            if (!r.isValid) throw InvalidParameterException("Invalid Refuel")
+            if (!r.isValid) throw InvalidParameterException("Abastecimento não validado")
         }
 
         expendsList?.forEach { e ->
-            if (!e.isValid) throw InvalidParameterException("Invalid Expend")
+            if (!e.isValid) throw InvalidParameterException("Despesa não validada")
         }
 
-        if (!isDatesInCorrectlyOrder()) throw InvalidParameterException("Dates are in wrong order")
+        if (!isDatesInCorrectlyOrder()) throw DateOrderException("Datas em ordem incorreta")
 
-        if (thereIsDuplicatedItems()) throw InvalidParameterException("There is duplicated items")
+        if (thereIsDuplicatedItems()) throw DuplicatedItemsException("Existem itens duplicados")
 
-        if (!isOdometerMeasuresInCorrectlyOrder()) throw InvalidParameterException("Odometer measures are in wrong order")
+        if (!isOdometerMeasuresInCorrectlyOrder()) throw OdometerOrderException("Quilometragem incorreta")
 
     }
 

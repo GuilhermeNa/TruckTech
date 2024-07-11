@@ -1,9 +1,10 @@
 package br.com.apps.repository.repository.fleet
 
 import androidx.lifecycle.LiveData
-import br.com.apps.model.dto.TruckDto
-import br.com.apps.model.model.Truck
+import br.com.apps.model.dto.fleet.TruckDto
 import br.com.apps.model.model.employee.Employee
+import br.com.apps.model.model.fleet.Trailer
+import br.com.apps.model.model.fleet.Truck
 import br.com.apps.repository.util.Response
 
 interface FleetRepositoryInterface : FleetReadInterface, FleetWriteInterface
@@ -39,6 +40,10 @@ interface FleetReadInterface {
      */
     suspend fun getTruckByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<Truck>>
+
+    suspend fun getTrailerListLinkedToTruckById(truckId: String, flow: Boolean = false)
+            : LiveData<Response<List<Trailer>>>
+
 
 }
 

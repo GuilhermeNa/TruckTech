@@ -14,12 +14,13 @@ import br.com.apps.model.toDate
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
+import br.com.apps.trucktech.expressions.atBrZone
 import br.com.apps.usecase.usecase.RefuelUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 
 class RefuelEditorViewModel(
     private val vmData: RefuelEVMData,
@@ -49,7 +50,7 @@ class RefuelEditorViewModel(
 
     init {
         if (isEditing) loadData()
-        else _date.value = LocalDateTime.now()
+        else _date.value = LocalDateTime.now().atBrZone()
     }
 
     private fun loadData() {
@@ -59,7 +60,7 @@ class RefuelEditorViewModel(
                         is Response.Error -> _data.value = response
                         is Response.Success -> {
                             _data.value = response
-                            _date.value = response.data?.date ?: LocalDateTime.now()
+                            _date.value = response.data?.date ?: LocalDateTime.now().atBrZone()
                         }
                     }
                 true
@@ -113,8 +114,9 @@ class RefuelEditorViewModel(
      * Interact with the [_date] LiveData, changing it.
      */
     fun newDateHaveBeenSelected(dateInLong: Long) {
-        val datetime =
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(dateInLong), ZoneId.systemDefault())
+        val datetime = LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(dateInLong), ZoneOffset.UTC
+        )
         _date.value = datetime
     }
 

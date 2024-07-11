@@ -19,7 +19,6 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.public_adapters.ToReceiveRecyclerAdapter
 import br.com.apps.trucktech.util.state.State
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Reembolsos"
 
@@ -28,8 +27,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentRefundBinding? = null
     private val binding get() = _binding!!
 
-    private val driverId by lazy { mainActVM.loggedUser.driverId }
-    private val viewModel: RefundViewModel by viewModel { parametersOf(driverId) }
+    private val viewModel: RefundViewModel by viewModel()
     private var adapter: ToReceiveRecyclerAdapter<Expend>? = null
 
     //---------------------------------------------------------------------------------------------//
@@ -72,11 +70,17 @@ class RefundFragment : BaseFragmentWithToolbar() {
      *   - Observes expendData for update the recyclerView and bind
      */
     private fun initStateManager() {
-        viewModel.data.observe(viewLifecycleOwner) { data ->
-            data?.let {
-                adapter?.update(it)
-                bindText(it)
-            }
+        mainActVM.cachedTravels.observe(viewLifecycleOwner) { travels ->
+            travels?.let { t ->
+
+                viewModel.updateData(t).let { expends ->
+                    if (expends.isNotEmpty()) {
+                        adapter?.update(expends)
+                        bindText(expends)
+                    }
+                }
+
+            } ?: viewModel.setState(State.Error(NullPointerException()))
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
@@ -129,7 +133,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
 
     private fun bindText(dataSet: List<Expend>) {
         val numberOfExpends = dataSet.size
-        val totalExpends = dataSet.sumOf { it.value!! }
+        val totalExpends = dataSet.sumOf { it.value }
 
         val refundsFormatted = SpannableString(
             numberOfExpends.toString()

@@ -1,4 +1,4 @@
-package br.com.apps.model.dto
+package br.com.apps.model.dto.fleet
 
 data class TruckDto(
     var id: String? = null,
@@ -9,7 +9,8 @@ data class TruckDto(
     val performanceAim: Double? = null,
     val plate: String? = null,
     val color: String? = null,
-    val commissionPercentual: Double? = null
+    val commissionPercentual: Double? = null,
+    val fleetType: String? = null
 ) {
 
     fun validateFields(): Boolean {

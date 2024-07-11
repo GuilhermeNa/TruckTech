@@ -5,15 +5,15 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.Document
+import br.com.apps.model.model.TruckDocument
 import br.com.apps.trucktech.databinding.ItemDocumentBinding
 import br.com.apps.trucktech.expressions.getDayFormatted
 import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
 
 class DocumentsListFragmentAdapter(
     private val context: Context,
-    dataSet: List<Document>,
-    val itemCLickListener: (document: Document) -> Unit = {}
+    dataSet: List<TruckDocument>,
+    val itemCLickListener: (document: TruckDocument) -> Unit = {}
 ) : RecyclerView.Adapter<DocumentsListFragmentAdapter.ViewHolder>() {
 
     val dataSet = dataSet.toMutableList()
@@ -52,28 +52,33 @@ class DocumentsListFragmentAdapter(
 
     override fun getItemCount(): Int = dataSet.size
 
-    private fun bind(holder: ViewHolder, document: Document) {
-        holder.tittle.text = document.name
+    private fun bind(holder: ViewHolder, document: TruckDocument) {
+        holder.tittle.text = buildString {
+            val plate = document.plate ?: "-"
+            val name = document.name ?: "-"
 
-        val day = document.expeditionDate?.getDayFormatted()
-        val month = document.expirationDate?.getMonthInPtBrAbbreviated()
-
+            append(plate)
+            append(" - ")
+            append(name)
+        }
         holder.date.text = buildString {
+            val day = document.expeditionDate?.getDayFormatted()
+            val month = document.expirationDate?.getMonthInPtBrAbbreviated()
+
             append(day)
             append(" ")
             append(month)
         }
-
     }
 
-    private fun initClickListener(holder: ViewHolder, document: Document) {
+    private fun initClickListener(holder: ViewHolder, document: TruckDocument) {
         holder.itemView.setOnClickListener {
             itemCLickListener(document)
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(dataSet: List<Document>) {
+    fun update(dataSet: List<TruckDocument>) {
         this.dataSet.clear()
         this.dataSet.addAll(dataSet)
         notifyDataSetChanged()

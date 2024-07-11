@@ -9,7 +9,6 @@ import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentTravelsBinding
 import br.com.apps.trucktech.expressions.loadGif
-import br.com.apps.trucktech.util.state.StateDeleteI
 import br.com.apps.trucktech.util.state.StateI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -17,7 +16,7 @@ import kotlinx.coroutines.launch
 class TravelsListState(
     private val binding: FragmentTravelsBinding,
     private val lifecycleScope: LifecycleCoroutineScope
-) : StateI, StateDeleteI {
+) : StateI {
 
     override fun showLoading() {
         binding.apply {
@@ -78,8 +77,6 @@ class TravelsListState(
         }
     }
 
-    override fun showUpdating() {}
-
     override fun showError(e: Exception) {
         binding.travelsFragmentRecycler.visibility = GONE
 
@@ -106,14 +103,13 @@ class TravelsListState(
         e.printStackTrace()
     }
 
-    override fun showDeleting() {
+    fun showDeleting() {
         binding.boxLoading.apply {
             layout.visibility = VISIBLE
         }
     }
 
-    override fun showDeleted() {
-        binding.boxGif.layout.visibility = GONE
+    fun showDeleted() {
         binding.boxLoading.apply {
             layout.visibility = GONE
         }

@@ -3,19 +3,17 @@ package br.com.apps.trucktech.ui.fragments.nav_home.home
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.lifecycleScope
-import br.com.apps.repository.util.Response
+import br.com.apps.model.model.Fine
 import br.com.apps.trucktech.databinding.FragmentHomeBinding
+import br.com.apps.trucktech.expressions.loadImageThroughUrl
+import br.com.apps.trucktech.expressions.navigateTo
+import br.com.apps.trucktech.ui.activities.main.LoggedUser
 import br.com.apps.trucktech.ui.activities.main.VisualComponents
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
-import br.com.apps.trucktech.ui.fragments.nav_home.home.box_view_managers.BoxFinesViewManager
-import br.com.apps.trucktech.ui.fragments.nav_home.home.box_view_managers.BoxHeaderViewManager
-import br.com.apps.trucktech.ui.fragments.nav_home.home.box_view_managers.BoxTimeLineViewManager
 import br.com.apps.trucktech.util.state.State
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class HomeFragment : BaseFragmentWithToolbar() {
@@ -23,43 +21,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private var stateHandler: HomeState? = null
     private val viewModel: HomeViewModel by viewModel()
-
-    private var boxHeader: BoxHeaderViewManager? = null
-    private var boxFines: BoxFinesViewManager? = null
-    private var boxTimeLine: BoxTimeLineViewManager? = null
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        loadLoggedUser()
-    }
-
-    /**
-     * When the app starts and the user logs in, it will load the driver data and save it in the
-     * shared activity ViewModel.
-     */
-    private fun loadLoggedUser() {
-        authViewModel.userId.let {
-            lifecycleScope.launch {
-                mainActVM.initUserData(it).asFlow().first { response ->
-                    when (response) {
-                        is Response.Error -> {
-                            response.exception.printStackTrace()
-                            viewModel.setState(State.Error(response.exception))
-                        }
-                        is Response.Success -> response.data?.let { viewModel.loadData(it) }
-                            ?: viewModel.setState(State.Error(NullPointerException()))
-                    }
-                    true
-                }
-            }
-        }
-    }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -78,55 +40,88 @@ class HomeFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        stateHandler = HomeState(binding)
-        boxHeader = BoxHeaderViewManager(binding.boxHeader)
-        boxFines = BoxFinesViewManager(binding.boxFines, requireContext())
-        boxTimeLine = BoxTimeLineViewManager(binding.boxTimeline, requireContext())
-
-        initSwipeRefresh()
         initStateManager()
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(hasToolbar = false)
-        configurator.bottomNavigation(hasBottomNavigation = true)
-    }
-
-    private fun initSwipeRefresh() {
-        binding.swipeRefresh.setOnRefreshListener {
-            viewModel.loadData(mainActVM.loggedUser)
-        }
+        configurator.bottomNavigation(hasBottomNavigation = false)
     }
 
     /**
      * State manager for home fragment
      */
     private fun initStateManager() {
-        viewModel.fragmentState.observe(viewLifecycleOwner) { fragmentState ->
-            when (fragmentState) {
+        mainActVM.state.observe(viewLifecycleOwner) { globalState ->
+            when(globalState) {
                 is State.Loading -> {
-                    stateHandler?.showLoading()
-                    mainActVM.setComponents(VisualComponents(hasBottomNavigation = false))
+                    binding.apply {
+                        shimmer.visibility = VISIBLE
+                        boxHeader.layout.visibility = GONE
+                        fragReceivable.visibility = GONE
+                        fragPerformance.visibility = GONE
+                        boxFines.layout.visibility = GONE
+                        boxTimeline.layout.visibility = GONE
+                    }
+                }
+                is State.Error -> {
+                    globalState.error.printStackTrace()
+                    requireActivity().finish()
                 }
                 is State.Loaded -> {
-                    stateHandler?.showLoaded()
+                    binding.apply {
+                        shimmer.visibility = GONE
+                        boxHeader.layout.visibility = VISIBLE
+                        fragReceivable.visibility = VISIBLE
+                        fragPerformance.visibility = VISIBLE
+                        boxFines.layout.visibility = VISIBLE
+                        boxTimeline.layout.visibility = VISIBLE
+                    }
                     mainActVM.setComponents(VisualComponents(hasBottomNavigation = true))
+                    bindBoxHeader(mainActVM.loggedUser)
+                    bindBoxTimeLine()
                 }
-                is State.Empty -> {}
-                is State.Error -> stateHandler?.showError()
                 else -> {}
             }
         }
 
-        viewModel.data.observe(viewLifecycleOwner) { data ->
-            binding.swipeRefresh.isRefreshing = false
-            data?.let {
-                boxHeader?.bind(mainActVM.loggedUser)
-                data.fines?.let { boxFines?.initialize(it) }
-                boxTimeLine?.initialize()
-            }
+        mainActVM.cachedFines.observe(viewLifecycleOwner) { fines ->
+            bindBoxFines(fines)
         }
 
+    }
+
+    private fun bindBoxHeader(user: LoggedUser) {
+        binding.boxHeader.apply {
+            name.text = user.name
+        }
+    }
+
+    private fun bindBoxFines(fines: List<Fine>?) {
+        binding.boxFines.apply {
+            panelFinesImage.loadImageThroughUrl(
+                "https://gringo.com.vc/wp-content/uploads/2022/06/Multa_18032016_1738_1280_960-1024x768.jpg"
+            )
+
+            panelFinesNewText.text = viewModel.getNewFinesText()
+            panelFinesNew.text = fines?.let { viewModel.getThisYearFines(it).toString() }
+            panelFinesAccumulated.text = fines?.size.toString()
+
+            panelFinesCard.setOnClickListener {
+                it.navigateTo(HomeFragmentDirections.actionHomeFragmentToFinesFragment())
+            }
+        }
+    }
+
+    private fun bindBoxTimeLine() {
+        binding.boxTimeline.apply {
+            panelTimeLineImage.loadImageThroughUrl(
+                "https://cdn.sanity.io/images/599r6htc/localized/e09081e08bcc400a488dd7c1fa88a4d1493b52aa-1108x1108.png?w=514&q=75&fit=max&auto=format"
+            )
+            panelTimeLineCard.setOnClickListener {
+                it.navigateTo(HomeFragmentDirections.actionHomeFragmentToTimelineFragment())
+            }
+        }
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -135,11 +130,6 @@ class HomeFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.swipeRefresh.isRefreshing = false
-        boxHeader = null
-        boxFines = null
-        boxTimeLine = null
-        stateHandler = null
         _binding = null
     }
 

@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentTravelPreviewBinding
 import br.com.apps.trucktech.expressions.getColorById
@@ -127,7 +128,7 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
                 when (response) {
                     is Response.Error -> {
                         response.exception.printStackTrace()
-                        requireView().snackBarRed(FAILED_WHEN_FINISHING)
+                        requireView().snackBarRed(response.exception.message ?: UNKNOWN_EXCEPTION)
                     }
 
                     is Response.Success -> {
@@ -296,7 +297,8 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
 
             //ODOMETER
             boxOdometer.apply {
-                boxTravelPreviewInitialMeasure.text = t.initialOdometerMeasurement.toNumberDecimalPtBr() + " - km"
+                boxTravelPreviewInitialMeasure.text =
+                    t.initialOdometerMeasurement.toNumberDecimalPtBr() + " - km"
                 boxTravelPreviewFinalMeasure.apply {
                     visibility =
                         if (t.finalOdometerMeasurement == null) {

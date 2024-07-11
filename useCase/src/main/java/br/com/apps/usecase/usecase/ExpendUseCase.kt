@@ -9,7 +9,6 @@ import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.repository.expend.ExpendRepository
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.EMPTY_DATASET
-import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
 import br.com.apps.repository.util.validateAndProcess
@@ -18,7 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import java.security.InvalidParameterException
 
 class ExpendUseCase(
     private val repository: ExpendRepository,
@@ -104,23 +102,13 @@ class ExpendUseCase(
     }
 
     /**
-     * Merges the provided list of expenditures into the corresponding travels in the travel list.
-     * Each expenditure is associated with a travel based on the travel ID.
+     * Deletes an ExpendDto entity from the repository after validating the permission.
      *
-     * @param travelList The list of travels into which expenditures will be merged.
-     * @param expendListNullable The nullable list of expenditures to merge into the travels.
-     * @throws InvalidParameterException if the provided expenditure list is null.
-     * @throws InvalidParameterException if any travel in the travel list has a null ID.
+     * @param writeReq A WriteRequest object containing the data (ExpendDto)
+     * to delete and the authorization level (authLevel).
+     *
+     * @throws InvalidAuthLevelException if the permission validation fails (Response.Error).
      */
-    fun mergeExpendList(travelList: List<Travel>, expendListNullable: List<Expend>?) {
-        val expendList = expendListNullable ?: throw InvalidParameterException(EMPTY_DATASET)
-        travelList.forEach { travel ->
-            val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
-            val expends = expendList.filter { it.travelId == travelId }
-            travel.expendsList = expends
-        }
-    }
-
     suspend fun delete(writeReq: WriteRequest<ExpendDto>) {
         val dto = writeReq.data
         val auth = writeReq.authLevel
@@ -135,6 +123,15 @@ class ExpendUseCase(
         }
     }
 
+    /**
+     * Saves an ExpendDto entity to the repository after validating permission and data.
+     *
+     * @param writeReq: A WriteRequest object containing the data (ExpendDto) to save and
+     * the authorization level (authLevel).
+     *
+     * @throws InvalidAuthLevelException if the permission validation fails (Response.Error).
+     * @throws NullPointerException if there is any null field.
+     */
     suspend fun save(writeReq: WriteRequest<ExpendDto>) {
         val dto = writeReq.data
         val auth = writeReq.authLevel

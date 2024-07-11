@@ -8,6 +8,7 @@ import br.com.apps.repository.di.writeModules
 import br.com.apps.trucktech.ui.activities.main.MainActivityViewModel
 import br.com.apps.trucktech.ui.fragments.base_fragments.AuthViewModel
 import br.com.apps.trucktech.ui.fragments.login.LoginViewModel
+import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentListVmData
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentsListFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.DiscountViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.fines.FinesListViewModel
@@ -62,7 +63,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModules = module {
-    viewModel<MainActivityViewModel> { MainActivityViewModel(get(), get()) }
+    viewModel<MainActivityViewModel> { MainActivityViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel<LoginViewModel> { LoginViewModel() }
     viewModel<BankListFragmentViewModel> { (id: String) ->
         BankListFragmentViewModel(
@@ -88,14 +89,14 @@ val viewModelModules = module {
         )
     }
     viewModel<ExpendListViewModel> { (idHolder: IdHolder) -> ExpendListViewModel(idHolder, get()) }
-    viewModel<DocumentsListFragmentViewModel> { (idHolder: IdHolder) ->
+    viewModel<DocumentsListFragmentViewModel> { (vmData: DocumentListVmData) ->
         DocumentsListFragmentViewModel(
-            idHolder,
+            vmData,
             get(),
             get()
         )
     }
-    viewModel<FinesListViewModel> { (idHolder: IdHolder) -> FinesListViewModel(idHolder, get()) }
+    viewModel<FinesListViewModel> { FinesListViewModel() }
     viewModel<FreightEditorViewModel> { (vmData: FreightEVMData) ->
         FreightEditorViewModel(
             vmData,
@@ -167,9 +168,9 @@ val viewModelModules = module {
         )
     }
     viewModel<ToReceiveViewModel> { ToReceiveViewModel() }
-    viewModel<DiscountViewModel> { (id: String) -> DiscountViewModel(id, get(), get(), get()) }
-    viewModel<PaymentViewModel> { (id: String) -> PaymentViewModel(id, get()) }
-    viewModel<RefundViewModel> { (id: String) -> RefundViewModel(id, get()) }
+    viewModel<DiscountViewModel> { DiscountViewModel(get()) }
+    viewModel<PaymentViewModel> { PaymentViewModel(get()) }
+    viewModel<RefundViewModel> { RefundViewModel(get()) }
     viewModel<RequestEditorRefuelViewModel> { (vmData: RequestEditorRefuelVmData) ->
         RequestEditorRefuelViewModel(
             vmData,
@@ -208,21 +209,10 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<HomeViewModel> {
-        HomeViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get()
-        )
-    }
+    viewModel<HomeViewModel> { HomeViewModel() }
     viewModel<PerformanceViewModel> { PerformanceViewModel(get()) }
-    viewModel<ReceivableViewModel> { ReceivableViewModel() }
     viewModel<TravelPreviewViewModel> { (vmData: TravelPreviewVmData) -> TravelPreviewViewModel(vmData, get()) }
+    viewModel<ReceivableViewModel> { ReceivableViewModel() }
 }
 
 val appModules = listOf(

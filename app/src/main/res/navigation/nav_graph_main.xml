@@ -281,7 +281,7 @@
             tools:layout="@layout/fragment_document" >
             <argument
                 android:name="document"
-                app:argType="br.com.apps.model.model.Document" />
+                app:argType="br.com.apps.model.model.TruckDocument" />
         </fragment>
     </navigation>
 

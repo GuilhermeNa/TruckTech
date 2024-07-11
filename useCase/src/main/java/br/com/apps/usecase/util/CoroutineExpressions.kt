@@ -18,7 +18,7 @@ suspend fun <T> LiveData<T>.awaitValue(): T = suspendCancellableCoroutine { cont
     this.observeForever(observer)
 }
 
-suspend fun <T> LiveData<Response<T>>.awaitData(): T = suspendCancellableCoroutine { cont ->
+suspend fun <T> LiveData<Response<T>>.awaitData(): T? = suspendCancellableCoroutine { cont ->
     val observer = object : Observer<Response<T>> {
         override fun onChanged(value: Response<T>) {
             when (value) {

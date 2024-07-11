@@ -1,93 +1,241 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipe_refresh"
+    android:id="@+id/fragment_home_scroll_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
-    <ScrollView
-        android:id="@+id/fragment_home_scroll_view"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="wrap_content"
+        tools:context=".ui.fragments.nav_home.home.HomeFragment">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <include
+            android:id="@+id/box_header"
+            layout="@layout/home_frag_box_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/frag_receivable"
+            class="br.com.apps.trucktech.ui.fragments.nav_home.home.frag_to_receive.ReceivableFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:context=".ui.fragments.nav_home.home.HomeFragment">
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="34dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/box_header"
+            tools:layout="@layout/fragment_receivable" />
 
-            <include
-                android:id="@+id/box_header"
-                layout="@layout/home_frag_box_header"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/frag_performance"
+            class="br.com.apps.trucktech.ui.fragments.nav_home.home.frag_performance.PerformanceFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="34dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frag_receivable"
+            tools:layout="@layout/fragment_performance" />
+
+        <include
+            android:id="@+id/box_fines"
+            layout="@layout/panel_home_fragment_my_fines"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frag_performance" />
+
+        <include
+            android:id="@+id/box_timeline"
+            layout="@layout/panel_home_fragment_time_line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/box_fines" />
+
+        <include
+            android:id="@+id/loading_screen"
+            layout="@layout/box_loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <include
+            android:id="@+id/box_error"
+            layout="@layout/box_error"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/box_timeline" />
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <ScrollView
+                android:id="@+id/scroll"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="match_parent"
+                android:fillViewport="true">
 
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/frag_receivable"
-                class="br.com.apps.trucktech.ui.fragments.nav_home.home.frag_to_receive.ReceivableFragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="34dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/box_header"
-                tools:layout="@layout/fragment_receivable" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/frag_performance"
-                class="br.com.apps.trucktech.ui.fragments.nav_home.home.frag_performance.PerformanceFragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="34dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/frag_receivable"
-                tools:layout="@layout/fragment_performance" />
+                    <View
+                        android:layout_width="150dp"
+                        android:layout_height="45dp"
+                        android:layout_margin="16dp"
+                        android:background="@color/light_grey" />
 
-            <include
-                android:id="@+id/box_fines"
-                layout="@layout/panel_home_fragment_my_fines"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/frag_performance" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="280dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="32dp"
+                        android:background="@color/light_grey" />
 
-            <include
-                android:id="@+id/box_timeline"
-                layout="@layout/panel_home_fragment_time_line"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/box_fines" />
+                    <View
+                        android:layout_width="200dp"
+                        android:layout_height="25dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="48dp"
+                        android:background="@color/light_grey" />
 
-            <include
-                android:id="@+id/loading_screen"
-                layout="@layout/box_loading"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal">
 
-            <include
-                android:id="@+id/box_error"
-                layout="@layout/box_error"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                        <View
+                            android:layout_width="100dp"
+                            android:layout_height="18dp"
+                            android:background="@color/light_grey" />
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/box_timeline" />
+                        <View
+                            android:layout_width="100dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="20dp"
+                            android:background="@color/light_grey" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                        <View
+                            android:layout_width="100dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="20dp"
+                            android:background="@color/light_grey" />
+
+                        <View
+                            android:layout_width="100dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="20dp"
+                            android:background="@color/light_grey" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="60dp"
+                            android:layout_height="80dp"
+                            android:background="@color/light_grey" />
+
+                        <View
+                            android:layout_width="60dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/light_grey" />
+
+                        <View
+                            android:layout_width="60dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/light_grey" />
+
+                        <View
+                            android:layout_width="60dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/light_grey" />
+
+                        <View
+                            android:layout_width="60dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/light_grey" />
+
+                        <View
+                            android:layout_width="60dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/light_grey" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/light_grey" />
+
+                    <View
+                        android:layout_width="200dp"
+                        android:layout_height="25dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="48dp"
+                        android:background="@color/light_grey" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/light_grey" />
+
+                    <View
+                        android:layout_width="200dp"
+                        android:layout_height="25dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="48dp"
+                        android:background="@color/light_grey" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/light_grey" />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="96dp" />
+
+                </LinearLayout>
+            </ScrollView>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
 

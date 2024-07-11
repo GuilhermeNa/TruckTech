@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -30,6 +31,8 @@ import br.com.apps.trucktech.ui.activities.main.VisualComponents
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.private_adapters.TravelsListRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
+import br.com.apps.trucktech.util.MonetaryMaskUtil
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
 import br.com.apps.trucktech.util.state.State
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CompletableDeferred
@@ -40,6 +43,7 @@ import org.koin.core.parameter.parametersOf
 import java.security.InvalidParameterException
 
 private const val TOOLBAR_TITLE = "Viagens"
+
 
 /**
  * A simple [Fragment] subclass.
@@ -81,7 +85,6 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
-        initSwipeRefresh()
         initFab()
     }
 
@@ -94,12 +97,6 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             title = TOOLBAR_TITLE
         )
         configurator.bottomNavigation(hasBottomNavigation = true)
-    }
-
-    private fun initSwipeRefresh() {
-        binding.swipeRefresh.setOnRefreshListener {
-            viewModel.loadData()
-        }
     }
 
     /**
@@ -134,10 +131,8 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     private fun launchCreatingNewTravel() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val measure =
-                    viewModel.getLastTravelFinalOdometer()
-                        ?: showOdometerMeasureDialog()
 
+                val measure = getLastTravelFinalOdometer() ?: showOdometerMeasureDialog()
                 createNewTravel(measure)
 
             } catch (e: Exception) {
@@ -149,11 +144,21 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
         }
     }
 
+    private fun getLastTravelFinalOdometer(): Double? {
+        val travels = mainActVM.cachedTravels.value ?: return null
+        return if (travels.isNotEmpty()) {
+            travels.first().finalOdometerMeasurement?.toDouble()
+        } else {
+            null
+        }
+    }
+
     private suspend fun showOdometerMeasureDialog(): Double {
         val deferred = CompletableDeferred<Double>()
 
         val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_input_text, null)
         val field = view.findViewById<EditText>(R.id.dialog_edit_text)
+        field.addTextChangedListener(MonetaryMaskUtil(field))
 
         MaterialAlertDialogBuilder(requireContext())
             .setView(view)
@@ -162,7 +167,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             .setMessage("Defina a quilometragem inicial para esta viagem:")
             .setPositiveButton("Ok") { _, _ ->
                 val text = field.text.toString()
-                if (text.isNotBlank()) deferred.complete(text.toDouble())
+                if (text.isNotBlank()) deferred.complete(text.formatPriceSave().toDouble())
                 else deferred.completeExceptionally(InvalidParameterException())
             }
             .setNegativeButton("Cancelar") { _, _ ->
@@ -184,12 +189,11 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
             when (response) {
                 is Response.Error -> {
                     requireView().snackBarRed(FAILED_TO_SAVE)
-                    response.exception.printStackTrace()
                 }
 
                 is Response.Success -> {
+
                     requireView().snackBarGreen(SUCCESSFULLY_SAVED)
-                    viewModel.loadData()
                 }
             }
         }
@@ -203,27 +207,26 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
      *   - Observes bottomNav to manage the interaction.
      */
     private fun initStateManager() {
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            if(viewModel.state.value != State.Loading) showAfterLoaded()
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainActVM.cachedTravels.asFlow().collect { data ->
+                viewModel.updateData(data)?.let { travels ->
+                    initRecyclerView(travels)
+                }
+            }
+        }
 
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            if (viewModel.state.value != State.Loading) showAfterLoaded()
             when (state) {
                 is State.Loading -> stateHandler?.showLoading()
                 is State.Loaded -> stateHandler?.showLoaded()
                 is State.Empty -> stateHandler?.showEmpty()
                 is State.Error -> stateHandler?.showError(state.error)
-                is State.Deleting -> stateHandler?.showDeleting()
-                is State.Deleted -> stateHandler?.showDeleted()
-                else -> {}
             }
         }
 
-        viewModel.data.observe(viewLifecycleOwner) { data ->
-            binding.swipeRefresh.isRefreshing = false
-            data?.let { initRecyclerView(it) }
-        }
-
-        viewModel.dialog.observe(viewLifecycleOwner) { dialog ->
-            when (dialog) {
+        viewModel.dialog.observe(viewLifecycleOwner) { hasDialog ->
+            when (hasDialog) {
                 true -> {
                     binding.fragTravelListDarkLayer.visibility = VISIBLE
                     mainActVM.setComponents(VisualComponents(hasBottomNavigation = false))
@@ -235,14 +238,18 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
                 }
             }
         }
+
     }
 
     private fun showAfterLoaded() {
         binding.apply {
             boxGif.layout.apply {
-                if(visibility == VISIBLE) {
+                if (visibility == VISIBLE) {
                     visibility = GONE
-                    animation = AnimationUtils.loadAnimation(binding.root.context, R.anim.fade_out_and_shrink)
+                    animation = AnimationUtils.loadAnimation(
+                        binding.root.context,
+                        R.anim.fade_out_and_shrink
+                    )
                 }
             }
 
@@ -336,12 +343,14 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun delete(travel: Travel) {
+        stateHandler?.showDeleting()
+
         lifecycleScope.launch {
             viewModel.delete(travel).observe(viewLifecycleOwner) { response ->
                 when (response) {
                     is Response.Success -> {
+                        stateHandler?.showDeleted()
                         requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
-                        viewModel.loadData()
                     }
 
                     is Response.Error -> {
@@ -353,21 +362,11 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     }
 
     //---------------------------------------------------------------------------------------------//
-    // ON RESUME
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.loadData()
-    }
-
-    //---------------------------------------------------------------------------------------------//
     // ON DESTROY VIEW
     //---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.swipeRefresh.isRefreshing = false
         stateHandler = null
         _binding = null
     }

@@ -83,9 +83,7 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
     ): LiveData<Response<List<Freight>>> {
         return withContext(Dispatchers.IO) {
             if (travelIdList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
-
             val listener = collection.whereIn(TRAVEL_ID, travelIdList)
-
             return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
             else listener.onComplete { it.toFreightList() }
         }

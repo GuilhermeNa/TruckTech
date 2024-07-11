@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.trucktech.databinding.FragmentDiscountBinding
@@ -11,6 +13,8 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.AdvanceRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.CostHelpRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.LoanRecyclerAdapter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -38,6 +42,7 @@ class DiscountFragment : BaseFragmentWithToolbar() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDiscountBinding.inflate(inflater, container, false)
+        stateHandler = DiscountState(binding)
         return binding.root
     }
 
@@ -47,7 +52,6 @@ class DiscountFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        stateHandler = DiscountState(binding)
         initPanelCostHelp()
         initPanelAdvance()
         initPanelLoan()
@@ -73,17 +77,7 @@ class DiscountFragment : BaseFragmentWithToolbar() {
      *   - Observes loanData for update the recyclerView
      */
     private fun initStateManager() {
-        viewModel.data.observe(viewLifecycleOwner) { data ->
-            data?.apply {
-                if(costHelps.isNotEmpty()) costHelpAdapter?.update(costHelps)
-
-                if (advances.isNotEmpty()) advanceAdapter?.update(advances)
-
-                if (loans.isNotEmpty()) loanAdapter?.update(loans)
-
-            }
-        }
-
+        getCachedData()
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is DiscountFState.Loading -> stateHandler?.showLoading()
@@ -108,7 +102,27 @@ class DiscountFragment : BaseFragmentWithToolbar() {
 
             }
         }
+    }
 
+    private fun getCachedData() {
+        lifecycleScope.launch {
+            val loans = mainActVM.cachedLoans.asFlow().first() ?: emptyList()
+            val advances = mainActVM.cachedAdvances.asFlow().first() ?: emptyList()
+            val travels = mainActVM.cachedTravels.asFlow().first() ?: emptyList()
+
+            viewModel.initFragmentData(loans, advances, travels).let { data ->
+                data.apply {
+                    if(costHelps.isNotEmpty()) costHelpAdapter?.update(costHelps)
+
+                    if (advances.isNotEmpty()) advanceAdapter?.update(advances)
+
+                    if (loans.isNotEmpty()) loanAdapter?.update(loans)
+
+                }
+
+            }
+
+        }
     }
 
     private fun initPanelCostHelp() {

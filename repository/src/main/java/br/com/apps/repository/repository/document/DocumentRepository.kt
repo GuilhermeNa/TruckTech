@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.document
 
-import br.com.apps.model.dto.DocumentDto
+import br.com.apps.model.dto.TruckDocumentDto
 
 
 class DocumentRepository(
@@ -12,7 +12,7 @@ class DocumentRepository(
     // WRITE
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun save(dto: DocumentDto) = write.save(dto)
+    override suspend fun save(dto: TruckDocumentDto) = write.save(dto)
 
     //---------------------------------------------------------------------------------------------//
     // READ
@@ -22,6 +22,9 @@ class DocumentRepository(
 
     override suspend fun getDocumentListByTruckId(truckId: String, flow: Boolean) =
         read.getDocumentListByTruckId(truckId, flow)
+
+    override suspend fun fetchDocumentListByTruckIdList(idList: List<String>, flow: Boolean) =
+        read.fetchDocumentListByTruckIdList(idList, flow)
 
 }
 

@@ -4,8 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
-import br.com.apps.model.model.Document
+import br.com.apps.model.model.TruckDocument
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
 import br.com.apps.repository.repository.document.DocumentRepository
@@ -18,21 +17,18 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class DocumentsListFragmentViewModel(
-    idHolder: IdHolder,
+    private val vmData: DocumentListVmData,
     private val documentRepository: DocumentRepository,
     private val labelRepository: LabelRepository
 ) : ViewModel() {
 
-    val masterUid = idHolder.masterUid ?: throw IllegalArgumentException("masterUid is null")
-    val truckId = idHolder.truckId ?: throw IllegalArgumentException("truckId is null")
-
     private lateinit var labels: List<Label>
 
     /**
-     * LiveData holding the response data of type [Response] with a list of [Document]
+     * LiveData holding the response data of type [Response] with a list of [TruckDocument]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<List<Document>>()
+    private val _data = MutableLiveData<List<TruckDocument>>()
     val data get() = _data
 
     private val _state = MutableLiveData<State>()
@@ -67,8 +63,8 @@ class DocumentsListFragmentViewModel(
         }
     }
 
-    private suspend fun loadDocuments(onComplete: (data: List<Document>) -> Unit) {
-        val response = documentRepository.getDocumentListByTruckId(truckId).asFlow().first()
+    private suspend fun loadDocuments(onComplete: (data: List<TruckDocument>) -> Unit) {
+        val response = documentRepository.fetchDocumentListByTruckIdList(vmData.fleetIds).asFlow().first()
 
         return when (response) {
             is Response.Error -> throw response.exception
@@ -80,7 +76,7 @@ class DocumentsListFragmentViewModel(
     private suspend fun loadLabels(): List<Label> {
         val response =
             labelRepository
-                .getLabelListByMasterUidAndType(LabelType.DOCUMENT.description, masterUid)
+                .getLabelListByMasterUidAndType(LabelType.DOCUMENT.description, vmData.masterUid)
                 .asFlow().first()
 
         return when (response) {
@@ -89,7 +85,7 @@ class DocumentsListFragmentViewModel(
         }
     }
 
-    private fun sendResponse(docList: List<Document>) {
+    private fun sendResponse(docList: List<TruckDocument>) {
         if (docList.isEmpty()) {
             setState(State.Empty)
         } else {
@@ -100,7 +96,7 @@ class DocumentsListFragmentViewModel(
 
     }
 
-    private fun mergeData(documents: List<Document>) {
+    private fun mergeData(documents: List<TruckDocument>) {
         documents.map { document ->
             val id = document.labelId
             val label = labels.firstOrNull { it.id == id }
@@ -109,3 +105,8 @@ class DocumentsListFragmentViewModel(
     }
 
 }
+
+data class DocumentListVmData(
+    val masterUid: String,
+    val fleetIds: List<String>
+)

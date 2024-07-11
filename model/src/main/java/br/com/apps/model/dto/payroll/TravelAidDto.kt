@@ -5,7 +5,7 @@ import java.util.Date
 data class TravelAidDto(
     val masterUid: String? = null,
     val id: String? = null,
-    val employeeId: String? = null,
+    val driverId: String? = null,
     val travelId: String? = null,
 
     val date: Date? = null,
@@ -18,7 +18,7 @@ data class TravelAidDto(
         var areFieldsValid = true
 
         if (masterUid == null ||
-            employeeId == null ||
+            driverId == null ||
             travelId == null ||
             date == null ||
             value == null ||

@@ -2,48 +2,36 @@ package br.com.apps.trucktech.ui.fragments.nav_home.payment
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.repository.repository.freight.FreightRepository
-import br.com.apps.repository.util.Response
-import br.com.apps.trucktech.util.buildUiResponse
+import br.com.apps.model.model.travel.Travel
 import br.com.apps.trucktech.util.state.State
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import br.com.apps.usecase.usecase.TravelUseCase
 
-class PaymentViewModel(
-    private val driverId: String,
-    private val repository: FreightRepository
-) : ViewModel() {
+class PaymentViewModel(private val travelUseCase: TravelUseCase) : ViewModel() {
 
     private val _state = MutableLiveData<State>()
     val state get() = _state
-
-    /**
-     * LiveData holding the response data of type [Response] with a [Freight]
-     * to be displayed on screen.
-     */
-    private val _data = MutableLiveData<List<Freight>>()
-    val data get() = _data
 
     //---------------------------------------------------------------------------------------------//
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init {
-        _state.value = State.Loading
-        loadData()
+    init { setState(State.Loading) }
+
+    fun setState(state: State) {
+        if (this@PaymentViewModel.state.value != state) {
+            _state.value = state
+        }
     }
 
-    private fun loadData() {
-        viewModelScope.launch {
-            repository.getFreightListByDriverIdAndIsNotPaidYet(driverId)
-                .asFlow().first {
-                    it.buildUiResponse(_state, _data)
-                    true
-                }
+    fun updateData(travelList: List<Travel>): List<Freight> {
+        val freights = travelUseCase.getFreightListWitchIsNotPaidYet(travelList)
+        fun getState(): State {
+            return if (freights.isEmpty()) State.Empty
+            else State.Loaded
         }
+        setState(getState())
+        return freights
     }
 
 }

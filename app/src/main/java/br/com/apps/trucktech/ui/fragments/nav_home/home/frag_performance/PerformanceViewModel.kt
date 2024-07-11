@@ -157,7 +157,14 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
                     isTheNextInvalid -> {
                         val partialEndIndex =
                             travels.drop(nextInd).indexOfFirst { it.considerAverage }
-                        val endIndex = partialEndIndex + nextInd
+
+                        val endIndex = if (partialEndIndex == -1) {
+                            travels.size
+
+
+                        } else {
+                            partialEndIndex + nextInd
+                        }
                         travels.subList(index, endIndex)
                     }
 
@@ -187,7 +194,7 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
 
         var mapIndex = 0
 
-        travels.forEachIndexed { index, pair ->
+        travels.forEachIndexed label@{ index, pair ->
             val nextInd = (index + 1)
             val isNextMonthInvalid =
                 nextInd < travels.size && !travels[nextInd].second.first().considerAverage
@@ -204,6 +211,7 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
                         thisMonthList.remove(it)
                     }
 
+                    if(thisMonthList.size == 0) return@label
                 }
 
                 else -> {}
@@ -241,11 +249,11 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
     private fun getPerformanceItems(travelList: List<Travel>): List<PerformanceItem> {
         val averageHit = useCase.getRefuelAverage(travelList)
         val averagePercent = averageHit.divide(averageAim, 2, RoundingMode.HALF_EVEN)
-                .multiply(BigDecimal(100))
+            .multiply(BigDecimal(100))
 
         val profitHit = useCase.getProfitPercentage(travelList)
         val profitPercent = profitHit.divide(performanceAim, 2, RoundingMode.HALF_EVEN)
-                .multiply(BigDecimal(100))
+            .multiply(BigDecimal(100))
 
         return listOf(
             PerformanceItem(

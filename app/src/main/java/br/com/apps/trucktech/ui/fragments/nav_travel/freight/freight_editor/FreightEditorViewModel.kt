@@ -16,6 +16,7 @@ import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
+import br.com.apps.trucktech.expressions.atBrZone
 import br.com.apps.usecase.usecase.FreightUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
@@ -23,7 +24,7 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 
 class FreightEditorViewModel(
     private val vmData: FreightEVMData,
@@ -121,8 +122,8 @@ class FreightEditorViewModel(
 
         _date.value =
             freight?.let {
-                it.loadingDate ?: LocalDateTime.now()
-            } ?: LocalDateTime.now()
+                it.loadingDate ?: LocalDateTime.now().atBrZone()
+            } ?: LocalDateTime.now().atBrZone()
     }
 
     private fun sendResponse(customers: List<Customer>, freight: Freight?) {
@@ -139,8 +140,9 @@ class FreightEditorViewModel(
      * Interact with the [_date] LiveData, changing it.
      */
     fun newDateHaveBeenSelected(dateInLong: Long) {
-        val datetime =
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(dateInLong), ZoneId.systemDefault())
+        val datetime = LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(dateInLong), ZoneOffset.UTC
+        )
         _date.value = datetime
     }
 
@@ -178,6 +180,7 @@ class FreightEditorViewModel(
                 FreightFactory.update(freight, viewDto)
                 freight.toDto()
             }
+
             false -> {
                 viewDto.apply {
                     masterUid = vmData.masterUid

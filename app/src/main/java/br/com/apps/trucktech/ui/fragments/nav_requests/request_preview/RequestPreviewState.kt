@@ -51,8 +51,6 @@ class RequestPreviewState(private val binding: FragmentRequestPreviewBinding) : 
 
     override fun showEmpty() {}
 
-    override fun showUpdating() {}
-
     override fun showError(e: Exception) {
         showAfterLoading()
         binding.boxError.apply {

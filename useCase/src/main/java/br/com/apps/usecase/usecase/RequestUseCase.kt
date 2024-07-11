@@ -107,16 +107,6 @@ class RequestUseCase(
 
     }
 
-    suspend fun updateEncodedImage(
-        permission: PermissionLevelType,
-        dto: TravelRequestDto,
-        encodedImage: String
-    ) {
-        val id = dto.id ?: throw NullPointerException(EMPTY_ID)
-        validatePermission(permission, dto)
-        repository.updateRequestImageUrl(id, encodedImage)
-    }
-
     suspend fun saveItem(permission: PermissionLevelType, dto: RequestItemDto): String {
         val requestId = dto.requestId ?: throw NullPointerException(EMPTY_ID)
         if (!dto.validateFields()) throw InvalidParameterException("Invalid Item for saving")

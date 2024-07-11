@@ -14,7 +14,7 @@ fun TravelAidDto.toModel(): TravelAid {
             masterUid = this.masterUid!!,
             id = this.id,
             travelId = this.travelId!!,
-            employeeId = this.employeeId!!,
+            employeeId = this.driverId!!,
             date = this.date!!.toLocalDateTime(),
             value = BigDecimal(this.value!!),
             isPaid = this.isPaid!!
@@ -29,7 +29,7 @@ fun TravelAid.toDto(): TravelAidDto {
         masterUid = this.masterUid,
         id = this.id,
         travelId = this.travelId,
-        employeeId = this.employeeId,
+        driverId = this.employeeId,
         date = this.date.toDate(),
         value = this.value.toDouble(),
         isPaid = this.isPaid

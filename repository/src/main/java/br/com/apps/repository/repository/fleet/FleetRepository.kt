@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.fleet
 
-import br.com.apps.model.dto.TruckDto
+import br.com.apps.model.dto.fleet.TruckDto
 
 class FleetRepository(
     private val write: FleetWriteImpl,
@@ -27,5 +27,8 @@ class FleetRepository(
 
     override suspend fun getTruckByDriverId(driverId: String, flow: Boolean) =
         read.getTruckByDriverId(driverId, flow)
+
+    override suspend fun getTrailerListLinkedToTruckById(truckId: String, flow: Boolean) =
+        read.getTrailerListLinkedToTruckById(truckId, flow)
 
 }
