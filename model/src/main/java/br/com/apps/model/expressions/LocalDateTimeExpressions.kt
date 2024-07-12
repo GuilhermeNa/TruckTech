@@ -1,6 +1,7 @@
 package br.com.apps.trucktech.expressions
 
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -111,4 +112,9 @@ fun String.toLocalDateTime(): LocalDateTime {
     return LocalDateTime.parse(this, formatter)
 }
 
+fun LocalDateTime.atBrZone(): LocalDateTime {
+    val zone = ZoneId.of("America/Sao_Paulo")
+    return this.atZone(zone).toLocalDateTime()
+
+}
 

@@ -4,6 +4,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("androidx.navigation.safeargs.kotlin")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -94,7 +95,7 @@ dependencies {
     // implementation("androidx.navigation:navigation-safe-args-gradle-plugin:$navVersion")
 
     //Leak Canary
-    implementation("com.squareup.leakcanary:leakcanary-android:2.12")
+    //implementation("com.squareup.leakcanary:leakcanary-android:2.12")
 
     //Room
     val roomVersion = "2.5.2"
@@ -130,6 +131,7 @@ dependencies {
     //FireBase
     implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage-ktx")
