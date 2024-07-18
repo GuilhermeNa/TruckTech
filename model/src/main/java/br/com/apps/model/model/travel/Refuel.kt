@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 data class Refuel(
     val masterUid: String,
-    val id: String? = null,
+    var id: String? = null,
     val truckId: String,
     val travelId: String? = null,
     val costId: String? = null,
@@ -24,6 +24,4 @@ data class Refuel(
     @field:JvmField
     var isValid: Boolean
 
-) {
-
-}
+)

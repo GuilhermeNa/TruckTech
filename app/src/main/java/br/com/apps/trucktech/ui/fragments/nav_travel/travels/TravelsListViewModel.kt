@@ -9,7 +9,7 @@ import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.trucktech.expressions.atBrZone
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.TravelUseCase
 import kotlinx.coroutines.async

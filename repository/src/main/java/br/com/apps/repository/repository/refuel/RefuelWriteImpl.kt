@@ -4,17 +4,21 @@ import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_REFUELS
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
 
-class RefuelWriteImpl(fireStore: FirebaseFirestore): RefuelWriteInterface {
+class RefuelWriteImpl(fireStore: FirebaseFirestore) : RefuelWriteInterface {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_REFUELS)
 
     override suspend fun save(dto: RefuelDto) {
-        if (dto.id == null) {
-            create(dto)
-        } else {
-            update(dto)
+        withContext(Dispatchers.IO) {
+            if (dto.id == null) {
+                create(dto)
+            } else {
+                update(dto)
+            }
         }
     }
 
@@ -31,8 +35,10 @@ class RefuelWriteImpl(fireStore: FirebaseFirestore): RefuelWriteInterface {
     }
 
     override suspend fun delete(refuelId: String?) {
-        if(refuelId == null) throw NullPointerException("Id is null")
-        collection.document(refuelId).delete()
+        withContext(Dispatchers.IO) {
+            if (refuelId == null) throw NullPointerException("Id is null")
+            collection.document(refuelId).delete()
+        }
     }
 
 }

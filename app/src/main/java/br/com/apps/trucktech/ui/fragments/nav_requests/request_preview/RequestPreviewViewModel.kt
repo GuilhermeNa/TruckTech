@@ -11,8 +11,8 @@ import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.getCompleteDateInPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred

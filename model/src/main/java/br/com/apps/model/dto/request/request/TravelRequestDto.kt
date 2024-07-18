@@ -1,39 +1,40 @@
 package br.com.apps.model.dto.request.request
 
+import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.exceptions.InvalidForSavingException
 import java.util.Date
 
 data class TravelRequestDto(
-    val masterUid: String? = null,
+    var masterUid: String? = null,
     var id: String? = null,
-    val truckId: String? = null,
-    val driverId: String? = null,
-
+    var truckId: String? = null,
+    var driverId: String? = null,
     val encodedImage: String? = null,
-    val date: Date? = null,
+    var date: Date? = null,
     var requestNumber: Int? = null,
-    val status: String? = null,
-    val itemsList: List<RequestItemDto>? = null
+    var status: String? = null
+) : DtoInterface {
 
-) {
+    override fun validateDataIntegrity() {
+        if (masterUid == null ||
+            id == null ||
+            truckId == null ||
+            driverId == null ||
+            date == null ||
+            requestNumber == null ||
+            status == null
+        ) throw CorruptedFileException("TravelRequestDto data is corrupted: ($this)")
+    }
 
-    fun validateFields(): Boolean {
-        var isValid = true
-
+    override fun validateForDataBaseInsertion() {
         if (masterUid == null ||
             truckId == null ||
             driverId == null ||
             date == null ||
             requestNumber == null ||
             status == null
-        ) {
-            isValid = false
-        }
-
-        return isValid
-    }
-
-    fun findItemById(itemId: String): RequestItemDto? {
-        return itemsList?.firstOrNull { it.id == itemId }
+        ) throw InvalidForSavingException("TravelRequestDto data is invalid: ($this)")
     }
 
 }

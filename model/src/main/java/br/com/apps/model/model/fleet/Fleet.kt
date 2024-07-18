@@ -31,7 +31,7 @@ enum class FleetType(description: String) {
                 "DOLLY" -> DOLLY
                 "BI_TRUCK_FRONT" -> BI_TRUCK_FRONT
                 "BI_TRUCK_REAR" -> BI_TRUCK_REAR
-                else -> throw InvalidTypeException("Invalid Fleet type ($type)")
+                else -> throw InvalidTypeException("Invalid Fleet type for ($type)")
             }
         }
 

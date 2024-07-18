@@ -19,7 +19,7 @@ import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRefuelEditorBinding
-import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
+import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed

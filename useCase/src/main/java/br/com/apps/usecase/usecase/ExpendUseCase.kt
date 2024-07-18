@@ -138,7 +138,7 @@ class ExpendUseCase(
 
         validateAndProcess(
             permission = { dto.validatePermission(auth) },
-            validator = { dto.validateDataForSaving() }
+            validator = { dto.validateForDataBaseInsertion() }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception

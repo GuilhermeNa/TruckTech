@@ -4,32 +4,26 @@ import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.toLocalDateTime
 import java.math.BigDecimal
-import java.security.InvalidParameterException
 
 object ExpendFactory {
 
     fun create(viewDto: ExpendDto): Expend {
-
-        if (viewDto.validateFields()) {
-            return Expend(
-                masterUid = viewDto.masterUid!!,
-                truckId = viewDto.truckId!!,
-                driverId = viewDto.driverId!!,
-                travelId = viewDto.travelId!!,
-                labelId = viewDto.labelId!!,
-
-                label = viewDto.label,
-                company = viewDto.company!!,
-                date = viewDto.date!!.toLocalDateTime(),
-                description = viewDto.description!!,
-                value = BigDecimal(viewDto.value!!),
-                isPaidByEmployee = viewDto.isPaidByEmployee!!,
-                isAlreadyRefunded = viewDto.isAlreadyRefunded!!,
-                isValid = viewDto.isValid!!
-            )
-        }
-
-        throw InvalidParameterException("ExpendFactory, create: ($viewDto)")
+        viewDto.validateDataIntegrity()
+        return Expend(
+            masterUid = viewDto.masterUid!!,
+            truckId = viewDto.truckId!!,
+            driverId = viewDto.driverId!!,
+            travelId = viewDto.travelId!!,
+            labelId = viewDto.labelId!!,
+            label = viewDto.label,
+            company = viewDto.company!!,
+            date = viewDto.date!!.toLocalDateTime(),
+            description = viewDto.description!!,
+            value = BigDecimal(viewDto.value!!),
+            isPaidByEmployee = viewDto.isPaidByEmployee!!,
+            isAlreadyRefunded = viewDto.isAlreadyRefunded!!,
+            isValid = viewDto.isValid!!
+        )
     }
 
     fun update(expend: Expend, viewDto: ExpendDto) {

@@ -7,7 +7,7 @@ import java.util.Date
 
 fun Date.toLocalDateTime(): LocalDateTime {
     val instant = this.toInstant()
-    return LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault())
+    return LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
 }
 
 fun LocalDateTime.toDate(): Date {

@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.trucktech.databinding.ItemAdvanceBinding
-import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 
 class AdvanceRecyclerAdapter(
     private val context: Context,

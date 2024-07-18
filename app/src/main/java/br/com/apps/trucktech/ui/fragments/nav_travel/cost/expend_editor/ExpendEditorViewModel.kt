@@ -17,7 +17,7 @@ import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
-import br.com.apps.trucktech.expressions.atBrZone
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.usecase.usecase.ExpendUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first

@@ -8,8 +8,8 @@ import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.user.User
 import br.com.apps.repository.util.Resource
 import br.com.apps.repository.util.toCommonUserObject
-import br.com.apps.trucktech.expressions.getMonthFormatted
-import br.com.apps.trucktech.expressions.getYearReference
+import br.com.apps.model.expressions.getMonthFormatted
+import br.com.apps.model.expressions.getYearReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject

@@ -12,9 +12,9 @@ import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
 import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestBinding
-import br.com.apps.trucktech.expressions.getDayFormatted
-import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.getDayFormatted
+import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
+import br.com.apps.model.expressions.toCurrencyPtBr
 
 class RequestsListRecyclerAdapter(
     private val context: Context,

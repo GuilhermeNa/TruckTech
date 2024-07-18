@@ -1,5 +1,6 @@
 package br.com.apps.model.model.payroll
 
+import br.com.apps.model.exceptions.InvalidTypeException
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -8,7 +9,6 @@ data class Advance(
     val id: String? = null,
     val travelId: String? = null,
     val employeeId: String,
-
     val date: LocalDateTime,
     val value: BigDecimal,
     @field:JvmField
@@ -16,11 +16,7 @@ data class Advance(
     @field:JvmField
     val isApproved: Boolean,
     val type: AdvanceType
-
-) {
-
-
-}
+)
 
 enum class AdvanceType(val description: String) {
     COMMISSION("COMMISSION"),
@@ -31,7 +27,7 @@ enum class AdvanceType(val description: String) {
             return when (type) {
                 "COMMISSION" -> COMMISSION
                 "PAYROLL" -> PAYROLL
-                else -> throw IllegalArgumentException()
+                else -> throw InvalidTypeException("Invalid type for string ($type)")
             }
         }
     }

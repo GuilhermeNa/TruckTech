@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 data class Expend(
     val masterUid: String,
-    val id: String? = null,
+    var id: String? = null,
     val truckId: String,
     val driverId: String,
     val travelId: String,

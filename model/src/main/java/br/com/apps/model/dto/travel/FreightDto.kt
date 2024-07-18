@@ -1,5 +1,7 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.InvalidAuthLevelException
 import br.com.apps.model.exceptions.InvalidForSavingException
 import br.com.apps.model.model.travel.Complement
@@ -15,11 +17,11 @@ data class FreightDto(
     var customerId: String? = null,
 
     var customer: String? = null,
-    val origin: String? = null,
-    val destiny: String? = null,
-    val cargo: String? = null,
-    val weight: Double? = null,
-    val value: Double? = null,
+    var origin: String? = null,
+    var destiny: String? = null,
+    var cargo: String? = null,
+    var weight: Double? = null,
+    var value: Double? = null,
     val breakDown: Double? = null,
     var loadingDate: Date? = null,
 
@@ -35,10 +37,9 @@ data class FreightDto(
     @field:JvmField
     var isValid: Boolean? = null
 
-) {
+) : DtoInterface {
 
-    fun validateFields(): Boolean {
-        var areFieldsValid = true
+    override fun validateDataIntegrity() {
 
         if (masterUid == null ||
             truckId == null ||
@@ -54,14 +55,10 @@ data class FreightDto(
             isCommissionPaid == null ||
             commissionPercentual == null ||
             isValid == null
-        ) {
-            areFieldsValid = false
-        }
-
-        return areFieldsValid
+        ) throw CorruptedFileException("FreightDto data is corrupted: ($this)")
     }
 
-    fun validateDataForSaving() {
+    override fun validateForDataBaseInsertion() {
         if (masterUid == null ||
             truckId == null ||
             travelId == null ||
@@ -76,7 +73,7 @@ data class FreightDto(
             isCommissionPaid == null ||
             commissionPercentual == null ||
             isValid == null
-        ) throw InvalidForSavingException()
+        ) throw InvalidForSavingException("FreightDto data is invalid: ($this)")
     }
 
     fun validatePermission(authLevel: PermissionLevelType?) {

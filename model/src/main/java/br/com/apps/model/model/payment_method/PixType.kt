@@ -1,5 +1,7 @@
 package br.com.apps.model.model.payment_method
 
+import br.com.apps.model.exceptions.InvalidTypeException
+
 enum class PixType(val description: String) {
     PHONE("PHONE"),
     EMAIL("EMAIL"),
@@ -7,13 +9,14 @@ enum class PixType(val description: String) {
     CNPJ("CNPJ");
 
     companion object {
+
         fun getType(type: String): PixType {
             return when (type) {
                 "PHONE" -> PHONE
                 "EMAIL" -> EMAIL
                 "CPF" -> CPF
                 "CNPJ" -> CNPJ
-                else -> throw IllegalArgumentException("PixType, getType: Invalid type for string ($type)")
+                else -> throw InvalidTypeException("Invalid type for string ($type)")
             }
         }
 
@@ -23,7 +26,7 @@ enum class PixType(val description: String) {
                 "Email" -> "EMAIL"
                 "Cpf" -> "CPF"
                 "Cnpj" -> "CNPJ"
-                else -> throw IllegalArgumentException()
+                else -> throw IllegalArgumentException("Invalid text for ($text)")
             }
         }
 

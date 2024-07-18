@@ -20,8 +20,8 @@ fun FineDto.toModel(): Fine {
     )
 }
 
-fun Fine.toDto(): FineDto {
-    return FineDto(
+fun Fine.toDto(): FineDto =
+    FineDto(
         masterUid = this.masterUid,
         id = this.id,
         truckId = this.truckId,
@@ -31,4 +31,3 @@ fun Fine.toDto(): FineDto {
         code = this.code,
         value = this.value?.toDouble()
     )
-}

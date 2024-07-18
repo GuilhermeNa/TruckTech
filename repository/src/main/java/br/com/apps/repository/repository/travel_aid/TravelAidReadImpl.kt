@@ -23,46 +23,47 @@ class TravelAidReadImpl(fireStore: FirebaseFirestore) : TravelAidReadInterface {
     override suspend fun getTravelAidByDriverIdAndIsNotDiscountedYet(
         employeeId: String,
         flow: Boolean
-    ): LiveData<Response<List<TravelAid>>> {
-        return withContext(Dispatchers.IO) {
-            val listener = collection.whereEqualTo(EMPLOYEE_ID, employeeId)
-                .whereEqualTo(IS_PAID, false)
-            return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
-            else listener.onComplete { it.toTravelAidList() }
-        }
+    ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO) {
+        val listener = collection.whereEqualTo(EMPLOYEE_ID, employeeId)
+            .whereEqualTo(IS_PAID, false)
+
+        if (flow) listener.onSnapShot { it.toTravelAidList() }
+        else listener.onComplete { it.toTravelAidList() }
     }
+
 
     override suspend fun getTravelAidListByTravelId(
         travelId: String,
         flow: Boolean
-    ): LiveData<Response<List<TravelAid>>> {
-        return withContext(Dispatchers.IO) {
-            val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
-                .whereEqualTo(IS_PAID, false)
+    ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO) {
+        val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+            .whereEqualTo(IS_PAID, false)
 
-            return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
-            else listener.onComplete { it.toTravelAidList() }
-        }
+        if (flow) listener.onSnapShot { it.toTravelAidList() }
+        else listener.onComplete { it.toTravelAidList() }
     }
+
 
     override suspend fun getTravelAidListByTravelIds(
         travelIdList: List<String>,
         flow: Boolean
-    ): LiveData<Response<List<TravelAid>>> {
-        return withContext(Dispatchers.IO) {
-            if (travelIdList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
+    ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO) {
+        if (travelIdList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
 
-            val listener = collection.whereIn(TRAVEL_ID, travelIdList)
+        val listener = collection.whereIn(TRAVEL_ID, travelIdList)
 
-            return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
-            else listener.onComplete { it.toTravelAidList() }
-        }
+        if (flow) listener.onSnapShot { it.toTravelAidList() }
+        else listener.onComplete { it.toTravelAidList() }
     }
 
-    override suspend fun getTravelAidListByDriverId(driverId: String, flow: Boolean)
-    : LiveData<Response<List<TravelAid>>> {
+
+    override suspend fun getTravelAidListByDriverId(
+        driverId: String,
+        flow: Boolean
+    ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO) {
         val listener = collection.whereEqualTo(DRIVER_ID, driverId)
-        return if (flow) listener.onSnapShot { it.toTravelAidList() }
+
+        if (flow) listener.onSnapShot { it.toTravelAidList() }
         else listener.onComplete { it.toTravelAidList() }
     }
 

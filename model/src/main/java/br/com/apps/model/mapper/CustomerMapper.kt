@@ -12,11 +12,10 @@ fun CustomerDto.toModel(): Customer {
     )
 }
 
-fun Customer.toDto(): CustomerDto {
-    return CustomerDto(
+fun Customer.toDto(): CustomerDto =
+    CustomerDto(
         masterUid = this.masterUid,
         id = this.id,
         cnpj = this.cnpj,
         name = this.name
     )
-}

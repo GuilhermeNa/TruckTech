@@ -3,7 +3,6 @@ package br.com.apps.model.mapper
 import br.com.apps.model.dto.user_dto.CommonUserDto
 import br.com.apps.model.dto.user_dto.MasterUserDto
 import br.com.apps.model.dto.user_dto.UserDto
-import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.model.UserCredentials
 import br.com.apps.model.model.user.CommonUser
 import br.com.apps.model.model.user.MasterUser
@@ -27,32 +26,27 @@ fun UserDto.toModel(): User {
 }
 
 private fun mapMasterUser(dto: MasterUserDto): MasterUser {
-    if (dto.validateFields()) {
-        return MasterUser(
-            masterUid = dto.masterUid!!,
-            email = dto.email!!,
-            name = dto.name!!,
-            orderCode = dto.orderCode!!,
-            orderNumber = dto.orderNumber!!
-        )
-    }
-    throw CorruptedFileException("UserMapper, mapMasterUser ($dto)")
+    dto.validateDataIntegrity()
+    return MasterUser(
+        masterUid = dto.masterUid!!,
+        email = dto.email!!,
+        name = dto.name!!,
+        orderCode = dto.orderCode!!,
+        orderNumber = dto.orderNumber!!
+    )
 }
 
 private fun mapCommonUser(dto: CommonUserDto): CommonUser {
-    if (dto.validateFields()) {
-        return CommonUser(
-            masterUid = dto.masterUid!!,
-            uid = dto.uid!!,
-            employeeId = dto.employeeId!!,
-            orderCode = dto.orderCode!!,
-            orderNumber = dto.orderNumber!!,
-            email = dto.email!!,
-            name = dto.name!!,
-            urlImage = dto.urlImage,
-            permission = dto.permission!!
-        )
-    }
-
-    throw CorruptedFileException("UserMapper, mapCommonUser ($dto)")
+    dto.validateDataIntegrity()
+    return CommonUser(
+        masterUid = dto.masterUid!!,
+        uid = dto.uid!!,
+        employeeId = dto.employeeId!!,
+        orderCode = dto.orderCode!!,
+        orderNumber = dto.orderNumber!!,
+        email = dto.email!!,
+        name = dto.name!!,
+        urlImage = dto.urlImage,
+        permission = dto.permission!!
+    )
 }

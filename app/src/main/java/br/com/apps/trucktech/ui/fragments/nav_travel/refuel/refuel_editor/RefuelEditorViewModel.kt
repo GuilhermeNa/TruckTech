@@ -14,7 +14,7 @@ import br.com.apps.model.toDate
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
-import br.com.apps.trucktech.expressions.atBrZone
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.usecase.usecase.RefuelUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

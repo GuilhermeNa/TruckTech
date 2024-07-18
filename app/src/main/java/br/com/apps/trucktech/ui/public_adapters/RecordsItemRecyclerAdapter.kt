@@ -7,15 +7,15 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRecordsBinding
-import br.com.apps.trucktech.expressions.getDayFormatted
-import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
+import br.com.apps.model.expressions.getDayFormatted
+import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.trucktech.expressions.isLightTheme
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
 
 class RecordsItemRecyclerAdapter<T>(
     private val context: Context,

@@ -38,7 +38,7 @@ interface FreightReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun getFreightListByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchFreightListByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<Freight>>>
 
     /**
@@ -49,7 +49,7 @@ interface FreightReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun getFreightListByDriverIdsAndPaymentStatus(
+    suspend fun fetchFreightListByDriverIdsAndPaymentStatus(
         driverIdList: List<String>,
         isPaid: Boolean,
         flow: Boolean = false
@@ -63,7 +63,7 @@ interface FreightReadInterface {
      * @param isPaid The payment status.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun getFreightListByDriverIdAndPaymentStatus(
+    suspend fun fetchFreightListByDriverIdAndPaymentStatus(
         driverId: String,
         isPaid: Boolean,
         flow: Boolean = false
@@ -76,7 +76,7 @@ interface FreightReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun getFreightListByTravelId(travelId: String, flow: Boolean = false)
+    suspend fun fetchFreightListByTravelId(travelId: String, flow: Boolean = false)
             : LiveData<Response<List<Freight>>>
 
     /**
@@ -86,7 +86,7 @@ interface FreightReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun getFreightListByTravelIds(travelIdList: List<String>, flow: Boolean = false)
+    suspend fun fetchFreightListByTravelIds(travelIdList: List<String>, flow: Boolean = false)
             : LiveData<Response<List<Freight>>>
 
     /**
@@ -96,7 +96,7 @@ interface FreightReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun getFreightById(freightId: String, flow: Boolean = false)
+    suspend fun fetchFreightById(freightId: String, flow: Boolean = false)
             : LiveData<Response<Freight>>
 
     /**
@@ -107,7 +107,7 @@ interface FreightReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Freight objects or an Error with an exception.
      */
-    suspend fun getFreightListByDriverIdAndIsNotPaidYet(driverId: String, flow: Boolean = false)
+    suspend fun fetchFreightListByDriverIdAndIsNotPaidYet(driverId: String, flow: Boolean = false)
     : LiveData<Response<List<Freight>>>
 
 }

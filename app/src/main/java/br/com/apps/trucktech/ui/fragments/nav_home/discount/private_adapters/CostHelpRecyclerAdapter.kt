@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.travel.TravelAid
 import br.com.apps.trucktech.databinding.ItemRequestSubItemBinding
-import br.com.apps.trucktech.expressions.getDayFormatted
-import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
+import br.com.apps.model.expressions.getDayFormatted
+import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 
 class CostHelpRecyclerAdapter(
     private val context: Context

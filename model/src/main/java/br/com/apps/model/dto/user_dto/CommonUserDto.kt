@@ -1,5 +1,6 @@
 package br.com.apps.model.dto.user_dto
 
+import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.model.user.PermissionLevelType
 
 data class CommonUserDto(
@@ -14,7 +15,7 @@ data class CommonUserDto(
     val urlImage: String? = null,
     val permission: PermissionLevelType? = null
 
-): UserDto(
+) : UserDto(
     masterUid = masterUid,
     email = email,
     name = name,
@@ -22,19 +23,20 @@ data class CommonUserDto(
     orderNumber = orderNumber
 ) {
 
-    override fun validateFields(): Boolean {
-        var isValid = true
+    override fun validateDataIntegrity() {
+        if (uid == null ||
+            name == null ||
+            email == null ||
+            masterUid == null ||
+            employeeId == null ||
+            permission == null ||
+            orderCode == null ||
+            orderNumber == null
+        ) throw CorruptedFileException("CommonUserDto data is corrupted: ($this)")
+    }
 
-        if(uid == null) isValid = false
-        if(name == null) isValid = false
-        if(email == null) isValid = false
-        if(masterUid == null) isValid = false
-        if(employeeId == null) isValid = false
-        if(permission == null) isValid = false
-        if(orderCode == null) isValid = false
-        if(orderNumber == null) isValid = false
+    override fun validateForDataBaseInsertion() {
 
-        return isValid
     }
 
 }

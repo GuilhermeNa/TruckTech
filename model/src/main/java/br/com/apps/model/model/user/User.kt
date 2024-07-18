@@ -1,5 +1,7 @@
 package br.com.apps.model.model.user
 
+import br.com.apps.model.exceptions.InvalidTypeException
+
 abstract class User(
 
     open val masterUid: String? = null,
@@ -19,14 +21,14 @@ enum class PermissionLevelType(val description: String) {
 
     companion object {
 
-        fun getType(s: String?): PermissionLevelType? {
+        fun getType(s: String): PermissionLevelType {
             return when (s) {
                 "OPERATIONAL" -> OPERATIONAL
                 "TRAINEE" -> TRAINEE
                 "ADMIN_ASSISTANT" -> ADMIN_ASSISTANT
                 "MANAGER" -> MANAGER
                 "MASTER" -> MASTER
-                else -> null
+                else -> throw InvalidTypeException("Invalid type for this string ($s)")
             }
         }
 

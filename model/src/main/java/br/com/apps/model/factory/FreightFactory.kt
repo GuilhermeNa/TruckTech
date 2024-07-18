@@ -4,33 +4,29 @@ import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.toLocalDateTime
 import java.math.BigDecimal
-import java.security.InvalidParameterException
 
 object FreightFactory {
 
     fun create(dto: FreightDto): Freight {
-        if (dto.validateFields()) {
-            return Freight(
-                masterUid = dto.masterUid!!,
-                truckId = dto.truckId!!,
-                driverId = dto.driverId!!,
-                travelId = dto.travelId!!,
-                customerId = dto.customerId!!,
+        dto.validateDataIntegrity()
+        return Freight(
+            masterUid = dto.masterUid!!,
+            truckId = dto.truckId!!,
+            driverId = dto.driverId!!,
+            travelId = dto.travelId!!,
+            customerId = dto.customerId!!,
 
-                origin = dto.origin!!,
-                destiny = dto.destiny!!,
-                weight = BigDecimal(dto.weight!!),
-                cargo = dto.cargo!!,
-                value = BigDecimal(dto.value!!),
-                loadingDate = dto.loadingDate!!.toLocalDateTime(),
+            origin = dto.origin!!,
+            destiny = dto.destiny!!,
+            weight = BigDecimal(dto.weight!!),
+            cargo = dto.cargo!!,
+            value = BigDecimal(dto.value!!),
+            loadingDate = dto.loadingDate!!.toLocalDateTime(),
 
-                isCommissionPaid = dto.isCommissionPaid!!,
-                commissionPercentual = BigDecimal(dto.commissionPercentual!!),
-                isValid = dto.isValid!!
-            )
-        }
-
-        throw InvalidParameterException("FreightFactory, create: ($dto)")
+            isCommissionPaid = dto.isCommissionPaid!!,
+            commissionPercentual = BigDecimal(dto.commissionPercentual!!),
+            isValid = dto.isValid!!
+        )
     }
 
     fun update(freight: Freight, viewDto: FreightDto) {

@@ -1,4 +1,4 @@
-package br.com.apps.trucktech.expressions
+package br.com.apps.model.expressions
 
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -107,14 +107,24 @@ fun LocalDateTime.getYearReference(): String {
     return year.substring(2)
 }
 
+/**
+ * Converts a string representation of date-time in ISO format to LocalDateTime.
+ *
+ * @return LocalDateTime object parsed from the input string.
+ * @throws DateTimeParseException if the input string is not in ISO date-time format.
+ */
 fun String.toLocalDateTime(): LocalDateTime {
     val formatter = DateTimeFormatter.ISO_DATE_TIME
     return LocalDateTime.parse(this, formatter)
 }
 
+/**
+ * Converts LocalDateTime to LocalDateTime in the Brazil/Sao_Paulo time zone.
+ *
+ * @return LocalDateTime object adjusted to Brazil/Sao_Paulo time zone.
+ */
 fun LocalDateTime.atBrZone(): LocalDateTime {
     val zone = ZoneId.of("America/Sao_Paulo")
     return this.atZone(zone).toLocalDateTime()
-
 }
 

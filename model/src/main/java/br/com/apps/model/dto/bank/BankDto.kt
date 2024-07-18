@@ -1,24 +1,21 @@
 package br.com.apps.model.dto.bank
 
+import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.exceptions.CorruptedFileException
+
 class BankDto(
-    val id: String? = null,
-    val name: String? = null,
-    val code: Int? = null,
-    val urlImage: String? = null
-) {
+    var id: String? = null,
+    var name: String? = null,
+    var code: Int? = null,
+    var urlImage: String? = null
+) : DtoInterface {
 
-    fun validateFields(): Boolean {
-        var isValid = true
-
-        if (id == null ||
-            name == null ||
-            code == null ||
-            urlImage == null
-        ) {
-            isValid = false
-        }
-
-        return isValid
+    override fun validateDataIntegrity() {
+        if((id == null || name == null || code == null || urlImage == null))
+            throw CorruptedFileException("BankDto data is corrupted: ($this)")
     }
 
+    override fun validateForDataBaseInsertion() {}
+
 }
+

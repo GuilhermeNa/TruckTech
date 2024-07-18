@@ -10,7 +10,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import br.com.apps.trucktech.databinding.FragmentReceivableBinding
 import br.com.apps.trucktech.expressions.navigateTo
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentForMainAct
 import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeFragmentDirections
 import kotlinx.coroutines.flow.first

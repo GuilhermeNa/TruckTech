@@ -10,7 +10,7 @@ import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.request.travel_requests.RequestItemType
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestPreviewBinding
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 import java.security.InvalidParameterException
 
 class RequestPreviewRecyclerAdapter(

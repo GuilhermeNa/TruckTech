@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 
 data class Travel(
     val masterUid: String,
-    val id: String? = null,
+    var id: String? = null,
     val truckId: String,
     val driverId: String,
 
@@ -19,7 +19,7 @@ data class Travel(
     var isFinished: Boolean,
     var considerAverage: Boolean,
 
-    val initialDate: LocalDateTime,
+    var initialDate: LocalDateTime,
     var finalDate: LocalDateTime? = null,
 
     var initialOdometerMeasurement: BigDecimal,
@@ -32,10 +32,89 @@ data class Travel(
 
 ) {
 
+    /**
+     * Retrieves the size of the specified list associated with the travel.
+     *
+     * @param listTag The tag indicating the type of list (FREIGHT, EXPEND, REFUEL, AID).
+     * @return The size of the specified list.
+     * @throws InvalidParameterException If an invalid list tag is provided.
+     */
+    fun getListSize(listTag: Int): Int = when (listTag) {
+        FREIGHT -> freightsList?.size ?: 0
+        EXPEND -> expendsList?.size ?: 0
+        REFUEL -> refuelsList?.size ?: 0
+        AID -> aidList?.size ?: 0
+        else -> throw InvalidParameterException("Wrong tag for getListSize: ($listTag) ")
+    }
+
+    /**
+     * Retrieves a list of ids associated with the specified list type.
+     *
+     * @param listTag The tag indicating the type of list (FREIGHT, EXPEND, REFUEL, AID).
+     * @return The list of identifiers associated with the specified list type.
+     * @throws InvalidParameterException If an invalid list tag is provided.
+     */
+    fun getListOfIdsForList(listTag: Int): List<String> = when (listTag) {
+        FREIGHT -> freightsList?.mapNotNull { it.id } ?: emptyList()
+        EXPEND -> expendsList?.mapNotNull { it.id } ?: emptyList()
+        REFUEL -> refuelsList?.mapNotNull { it.id } ?: emptyList()
+        AID -> aidList?.mapNotNull { it.id } ?: emptyList()
+        else -> throw InvalidParameterException("Invalid tag for ($listTag)")
+    }
+
+    /**
+     * Calculates and returns the total commission value for all freights in the travel.
+     *
+     * @return The total commission value as a BigDecimal.
+     */
     fun getCommissionValue(): BigDecimal {
         return freightsList?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
     }
 
+    /**
+     * Calculates and returns the difference between the initial and final odometer measurements.
+     *
+     * @return The difference between the initial and final odometer measurements as a BigDecimal.
+     */
+    fun getDifferenceBetweenInitialAndFinalOdometerMeasure(): BigDecimal =
+        finalOdometerMeasurement?.let {
+            finalOdometerMeasurement!!.subtract(initialOdometerMeasurement)
+        } ?: BigDecimal.ZERO
+
+    /**
+     * Calculates and returns the total value for the specified list type associated with the travel.
+     *
+     * @param listTag The tag indicating the type of list (FREIGHT, EXPEND, REFUEL, AID).
+     * @return The total value for the specified list type as a BigDecimal.
+     * @throws InvalidParameterException If an invalid list tag is provided.
+     */
+    fun getListTotalValue(listTag: Int): BigDecimal = when (listTag) {
+        FREIGHT -> freightsList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
+        EXPEND -> expendsList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
+        REFUEL -> refuelsList?.map { it.totalValue }?.sumOf { it } ?: BigDecimal.ZERO
+        AID -> aidList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
+        else -> throw InvalidParameterException("Invalid tag for ($listTag)")
+    }
+
+    /**
+     * Calculates and returns the liquid value (total freight value minus refuel, expenses, and commission values).
+     *
+     * @return The liquid value as a BigDecimal.
+     */
+    fun getLiquidValue(): BigDecimal {
+        val freight = getListTotalValue(FREIGHT)
+        val commission = freightsList?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
+        val refuel = getListTotalValue(REFUEL)
+        val expend = getListTotalValue(EXPEND)
+        return freight.subtract(refuel).subtract(expend).subtract(commission)
+            .setScale(2, RoundingMode.HALF_EVEN)
+    }
+
+    /**
+     * Calculates and returns the travel authentication percentage based on authenticated items.
+     *
+     * @return The travel authentication percentage as a Double.
+     */
     fun getTravelAuthenticationPercent(): Double {
         val authenticableItems = getListSize(FREIGHT) + getListSize(EXPEND) + getListSize(REFUEL)
         var authenticated = 0.0
@@ -47,60 +126,34 @@ data class Travel(
         return authenticated.div(authenticableItems.toDouble()) * 100
     }
 
-    fun getLiquidValue(): BigDecimal {
-        val freight = getListTotalValue(FREIGHT)
-        val commission = freightsList?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
-        val refuel = getListTotalValue(REFUEL)
-        val expend = getListTotalValue(EXPEND)
-
-        return freight.subtract(refuel).subtract(expend).subtract(commission)
-    }
-
-    fun getListSize(listTag: Int): Int {
-        return when (listTag) {
-            FREIGHT -> freightsList?.size ?: 0
-            EXPEND -> expendsList?.size ?: 0
-            REFUEL -> refuelsList?.size ?: 0
-            AID -> aidList?.size ?: 0
-            else -> 0
-        }
-    }
-
-    fun getListTotalValue(listTag: Int): BigDecimal {
-        return when (listTag) {
-            FREIGHT -> freightsList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
-            EXPEND -> expendsList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
-            REFUEL -> refuelsList?.map { it.totalValue }?.sumOf { it } ?: BigDecimal.ZERO
-            AID -> aidList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
-            else -> BigDecimal.ZERO
-        }
-    }
-
-    fun getListOfIdsForList(listTag: Int): List<String> {
-        return when (listTag) {
-            FREIGHT -> freightsList?.mapNotNull { it.id } ?: emptyList()
-            EXPEND -> expendsList?.mapNotNull { it.id } ?: emptyList()
-            REFUEL -> refuelsList?.mapNotNull { it.id } ?: emptyList()
-            AID -> aidList?.mapNotNull { it.id } ?: emptyList()
-
-            else -> emptyList()
-        }
-    }
-
-    fun getDifferenceBetweenInitialAndFinalOdometerMeasure(): BigDecimal {
-        return if (initialOdometerMeasurement != null && finalOdometerMeasurement != null)
-            finalOdometerMeasurement!!.subtract(initialOdometerMeasurement)
-        else BigDecimal.ZERO
-    }
-
+    /**
+     * Checks if the travel is ready to be finished. It happen when the travel is 100 validated.
+     *
+     * @return True if the travel is ready to be finished, false otherwise.
+     */
     fun isReadyToBeFinished(): Boolean {
         return getTravelAuthenticationPercent() == 100.0 && !freightsList.isNullOrEmpty()
     }
 
+    /**
+     * Checks if the travel is empty (no freights, expenses, refuels, or aids).
+     *
+     * @return True if the travel is empty, false otherwise.
+     */
     fun isEmptyTravel(): Boolean {
         return getListSize(FREIGHT) + getListSize(EXPEND) + getListSize(REFUEL) + getListSize(AID) == 0
     }
 
+    /**
+     * Validates the travel data for saving by checking if all required data is present and valid.
+     *
+     * @throws EmptyDataException If no freights are found in the travel.
+     * @throws InvalidParameterException If any freight, refuel, or expense is not valid.
+     * @throws DateOrderException If the dates are in incorrect order.
+     * @throws DuplicatedItemsException If there are duplicated items in any list.
+     * @throws OdometerOrderException If the odometer measurements are in incorrect order.
+     * @throws NullPointerException If there is a failure to load freights.
+     */
     fun validateForSaving() {
         freightsList?.also {
             if (it.isEmpty()) throw EmptyDataException("Nenhuma viagem encontrada")
@@ -117,36 +170,32 @@ data class Travel(
             if (!e.isValid) throw InvalidParameterException("Despesa não validada")
         }
 
-        if (!isDatesInCorrectlyOrder()) throw DateOrderException("Datas em ordem incorreta")
-
-        if (thereIsDuplicatedItems()) throw DuplicatedItemsException("Existem itens duplicados")
-
-        if (!isOdometerMeasuresInCorrectlyOrder()) throw OdometerOrderException("Quilometragem incorreta")
-
+        validateDatesOrder()
+        thereIsDuplicatedItems()
+        validateOdometerMeasures()
     }
 
-    private fun isOdometerMeasuresInCorrectlyOrder(): Boolean {
+    private fun validateDatesOrder() {
+        finalDate?.let {
+            if(initialDate.isAfter(finalDate)) throw DateOrderException("Dates in wrong order")
+        } ?: throw NullPointerException("Final date is null")
+    }
+
+    private fun validateOdometerMeasures() {
         finalOdometerMeasurement?.let {
-            if (initialOdometerMeasurement < finalOdometerMeasurement) return true
+            if (initialOdometerMeasurement >
+                finalOdometerMeasurement
+            ) throw OdometerOrderException("Incorrect odometer measure: final cannot be higher than initial measure")
         }
-        return false
     }
 
-    private fun isDatesInCorrectlyOrder(): Boolean {
-        if (initialDate != null && finalDate != null) {
-            return initialDate.isBefore(finalDate)
-        }
-
-        return false
-    }
-
-    private fun thereIsDuplicatedItems(): Boolean {
+    private fun thereIsDuplicatedItems() {
         freightsList?.let { freights ->
             val uniqueIds = mutableSetOf<String>()
 
             freights.mapNotNull { it.id }.forEach { id ->
                 if (uniqueIds.contains(id)) {
-                    return true
+                    throw DuplicatedItemsException("There is duplicated itens for travel freight list")
                 } else {
                     uniqueIds.add(id)
                 }
@@ -158,7 +207,7 @@ data class Travel(
 
             refuels.mapNotNull { it.id }.forEach { id ->
                 if (uniqueIds.contains(id)) {
-                    return true
+                    throw DuplicatedItemsException("There is duplicated itens for travel refuel list")
                 } else {
                     uniqueIds.add(id)
                 }
@@ -171,7 +220,7 @@ data class Travel(
 
             expends.mapNotNull { it.id }.forEach { id ->
                 if (uniqueIds.contains(id)) {
-                    return true
+                    throw DuplicatedItemsException("There is duplicated itens for travel expend list")
                 } else {
                     uniqueIds.add(id)
                 }
@@ -184,7 +233,7 @@ data class Travel(
 
             aids.mapNotNull { it.id }.forEach { id ->
                 if (uniqueIds.contains(id)) {
-                    return true
+                    throw DuplicatedItemsException("There is duplicated itens for travel aid list")
                 } else {
                     uniqueIds.add(id)
                 }
@@ -192,36 +241,50 @@ data class Travel(
 
         }
 
-        return false
     }
 
+    /**
+     * Checks if the travel can be deleted.
+     *
+     * @return True if the travel can be deleted, false otherwise.
+     */
     fun isDeletable(): Boolean {
         if (isFinished) return false
         if (id == null) return false
+
         freightsList?.let {
             it.forEach { f ->
                 if (f.isValid) return false
                 if (f.id == null) return false
             }
         }
+
         refuelsList?.let {
             it.forEach { r ->
                 if (r.isValid) return false
                 if (r.id == null) return false
             }
         }
+
         expendsList?.let {
             it.forEach { e ->
                 if (e.isValid) return false
                 if (e.id == null) return false
             }
         }
+
         aidList?.let {
             if (it.isNotEmpty()) return false
         }
+
         return true
     }
 
+    /**
+     * Calculates and returns the profit percentage based on the total profit and total waste.
+     *
+     * @return The profit percentage as a BigDecimal.
+     */
     fun getProfitPercent(): BigDecimal {
         val profit = getListTotalValue(FREIGHT)
         val waste =
@@ -239,16 +302,27 @@ data class Travel(
 
     }
 
+    /**
+     * Calculates and returns the fuel average based on the refuels and odometer measurements.
+     *
+     * @return The fuel average as a BigDecimal.
+     */
     fun getFuelAverage(): BigDecimal {
-            return refuelsList?.let { refuels ->
+        return refuelsList?.let { refuels ->
             val liters = refuels.sumOf { it.amountLiters }
             val distance = getDifferenceBetweenInitialAndFinalOdometerMeasure()
             distance.divide(liters, 2, RoundingMode.HALF_EVEN)
         } ?: BigDecimal.ZERO
     }
 
+    /**
+     * Checks if average fuel consumption should be considered based on the refuels list.
+     *
+     * @return True if average fuel consumption should be considered, false otherwise.
+     */
     fun shouldConsiderAverage(): Boolean {
-        return refuelsList?.last()?.isCompleteRefuel ?: false
+        if (refuelsList.isNullOrEmpty()) return false
+        return refuelsList!!.last().isCompleteRefuel
     }
 
     companion object {

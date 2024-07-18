@@ -5,7 +5,6 @@ import br.com.apps.model.factory.FactoryUtil.Companion.checkIfStringsAreBlank
 import br.com.apps.model.model.request.travel_requests.RequestItem
 import br.com.apps.model.model.request.travel_requests.RequestItemType
 import java.math.BigDecimal
-import java.security.InvalidParameterException
 
 object RequestItemFactory {
 
@@ -19,18 +18,13 @@ object RequestItemFactory {
      * @throws IllegalArgumentException if the requestId or value fields are blank.
      */
     fun create(viewDto: RequestItemDto, type: RequestItemType): RequestItem {
-
         val item = RequestItem(
             requestId = viewDto.requestId!!,
             docUrl = viewDto.docUrl,
             value = BigDecimal(viewDto.value!!),
             type = type
         )
-
-        if (!viewDto.validateFields()) {
-            throw InvalidParameterException("RequestItemFactory, create: ($viewDto)")
-        }
-
+        viewDto.validateDataIntegrity()
         throw return when (type) {
             RequestItemType.REFUEL -> appendRefuelItemData(item, viewDto)
             RequestItemType.COST -> appendCostItemData(item, viewDto)

@@ -4,22 +4,28 @@ import br.com.apps.model.dto.travel.ExpendDto
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_EXPENDS
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
 
-class ExpendWriteImpl(fireStore: FirebaseFirestore): ExpendWriteInterface {
+class ExpendWriteImpl(fireStore: FirebaseFirestore) : ExpendWriteInterface {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_EXPENDS)
 
     override suspend fun delete(expendId: String?) {
-        if(expendId == null) throw NullPointerException("Id is null")
-        collection.document(expendId).delete()
+        withContext(Dispatchers.IO) {
+            if (expendId == null) throw NullPointerException("Id is null")
+            collection.document(expendId).delete()
+        }
     }
 
     override suspend fun save(dto: ExpendDto) {
-        if (dto.id == null) {
-            create(dto)
-        } else {
-            update(dto)
+        withContext(Dispatchers.IO) {
+            if (dto.id == null) {
+                create(dto)
+            } else {
+                update(dto)
+            }
         }
     }
 

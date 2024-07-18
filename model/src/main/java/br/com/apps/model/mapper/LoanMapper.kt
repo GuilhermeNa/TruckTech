@@ -7,20 +7,21 @@ import br.com.apps.model.toLocalDateTime
 import java.math.BigDecimal
 
 fun LoanDto.toModel(): Loan {
+    this.validateDataIntegrity()
     return Loan(
-        masterUid = this.masterUid,
+        masterUid = this.masterUid!!,
         id = this.id,
-        employeeId = this.employeeId,
-        date = this.date?.toLocalDateTime(),
-        value = this.value?.let { BigDecimal(it) },
-        installments = this.installments,
-        installmentsAlreadyPaid = this.installmentsAlreadyPaid,
-        isPaid = this.isPaid
+        employeeId = this.employeeId!!,
+        date = this.date?.toLocalDateTime()!!,
+        value = this.value?.let { BigDecimal(it) }!!,
+        installments = this.installments!!,
+        installmentsAlreadyPaid = this.installmentsAlreadyPaid!!,
+        isPaid = this.isPaid!!
     )
 }
 
-fun Loan.toDto(): LoanDto {
-    return LoanDto(
+fun Loan.toDto(): LoanDto =
+    LoanDto(
         masterUid = this.masterUid,
         id = this.id,
         employeeId = this.employeeId,
@@ -30,4 +31,3 @@ fun Loan.toDto(): LoanDto {
         installmentsAlreadyPaid = this.installmentsAlreadyPaid,
         isPaid = this.isPaid
     )
-}

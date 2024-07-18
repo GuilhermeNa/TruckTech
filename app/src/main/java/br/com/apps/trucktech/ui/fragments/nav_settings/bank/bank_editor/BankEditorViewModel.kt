@@ -7,6 +7,7 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.factory.BankAccountFactory
 import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.bank.Bank
@@ -17,7 +18,6 @@ import br.com.apps.model.toDate
 import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.trucktech.expressions.atBrZone
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll

@@ -124,7 +124,7 @@ class TravelUseCase(
                     repository.getTravelById(travelId).awaitData()
                 }
                 val freightsResp = async {
-                    freightRepository.getFreightListByTravelId(travelId).awaitData()
+                    freightRepository.fetchFreightListByTravelId(travelId).awaitData()
                 }
                 val refuelsResp = async {
                     refuelRepository.getRefuelListByTravelId(travelId).awaitData()
@@ -167,7 +167,7 @@ class TravelUseCase(
                 val ids = travels!!.mapNotNull { it.id }
 
                 val freightsDef = async {
-                    freightRepository.getFreightListByTravelIds(ids).awaitData()
+                    freightRepository.fetchFreightListByTravelIds(ids).awaitData()
                 }
                 val refuelsDef = async {
                     refuelRepository.getRefuelListByTravelIds(ids).awaitData()
@@ -203,7 +203,7 @@ class TravelUseCase(
                 val ids = travels!!.mapNotNull { it.id }
 
                 val freightsDef = async {
-                    freightRepository.getFreightListByTravelIds(ids).awaitData()
+                    freightRepository.fetchFreightListByTravelIds(ids).awaitData()
                 }
                 val refuelsDef = async {
                     refuelRepository.getRefuelListByTravelIds(ids).awaitData()
@@ -253,7 +253,7 @@ class TravelUseCase(
     }
 
     suspend fun setTravelFinished(permission: PermissionLevelType, dto: TravelDto) {
-        if (!dto.validateFieldsForFinish()) throw InvalidParameterException("Invalid Travel for finish")
+        if (!dto.validateForDataBaseInsertion()) throw InvalidParameterException("Invalid Travel for finish")
         repository.save(dto)
     }
 

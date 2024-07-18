@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.Fine
 import br.com.apps.trucktech.databinding.ItemFineBinding
-import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 
 class FineRecyclerAdapter(
     private val context: Context,

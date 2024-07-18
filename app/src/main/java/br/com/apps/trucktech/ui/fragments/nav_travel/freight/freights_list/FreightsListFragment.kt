@@ -15,7 +15,7 @@ import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.NULL_DATE
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentFreightsListBinding
-import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.KEY_ID
 import br.com.apps.trucktech.ui.PAGE_FREIGHT

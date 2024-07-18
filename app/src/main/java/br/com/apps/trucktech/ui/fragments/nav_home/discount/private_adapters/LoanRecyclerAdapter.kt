@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.payroll.Loan
 import br.com.apps.trucktech.databinding.ItemLoanBinding
-import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 
 class LoanRecyclerAdapter(
     private val context: Context,

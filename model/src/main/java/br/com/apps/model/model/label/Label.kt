@@ -1,42 +1,56 @@
 package br.com.apps.model.model.label
 
-const val DEFAULT_FREIGHT_LABEL_ID = "pI7UEBdJQPz8jl7WVUao"
-const val DEFAULT_COMMISSION_LABEL_ID = "n9M651rUc0CCNM9LcE8c"
-const val DEFAULT_REFUEL_LABEL_ID = "IUFnqrpUlDK9u4Bn1Ibn"
-const val DEFAULT_FINANCIAL_LABEL_ID = "1kmv9NwCjA7xG9F4fpXR"
-const val DEFAULT_FINANCIAL_COMPLEMENT_ID = "vYAf2oXK4cEgRzgTLMKP"
-const val DEFAULT_FINANCIAL_DAILY_ID = "58Fh8JUftUbc5i3h2VbG"
+import br.com.apps.model.exceptions.InvalidTypeException
 
 data class Label(
-    val masterUid: String? = null,
+    val masterUid: String,
     val id: String? = null,
-
-    var name: String? = "",
+    var name: String,
     var urlIcon: String? = null,
     var color: Int? = 0,
-    val type: LabelType? = null,
+    val type: LabelType,
     @field:JvmField
-    val isDefaultLabel: Boolean? = null,
+    val isDefaultLabel: Boolean,
     @field:JvmField
-    val isOperational: Boolean? = null
+    val isOperational: Boolean
 ) {
 
     companion object {
 
-
+        /**
+         * Retrieves a list of names from a list of labels.
+         *
+         * @receiver The list of labels to retrieve names from.
+         * @return List of names extracted from the labels.
+         */
         fun List<Label>.getListOfTitles(): List<String> {
-            return this.mapNotNull { it.name }
+            return this.map { it.name }
         }
 
+        /**
+         * Checks if a list of labels contains a label with the specified name.
+         *
+         * @receiver The list of labels to search.
+         * @param name The name of the label to check for.
+         * @return `true` if a label with the specified name exists in the list, otherwise `false`.
+         */
         fun List<Label>.containsByName(name: String): Boolean {
-            return this.mapNotNull { it.name }.contains(name)
+            return this.map { it.name }.contains(name)
         }
 
+        /**
+         * Retrieves the identifier of a label by its name from a list of labels.
+         *
+         * @receiver The list of labels to search.
+         * @param name The name of the label to retrieve the identifier for.
+         * @return The identifier of the label with the specified name, or `null` if no such label is found.
+         */
         fun List<Label>.getIdByName(name: String): String? {
             return this.firstOrNull { it.name == name }?.id
         }
 
     }
+
 }
 
 enum class LabelType(val description: String) {
@@ -47,14 +61,15 @@ enum class LabelType(val description: String) {
     DOCUMENT("DOCUMENT");
 
     companion object {
-        fun getType(s: String?): LabelType? {
+        fun getType(s: String): LabelType {
             return when (s) {
                 "COST" -> COST
                 "EXPENSE" -> EXPENSE
                 "INCOME" -> INCOME
                 "TRUCK_WALLET" -> TRUCK_WALLET
                 "DOCUMENT" -> DOCUMENT
-                else -> null
+                else -> throw InvalidTypeException("Invalid Label type for ($s)")
+
             }
         }
     }

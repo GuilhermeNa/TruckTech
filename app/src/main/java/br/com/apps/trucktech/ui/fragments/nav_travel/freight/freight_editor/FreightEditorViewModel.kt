@@ -16,7 +16,7 @@ import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
-import br.com.apps.trucktech.expressions.atBrZone
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.usecase.usecase.FreightUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
@@ -84,7 +84,7 @@ class FreightEditorViewModel(
     private suspend fun loadFreight(freightId: String): CompletableDeferred<Freight> {
         val deferred = CompletableDeferred<Freight>()
 
-        repository.getFreightById(freightId).asFlow().first { response ->
+        repository.fetchFreightById(freightId).asFlow().first { response ->
             when (response) {
                 is Response.Error -> deferred.completeExceptionally(response.exception)
                 is Response.Success -> {

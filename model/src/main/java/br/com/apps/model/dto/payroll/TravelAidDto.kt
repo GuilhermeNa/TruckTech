@@ -1,33 +1,31 @@
 package br.com.apps.model.dto.payroll
 
+import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.exceptions.CorruptedFileException
 import java.util.Date
 
 data class TravelAidDto(
-    val masterUid: String? = null,
-    val id: String? = null,
-    val driverId: String? = null,
-    val travelId: String? = null,
-
-    val date: Date? = null,
-    val value: Double? = null,
+    var masterUid: String? = null,
+    var id: String? = null,
+    var driverId: String? = null,
+    var travelId: String? = null,
+    var date: Date? = null,
+    var value: Double? = null,
     @field:JvmField
-    val isPaid: Boolean? = null
-) {
+    var isPaid: Boolean? = null
+) : DtoInterface {
 
-    fun validateFields(): Boolean {
-        var areFieldsValid = true
-
+    override fun validateDataIntegrity() {
         if (masterUid == null ||
+            id == null ||
             driverId == null ||
             travelId == null ||
             date == null ||
             value == null ||
             isPaid == null
-        ) {
-            areFieldsValid = false
-        }
-
-        return areFieldsValid
+        ) throw CorruptedFileException("TravelAidDto data is corrupted: ($this)")
     }
+
+    override fun validateForDataBaseInsertion() {}
 
 }

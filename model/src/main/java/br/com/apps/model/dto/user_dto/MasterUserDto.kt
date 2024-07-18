@@ -17,8 +17,8 @@ data class MasterUserDto(
     orderNumber = orderNumber
 ) {
 
-    override fun validateFields(): Boolean {
-       return true
-    }
+    override fun validateDataIntegrity() {}
+
+    override fun validateForDataBaseInsertion() {}
 
 }

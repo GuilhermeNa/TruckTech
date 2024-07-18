@@ -8,7 +8,7 @@ import br.com.apps.model.model.TimeLineEvent
 import br.com.apps.trucktech.databinding.ItemTimeLineBinding
 import br.com.apps.trucktech.databinding.ItemTimeLineFirstBinding
 import br.com.apps.trucktech.databinding.ItemTimeLineLastBinding
-import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
 
 class TimelineRecyclerAdapter(
     private val context: Context,

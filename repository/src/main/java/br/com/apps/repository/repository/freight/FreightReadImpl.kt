@@ -22,98 +22,82 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_FREIGHTS)
 
-    override suspend fun getFreightListByDriverId(
+    override suspend fun fetchFreightListByDriverId(
         driverId: String,
         flow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val listener = collection.whereEqualTo(DRIVER_ID, driverId)
-            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-            else listener.onComplete { it.toFreightList() }
-        }
+    ): LiveData<Response<List<Freight>>> = withContext(Dispatchers.IO) {
+        val listener = collection.whereEqualTo(DRIVER_ID, driverId)
+        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
     }
 
-    override suspend fun getFreightListByDriverIdsAndPaymentStatus(
+    override suspend fun fetchFreightListByDriverIdsAndPaymentStatus(
         driverIdList: List<String>,
         isPaid: Boolean,
         flow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            if (driverIdList.isEmpty())
-                return@withContext MutableLiveData(Response.Error(EmptyIdException("FreightReadImpl: emptyId")))
+    ): LiveData<Response<List<Freight>>> = withContext(Dispatchers.IO) {
+        if (driverIdList.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyIdException("FreightReadImpl: emptyId")))
 
-            val listener = collection
-                .whereIn(DRIVER_ID, driverIdList)
-                .whereEqualTo(IS_COMMISSION_PAID, isPaid)
+        val listener =
+            collection.whereIn(DRIVER_ID, driverIdList).whereEqualTo(IS_COMMISSION_PAID, isPaid)
 
-            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-            else listener.onComplete { it.toFreightList() }
-        }
+        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
     }
 
-    override suspend fun getFreightListByDriverIdAndPaymentStatus(
+    override suspend fun fetchFreightListByDriverIdAndPaymentStatus(
         driverId: String,
         isPaid: Boolean,
         flow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val listener = collection
-                .whereEqualTo(DRIVER_ID, driverId)
-                .whereEqualTo(IS_COMMISSION_PAID, isPaid)
+    ): LiveData<Response<List<Freight>>> = withContext(Dispatchers.IO) {
+        val listener = collection
+            .whereEqualTo(DRIVER_ID, driverId)
+            .whereEqualTo(IS_COMMISSION_PAID, isPaid)
 
-            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-            else listener.onComplete { it.toFreightList() }
-        }
+        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
     }
 
-    override suspend fun getFreightListByTravelId(
+    override suspend fun fetchFreightListByTravelId(
         travelId: String,
         flow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
-            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-            else listener.onComplete { it.toFreightList() }
-        }
+    ): LiveData<Response<List<Freight>>> = withContext(Dispatchers.IO) {
+        val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
+        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
     }
 
-    override suspend fun getFreightListByTravelIds(
+    override suspend fun fetchFreightListByTravelIds(
         travelIdList: List<String>,
         flow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            if (travelIdList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
-            val listener = collection.whereIn(TRAVEL_ID, travelIdList)
-            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-            else listener.onComplete { it.toFreightList() }
-        }
+    ): LiveData<Response<List<Freight>>> = withContext(Dispatchers.IO) {
+        if (travelIdList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
+        val listener = collection.whereIn(TRAVEL_ID, travelIdList)
+        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
     }
 
-    override suspend fun getFreightById(
+    override suspend fun fetchFreightById(
         freightId: String,
         flow: Boolean
-    ): LiveData<Response<Freight>> {
-        return withContext(Dispatchers.IO) {
-            val listener = collection.document(freightId)
-
-            return@withContext if (flow) listener.onSnapShot { it.toFreightObject() }
-            else listener.onComplete { it.toFreightObject() }
-        }
+    ): LiveData<Response<Freight>> = withContext(Dispatchers.IO) {
+        val listener = collection.document(freightId)
+        return@withContext if (flow) listener.onSnapShot { it.toFreightObject() }
+        else listener.onComplete { it.toFreightObject() }
     }
 
-    override suspend fun getFreightListByDriverIdAndIsNotPaidYet(
+    override suspend fun fetchFreightListByDriverIdAndIsNotPaidYet(
         driverId: String,
         flow: Boolean
-    ): LiveData<Response<List<Freight>>> {
-        return withContext(Dispatchers.IO) {
-            val listener = collection
-                .whereEqualTo(DRIVER_ID, driverId)
-                .whereEqualTo(IS_VALID, true)
-                .whereEqualTo(IS_COMMISSION_PAID, false)
+    ): LiveData<Response<List<Freight>>> = withContext(Dispatchers.IO) {
+        val listener = collection
+            .whereEqualTo(DRIVER_ID, driverId)
+            .whereEqualTo(IS_VALID, true)
+            .whereEqualTo(IS_COMMISSION_PAID, false)
 
-            return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-            else listener.onComplete { it.toFreightList() }
-        }
+        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
+        else listener.onComplete { it.toFreightList() }
     }
 
 }

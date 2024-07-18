@@ -1,20 +1,27 @@
 package br.com.apps.model.dto.fleet
 
-data class TrailerDto(
-    val masterUid: String? = null,
-    val id: String? = null,
-    val plate: String? = null,
-    val fleetType: String? = null,
-    val truckId: String? = null,
-) {
+import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.exceptions.CorruptedFileException
 
-    fun validateFields(): Boolean {
-        if (id == null) return false
-        if (plate == null) return false
-        if (truckId == null) return false
-        if (fleetType == null) return false
-        if (masterUid == null) return false
-        return true
+data class TrailerDto(
+    var masterUid: String? = null,
+    var id: String? = null,
+    var plate: String? = null,
+    var fleetType: String? = null,
+    var truckId: String? = null,
+) : DtoInterface {
+
+    override fun validateDataIntegrity() {
+        if (id == null ||
+            plate == null ||
+            truckId == null ||
+            fleetType == null ||
+            masterUid == null
+        ) throw CorruptedFileException("TrailerDto data is corrupted: ($this)")
+    }
+
+    override fun validateForDataBaseInsertion() {
+
     }
 
 }

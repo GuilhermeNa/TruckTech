@@ -4,26 +4,23 @@ import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.payment_method.PixType
 import br.com.apps.model.toLocalDateTime
-import java.security.InvalidParameterException
 
 object BankAccountFactory {
 
     fun create(viewDto: BankAccountDto): BankAccount {
-        if (viewDto.validateFields()) {
-            return BankAccount(
-                masterUid = viewDto.masterUid!!,
-                employeeId = viewDto.employeeId!!,
-                insertionDate = viewDto.insertionDate!!.toLocalDateTime(),
-                code = viewDto.code!!.toInt(),
-                bankName = viewDto.bankName!!,
-                branch = viewDto.branch!!,
-                accNumber = viewDto.accNumber!!,
-                mainAccount = viewDto.mainAccount!!,
-                pix = viewDto.pix,
-                pixType = viewDto.pixType?.let { PixType.getType(it) }
-            )
-        }
-        throw InvalidParameterException("BankAccountFactory, create: ($viewDto)")
+        viewDto.validateDataIntegrity()
+        return BankAccount(
+            masterUid = viewDto.masterUid!!,
+            employeeId = viewDto.employeeId!!,
+            insertionDate = viewDto.insertionDate!!.toLocalDateTime(),
+            code = viewDto.code!!.toInt(),
+            bankName = viewDto.bankName!!,
+            branch = viewDto.branch!!,
+            accNumber = viewDto.accNumber!!,
+            mainAccount = viewDto.mainAccount!!,
+            pix = viewDto.pix,
+            pixType = viewDto.pixType?.let { PixType.getType(it) }
+        )
     }
 
     fun update(bankAccount: BankAccount, viewDto: BankAccountDto) {

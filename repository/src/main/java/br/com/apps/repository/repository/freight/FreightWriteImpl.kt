@@ -4,17 +4,21 @@ import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_FREIGHTS
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
 
-class FreightWriteImpl(fireStore: FirebaseFirestore): FreightWriteInterface {
+class FreightWriteImpl(fireStore: FirebaseFirestore) : FreightWriteInterface {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_FREIGHTS)
 
     override suspend fun save(dto: FreightDto) {
-        if (dto.id == null) {
-            create(dto)
-        } else {
-            update(dto)
+        withContext(Dispatchers.IO) {
+            if (dto.id == null) {
+                create(dto)
+            } else {
+                update(dto)
+            }
         }
     }
 
@@ -31,8 +35,10 @@ class FreightWriteImpl(fireStore: FirebaseFirestore): FreightWriteInterface {
     }
 
     override suspend fun delete(freightId: String?) {
-        if(freightId == null) throw NullPointerException("Id is null")
-        collection.document(freightId).delete()
+        withContext(Dispatchers.IO) {
+            if (freightId == null) throw NullPointerException("Id is null")
+            collection.document(freightId).delete()
+        }
     }
 
 }

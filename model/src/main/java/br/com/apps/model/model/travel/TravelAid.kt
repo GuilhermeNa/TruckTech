@@ -5,12 +5,11 @@ import java.time.LocalDateTime
 
 data class TravelAid(
     val masterUid: String,
-    val id: String? = null,
-    val employeeId: String,
+    var id: String? = null,
+    val driverId: String,
     val travelId: String,
-
     val date: LocalDateTime,
-    val value: BigDecimal,
+    var value: BigDecimal,
     @field:JvmField
     val isPaid: Boolean
 )

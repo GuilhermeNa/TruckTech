@@ -1,28 +1,34 @@
 package br.com.apps.model.dto.fleet
 
+import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.exceptions.CorruptedFileException
+
 data class TruckDto(
     var id: String? = null,
-    val masterUid: String? = null,
-    val driverId: String? = null,
+    var masterUid: String? = null,
+    var driverId: String? = null,
 
-    val averageAim: Double? = null,
-    val performanceAim: Double? = null,
-    val plate: String? = null,
-    val color: String? = null,
-    val commissionPercentual: Double? = null,
-    val fleetType: String? = null
-) {
+    var averageAim: Double? = null,
+    var performanceAim: Double? = null,
+    var plate: String? = null,
+    var color: String? = null,
+    var commissionPercentual: Double? = null,
+    var fleetType: String? = null
+) : DtoInterface {
 
-    fun validateFields(): Boolean {
-        var isValid = true
-
-        if(id == null) isValid = false
-        if(masterUid == null) isValid = false
-        if(driverId == null) isValid = false
-        if(averageAim == null) isValid = false
-        if(performanceAim == null) isValid = false
-
-        return isValid
+    override fun validateDataIntegrity() {
+        if (id == null ||
+            plate == null ||
+            color == null ||
+            driverId == null ||
+            masterUid == null ||
+            fleetType == null ||
+            averageAim == null ||
+            performanceAim == null ||
+            commissionPercentual == null
+        ) throw CorruptedFileException("TruckDto data is corrupted: ($this)")
     }
+
+    override fun validateForDataBaseInsertion() {}
 
 }

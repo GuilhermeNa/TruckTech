@@ -4,28 +4,25 @@ import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.toLocalDateTime
 import java.math.BigDecimal
-import java.security.InvalidParameterException
 
 object RefuelFactory {
 
     fun create(viewDto: RefuelDto): Refuel {
-        if (viewDto.validateFields()) {
-            return Refuel(
-                masterUid = viewDto.masterUid!!,
-                travelId = viewDto.travelId,
-                truckId = viewDto.truckId!!,
-                driverId = viewDto.driverId,
-                station = viewDto.station!!,
-                date = viewDto.date!!.toLocalDateTime(),
-                odometerMeasure = BigDecimal(viewDto.odometerMeasure!!),
-                amountLiters = BigDecimal(viewDto.amountLiters!!),
-                valuePerLiter = BigDecimal(viewDto.valuePerLiter!!),
-                totalValue = BigDecimal(viewDto.totalValue!!),
-                isCompleteRefuel = viewDto.isCompleteRefuel!!,
-                isValid = viewDto.isValid!!
-            )
-        }
-        throw InvalidParameterException("RefuelFactory, create: ($viewDto)")
+        viewDto.validateDataIntegrity()
+        return Refuel(
+            masterUid = viewDto.masterUid!!,
+            travelId = viewDto.travelId,
+            truckId = viewDto.truckId!!,
+            driverId = viewDto.driverId,
+            station = viewDto.station!!,
+            date = viewDto.date!!.toLocalDateTime(),
+            odometerMeasure = BigDecimal(viewDto.odometerMeasure!!),
+            amountLiters = BigDecimal(viewDto.amountLiters!!),
+            valuePerLiter = BigDecimal(viewDto.valuePerLiter!!),
+            totalValue = BigDecimal(viewDto.totalValue!!),
+            isCompleteRefuel = viewDto.isCompleteRefuel!!,
+            isValid = viewDto.isValid!!
+        )
     }
 
     fun update(refuel: Refuel, viewDto: RefuelDto) {

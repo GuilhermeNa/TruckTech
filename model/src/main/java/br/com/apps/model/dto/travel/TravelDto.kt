@@ -1,5 +1,8 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.exceptions.InvalidForSavingException
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
@@ -7,30 +10,24 @@ import br.com.apps.model.model.travel.TravelAid
 import java.util.Date
 
 data class TravelDto(
-    val masterUid: String? = null,
+    var masterUid: String? = null,
     var id: String? = null,
-    val truckId: String? = null,
-    val driverId: String? = null,
-
+    var truckId: String? = null,
+    var driverId: String? = null,
     @field:JvmField
-    val isFinished: Boolean? = null,
-    val considerAverage: Boolean? = null,
-
-    val initialDate: Date? = null,
-    val finalDate: Date? = null,
-
+    var isFinished: Boolean? = null,
+    var considerAverage: Boolean? = null,
+    var initialDate: Date? = null,
+    var finalDate: Date? = null,
     val initialOdometerMeasurement: Double? = null,
     val finalOdometerMeasurement: Double? = null,
-
     val freightsList: List<Freight>? = null,
     val refuelsList: List<Refuel>? = null,
     val expendsList: List<Expend>? = null,
     val aidList: List<TravelAid>? = null
-) {
+) : DtoInterface {
 
-    fun validateFields(): Boolean {
-        var isValid = true
-
+    override fun validateDataIntegrity() {
         if (masterUid == null ||
             truckId == null ||
             driverId == null ||
@@ -38,16 +35,10 @@ data class TravelDto(
             considerAverage == null ||
             initialDate == null ||
             initialOdometerMeasurement == null
-        ) {
-            isValid = false
-        }
-
-        return isValid
+        ) throw CorruptedFileException("TravelDto data is corrupted: ($this)")
     }
 
-    fun validateFieldsForFinish(): Boolean {
-        var isValid = true
-
+    override fun validateForDataBaseInsertion() {
         if (masterUid == null ||
             truckId == null ||
             driverId == null ||
@@ -57,11 +48,7 @@ data class TravelDto(
             finalDate == null ||
             initialOdometerMeasurement == null ||
             finalOdometerMeasurement == null
-        ) {
-            isValid = false
-        }
-
-        return isValid
+        ) throw InvalidForSavingException("TravelDto data is invalid: ($this)")
     }
 
 }

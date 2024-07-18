@@ -77,7 +77,7 @@ class FreightsListViewModel(
     }
 
     private suspend fun loadFreights(complete: (freights: List<Freight>) -> Unit) {
-        fRepository.getFreightListByTravelId(idHolder.travelId!!, true).asFlow()
+        fRepository.fetchFreightListByTravelId(idHolder.travelId!!, true).asFlow()
             .collect { response ->
                 when (response) {
                     is Response.Error -> _state.value = State.Error(response.exception)

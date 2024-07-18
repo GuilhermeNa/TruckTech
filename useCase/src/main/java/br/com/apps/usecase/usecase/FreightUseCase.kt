@@ -26,7 +26,7 @@ class FreightUseCase(
     suspend fun getFreightByIdFlow(id: String, onComplete: (Response<Freight>) -> Unit) {
         coroutineScope {
             try {
-                fRepository.getFreightById(id, true).observeFlow { f ->
+                fRepository.fetchFreightById(id, true).observeFlow { f ->
                     launch {
                         f.customer = customerRepository.getCustomerById(f.customerId).awaitData()
                         onComplete(Response.Success(f))
@@ -54,7 +54,7 @@ class FreightUseCase(
 
         validateAndProcess(
             permission = { dto.validatePermission(auth) },
-            validator = { dto.validateDataForSaving() }
+            validator = { dto.validateForDataBaseInsertion() }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception

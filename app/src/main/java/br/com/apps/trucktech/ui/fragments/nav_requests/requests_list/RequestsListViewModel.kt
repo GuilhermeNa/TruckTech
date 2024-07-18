@@ -14,7 +14,7 @@ import br.com.apps.model.toDate
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
-import br.com.apps.trucktech.expressions.atBrZone
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.RequestUseCase

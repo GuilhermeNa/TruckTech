@@ -1,6 +1,9 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.InvalidAuthLevelException
+import br.com.apps.model.exceptions.InvalidForSavingException
 import br.com.apps.model.model.user.PermissionLevelType
 import java.util.Date
 
@@ -11,25 +14,19 @@ data class RefuelDto(
     var travelId: String? = null,
     val costId: String? = null,
     var driverId: String? = null,
-
     var date: Date? = null,
-    val station: String? = null,
-    val odometerMeasure: Double? = null,
-    val valuePerLiter: Double? = null,
-    val amountLiters: Double? = null,
-    val totalValue: Double? = null,
-
+    var station: String? = null,
+    var odometerMeasure: Double? = null,
+    var valuePerLiter: Double? = null,
+    var amountLiters: Double? = null,
+    var totalValue: Double? = null,
     @field:JvmField
-    val isCompleteRefuel: Boolean? = null,
-
+    var isCompleteRefuel: Boolean? = null,
     @field:JvmField
     var isValid: Boolean? = null
+) : DtoInterface {
 
-) {
-
-    fun validateFields(): Boolean {
-        var areFieldsValid = true
-
+    override fun validateDataIntegrity() {
         if (masterUid == null ||
             truckId == null ||
             travelId == null ||
@@ -42,34 +39,29 @@ data class RefuelDto(
             totalValue == null ||
             isCompleteRefuel == null ||
             isValid == null
-        ) {
-            areFieldsValid = false
-        }
+        ) throw CorruptedFileException("RefuelDto data is corrupted: ($this)")
+    }
 
-        return areFieldsValid
+    override fun validateForDataBaseInsertion() {
+        if (masterUid == null ||
+            truckId == null ||
+            travelId == null ||
+            driverId == null ||
+            date == null ||
+            station == null ||
+            odometerMeasure == null ||
+            valuePerLiter == null ||
+            amountLiters == null ||
+            totalValue == null ||
+            isCompleteRefuel == null ||
+            isValid == null
+        ) throw InvalidForSavingException("RefuelDto data is invalid: ($this)")
     }
 
     fun validatePermission(authLevel: PermissionLevelType?) {
         if (authLevel == null) throw NullPointerException("AuthLevel is null")
         if (isValid == null) throw NullPointerException("isValid is null")
         if (isValid!! && authLevel != PermissionLevelType.MANAGER) throw InvalidAuthLevelException()
-
-    }
-
-    fun validateDataForSaving() {
-        if (masterUid == null ||
-            truckId == null ||
-            travelId == null ||
-            driverId == null ||
-            date == null ||
-            station == null ||
-            odometerMeasure == null ||
-            valuePerLiter == null ||
-            amountLiters == null ||
-            totalValue == null ||
-            isCompleteRefuel == null ||
-            isValid == null
-        ) throw InvalidAuthLevelException()
     }
 
 }

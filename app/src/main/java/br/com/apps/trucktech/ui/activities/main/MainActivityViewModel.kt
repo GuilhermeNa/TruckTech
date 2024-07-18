@@ -229,7 +229,7 @@ class MainActivityViewModel(
             val travelFLow = travelRepository.getTravelListByDriverId(driverId, flow = true)
                 .asFlow()
 
-            val freightFlow = freightRepository.getFreightListByDriverId(driverId, flow = true)
+            val freightFlow = freightRepository.fetchFreightListByDriverId(driverId, flow = true)
                 .asFlow()
 
             val refuelFlow = refuelRepository.getRefuelListByDriverId(driverId, flow = true)

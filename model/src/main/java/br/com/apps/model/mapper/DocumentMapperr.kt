@@ -21,8 +21,8 @@ fun TruckDocumentDto.toModel(): TruckDocument {
     )
 }
 
-fun TruckDocument.toDto(): TruckDocumentDto {
-    return TruckDocumentDto(
+fun TruckDocument.toDto(): TruckDocumentDto =
+    TruckDocumentDto(
         masterUid = this.masterUid,
         id = this.id,
         truckId = this.truckId,
@@ -35,5 +35,4 @@ fun TruckDocument.toDto(): TruckDocumentDto {
         expeditionDate = this.expeditionDate?.toDate(),
         expirationDate = this.expirationDate?.toDate()
     )
-}
 

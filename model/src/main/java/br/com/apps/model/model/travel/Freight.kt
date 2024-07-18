@@ -1,52 +1,53 @@
 package br.com.apps.model.model.travel
 
+import br.com.apps.model.expressions.toPercentValue
 import br.com.apps.model.model.Customer
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDateTime
 
 data class Freight(
     val masterUid: String,
-    val id: String? = null,
+    var id: String? = null,
     val truckId: String,
     val driverId: String,
     val travelId: String,
     var customerId: String,
-
     var customer: Customer? = null,
     var origin: String,
     var destiny: String,
     var weight: BigDecimal,
     var cargo: String,
-
     var breakDown: BigDecimal? = null,
     var value: BigDecimal,
     var loadingDate: LocalDateTime? = null,
-
     var dailyValue: BigDecimal? = null,
     var daily: Int? = null,
     var dailyTotalValue: BigDecimal? = null,
-
     @field:JvmField
     var isCommissionPaid: Boolean,
     var commissionPercentual: BigDecimal,
-
     @field:JvmField
     var isValid: Boolean
-
 ) {
 
+    /**
+     * Calculates and returns the commission value based on the freight value
+     * and commission percentage.
+     *
+     * @return The calculated commission value as a BigDecimal.
+     */
     fun getCommissionValue(): BigDecimal {
-        return if (value != null && commissionPercentual != null) {
-            val x = value!!.multiply(commissionPercentual)
-            x.divide(BigDecimal(100), 2, RoundingMode.HALF_EVEN)
-        } else {
-            BigDecimal.ZERO
-        }
+        val x = value.multiply(commissionPercentual)
+        return x.toPercentValue()
     }
 
+    /**
+     * Retrieves a text description based on the freight destination.
+     *
+     * @return A text description stating the freight destination.
+     */
     fun getTextDescription(): String {
-        return destiny?.let { "Voce carregou para $it" } ?: "-"
+        return destiny.let { "Voce carregou para $it" } ?: "-"
     }
 
 }

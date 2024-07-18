@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemTravelBinding
-import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
+import br.com.apps.model.expressions.getCompleteDateInPtBr
 import java.security.InvalidParameterException
 
 class TravelsListRecyclerAdapter(

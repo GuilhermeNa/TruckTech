@@ -24,8 +24,8 @@ fun TravelDto.toModel(): Travel {
     )
 }
 
-fun Travel.toDto(): TravelDto {
-    return TravelDto(
+fun Travel.toDto(): TravelDto =
+     TravelDto(
         masterUid = this.masterUid,
         id = this.id,
         truckId = this.truckId,
@@ -41,4 +41,4 @@ fun Travel.toDto(): TravelDto {
         expendsList = null,
         aidList = null
     )
-}
+

@@ -19,35 +19,33 @@ class FreightRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getFreightListByDriverId(driverId: String, flow: Boolean) =
-        read.getFreightListByDriverId(driverId, flow)
+    override suspend fun fetchFreightListByDriverId(driverId: String, flow: Boolean) =
+        read.fetchFreightListByDriverId(driverId, flow)
 
-    override suspend fun getFreightListByTravelId(travelId: String, flow: Boolean) =
-        read.getFreightListByTravelId(travelId, flow)
+    override suspend fun fetchFreightListByTravelId(travelId: String, flow: Boolean) =
+        read.fetchFreightListByTravelId(travelId, flow)
 
-    override suspend fun getFreightListByTravelIds(travelIdList: List<String>, flow: Boolean) =
-        read.getFreightListByTravelIds(travelIdList, flow)
+    override suspend fun fetchFreightListByTravelIds(travelIdList: List<String>, flow: Boolean) =
+        read.fetchFreightListByTravelIds(travelIdList, flow)
 
-    override suspend fun getFreightById(freightId: String, flow: Boolean) =
-        read.getFreightById(freightId, flow)
+    override suspend fun fetchFreightById(freightId: String, flow: Boolean) =
+        read.fetchFreightById(freightId, flow)
 
-    override suspend fun getFreightListByDriverIdAndIsNotPaidYet(
+    override suspend fun fetchFreightListByDriverIdAndIsNotPaidYet(
         driverId: String,
         flow: Boolean
-    ) = read.getFreightListByDriverIdAndIsNotPaidYet(driverId, flow)
+    ) = read.fetchFreightListByDriverIdAndIsNotPaidYet(driverId, flow)
 
-    override suspend fun getFreightListByDriverIdsAndPaymentStatus(
+    override suspend fun fetchFreightListByDriverIdsAndPaymentStatus(
         driverIdList: List<String>,
         isPaid: Boolean,
         flow: Boolean
-    ) =
-        read.getFreightListByDriverIdsAndPaymentStatus(driverIdList, isPaid, flow)
+    ) = read.fetchFreightListByDriverIdsAndPaymentStatus(driverIdList, isPaid, flow)
 
-    override suspend fun getFreightListByDriverIdAndPaymentStatus(
+    override suspend fun fetchFreightListByDriverIdAndPaymentStatus(
         driverId: String,
         isPaid: Boolean,
         flow: Boolean
-    ) =
-        read.getFreightListByDriverIdAndPaymentStatus(driverId, isPaid, flow)
+    ) = read.fetchFreightListByDriverIdAndPaymentStatus(driverId, isPaid, flow)
 
 }

@@ -9,9 +9,9 @@ import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemToReceiveBinding
-import br.com.apps.trucktech.expressions.getDayFormatted
-import br.com.apps.trucktech.expressions.getMonthInPtBrAbbreviated
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.getDayFormatted
+import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
+import br.com.apps.model.expressions.toCurrencyPtBr
 
 private const val VALUE_TEXT_FREIGHT = "Minha comissão:"
 

@@ -18,12 +18,12 @@ import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentTravelPreviewBinding
 import br.com.apps.trucktech.expressions.getColorById
 import br.com.apps.trucktech.expressions.getColorStateListById
-import br.com.apps.trucktech.expressions.getCompleteDateInPtBr
+import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
-import br.com.apps.trucktech.expressions.toCurrencyPtBr
-import br.com.apps.trucktech.expressions.toNumberDecimalPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.toNumberDecimalPtBr
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel

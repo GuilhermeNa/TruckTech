@@ -21,7 +21,7 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRequestsListBinding
-import br.com.apps.trucktech.expressions.getMonthAndYearInPtBr
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarOrange
