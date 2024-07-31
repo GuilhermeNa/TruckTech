@@ -4,13 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.exceptions.NullBankException
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.trucktech.exceptions.NoBanksFoundException
 import br.com.apps.trucktech.util.state.State
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -27,7 +27,7 @@ class BankListFragmentViewModel(
     private var _adapterPos = -1
     val adapterClickedPos get() = _adapterPos
 
-    private val _data = MutableLiveData<BankLFData>()
+    private val _data = MutableLiveData<List<BankAccount>>()
     val data get() = _data
 
     private val _state = MutableLiveData<State>(State.Loading)
@@ -42,13 +42,19 @@ class BankListFragmentViewModel(
         loadData()
     }
 
+    private fun setState(state: State) {
+        if (state != this@BankListFragmentViewModel.state) _state.value = state
+    }
+
     private fun loadData() {
         viewModelScope.launch {
             delay(1000)
 
             try {
                 banks = loadBanks()
-                loadAccountsFlow { sendResponse(it) }
+                loadAccountsFlow {
+                    sendResponse(it)
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -59,10 +65,10 @@ class BankListFragmentViewModel(
     }
 
     private suspend fun loadBanks(): List<Bank> {
-        val response = bankRepository.getBankList().asFlow().first()
+        val response = bankRepository.fetchBankList().asFlow().first()
         return when (response) {
             is Response.Error -> throw response.exception
-            is Response.Success -> response.data ?: throw NoBanksFoundException()
+            is Response.Success -> response.data ?: throw NullBankException()
         }
     }
 
@@ -80,20 +86,14 @@ class BankListFragmentViewModel(
         if (bankAccList.isEmpty()) {
             setState(State.Empty)
         } else {
-            _data.value = BankLFData(bankList = banks, bankAccList = bankAccList)
-
-            if (state.value != State.Loaded) {
-                setState(State.Loaded)
-            }
+            bankAccList.forEach { it.setBankById(banks) }
+            _data.value = bankAccList
+            setState(State.Loaded)
         }
     }
 
-    private fun setState(state: State) {
-        _state.value = state
-    }
-
     suspend fun updateMainAccount(newMainAccId: String) {
-        val bankList = (data.value)!!.bankAccList
+        val bankList = data.value!!
         val oldMainAccId = bankList.firstOrNull { it.mainAccount }?.id
 
         employeeRepository.updateMainAccount(

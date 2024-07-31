@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
@@ -43,14 +42,14 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: BankEditorFragmentArgs by navArgs()
-    private val idHolder by lazy {
-        IdHolder(
+    private val vmData by lazy {
+        BankEVmData(
             masterUid = mainActVM.loggedUser.masterUid,
-            driverId = mainActVM.loggedUser.driverId,
+            employeeId = mainActVM.loggedUser.driverId,
             bankAccountId = args.bankId
         )
     }
-    private val viewModel: BankEditorViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: BankEditorViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -165,7 +164,7 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
 
     private fun bind(bankAccount: BankAccount) {
         binding.apply {
-            fragBankEditorBankAutoComplete.setText(bankAccount.bankName)
+            fragBankEditorBankAutoComplete.setText(bankAccount.getBankName())
             fragBankEditorBranch.setText(bankAccount.branch.toString())
             fragBankEditorAccNumber.setText(bankAccount.accNumber.toString())
             fragmentBankEditorAutoComplete.setText(bankAccount.getTypeDescription())
@@ -216,13 +215,12 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
 
                 if (fieldsAreValid) {
                     val viewDto = BankAccountDto(
-                        bankName = bankName,
+                        bankId = viewModel.getBankId(bankName),
                         branch = branch.toInt(),
                         accNumber = accNumber.toInt(),
                         pixType = PixType.getTypeInString(type),
                         pix = pix,
                         mainAccount = false,
-                        code = viewModel.getBankCode(bankName)
                     )
                     saveBankAccount(viewDto)
                 }

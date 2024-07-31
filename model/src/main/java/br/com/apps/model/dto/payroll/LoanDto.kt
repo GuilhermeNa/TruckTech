@@ -1,6 +1,6 @@
 package br.com.apps.model.dto.payroll
 
-import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
 import java.util.Date
 
@@ -14,7 +14,7 @@ data class LoanDto(
     var installmentsAlreadyPaid: Int? = null,
     @field:JvmField
     var isPaid: Boolean? = null
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||

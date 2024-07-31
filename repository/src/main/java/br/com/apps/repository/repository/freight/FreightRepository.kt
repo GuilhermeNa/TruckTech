@@ -19,33 +19,33 @@ class FreightRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun fetchFreightListByDriverId(driverId: String, flow: Boolean) =
-        read.fetchFreightListByDriverId(driverId, flow)
+    override suspend fun fetchFreightListByDriverId(id: String, flow: Boolean) =
+        read.fetchFreightListByDriverId(id, flow)
 
-    override suspend fun fetchFreightListByTravelId(travelId: String, flow: Boolean) =
-        read.fetchFreightListByTravelId(travelId, flow)
+    override suspend fun fetchFreightListByTravelId(id: String, flow: Boolean) =
+        read.fetchFreightListByTravelId(id, flow)
 
-    override suspend fun fetchFreightListByTravelIds(travelIdList: List<String>, flow: Boolean) =
-        read.fetchFreightListByTravelIds(travelIdList, flow)
+    override suspend fun fetchFreightListByTravelIds(ids: List<String>, flow: Boolean) =
+        read.fetchFreightListByTravelIds(ids, flow)
 
-    override suspend fun fetchFreightById(freightId: String, flow: Boolean) =
-        read.fetchFreightById(freightId, flow)
+    override suspend fun fetchFreightById(id: String, flow: Boolean) =
+        read.fetchFreightById(id, flow)
 
     override suspend fun fetchFreightListByDriverIdAndIsNotPaidYet(
-        driverId: String,
+        id: String,
         flow: Boolean
-    ) = read.fetchFreightListByDriverIdAndIsNotPaidYet(driverId, flow)
+    ) = read.fetchFreightListByDriverIdAndIsNotPaidYet(id, flow)
 
     override suspend fun fetchFreightListByDriverIdsAndPaymentStatus(
-        driverIdList: List<String>,
+        ids: List<String>,
         isPaid: Boolean,
         flow: Boolean
-    ) = read.fetchFreightListByDriverIdsAndPaymentStatus(driverIdList, isPaid, flow)
+    ) = read.fetchFreightListByDriverIdsAndPaymentStatus(ids, isPaid, flow)
 
     override suspend fun fetchFreightListByDriverIdAndPaymentStatus(
-        driverId: String,
+        id: String,
         isPaid: Boolean,
         flow: Boolean
-    ) = read.fetchFreightListByDriverIdAndPaymentStatus(driverId, isPaid, flow)
+    ) = read.fetchFreightListByDriverIdAndPaymentStatus(id, isPaid, flow)
 
 }

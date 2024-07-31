@@ -11,6 +11,6 @@ interface BankInterface {
      *
      * @return A LiveData object containing the result of the operation.
      */
-    suspend fun getBankList(): LiveData<Response<List<Bank>>>
+    suspend fun fetchBankList(): LiveData<Response<List<Bank>>>
 
 }

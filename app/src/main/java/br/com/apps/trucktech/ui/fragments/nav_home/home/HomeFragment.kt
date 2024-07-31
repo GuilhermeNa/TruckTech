@@ -6,7 +6,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import br.com.apps.model.model.Fine
+import br.com.apps.model.model.FleetFine
 import br.com.apps.trucktech.databinding.FragmentHomeBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo
@@ -97,7 +97,7 @@ class HomeFragment : BaseFragmentWithToolbar() {
         }
     }
 
-    private fun bindBoxFines(fines: List<Fine>?) {
+    private fun bindBoxFines(fines: List<FleetFine>?) {
         binding.boxFines.apply {
             panelFinesImage.loadImageThroughUrl(
                 "https://gringo.com.vc/wp-content/uploads/2022/06/Multa_18032016_1738_1280_960-1024x768.jpg"

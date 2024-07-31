@@ -31,8 +31,10 @@ import br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.RequestPr
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.RequestPreviewVmData
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.RequestLVMData
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.RequestsListViewModel
+import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_editor.BankEVmData
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_editor.BankEditorViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankListFragmentViewModel
+import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_preview.BankPVmData
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_preview.BankPreviewViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.change_password.ChangePasswordFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsViewModel
@@ -195,20 +197,14 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<BankPreviewViewModel> { (idHolder: IdHolder) ->
+    viewModel<BankPreviewViewModel> { (vmData: BankPVmData) ->
         BankPreviewViewModel(
-            idHolder,
+            vmData,
             get(),
             get()
         )
     }
-    viewModel<BankEditorViewModel> { (idHolder: IdHolder) ->
-        BankEditorViewModel(
-            idHolder,
-            get(),
-            get()
-        )
-    }
+    viewModel<BankEditorViewModel> { (vmData: BankEVmData) -> BankEditorViewModel(vmData, get(), get(), get()) }
     viewModel<HomeViewModel> { HomeViewModel() }
     viewModel<PerformanceViewModel> { PerformanceViewModel(get()) }
     viewModel<TravelPreviewViewModel> { (vmData: TravelPreviewVmData) -> TravelPreviewViewModel(vmData, get()) }

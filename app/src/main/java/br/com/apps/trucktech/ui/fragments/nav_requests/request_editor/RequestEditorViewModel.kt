@@ -64,7 +64,7 @@ class RequestEditorViewModel(
     private suspend fun loadRequest(): PaymentRequest {
         val deferred = CompletableDeferred<PaymentRequest>()
 
-        repository.getRequestById(vmData.requestId).asFlow().first { response ->
+        repository.fetchRequestById(vmData.requestId).asFlow().first { response ->
             when (response) {
                 is Response.Error -> _data.value = response
                 is Response.Success -> {
@@ -79,7 +79,7 @@ class RequestEditorViewModel(
     }
 
     private suspend fun loadItems(complete: (List<RequestItem>) -> Unit) {
-        repository.getItemListByRequestId(vmData.requestId, true).asFlow().collect { response ->
+        repository.fetchItemListByRequestId(vmData.requestId, true).asFlow().collect { response ->
             when (response) {
                 is Response.Error -> _data.value = response
                 is Response.Success -> {

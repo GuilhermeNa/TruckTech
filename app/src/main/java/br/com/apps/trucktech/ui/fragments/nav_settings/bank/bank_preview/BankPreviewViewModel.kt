@@ -5,33 +5,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
+import br.com.apps.model.exceptions.NullBankAccountException
+import br.com.apps.model.exceptions.NullBankException
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
-import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.repository.bank.BankRepository
+import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class BankPreviewViewModel(
-    private val idHolder: IdHolder,
+    private val vmData: BankPVmData,
     private val repository: EmployeeRepository,
     private val bankRepository: BankRepository
 ) : ViewModel() {
 
-    private val employeeId = idHolder.driverId
-        ?: throw NullPointerException("BankPreviewViewModel: employeeId is null")
-
-    private val bankId = idHolder.bankAccountId
-        ?: throw NullPointerException("BankPreviewViewModel: bankId is null")
-
-    private var isFirstBoot = true
+    private lateinit var banks: List<Bank>
 
     /**
      * LiveData with a dark layer state, used when dialog is requested.
@@ -43,7 +34,7 @@ class BankPreviewViewModel(
      * LiveData holding the response data of type [Response] with a [BankAccount]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<Response<BankPFData>>()
+    private val _data = MutableLiveData<Response<BankAccount>>()
     val data get() = _data
 
     //---------------------------------------------------------------------------------------------//
@@ -56,60 +47,45 @@ class BankPreviewViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-
-            val bankListDef = loadBankList()
-
-            val bankAccDef = CompletableDeferred<BankAccount>()
-            launch {
-                loadBankAcc {
-                    if(isFirstBoot) {
-                        isFirstBoot = false
-                        bankAccDef.complete(it)
-                    } else {
-                        sendResponse(bankListDef.getCompleted(), it)
-                    }
-                }
+            banks = loadBanks()
+            loadBankAcc {
+                sendResponse(it)
             }
-
-            awaitAll(bankListDef, bankAccDef)
-            sendResponse(bankListDef.getCompleted(), bankAccDef.getCompleted())
-
         }
     }
 
-    private suspend fun loadBankList(): CompletableDeferred<List<Bank>> {
-        val deferred = CompletableDeferred<List<Bank>>()
-
-        bankRepository.getBankList().asFlow().first { response ->
-            when(response) {
-                is Response.Error -> {}
-                is Response.Success -> response.data?.let { deferred.complete(it) }
-            }
-            true
+    private suspend fun loadBanks(): List<Bank> {
+        val response = bankRepository.fetchBankList().asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullBankException("Failed to found banks")
         }
-
-        return deferred
     }
 
     private suspend fun loadBankAcc(complete: (bankAcc: BankAccount) -> Unit) {
-        repository.getBankAccountById(employeeId, bankId, EmployeeType.DRIVER, true).asFlow()
-            .collect { response ->
-                when (response) {
-                    is Response.Error -> {}
-                    is Response.Success -> response.data?.let { complete(it) }
-                }
+        repository.getBankAccountById(
+            vmData.employeeId,
+            vmData.bankAccountId,
+            EmployeeType.DRIVER,
+            true
+        ).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data?.let(complete)
+                    ?: throw NullBankAccountException()
             }
+        }
     }
 
-    private fun sendResponse(bankList: List<Bank>, bankAcc: BankAccount) {
-        val urlImage = bankList.firstOrNull { it.code == bankAcc.code }?.urlImage
-        _data.value = Response.Success(BankPFData(bankAcc = bankAcc, urlImage = urlImage))
+    private fun sendResponse(bankAcc: BankAccount) {
+        bankAcc.setBankById(banks)
+        _data.value = Response.Success(bankAcc)
     }
 
     suspend fun delete() =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                repository.deleteBankAcc(employeeId, bankId, EmployeeType.DRIVER)
+                repository.deleteBankAcc(vmData.employeeId, vmData.bankAccountId, EmployeeType.DRIVER)
                 emit(Response.Success())
             } catch (e: Exception) {
                 emit(Response.Error(e))
@@ -132,8 +108,7 @@ class BankPreviewViewModel(
 
 }
 
-data class BankPFData(
-    val bankAcc: BankAccount,
-    val urlImage: String?
-
+class BankPVmData(
+    val employeeId: String,
+    val bankAccountId: String
 )

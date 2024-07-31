@@ -1,6 +1,5 @@
 package br.com.apps.trucktech.ui.fragments.login
 
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.animation.AnimationUtils
@@ -15,26 +14,29 @@ class LoginState(
 ) {
 
     suspend fun showOpening() {
-        binding.fragLoginLogoImage.apply {
-            y = pixelsHeight * 0.28.toFloat()
-            scaleY = pixelsHeight * 0.00055.toFloat()
-            scaleX = pixelsHeight * 0.00055.toFloat()
+        binding.apply {
+            fragLoginLogoImage.apply {
+                y = pixelsHeight * 0.28.toFloat()
+                scaleY = pixelsHeight * 0.00055.toFloat()
+                scaleX = pixelsHeight * 0.00055.toFloat()
+            }
+
+            fragLoginLoading.y = pixelsHeight * 0.14.toFloat()
+
+            delay(500)
+            fragLoginLoading.apply {
+                visibility = VISIBLE
+                animation =
+                    AnimationUtils.loadAnimation(context, R.anim.slide_in_from_left)
+            }
         }
 
-        binding.fragLoginLoading.y = pixelsHeight * 0.14.toFloat()
-
-        delay(500)
-        binding.fragLoginLoading.apply {
-            visibility = View.VISIBLE
-            animation =
-                AnimationUtils.loadAnimation(context, R.anim.slide_in_from_left)
-        }
     }
 
     suspend fun showEditTextFieldsForCredentials() {
         delay(1000)
         binding.fragLoginLoading.apply {
-            visibility = View.GONE
+            visibility = GONE
             animation =
                 AnimationUtils.loadAnimation(context, R.anim.slide_out_to_right)
         }
@@ -51,35 +53,35 @@ class LoginState(
 
         delay(200)
         binding.fragLoginTitle.apply {
-            visibility = View.VISIBLE
+            visibility = VISIBLE
             animation =
                 AnimationUtils.loadAnimation(context, R.anim.slide_in_from_bottom)
         }
 
         delay(250)
         binding.fragLayoutUser.apply {
-            visibility = View.VISIBLE
+            visibility = VISIBLE
             animation =
                 AnimationUtils.loadAnimation(context, R.anim.slide_in_from_left)
         }
 
         delay(50)
         binding.fragLayoutPassword.apply {
-            visibility = View.VISIBLE
+            visibility = VISIBLE
             animation =
                 AnimationUtils.loadAnimation(context, R.anim.slide_in_from_left)
         }
 
         delay(50)
         binding.fragButtonLogin.apply {
-            visibility = View.VISIBLE
+            visibility = VISIBLE
             animation =
                 AnimationUtils.loadAnimation(context, R.anim.slide_in_from_left)
         }
 
         delay(50)
         binding.fragButtonHelp.apply {
-            visibility = View.VISIBLE
+            visibility = VISIBLE
             animation =
                 AnimationUtils.loadAnimation(context, R.anim.slide_in_from_left)
         }
@@ -88,14 +90,14 @@ class LoginState(
     suspend fun showOpeningToMainActivity(animationComplete: () -> Unit) {
         delay(1000)
         binding.fragLoginLoading.apply {
-            visibility = View.GONE
+            visibility = GONE
             animation =
                 AnimationUtils.loadAnimation(context, R.anim.slide_out_to_right)
         }
 
         delay(500)
         binding.fragLoginLogoImage.apply {
-            visibility = View.GONE
+            visibility = GONE
             animation = AnimationUtils.loadAnimation(context, R.anim.slide_out_to_left)
         }
 

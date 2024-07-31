@@ -1,59 +1,60 @@
 package br.com.apps.model.dto.travel
 
-import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.InvalidAuthLevelException
 import br.com.apps.model.exceptions.InvalidForSavingException
-import br.com.apps.model.model.travel.Complement
+import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.user.PermissionLevelType
 import java.util.Date
 
+/**
+ * Data Transfer Object (DTO) representing a [Freight].
+ *
+ * This class is used to transfer information between different parts
+ * of the application or between different systems. It plays a crucial role in
+ * communicating with the database by being used to send and receive data from
+ * the database.
+ */
 data class FreightDto(
+    // Ids
     var masterUid: String? = null,
     var id: String? = null,
     var truckId: String? = null,
     var travelId: String? = null,
-    var driverId: String? = null,
+    var employeeId: String? = null,
     var customerId: String? = null,
 
-    var customer: String? = null,
+    // Others
+    var cargo: String? = null,
     var origin: String? = null,
     var destiny: String? = null,
-    var cargo: String? = null,
-    var weight: Double? = null,
     var value: Double? = null,
-    val breakDown: Double? = null,
+    var weight: Double? = null,
     var loadingDate: Date? = null,
-
-    val dailyValue: Double? = null,
-    val daily: Int? = null,
-    val dailyTotalValue: Double? = null,
-    val complement: List<Complement>? = null,
-
+    var commissionPercentual: Double? = null,
+    @field:JvmField
+    var isValid: Boolean? = null,
     @field:JvmField
     var isCommissionPaid: Boolean? = null,
-    var commissionPercentual: Double? = null,
 
-    @field:JvmField
-    var isValid: Boolean? = null
-
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
-
         if (masterUid == null ||
+            id == null ||
             truckId == null ||
             travelId == null ||
-            driverId == null ||
+            employeeId == null ||
             customerId == null ||
+            cargo == null ||
             origin == null ||
             destiny == null ||
-            weight == null ||
-            cargo == null ||
             value == null ||
+            weight == null ||
             loadingDate == null ||
-            isCommissionPaid == null ||
             commissionPercentual == null ||
+            isCommissionPaid == null ||
             isValid == null
         ) throw CorruptedFileException("FreightDto data is corrupted: ($this)")
     }
@@ -62,7 +63,7 @@ data class FreightDto(
         if (masterUid == null ||
             truckId == null ||
             travelId == null ||
-            driverId == null ||
+            employeeId == null ||
             customerId == null ||
             origin == null ||
             destiny == null ||

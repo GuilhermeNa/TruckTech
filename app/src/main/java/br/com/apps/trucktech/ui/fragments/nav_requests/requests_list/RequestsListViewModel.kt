@@ -6,6 +6,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.TravelRequestDto
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.request.travel_requests.PaymentRequest
 import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
 import br.com.apps.model.model.request.travel_requests.RequestItem
@@ -14,11 +15,9 @@ import br.com.apps.model.toDate
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
-import br.com.apps.model.expressions.atBrZone
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.RequestUseCase
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -80,7 +79,6 @@ class RequestsListViewModel(
             delay(1000)
 
             try {
-
                 val requests = loadRequestsAwait()
                 val idList = requests.mapNotNull { it.id }
 
@@ -93,6 +91,7 @@ class RequestsListViewModel(
                 _data.value = requests
 
             } catch (e: Exception) {
+                e.printStackTrace()
                 _state.value = State.Error(e)
 
             }
@@ -100,37 +99,20 @@ class RequestsListViewModel(
     }
 
     private suspend fun loadRequestsAwait(): List<PaymentRequest> {
-        val deferred = CompletableDeferred<List<PaymentRequest>>()
-
-        repository.getRequestListByDriverId(driverId = vmData.driverId)
-            .asFlow().first { response ->
-                when (response) {
-                    is Response.Error -> throw response.exception
-
-                    is Response.Success -> response.data?.let { deferred.complete(it) }
-                        ?: deferred.complete(emptyList())
-                }
-                true
-            }
-
-        return deferred.await()
+        val response =
+            repository.fetchRequestListByDriverId(driverId = vmData.driverId).asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullPointerException()
+        }
     }
 
     private suspend fun loadItemsAwait(idList: List<String>): List<RequestItem> {
-        val deferred = CompletableDeferred<List<RequestItem>>()
-
-        repository.getItemListByRequests(idList, true)
-            .asFlow().first { response ->
-                when (response) {
-                    is Response.Error -> throw response.exception
-
-                    is Response.Success -> response.data?.let { deferred.complete(it) }
-                        ?: deferred.complete(emptyList())
-                }
-                true
-            }
-
-        return deferred.await()
+        val response = repository.fetchItemListByRequests(idList, true).asFlow().first()
+        return when (response) {
+            is Response.Error -> emptyList()
+            is Response.Success -> response.data ?: throw NullPointerException()
+        }
     }
 
     fun newHeaderSelected(headerTitle: String) {
@@ -203,7 +185,8 @@ class RequestsListViewModel(
                 }
 
                 3 -> {
-                    val data = dataSet.filter { it.status == PaymentRequestStatusType.PROCESSED }
+                    val data =
+                        dataSet.filter { it.status == PaymentRequestStatusType.PROCESSED }
                     if (data.isEmpty()) _state.value = State.Empty
                     else _state.value = State.Loaded
                     data

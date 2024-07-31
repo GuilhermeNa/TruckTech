@@ -17,14 +17,13 @@ class BankAccountDtoTest {
             masterUid = "1",
             id = "2",
             employeeId = "3",
+            bankId = "4",
             insertionDate = Date(),
-            bankName = "Bradesco",
             branch = 123,
             accNumber = 321,
             pix = "111.111.111-11",
-            code = "123",
             mainAccount = true,
-            pixType = "CNPJ"
+            pixType = "CNPJ",
         )
     }
 
@@ -57,16 +56,8 @@ class BankAccountDtoTest {
     }
 
     @Test
-    fun `should throw CorruptedFileException when code is null`() {
-        bankAcc.code = null
-        assertThrows(CorruptedFileException::class.java) {
-            bankAcc.validateDataIntegrity()
-        }
-    }
-
-    @Test
-    fun `should throw CorruptedFileException when bankName is null`() {
-        bankAcc.bankName = null
+    fun `should throw CorruptedFileException when bankId is null`() {
+        bankAcc.bankId = null
         assertThrows(CorruptedFileException::class.java) {
             bankAcc.validateDataIntegrity()
         }

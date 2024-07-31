@@ -24,7 +24,7 @@ class TravelTest {
                 masterUid = "1",
                 id = "1",
                 truckId = "3",
-                driverId = "4",
+                employeeId = "4",
                 travelId = "5",
                 customerId = "6",
 
@@ -54,7 +54,7 @@ class TravelTest {
                 masterUid = "2",
                 id = "2",
                 truckId = "3",
-                driverId = "4",
+                employeeId = "4",
                 travelId = "6",
                 customerId = "7",
 

@@ -1,6 +1,6 @@
 package br.com.apps.model.dto.request.request
 
-import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.InvalidForSavingException
 
@@ -13,7 +13,7 @@ data class RequestItemDto(
     val kmMarking: Int? = null,
     var value: Double? = null,
     var type: String? = null
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
         if (id == null ||

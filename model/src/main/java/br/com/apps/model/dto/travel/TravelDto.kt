@@ -1,6 +1,6 @@
 package br.com.apps.model.dto.travel
 
-import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.InvalidForSavingException
 import br.com.apps.model.model.travel.Expend
@@ -25,7 +25,7 @@ data class TravelDto(
     val refuelsList: List<Refuel>? = null,
     val expendsList: List<Expend>? = null,
     val aidList: List<TravelAid>? = null
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||

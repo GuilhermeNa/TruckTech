@@ -80,7 +80,7 @@ class RequestEditorCostFragmentViewModel(
     private suspend fun loadItem(itemId: String): RequestItem {
         val deferred = CompletableDeferred<RequestItem>()
 
-        repository.getItemById(vmData.requestId, itemId)
+        repository.fetchItemById(vmData.requestId, itemId)
             .asFlow().first { response ->
                 val data = when (response) {
                     is Response.Error -> throw response.exception

@@ -2,12 +2,15 @@ package br.com.apps.usecase.usecase
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.dto.employee_dto.EmployeeDto
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Resource
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.repository.util.validateAndProcess
 import java.security.InvalidParameterException
 
 class EmployeeUseCase(
@@ -42,5 +45,14 @@ class EmployeeUseCase(
         return repository.updateMainAccount(employeeId, oldMainAccId, newMainAccId, type)
     }
 
+    suspend fun saveBankAccount(writeReq: WriteRequest<BankAccountDto>, driver: EmployeeType) {
+        val dto = writeReq.data
+
+        validateAndProcess (
+            validateData = { dto.validateForDataBaseInsertion() }
+        ).let {
+            repository.saveBankAccount(dto, EmployeeType.DRIVER)
+        }
+    }
 
 }

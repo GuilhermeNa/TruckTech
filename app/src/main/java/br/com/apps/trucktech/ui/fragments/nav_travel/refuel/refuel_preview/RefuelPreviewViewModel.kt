@@ -46,7 +46,7 @@ class RefuelPreviewViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.getRefuelById(vmData.refuelId, true).asFlow().collect { response ->
+            repository.fetchRefuelById(vmData.refuelId, true).asFlow().collect { response ->
                 _data.value = when (response) {
                     is Response.Error -> response
                     is Response.Success -> {

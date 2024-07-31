@@ -34,23 +34,23 @@ interface FreightReadInterface {
     /**
      * Fetches the [Freight] dataSet for the specified driver ID.
      *
-     * @param driverId The ID of the [Employee].
+     * @param id The ID of the [Employee].
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun fetchFreightListByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchFreightListByDriverId(id: String, flow: Boolean = false)
             : LiveData<Response<List<Freight>>>
 
     /**
      * Fetches the [Freight] dataSet for the specified driver ID list.
      *
-     * @param driverIdList The ID list of the [Employee]'s.
+     * @param ids The ID list of the [Employee]'s.
      * @param isPaid The payment status.
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
     suspend fun fetchFreightListByDriverIdsAndPaymentStatus(
-        driverIdList: List<String>,
+        ids: List<String>,
         isPaid: Boolean,
         flow: Boolean = false
     ): LiveData<Response<List<Freight>>>
@@ -58,13 +58,13 @@ interface FreightReadInterface {
     /**
      * Fetches the [Freight] dataSet for the specified driver ID.
      *
-     * @param driverId The ID of the [Employee].
+     * @param id The ID of the [Employee].
      * @param flow If the user wants to keep observing the data.
      * @param isPaid The payment status.
      * @return A [Response] with the [Freight] list.
      */
     suspend fun fetchFreightListByDriverIdAndPaymentStatus(
-        driverId: String,
+        id: String,
         isPaid: Boolean,
         flow: Boolean = false
     ): LiveData<Response<List<Freight>>>
@@ -72,42 +72,42 @@ interface FreightReadInterface {
     /**
      * Fetches the [Freight] dataSet for the specified travel ID.
      *
-     * @param travelId The ID of the [Travel].
+     * @param id The ID of the [Travel].
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun fetchFreightListByTravelId(travelId: String, flow: Boolean = false)
+    suspend fun fetchFreightListByTravelId(id: String, flow: Boolean = false)
             : LiveData<Response<List<Freight>>>
 
     /**
      * Fetches the [Freight] dataSet for the specified travel ID list.
      *
-     * @param travelIdList The ID list of the [Travel]'s.
+     * @param ids The ID list of the [Travel]'s.
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun fetchFreightListByTravelIds(travelIdList: List<String>, flow: Boolean = false)
+    suspend fun fetchFreightListByTravelIds(ids: List<String>, flow: Boolean = false)
             : LiveData<Response<List<Freight>>>
 
     /**
      * Fetches the [Freight] dataSet for the specified ID.
      *
-     * @param freightId The ID of the [Freight].
+     * @param id The ID of the [Freight].
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Freight] list.
      */
-    suspend fun fetchFreightById(freightId: String, flow: Boolean = false)
+    suspend fun fetchFreightById(id: String, flow: Boolean = false)
             : LiveData<Response<Freight>>
 
     /**
      * Retrieves a list of [Freight] associated with a driver ID that have not been paid yet.
      *
-     * @param driverId The ID of the driver to retrieve freights for.
+     * @param id The ID of the driver to retrieve freights for.
      * @param flow If true, indicates to use continuous data flow updates.
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Freight objects or an Error with an exception.
      */
-    suspend fun fetchFreightListByDriverIdAndIsNotPaidYet(driverId: String, flow: Boolean = false)
+    suspend fun fetchFreightListByDriverIdAndIsNotPaidYet(id: String, flow: Boolean = false)
     : LiveData<Response<List<Freight>>>
 
 }

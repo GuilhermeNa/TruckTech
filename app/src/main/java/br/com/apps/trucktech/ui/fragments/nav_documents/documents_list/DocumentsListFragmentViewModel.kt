@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.model.TruckDocument
+import br.com.apps.model.model.TruckDocument.Companion.merge
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.LabelType
 import br.com.apps.repository.repository.document.DocumentRepository
@@ -44,7 +45,7 @@ class DocumentsListFragmentViewModel(
     }
 
     private fun setState(state: State) {
-        _state.value = state
+        if (state != _state.value) _state.value = state
     }
 
     fun loadData() {
@@ -53,7 +54,9 @@ class DocumentsListFragmentViewModel(
 
             try {
                 labels = loadLabels()
-                loadDocuments { sendResponse(it) }
+                loadDocuments {
+                    sendResponse(it)
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -63,25 +66,24 @@ class DocumentsListFragmentViewModel(
         }
     }
 
-    private suspend fun loadDocuments(onComplete: (data: List<TruckDocument>) -> Unit) {
-        val response = documentRepository.fetchDocumentListByTruckIdList(vmData.fleetIds).asFlow().first()
-
-        return when (response) {
-            is Response.Error -> throw response.exception
-            is Response.Success -> onComplete(response.data ?: emptyList())
-        }
-
-    }
-
     private suspend fun loadLabels(): List<Label> {
         val response =
             labelRepository
-                .getLabelListByMasterUidAndType(LabelType.DOCUMENT.description, vmData.masterUid)
+                .fetchLabelListByMasterUidAndType(LabelType.DOCUMENT.description, vmData.masterUid)
                 .asFlow().first()
-
         return when (response) {
             is Response.Error -> throw response.exception
             is Response.Success -> response.data ?: throw NoLabelsFoundException()
+        }
+    }
+
+    private suspend fun loadDocuments(onComplete: (data: List<TruckDocument>) -> Unit) {
+        val response =
+            documentRepository.fetchDocumentListByFleetIdList(vmData.fleetIds).asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data?.let { onComplete(it) }
+                ?: throw NullPointerException("Null document")
         }
     }
 
@@ -89,19 +91,11 @@ class DocumentsListFragmentViewModel(
         if (docList.isEmpty()) {
             setState(State.Empty)
         } else {
-            mergeData(docList)
+            docList.merge(labels)
             setState(State.Loaded)
             _data.value = docList
         }
 
-    }
-
-    private fun mergeData(documents: List<TruckDocument>) {
-        documents.map { document ->
-            val id = document.labelId
-            val label = labels.firstOrNull { it.id == id }
-            document.name = label?.name
-        }
     }
 
 }

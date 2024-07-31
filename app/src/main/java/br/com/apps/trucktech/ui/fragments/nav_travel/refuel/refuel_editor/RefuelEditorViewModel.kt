@@ -55,7 +55,7 @@ class RefuelEditorViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.getRefuelById(vmData.refuelId!!).asFlow().first { response ->
+            repository.fetchRefuelById(vmData.refuelId!!).asFlow().first { response ->
                     when (response) {
                         is Response.Error -> _data.value = response
                         is Response.Success -> {

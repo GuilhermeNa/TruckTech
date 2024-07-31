@@ -42,7 +42,7 @@ class DocumentFragment : BaseFragmentWithToolbar() {
         super.onViewCreated(view, savedInstanceState)
         args.document.run {
             binding.fragmentDocumentImage.loadImageThroughUrl(urlImage)
-            binding.fragmentDocumentToolbar.toolbarText.text = name ?: "Documento"
+            binding.fragmentDocumentToolbar.toolbarText.text = getDocumentName()
         }
     }
 

@@ -1,7 +1,7 @@
 package br.com.apps.repository.util
 
 import br.com.apps.model.dto.CustomerDto
-import br.com.apps.model.dto.FineDto
+import br.com.apps.model.dto.FleetFineDto
 import br.com.apps.model.dto.LabelDto
 import br.com.apps.model.dto.TruckDocumentDto
 import br.com.apps.model.dto.bank.BankDto
@@ -23,7 +23,7 @@ import br.com.apps.model.exceptions.ConversionException
 import br.com.apps.model.mapper.EmployeeMapper.Companion.toModel
 import br.com.apps.model.mapper.toModel
 import br.com.apps.model.model.Customer
-import br.com.apps.model.model.Fine
+import br.com.apps.model.model.FleetFine
 import br.com.apps.model.model.TruckDocument
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
@@ -111,14 +111,14 @@ fun DocumentSnapshot.toLabelObject(): Label {
         ?: throw ConversionException("ConversionExpression, toLabelObject: ($this)")
 }
 
-fun QuerySnapshot.toFineList(): List<Fine> {
+fun QuerySnapshot.toFineList(): List<FleetFine> {
     return this.mapNotNull { fineDocument ->
         fineDocument.toFineObject()
     }
 }
 
-fun DocumentSnapshot.toFineObject(): Fine {
-    return this.toObject(FineDto::class.java)?.toModel()
+fun DocumentSnapshot.toFineObject(): FleetFine {
+    return this.toObject(FleetFineDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toFineObject: ($this)")
 }
 

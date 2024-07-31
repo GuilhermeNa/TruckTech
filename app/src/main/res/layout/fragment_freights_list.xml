@@ -7,7 +7,7 @@
     tools:context=".ui.fragments.nav_travel.freight.freights_list.FreightsListFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/freight_fragment_recycler"
+        android:id="@+id/frag_freight_list_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/item_records"

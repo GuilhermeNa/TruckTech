@@ -2,16 +2,16 @@ package br.com.apps.repository.repository.loan
 
 class LoanRepository(private val read: LoanReadImpl): LoanRepositoryInterface {
 
-    override suspend fun getLoanListByEmployeeIdAndPaymentStatus(
+    override suspend fun fetchLoanListByEmployeeIdAndPaymentStatus(
         employeeId: String,
         isPaid: Boolean,
         flow: Boolean
-    ) = read.getLoanListByEmployeeIdAndPaymentStatus(employeeId, isPaid, flow)
+    ) = read.fetchLoanListByEmployeeIdAndPaymentStatus(employeeId, isPaid, flow)
 
-    override suspend fun getLoanListByEmployeeIdsAndPaymentStatus(
+    override suspend fun fetchLoanListByEmployeeIdsAndPaymentStatus(
         employeeIdList: List<String>,
         isPaid: Boolean,
         flow: Boolean
-    ) = read.getLoanListByEmployeeIdsAndPaymentStatus(employeeIdList, isPaid, flow)
+    ) = read.fetchLoanListByEmployeeIdsAndPaymentStatus(employeeIdList, isPaid, flow)
 
 }

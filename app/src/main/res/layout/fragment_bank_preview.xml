@@ -63,7 +63,7 @@
                 android:id="@+id/frag_bank_preview_branch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="1274"/>
+                tools:text="1274" />
 
             <TextView
                 android:layout_width="match_parent"

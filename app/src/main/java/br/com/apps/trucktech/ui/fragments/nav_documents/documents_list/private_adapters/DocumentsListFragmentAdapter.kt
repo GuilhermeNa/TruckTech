@@ -5,13 +5,14 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.TruckDocument
-import br.com.apps.trucktech.databinding.ItemDocumentBinding
 import br.com.apps.model.expressions.getDayFormatted
 import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
+import br.com.apps.model.model.TruckDocument
+import br.com.apps.trucktech.databinding.ItemDocumentBinding
 
 class DocumentsListFragmentAdapter(
     private val context: Context,
+    private val plate: String,
     dataSet: List<TruckDocument>,
     val itemCLickListener: (document: TruckDocument) -> Unit = {}
 ) : RecyclerView.Adapter<DocumentsListFragmentAdapter.ViewHolder>() {
@@ -54,8 +55,8 @@ class DocumentsListFragmentAdapter(
 
     private fun bind(holder: ViewHolder, document: TruckDocument) {
         holder.tittle.text = buildString {
-            val plate = document.plate ?: "-"
-            val name = document.name ?: "-"
+            val plate = plate
+            val name = document.getDocumentName()
 
             append(plate)
             append(" - ")

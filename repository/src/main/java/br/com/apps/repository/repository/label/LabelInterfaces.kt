@@ -35,7 +35,7 @@ interface LabelReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Label objects or an Error with an exception.
      */
-    suspend fun getLabelListByMasterUid(masterUid: String, flow: Boolean = false)
+    suspend fun fetchLabelListByMasterUid(masterUid: String, flow: Boolean = false)
             : LiveData<Response<List<Label>>>
 
     /**
@@ -47,7 +47,7 @@ interface LabelReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Label objects or an Error with an exception.
      */
-    suspend fun getLabelListByMasterUidAndType(
+    suspend fun fetchLabelListByMasterUidAndType(
         type: String,
         masterUid: String,
         flow: Boolean = false
@@ -61,7 +61,7 @@ interface LabelReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with the Label object or an Error with an exception.
      */
-    suspend fun getLabelById(labelId: String, flow: Boolean = false): LiveData<Response<Label>>
+    suspend fun fetchLabelById(labelId: String, flow: Boolean = false): LiveData<Response<Label>>
 
     /**
      * Retrieves a list of [Label]'s associated with a master UID, specific type, and operational status.
@@ -73,7 +73,7 @@ interface LabelReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Label objects or an Error with an exception.
      */
-    suspend fun getLabelListByMasterUidAndTypeAndOperational(
+    suspend fun fetchLabelListByMasterUidAndTypeAndOperational(
         masterUid: String,
         type: String,
         isOperational: Boolean,
@@ -89,7 +89,7 @@ interface LabelReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Label objects or an Error with an exception.
      */
-    suspend fun getDefaultLabelList(
+    suspend fun fetchDefaultLabelList(
         type: String,
         isOperational: Boolean,
         flow: Boolean = false
@@ -103,7 +103,7 @@ interface LabelReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Label objects or an Error with an exception.
      */
-    suspend fun getDefaultExpendLabelList(isOperational: Boolean? = false, flow: Boolean = false)
+    suspend fun fetchDefaultExpendLabelList(isOperational: Boolean? = false, flow: Boolean = false)
             : LiveData<Response<List<Label>>>
 
     /**

@@ -34,16 +34,16 @@ class EmployeeRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getEmployeeListByMasterUid(
+    override suspend fun fetchEmployeeListByMasterUid(
         masterUid: String,
         flow: Boolean
-    ) = read.getEmployeeListByMasterUid(masterUid, flow)
+    ) = read.fetchEmployeeListByMasterUid(masterUid, flow)
 
-    override suspend fun getById(
+    override suspend fun fetchById(
         id: String,
         type: EmployeeType,
         flow: Boolean
-    ) = read.getById(id, type, flow)
+    ) = read.fetchById(id, type, flow)
 
     override suspend fun getEmployeeBankAccounts(id: String, type: EmployeeType, flow: Boolean) =
         read.getEmployeeBankAccounts(id, type, flow)

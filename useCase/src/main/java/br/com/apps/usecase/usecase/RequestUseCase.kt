@@ -70,8 +70,7 @@ class RequestUseCase(
     }
 
     suspend fun save(permission: PermissionLevelType, dto: TravelRequestDto) {
-        //TODO alterar
-        if (!dto.validateForDataBaseInsertion()) throw InvalidParameterException("Invalid Request for saving")
+       dto.validateForDataBaseInsertion()
         validatePermission(permission, dto)
         repository.save(dto)
     }
@@ -109,11 +108,10 @@ class RequestUseCase(
     }
 
     suspend fun saveItem(permission: PermissionLevelType, dto: RequestItemDto): String {
-        //TODO recriar validação p salvar
         val requestId = dto.requestId ?: throw NullPointerException(EMPTY_ID)
-        if (!dto.validateDataIntegrity()) throw InvalidParameterException("Invalid Item for saving")
+        dto.validateDataIntegrity()
 
-        val response = repository.getRequestById(requestId).awaitValue()
+        val response = repository.fetchRequestById(requestId).awaitValue()
         val requestDto = when (response) {
             is Response.Error -> throw response.exception
             is Response.Success -> response.data ?: throw NullPointerException()

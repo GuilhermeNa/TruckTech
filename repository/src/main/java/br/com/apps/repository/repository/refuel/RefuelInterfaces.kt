@@ -38,7 +38,7 @@ interface RefuelReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Refuel] list.
      */
-    suspend fun getRefuelListByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchRefuelListByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<Refuel>>>
 
     /**
@@ -48,7 +48,7 @@ interface RefuelReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Travel] list.
      */
-    suspend fun getRefuelListByTravelId(travelId: String, flow: Boolean = false)
+    suspend fun fetchRefuelListByTravelId(travelId: String, flow: Boolean = false)
             : LiveData<Response<List<Refuel>>>
 
     /**
@@ -58,7 +58,7 @@ interface RefuelReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Refuel] list.
      */
-    suspend fun getRefuelListByTravelIds(idList: List<String>, flow: Boolean = false)
+    suspend fun fetchRefuelListByTravelIds(idList: List<String>, flow: Boolean = false)
             : LiveData<Response<List<Refuel>>>
 
     /**
@@ -68,7 +68,7 @@ interface RefuelReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Refuel].
      */
-    suspend fun getRefuelById(refuelId: String, flow: Boolean = false)
+    suspend fun fetchRefuelById(refuelId: String, flow: Boolean = false)
             : LiveData<Response<Refuel>>
 
 }

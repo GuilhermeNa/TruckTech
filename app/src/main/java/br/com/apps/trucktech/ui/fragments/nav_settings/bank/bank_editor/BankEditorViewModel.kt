@@ -5,42 +5,34 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
 import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.exceptions.NullBankAccountException
+import br.com.apps.model.exceptions.NullBankException
 import br.com.apps.model.expressions.atBrZone
-import br.com.apps.model.factory.BankAccountFactory
-import br.com.apps.model.mapper.toDto
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.EmployeeType
-import br.com.apps.model.model.payment_method.PixType
+import br.com.apps.model.model.payment_method.PixType.Companion.listOfPixDescriptions
 import br.com.apps.model.toDate
 import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitAll
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.usecase.usecase.EmployeeUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class BankEditorViewModel(
-    private val idHolder: IdHolder,
+    private val vmData: BankEVmData,
+    private val employeeUseCase: EmployeeUseCase,
     private val employeeRepository: EmployeeRepository,
     private val bankRepository: BankRepository
 ) : ViewModel() {
 
-    private val masterUid = idHolder.masterUid
-        ?: throw NullPointerException("BankEditorViewModel: masterUid is null")
+    private var isEditing = vmData.bankAccountId != null
 
-    private val employeeId = idHolder.driverId
-        ?: throw NullPointerException("BankEditorViewModel: employeeId is null")
-
-    private var isEditing = false
-
-    private val _data = MutableLiveData<Response<BankEditorData>>()
+    private val _data = MutableLiveData<Response<BankEFData>>()
     val data get() = _data
 
     //---------------------------------------------------------------------------------------------//
@@ -48,10 +40,7 @@ class BankEditorViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        isEditing = idHolder.bankAccountId?.let { true } ?: false
-
         loadData()
-
     }
 
     /**
@@ -59,78 +48,52 @@ class BankEditorViewModel(
      */
     private fun loadData() {
         viewModelScope.launch {
-
-            val bankAccDef = idHolder.bankAccountId?.let { loadBankAccount(it) }
-            val bankListDef = loadBanks()
-
-            _data.value =
-                if (isEditing) responseWhenEditing(bankAccDef, bankListDef)
-                else responseWhenCreating(bankListDef)
-
+            val bankAcc = vmData.bankAccountId?.let { loadBankAccount(it) }
+            val bankList = loadBanks()
+            sendResponse(bankAcc, bankList)
         }
     }
 
-    private suspend fun loadBanks(): CompletableDeferred<List<Bank>> {
-        val bankListDef = CompletableDeferred<List<Bank>>()
-
-        bankRepository.getBankList().asFlow().first { response ->
-            when (response) {
-                is Response.Error -> _data.value = response
-                is Response.Success -> {
-
-                    response.data?.let {
-                        bankListDef.complete(it)
-                    }
-                }
-            }
-            true
+    private suspend fun loadBanks(): List<Bank> {
+        val response = bankRepository.fetchBankList().asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data
+                ?: throw NullBankException("Error when loading banks, data is null")
         }
-
-        return bankListDef
     }
 
-    private suspend fun loadBankAccount(bankId: String): CompletableDeferred<BankAccount> {
-        val bankAccDef = CompletableDeferred<BankAccount>()
-
-        employeeRepository.getBankAccountById(employeeId, bankId, EmployeeType.DRIVER)
-            .asFlow().first { response ->
-                when (response) {
-                    is Response.Error -> _data.value = response
-                    is Response.Success -> response.data?.let { bankAccDef.complete(it) }
-                }
-                true
-            }
-
-        return bankAccDef
+    private suspend fun loadBankAccount(bankAccId: String): BankAccount {
+        val response = employeeRepository.getBankAccountById(
+            vmData.employeeId,
+            bankAccId,
+            EmployeeType.DRIVER
+        ).asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data
+                ?: throw NullBankAccountException("Error when loading bank account, data is null")
+        }
     }
 
-    private suspend fun responseWhenCreating(bankListDef: CompletableDeferred<List<Bank>>): Response.Success<BankEditorData> {
-        bankListDef.await()
-        val bankList = bankListDef.getCompleted()
-        val pixList = PixType.getMappedPixTypeAndDescription().entries.map { it.value }.sorted()
-
-        return Response.Success(
-            BankEditorData(
+    private fun sendResponse(bankAcc: BankAccount?, bankList: List<Bank>) {
+        fun whenEditing(): BankEFData {
+            bankAcc?.setBankById(bankList)
+            return BankEFData(
                 bankList = bankList,
-                pixList = pixList
-            )
-        )
-    }
-
-    private suspend fun responseWhenEditing(
-        bankAccDef: CompletableDeferred<BankAccount>?,
-        bankListDef: CompletableDeferred<List<Bank>>
-    ): Response.Success<BankEditorData> {
-        awaitAll(bankAccDef!!, bankListDef)
-        val bankList = bankListDef.getCompleted()
-        val bankAcc = bankAccDef.getCompleted()
-        return Response.Success(
-            BankEditorData(
-                bankList = bankList,
-                pixList = PixType.getMappedPixTypeAndDescription().entries.map { it.value }.sorted(),
+                pixList = listOfPixDescriptions.sorted(),
                 bankAcc = bankAcc
             )
-        )
+        }
+
+        fun whenCreating(): BankEFData {
+            return BankEFData(
+                bankList = bankList,
+                pixList = listOfPixDescriptions.sorted()
+            )
+        }
+
+        _data.value = Response.Success(if (isEditing) whenEditing() else whenCreating())
     }
 
     /**
@@ -139,28 +102,36 @@ class BankEditorViewModel(
     fun save(viewDto: BankAccountDto) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = createOrUpdate(viewDto)
-                employeeRepository.saveBankAccount(dto, EmployeeType.DRIVER)
+                val writeReq = WriteRequest(data = generateDto(viewDto))
+                employeeUseCase.saveBankAccount(writeReq, EmployeeType.DRIVER)
                 emit(Response.Success())
+
             } catch (e: Exception) {
                 emit(Response.Error(e))
+
             }
         }
 
-    private fun createOrUpdate(viewDto: BankAccountDto): BankAccountDto {
-        return if (isEditing) {
-            val bankAcc = (data.value as Response.Success).data?.bankAcc
-            BankAccountFactory.update(bankAcc!!, viewDto)
-            bankAcc.toDto()
+    private fun generateDto(viewDto: BankAccountDto): BankAccountDto {
+        fun whenEditing(): BankAccountDto {
+            val bankAcc = (data.value as Response.Success).data?.bankAcc!!
 
-        } else {
-            viewDto.run {
-                this.insertionDate = LocalDateTime.now().atBrZone().toDate()
-                this.masterUid = this@BankEditorViewModel.masterUid
-                this.employeeId = this@BankEditorViewModel.employeeId
+            return viewDto.also {
+                it.masterUid = bankAcc.masterUid
+                it.id = bankAcc.id
+                it.employeeId = bankAcc.employeeId
+                it.insertionDate = bankAcc.insertionDate.toDate()
             }
-            BankAccountFactory.create(viewDto).toDto()
         }
+
+        fun whenCreating(): BankAccountDto = viewDto.also {
+            it.insertionDate = LocalDateTime.now().atBrZone().toDate()
+            it.masterUid = vmData.masterUid
+            it.employeeId = vmData.employeeId
+        }
+
+        return if (isEditing) whenEditing()
+        else whenCreating()
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -170,22 +141,28 @@ class BankEditorViewModel(
     fun validateBank(bankName: String): Boolean {
         var isValid = true
 
-        if(bankName.isEmpty()) isValid = false
+        if (bankName.isEmpty()) isValid = false
 
         val bankList = (data.value as Response.Success).data?.bankList!!
-        if(!bankList.map { it.name }.contains(bankName)) isValid = false
+        if (!bankList.map { it.name }.contains(bankName)) isValid = false
 
         return isValid
     }
 
-    fun getBankCode(bankName: String): String {
+    fun getBankId(bankName: String): String {
         val bankList = (data.value as Response.Success).data?.bankList!!
-        return bankList.firstOrNull { it.name == bankName }?.code.toString()
+        return bankList.firstOrNull { it.name == bankName }!!.id
     }
 
 }
 
-data class BankEditorData(
+class BankEVmData(
+    val masterUid: String,
+    val employeeId: String,
+    val bankAccountId: String?
+)
+
+data class BankEFData(
     val bankList: List<Bank>,
     val pixList: List<String>,
     val bankAcc: BankAccount? = null

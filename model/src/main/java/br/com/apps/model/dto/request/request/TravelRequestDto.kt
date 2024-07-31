@@ -1,6 +1,6 @@
 package br.com.apps.model.dto.request.request
 
-import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.InvalidForSavingException
 import java.util.Date
@@ -14,7 +14,7 @@ data class TravelRequestDto(
     var date: Date? = null,
     var requestNumber: Int? = null,
     var status: String? = null
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||

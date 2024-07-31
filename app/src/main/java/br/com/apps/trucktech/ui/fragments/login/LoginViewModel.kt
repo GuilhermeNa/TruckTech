@@ -10,8 +10,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
-
 class LoginViewModel : ViewModel() {
 
     private val _state = MutableLiveData<LfState>()

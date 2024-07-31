@@ -9,7 +9,7 @@ abstract class Fleet(
     open val fleetType: FleetType
 )
 
-enum class FleetType(description: String) {
+enum class FleetType(val description: String) {
     TRUCK("TRUCK"),
     THREE_AXIS("THREE_AXIS"),
     FOUR_AXIS("FOUR_AXIS"),

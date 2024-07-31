@@ -6,17 +6,17 @@ class AdvanceRepository(private val read: AdvanceReadImpl): AdvanceRepositoryInt
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getAdvanceListByEmployeeIdAndPaymentStatus(
+    override suspend fun fetchAdvanceListByEmployeeIdAndPaymentStatus(
         employeeId: String,
         isPaid: Boolean,
         flow: Boolean
-    ) = read.getAdvanceListByEmployeeIdAndPaymentStatus(employeeId, isPaid, flow)
+    ) = read.fetchAdvanceListByEmployeeIdAndPaymentStatus(employeeId, isPaid, flow)
 
-    override suspend fun getAdvanceListByEmployeeIdsAndPaymentStatus(
+    override suspend fun fetchAdvanceListByEmployeeIdsAndPaymentStatus(
         employeeIdList: List<String>,
         isPaid: Boolean,
         flow: Boolean
-    ) = read.getAdvanceListByEmployeeIdsAndPaymentStatus(employeeIdList, isPaid, flow)
+    ) = read.fetchAdvanceListByEmployeeIdsAndPaymentStatus(employeeIdList, isPaid, flow)
 
 }
 

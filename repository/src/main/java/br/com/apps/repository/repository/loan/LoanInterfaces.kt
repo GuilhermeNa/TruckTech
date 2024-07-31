@@ -19,7 +19,7 @@ interface LoanReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Loan objects or an Error with an exception.
      */
-    suspend fun getLoanListByEmployeeIdAndPaymentStatus(
+    suspend fun fetchLoanListByEmployeeIdAndPaymentStatus(
         employeeId: String,
         isPaid: Boolean,
         flow: Boolean = false
@@ -34,7 +34,7 @@ interface LoanReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Loan objects or an Error with an exception.
      */
-    suspend fun getLoanListByEmployeeIdsAndPaymentStatus(
+    suspend fun fetchLoanListByEmployeeIdsAndPaymentStatus(
         employeeIdList: List<String>,
         isPaid: Boolean,
         flow: Boolean = false

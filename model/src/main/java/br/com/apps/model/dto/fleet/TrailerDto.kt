@@ -1,6 +1,6 @@
 package br.com.apps.model.dto.fleet
 
-import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
 
 data class TrailerDto(
@@ -9,7 +9,7 @@ data class TrailerDto(
     var plate: String? = null,
     var fleetType: String? = null,
     var truckId: String? = null,
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
         if (id == null ||

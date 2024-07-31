@@ -5,14 +5,14 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.Fine
+import br.com.apps.model.model.FleetFine
 import br.com.apps.trucktech.databinding.ItemFineBinding
 import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.model.expressions.toCurrencyPtBr
 
 class FineRecyclerAdapter(
     private val context: Context,
-    dataSet: List<Fine>
+    dataSet: List<FleetFine>
 ) : RecyclerView.Adapter<FineRecyclerAdapter.ViewHolder>() {
 
     private val dataSet = dataSet.toMutableList()
@@ -49,7 +49,7 @@ class FineRecyclerAdapter(
 
     override fun getItemCount(): Int = dataSet.size
 
-    private fun bind(holder: ViewHolder, fine: Fine) {
+    private fun bind(holder: ViewHolder, fine: FleetFine) {
         holder.apply {
             date.text = fine.date?.getMonthAndYearInPtBr()
             code.text = buildString {
@@ -62,7 +62,7 @@ class FineRecyclerAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(dataSet: List<Fine>) {
+    fun update(dataSet: List<FleetFine>) {
         this.dataSet.clear()
         this.dataSet.addAll(dataSet)
         notifyDataSetChanged()

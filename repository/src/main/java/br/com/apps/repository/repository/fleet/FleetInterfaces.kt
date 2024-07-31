@@ -14,36 +14,42 @@ interface FleetReadInterface {
     /**
      * Fetches the [Truck] dataSet for the specified master UID.
      *
-     * @param masterUid The ID of the master user.
+     * @param uid The ID of the master user.
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Truck] list.
      */
-    suspend fun getTruckListByMasterUid(masterUid: String, flow: Boolean = false)
+    suspend fun fetchTruckListByMasterUid(uid: String, flow: Boolean = false)
             : LiveData<Response<List<Truck>>>
 
     /**
      * Fetches the [Truck] dataSet for the specified ID.
      *
-     * @param truckId The ID of [Truck].
+     * @param id The ID of [Truck].
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Truck].
      */
-    suspend fun getTruckById(truckId: String, flow: Boolean = false)
+    suspend fun fetchTruckById(id: String, flow: Boolean = false)
             : LiveData<Response<Truck>>
 
     /**
      * Fetches the [Truck] dataSet for the specified driver ID.
      *
-     * @param driverId The ID of the [Employee].
+     * @param id The ID of the [Employee].
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Truck] list.
      */
-    suspend fun getTruckByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchTruckByDriverId(id: String, flow: Boolean = false)
             : LiveData<Response<Truck>>
 
-    suspend fun getTrailerListLinkedToTruckById(truckId: String, flow: Boolean = false)
+    /**
+     * Fetches the list of [Trailer]'s linked to the specified [Truck] ID.
+     *
+     * @param id The ID of the [Truck] for which the linked trailers are to be fetched.
+     * @param flow If true, the user will continuously observe updates to the data.
+     * @return A [Response] with a list of trailers linked to the specified truck.
+     */
+    suspend fun fetchTrailerListLinkedToTruckById(id: String, flow: Boolean = false)
             : LiveData<Response<List<Trailer>>>
-
 
 }
 

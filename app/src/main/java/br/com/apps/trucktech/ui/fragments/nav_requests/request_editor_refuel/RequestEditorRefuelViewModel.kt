@@ -53,7 +53,7 @@ class RequestEditorRefuelViewModel(
     fun loadData(itemId: String) {
         viewModelScope.launch {
             val response =
-                repository.getItemById(requestId = vmData.requestId, itemId = itemId).asFlow()
+                repository.fetchItemById(requestId = vmData.requestId, itemId = itemId).asFlow()
                     .first()
 
             _data.value = when (response) {

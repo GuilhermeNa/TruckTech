@@ -13,7 +13,7 @@ data class LabelDto(
     var isDefaultLabel: Boolean? = null,
     @field:JvmField
     var isOperational: Boolean? = null
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||

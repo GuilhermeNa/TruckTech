@@ -59,7 +59,7 @@ class FreightsListViewModel(
     private suspend fun loadCustomers(): CompletableDeferred<List<Customer>> {
         val deferred = CompletableDeferred<List<Customer>>()
 
-        cRepository.getCustomerListByMasterUid(idHolder.masterUid!!).asFlow().first { response ->
+        cRepository.fetchCustomerListByMasterUid(idHolder.masterUid!!).asFlow().first { response ->
             when (response) {
                 is Response.Error -> {
                     _state.value = State.Error(response.exception)

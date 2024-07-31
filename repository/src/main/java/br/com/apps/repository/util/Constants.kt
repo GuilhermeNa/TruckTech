@@ -16,6 +16,8 @@ const val TRAVEL_ID = "travelId"
 
 const val TRUCK_ID = "truckId"
 
+const val FLEET_ID = "fleetId"
+
 const val EMPLOYEE_ID = "employeeId"
 
 const val IS_PAID = "isPaid"
@@ -58,6 +60,10 @@ const val SUCCESSFULLY_REMOVED = "Removido com sucesso"
 // FAILURE MESSAGES
 //---------------------------------------------------------------------------------------------//
 
+const val EMPTY_ID_EXCEPTION = "Id list cannot be empty"
+
+const val BLANK_ID_EXCEPTION = "Id cannot be blank"
+
 const val UNKNOWN_EXCEPTION = "Erro desconhecido"
 
 const val FAILED_TO_SAVE = "Falha ao salvar"
@@ -78,15 +84,15 @@ const val NULL_DATE = "Date is null"
 // FIRE BASE COLLECTIONS
 //---------------------------------------------------------------------------------------------//
 
-internal const val FIRESTORE_COLLECTION_TRAVELS = "travels"
+const val FIRESTORE_COLLECTION_TRAVELS = "travels"
 
-internal const val FIRESTORE_COLLECTION_FREIGHTS = "freights"
+const val FIRESTORE_COLLECTION_FREIGHTS = "freights"
 
 internal const val FIRESTORE_COLLECTION_REFUELS = "refuels"
 
 internal const val FIRESTORE_COLLECTION_ADVANCES = "advances"
 
-internal const val FIRESTORE_COLLECTION_EXPENDS = "expends"
+const val FIRESTORE_COLLECTION_EXPENDS = "expends"
 
 internal const val FIRESTORE_COLLECTION_LOANS = "loans"
 
@@ -102,17 +108,17 @@ internal const val FIRESTORE_COLLECTION_USER_LABELS = "labels"
 
 internal const val FIRESTORE_COLLECTION_INCOMES = "incomes"
 
-internal const val FIRESTORE_COLLECTION_REQUESTS = "requests"
+const val FIRESTORE_COLLECTION_REQUESTS = "requests"
 
 internal const val FIRESTORE_COLLECTION_ITEMS = "requestItems"
 
 internal const val FIRESTORE_COLLECTION_DEFAULT_BANKS = "_banks"
 
-internal const val FIRESTORE_COLLECTION_DRIVER = "driverEmployee"
+const val FIRESTORE_COLLECTION_DRIVER = "driverEmployee"
 
 internal const val FIRESTORE_COLLECTION_ADMIN = "adminEmployee"
 
-internal const val FIRESTORE_COLLECTION_BANK = "bankAccount"
+const val FIRESTORE_COLLECTION_BANK = "bankAccount"
 
 internal const val FIRESTORE_COLLECTION_CUSTOMER = "customers"
 

@@ -37,7 +37,7 @@ interface TravelReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Travel objects or an Error with an exception.
      */
-    suspend fun getTravelListByDriverIdAndIsFinished(driverId: String, flow: Boolean = false)
+    suspend fun fetchTravelListByDriverIdAndIsFinished(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<Travel>>>
 
     /**
@@ -47,7 +47,7 @@ interface TravelReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Travel] list.
      */
-    suspend fun getTravelListByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchTravelListByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<Travel>>>
 
     /**
@@ -57,7 +57,7 @@ interface TravelReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Travel].
      */
-    suspend fun getTravelById(travelId: String, flow: Boolean = false)
+    suspend fun fetchTravelById(travelId: String, flow: Boolean = false)
             : LiveData<Response<Travel>>
 
 }

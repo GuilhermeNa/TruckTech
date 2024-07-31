@@ -2,6 +2,7 @@ package br.com.apps.repository.repository.refuel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.DRIVER_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_REFUELS
@@ -21,46 +22,56 @@ class RefuelReadImpl(fireStore: FirebaseFirestore) : RefuelReadInterface {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_REFUELS)
 
-    override suspend fun getRefuelListByDriverId(
+    override suspend fun fetchRefuelListByDriverId(
         driverId: String,
         flow: Boolean
     ): LiveData<Response<List<Refuel>>> = withContext(Dispatchers.IO) {
+        if (driverId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be empty")))
+
         val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-        if (flow) listener.onSnapShot { it.toRefuelList() }
+        return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
         else listener.onComplete { it.toRefuelList() }
     }
 
-    override suspend fun getRefuelListByTravelId(
+    override suspend fun fetchRefuelListByTravelId(
         travelId: String,
         flow: Boolean
     ): LiveData<Response<List<Refuel>>> = withContext(Dispatchers.IO) {
+        if (travelId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be empty")))
+
         val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
             .orderBy(ODOMETER_MEASURE, Query.Direction.ASCENDING)
 
-        if (flow) listener.onSnapShot { it.toRefuelList() }
+        return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
         else listener.onComplete { it.toRefuelList() }
     }
 
-    override suspend fun getRefuelListByTravelIds(
+    override suspend fun fetchRefuelListByTravelIds(
         idList: List<String>,
         flow: Boolean
     ): LiveData<Response<List<Refuel>>> = withContext(Dispatchers.IO) {
-        if (idList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
+        if (idList.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id list cannot be empty")))
 
         val listener = collection.whereIn(TRAVEL_ID, idList)
 
-        if (flow) listener.onSnapShot { it.toRefuelList() }
+        return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
         else listener.onComplete { it.toRefuelList() }
     }
 
-    override suspend fun getRefuelById(
+    override suspend fun fetchRefuelById(
         refuelId: String,
         flow: Boolean
     ): LiveData<Response<Refuel>> = withContext(Dispatchers.IO) {
+        if (refuelId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be empty")))
+
         val listener = collection.document(refuelId)
 
-        if (flow) listener.onSnapShot { it.toRefuelObject() }
+        return@withContext if (flow) listener.onSnapShot { it.toRefuelObject() }
         else listener.onComplete { it.toRefuelObject() }
     }
 

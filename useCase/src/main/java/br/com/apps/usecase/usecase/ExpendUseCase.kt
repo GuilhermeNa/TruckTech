@@ -81,7 +81,7 @@ class ExpendUseCase(
         mediator: MediatorLiveData<Response<List<Expend>>>,
         complete: (expendList: List<Expend>) -> Unit
     ) {
-        val liveData = repository.getExpendListByTravelId(travelId, true)
+        val liveData = repository.fetchExpendListByTravelId(travelId, true)
 
         mediator.addSource(liveData) { response ->
             when (response) {
@@ -114,7 +114,7 @@ class ExpendUseCase(
         val auth = writeReq.authLevel
 
         validateAndProcess(
-            permission = { dto.validatePermission(auth) }
+            validatePermission = { dto.validatePermission(auth) }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception
@@ -137,8 +137,8 @@ class ExpendUseCase(
         val auth = writeReq.authLevel
 
         validateAndProcess(
-            permission = { dto.validatePermission(auth) },
-            validator = { dto.validateForDataBaseInsertion() }
+            validatePermission = { dto.validatePermission(auth) },
+            validateData = { dto.validateForDataBaseInsertion() }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception

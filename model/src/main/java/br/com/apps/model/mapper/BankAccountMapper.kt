@@ -10,13 +10,12 @@ fun BankAccountDto.toModel(): BankAccount {
     this.validateDataIntegrity()
     return BankAccount(
         masterUid = this.masterUid!!,
-        id = this.id,
+        id = this.id!!,
         employeeId = this.employeeId!!,
+        bankId = this.bankId!!,
         insertionDate = this.insertionDate!!.toLocalDateTime(),
-        bankName = this.bankName!!,
         branch = this.branch!!,
         accNumber = this.accNumber!!,
-        code = this.code!!.toInt(),
         mainAccount = this.mainAccount!!,
         pix = this.pix,
         pixType = this.pixType?.let { PixType.getType(it) }
@@ -28,12 +27,11 @@ fun BankAccount.toDto(): BankAccountDto =
         masterUid = this.masterUid,
         id = this.id,
         employeeId = this.employeeId,
+        bankId = this.bankId,
         insertionDate = this.insertionDate.toDate(),
-        bankName = this.bankName,
         branch = this.branch,
         accNumber = this.accNumber,
         pix = this.pix,
-        code = this.code.toString(),
         mainAccount = this.mainAccount,
         pixType = this.pixType?.description
     )

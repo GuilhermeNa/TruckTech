@@ -32,7 +32,7 @@ class RecordsViewModel(
 
     fun loadData() {
         viewModelScope.launch {
-            val response = repository.getTravelById(travelId).asFlow().first()
+            val response = repository.fetchTravelById(travelId).asFlow().first()
             val state = when (response) {
                 is Response.Error -> StateR.Error(response.exception)
                 is Response.Success -> {

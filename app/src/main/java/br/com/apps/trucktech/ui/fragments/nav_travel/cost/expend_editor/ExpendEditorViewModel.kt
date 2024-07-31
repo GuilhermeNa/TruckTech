@@ -98,7 +98,7 @@ class ExpendEditorViewModel(
     private suspend fun loadExpend(expendId: String): CompletableDeferred<Expend> {
         val deferred = CompletableDeferred<Expend>()
 
-        expendRepository.getExpendById(expendId).asFlow().first { response ->
+        expendRepository.fetchExpendById(expendId).asFlow().first { response ->
             when (response) {
                 is Response.Error -> deferred.completeExceptionally(response.exception)
                 is Response.Success -> {

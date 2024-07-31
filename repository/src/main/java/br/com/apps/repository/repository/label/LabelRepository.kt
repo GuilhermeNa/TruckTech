@@ -19,31 +19,31 @@ class LabelRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getLabelListByMasterUid(masterUid: String, flow: Boolean) =
-        read.getLabelListByMasterUid(masterUid, flow)
+    override suspend fun fetchLabelListByMasterUid(masterUid: String, flow: Boolean) =
+        read.fetchLabelListByMasterUid(masterUid, flow)
 
-    override suspend fun getLabelListByMasterUidAndType(
+    override suspend fun fetchLabelListByMasterUidAndType(
         type: String,
         masterUid: String,
         flow: Boolean
     ) =
-        read.getLabelListByMasterUidAndType(type, masterUid, flow)
+        read.fetchLabelListByMasterUidAndType(type, masterUid, flow)
 
-    override suspend fun getLabelById(labelId: String, flow: Boolean) =
-        read.getLabelById(labelId, flow)
+    override suspend fun fetchLabelById(labelId: String, flow: Boolean) =
+        read.fetchLabelById(labelId, flow)
 
-    override suspend fun getLabelListByMasterUidAndTypeAndOperational(
+    override suspend fun fetchLabelListByMasterUidAndTypeAndOperational(
         masterUid: String,
         type: String,
         isOperational: Boolean,
         flow: Boolean
-    ) = read.getLabelListByMasterUidAndTypeAndOperational(masterUid, type, isOperational, flow)
+    ) = read.fetchLabelListByMasterUidAndTypeAndOperational(masterUid, type, isOperational, flow)
 
-    override suspend fun getDefaultLabelList(type: String, isOperational: Boolean, flow: Boolean) =
-        read.getDefaultLabelList(type, isOperational, flow)
+    override suspend fun fetchDefaultLabelList(type: String, isOperational: Boolean, flow: Boolean) =
+        read.fetchDefaultLabelList(type, isOperational, flow)
 
-    override suspend fun getDefaultExpendLabelList(isOperational: Boolean?, flow: Boolean) =
-        read.getDefaultExpendLabelList(isOperational, flow)
+    override suspend fun fetchDefaultExpendLabelList(isOperational: Boolean?, flow: Boolean) =
+        read.fetchDefaultExpendLabelList(isOperational, flow)
 
     override suspend fun getAllOperationalLabelListForDrivers(masterUid: String) =
         read.getAllOperationalLabelListForDrivers(masterUid)

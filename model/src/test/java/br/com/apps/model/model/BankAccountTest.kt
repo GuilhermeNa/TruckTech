@@ -1,6 +1,7 @@
 package br.com.apps.model.model
 
 import br.com.apps.model.exceptions.InvalidTypeException
+import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.payment_method.PixType
 import org.junit.Assert
@@ -18,15 +19,14 @@ class BankAccountTest {
             masterUid = "1",
             id = "2",
             employeeId = "3",
-
+            bankId = "4",
             insertionDate = LocalDateTime.of(2024, 7, 15, 12, 0, 0),
-            code = 123,
-            bankName = "Bradesco",
             branch = 321,
             accNumber = 123456,
             mainAccount = true,
             pix = "111.111.111-11",
-            pixType = PixType.CPF
+            pixType = PixType.CPF,
+            bank = Bank(id = "4", name = "Bradesco", code = 123, urlImage = "urlImage")
         )
     }
 

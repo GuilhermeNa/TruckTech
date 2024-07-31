@@ -32,19 +32,19 @@ class RequestRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getRequestListByDriverId(driverId: String, flow: Boolean) =
-        read.getRequestListByDriverId(driverId, flow)
+    override suspend fun fetchRequestListByDriverId(driverId: String, flow: Boolean) =
+        read.fetchRequestListByDriverId(driverId, flow)
 
-    override suspend fun getItemListByRequests(idList: List<String>, flow: Boolean) =
-        read.getItemListByRequests(idList, flow)
+    override suspend fun fetchItemListByRequests(idList: List<String>, flow: Boolean) =
+        read.fetchItemListByRequests(idList, flow)
 
-    override suspend fun getRequestById(requestId: String, flow: Boolean) =
-        read.getRequestById(requestId, flow)
+    override suspend fun fetchRequestById(requestId: String, flow: Boolean) =
+        read.fetchRequestById(requestId, flow)
 
-    override suspend fun getItemListByRequestId(requestId: String, flow: Boolean) =
-        read.getItemListByRequestId(requestId, flow)
+    override suspend fun fetchItemListByRequestId(requestId: String, flow: Boolean) =
+        read.fetchItemListByRequestId(requestId, flow)
 
-    override suspend fun getItemById(requestId: String, itemId: String, flow: Boolean) =
-        read.getItemById(requestId, itemId, flow)
+    override suspend fun fetchItemById(requestId: String, itemId: String, flow: Boolean) =
+        read.fetchItemById(requestId, itemId, flow)
 
 }

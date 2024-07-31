@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.repository.util.FAILED_TO_LOAD_BANKS
 import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.R
@@ -86,7 +87,7 @@ class BankListFragment : BaseFragmentWithToolbar() {
         adapter = BankFragmentAdapter(
             context = requireContext(),
             _clickedPos = viewModel.adapterClickedPos,
-            data = viewModel.data.value ?: BankLFData(emptyList(), emptyList()),
+            data = viewModel.data.value ?: emptyList(),
             clickListener = { id, clickedPos ->
                 viewModel.setAdapterPos(clickedPos)
                 requireView().navigateTo(
@@ -204,34 +205,35 @@ class BankListFragment : BaseFragmentWithToolbar() {
                     }
                 }
 
-                else -> {}
             }
         }
 
         viewModel.data.observe(viewLifecycleOwner) { data ->
-            data?.let {
-                if (viewModel.state.value == State.Loaded) {
-                    val itemRemoved = it.bankAccList.size < adapter!!.data.size
-                    val itemAdded = it.bankAccList.size > adapter!!.data.size
-
-                    when {
-                        itemRemoved -> adapter?.remove()
-
-                        itemAdded -> {
-                            val item =
-                                it.bankAccList.subtract(adapter!!.data.toSet()).singleOrNull()
-                            item?.let { account -> adapter?.add(account) }
-                        }
-
-                        else -> adapter?.update(it)
-                    }
-
-                } else {
-                    adapter?.update(it)
-                }
-            }
+            data?.let { updateFragmentData(it) }
         }
 
+    }
+
+    private fun updateFragmentData(data: List<BankAccount>) {
+        if (viewModel.state.value == State.Loaded) {
+            val itemRemoved = data.size < adapter!!.data.size
+            val itemAdded = data.size > adapter!!.data.size
+
+            when {
+                itemRemoved -> adapter?.remove()
+
+                itemAdded -> {
+                    val item =
+                        data.subtract(adapter!!.data.toSet()).singleOrNull()
+                    item?.let { account -> adapter?.add(account) }
+                }
+
+                else -> adapter?.update(data)
+            }
+
+        } else {
+            adapter?.update(data)
+        }
     }
 
     private fun showAfterLoading() {
@@ -239,7 +241,8 @@ class BankListFragment : BaseFragmentWithToolbar() {
             boxGif.layout.apply {
                 if (this.visibility == VISIBLE) {
                     visibility = GONE
-                    animation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out_and_shrink)
+                    animation =
+                        AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out_and_shrink)
                 }
             }
 

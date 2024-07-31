@@ -7,14 +7,14 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.expressions.getDayFormatted
+import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRecordsBinding
-import br.com.apps.model.expressions.getDayFormatted
-import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.trucktech.expressions.isLightTheme
 
 class RecordsItemRecyclerAdapter<T>(
@@ -86,7 +86,7 @@ class RecordsItemRecyclerAdapter<T>(
             month.text = freight.loadingDate?.getMonthInPtBrAbbreviated()
             day.text = freight.loadingDate?.getDayFormatted()
             title.text = freight.customer?.name
-            description.text = freight.getTextDescription()
+            description.text = "Voce carregou para ${freight.destiny}"
             value.text = freight.value?.toCurrencyPtBr()
             isValidImg.visibility = if(freight.isValid) VISIBLE else GONE
             image.run {

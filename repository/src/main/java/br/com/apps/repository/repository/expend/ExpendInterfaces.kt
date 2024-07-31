@@ -18,7 +18,7 @@ interface ExpendReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Expend] list.
      */
-    suspend fun getExpendListByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchExpendListByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<Expend>>>
 
     /**
@@ -30,7 +30,7 @@ interface ExpendReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Expend] list.
      */
-    suspend fun getExpendListByDriverIdsAndRefundableStatus(
+    suspend fun fetchExpendListByDriverIdsAndRefundableStatus(
         driverIdList: List<String>,
         paidByEmployee: Boolean,
         alreadyRefunded: Boolean,
@@ -46,7 +46,7 @@ interface ExpendReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Expend] list.
      */
-    suspend fun getExpendListByDriverIdAndRefundableStatus(
+    suspend fun fetchExpendListByDriverIdAndRefundableStatus(
         driverId: String,
         paidByEmployee: Boolean,
         alreadyRefunded: Boolean,
@@ -60,7 +60,7 @@ interface ExpendReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Expend] list.
      */
-    suspend fun getExpendListByTravelId(travelId: String, flow: Boolean = false)
+    suspend fun fetchExpendListByTravelId(travelId: String, flow: Boolean = false)
             : LiveData<Response<List<Expend>>>
 
     /**
@@ -70,7 +70,7 @@ interface ExpendReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Expend] list.
      */
-    suspend fun getExpendListByTravelIds(travelIdList: List<String>, flow: Boolean = false)
+    suspend fun fetchExpendListByTravelIds(travelIdList: List<String>, flow: Boolean = false)
             : LiveData<Response<List<Expend>>>
 
     /**
@@ -80,7 +80,7 @@ interface ExpendReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Expend] list.
      */
-    suspend fun getExpendById(expendId: String, flow: Boolean = false)
+    suspend fun fetchExpendById(expendId: String, flow: Boolean = false)
             : LiveData<Response<Expend>>
 
     /**
@@ -91,7 +91,7 @@ interface ExpendReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Expend objects or an Error with an exception.
      */
-    suspend fun getExpendListByDriverIdAndIsNotRefundYet(driverId: String, flow: Boolean = false)
+    suspend fun fetchExpendListByDriverIdAndIsNotRefundYet(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<Expend>>>
 
 }

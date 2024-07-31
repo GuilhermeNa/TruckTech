@@ -104,7 +104,7 @@ class RequestPreviewViewModel(
     }
 
     private suspend fun loadRequest(complete: (requests: PaymentRequest) -> Unit) {
-        repository.getRequestById(vmData.requestId, true).asFlow().collect { response ->
+        repository.fetchRequestById(vmData.requestId, true).asFlow().collect { response ->
             when (response) {
                 is Response.Error -> throw response.exception
                 is Response.Success -> {
@@ -116,7 +116,7 @@ class RequestPreviewViewModel(
     }
 
     private suspend fun loadItems(complete: (items: List<RequestItem>) -> Unit) {
-        repository.getItemListByRequestId(vmData.requestId, true).asFlow().collect { response ->
+        repository.fetchItemListByRequestId(vmData.requestId, true).asFlow().collect { response ->
             when (response) {
                 is Response.Error -> throw response.exception
                 is Response.Success -> response.data?.let { complete(it) } ?: complete(emptyList())

@@ -16,7 +16,7 @@ interface AdvanceReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Advance] list.
      */
-    suspend fun getAdvanceListByEmployeeIdAndPaymentStatus(
+    suspend fun fetchAdvanceListByEmployeeIdAndPaymentStatus(
         employeeId: String,
         isPaid: Boolean,
         flow: Boolean = false
@@ -30,7 +30,7 @@ interface AdvanceReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Advance] list.
      */
-    suspend fun getAdvanceListByEmployeeIdsAndPaymentStatus(
+    suspend fun fetchAdvanceListByEmployeeIdsAndPaymentStatus(
         employeeIdList: List<String>,
         isPaid: Boolean,
         flow: Boolean = false

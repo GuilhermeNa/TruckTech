@@ -52,4 +52,9 @@ dependencies {
     //Koin
     implementation("io.insert-koin:koin-android:3.4.0")
 
+    //MockK
+    testImplementation ("io.mockk:mockk:1.13.12")
+
+    //Coroutine Test
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 }

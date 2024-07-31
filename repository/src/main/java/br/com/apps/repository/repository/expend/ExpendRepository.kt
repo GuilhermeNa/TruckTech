@@ -19,42 +19,42 @@ class ExpendRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getExpendListByDriverId(driverId: String, flow: Boolean) =
-        read.getExpendListByDriverId(driverId, flow)
+    override suspend fun fetchExpendListByDriverId(driverId: String, flow: Boolean) =
+        read.fetchExpendListByDriverId(driverId, flow)
 
-    override suspend fun getExpendListByDriverIdsAndRefundableStatus(
+    override suspend fun fetchExpendListByDriverIdsAndRefundableStatus(
         driverIdList: List<String>, paidByEmployee: Boolean, alreadyRefunded: Boolean, flow: Boolean
-    ) = read.getExpendListByDriverIdsAndRefundableStatus(
+    ) = read.fetchExpendListByDriverIdsAndRefundableStatus(
         driverIdList,
         paidByEmployee,
         alreadyRefunded,
         flow
     )
 
-    override suspend fun getExpendListByDriverIdAndRefundableStatus(
+    override suspend fun fetchExpendListByDriverIdAndRefundableStatus(
         driverId: String,
         paidByEmployee: Boolean,
         alreadyRefunded: Boolean,
         flow: Boolean
-    ) = read.getExpendListByDriverIdAndRefundableStatus(
+    ) = read.fetchExpendListByDriverIdAndRefundableStatus(
         driverId,
         paidByEmployee,
         alreadyRefunded,
         flow
     )
 
-    override suspend fun getExpendListByTravelId(travelId: String, flow: Boolean) =
-        read.getExpendListByTravelId(travelId, flow)
+    override suspend fun fetchExpendListByTravelId(travelId: String, flow: Boolean) =
+        read.fetchExpendListByTravelId(travelId, flow)
 
-    override suspend fun getExpendListByTravelIds(travelIdList: List<String>, flow: Boolean) =
-        read.getExpendListByTravelIds(travelIdList, flow)
+    override suspend fun fetchExpendListByTravelIds(travelIdList: List<String>, flow: Boolean) =
+        read.fetchExpendListByTravelIds(travelIdList, flow)
 
-    override suspend fun getExpendById(expendId: String, flow: Boolean) =
-        read.getExpendById(expendId, flow)
+    override suspend fun fetchExpendById(expendId: String, flow: Boolean) =
+        read.fetchExpendById(expendId, flow)
 
-    override suspend fun getExpendListByDriverIdAndIsNotRefundYet(
+    override suspend fun fetchExpendListByDriverIdAndIsNotRefundYet(
         driverId: String,
         flow: Boolean
-    ) = read.getExpendListByDriverIdAndIsNotRefundYet(driverId, flow)
+    ) = read.fetchExpendListByDriverIdAndIsNotRefundYet(driverId, flow)
 
 }

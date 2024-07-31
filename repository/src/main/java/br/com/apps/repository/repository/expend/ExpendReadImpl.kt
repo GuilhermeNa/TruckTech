@@ -23,17 +23,20 @@ class ExpendReadImpl(fireStore: FirebaseFirestore) : ExpendReadInterface {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_EXPENDS)
 
-    override suspend fun getExpendListByDriverId(
+    override suspend fun fetchExpendListByDriverId(
         driverId: String,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> = withContext(Dispatchers.IO) {
+        if (driverId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyIdException("Driver id cannot be blank")))
+
         val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-        if (flow) listener.onSnapShot { it.toExpendList() }
+        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
         else listener.onComplete { it.toExpendList() }
     }
 
-    override suspend fun getExpendListByDriverIdsAndRefundableStatus(
+    override suspend fun fetchExpendListByDriverIdsAndRefundableStatus(
         driverIdList: List<String>,
         paidByEmployee: Boolean,
         alreadyRefunded: Boolean,
@@ -46,68 +49,79 @@ class ExpendReadImpl(fireStore: FirebaseFirestore) : ExpendReadInterface {
             .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
             .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
-        if (flow) listener.onSnapShot { it.toExpendList() }
+        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
         else listener.onComplete { it.toExpendList() }
     }
 
-    override suspend fun getExpendListByDriverIdAndRefundableStatus(
+    override suspend fun fetchExpendListByDriverIdAndRefundableStatus(
         driverId: String,
         paidByEmployee: Boolean,
         alreadyRefunded: Boolean,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> = withContext(Dispatchers.IO) {
+        if (driverId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyIdException("Driver id cannot be blank")))
+
         val listener = collection.whereEqualTo(DRIVER_ID, driverId)
             .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
             .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
-        if (flow) listener.onSnapShot { it.toExpendList() }
+        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
         else listener.onComplete { it.toExpendList() }
     }
 
-    override suspend fun getExpendListByTravelId(
+    override suspend fun fetchExpendListByTravelId(
         travelId: String,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> = withContext(Dispatchers.IO) {
+        if (travelId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyIdException("Travel id cannot be blank")))
+
         val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
 
-        if (flow) listener.onSnapShot { it.toExpendList() }
+        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
         else listener.onComplete { it.toExpendList() }
     }
 
-    override suspend fun getExpendListByTravelIds(
+    override suspend fun fetchExpendListByTravelIds(
         travelIdList: List<String>,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> = withContext(Dispatchers.IO) {
-        if (travelIdList.isEmpty()) return@withContext MutableLiveData(
-            Response.Success(emptyList())
-        )
+        if (travelIdList.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyIdException("Id list cannot be flank")))
 
         val listener = collection.whereIn(TRAVEL_ID, travelIdList)
 
-        if (flow) listener.onSnapShot { it.toExpendList() }
+        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
         else listener.onComplete { it.toExpendList() }
     }
 
-    override suspend fun getExpendById(
+    override suspend fun fetchExpendById(
         expendId: String,
         flow: Boolean
     ): LiveData<Response<Expend>> = withContext(Dispatchers.IO) {
+        if (expendId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyIdException("Expend id cannot be blank")))
+
         val listener = collection.document(expendId)
 
-        if (flow) listener.onSnapShot { it.toExpendObject() }
+        return@withContext if (flow) listener.onSnapShot { it.toExpendObject() }
         else listener.onComplete { it.toExpendObject() }
     }
 
-    override suspend fun getExpendListByDriverIdAndIsNotRefundYet(
+    override suspend fun fetchExpendListByDriverIdAndIsNotRefundYet(
         driverId: String,
         flow: Boolean
     ): LiveData<Response<List<Expend>>> = withContext(Dispatchers.IO) {
+        if (driverId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyIdException("Driver id cannot be blank")))
+
         val listener = collection.whereEqualTo(DRIVER_ID, driverId)
             .whereEqualTo(IS_VALID, true)
             .whereEqualTo(PAID_BY_EMPLOYEE, true)
             .whereEqualTo(ALREADY_REFUNDED, false)
 
-        if (flow) listener.onSnapShot { it.toExpendList() }
+        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
         else listener.onComplete { it.toExpendList() }
     }
 

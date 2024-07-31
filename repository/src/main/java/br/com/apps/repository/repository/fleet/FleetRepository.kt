@@ -19,16 +19,16 @@ class FleetRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getTruckListByMasterUid(masterUid: String, flow: Boolean) =
-        read.getTruckListByMasterUid(masterUid, flow)
+    override suspend fun fetchTruckListByMasterUid(uid: String, flow: Boolean) =
+        read.fetchTruckListByMasterUid(uid, flow)
 
-    override suspend fun getTruckById(truckId: String, flow: Boolean) =
-        read.getTruckById(truckId, flow)
+    override suspend fun fetchTruckById(id: String, flow: Boolean) =
+        read.fetchTruckById(id, flow)
 
-    override suspend fun getTruckByDriverId(driverId: String, flow: Boolean) =
-        read.getTruckByDriverId(driverId, flow)
+    override suspend fun fetchTruckByDriverId(id: String, flow: Boolean) =
+        read.fetchTruckByDriverId(id, flow)
 
-    override suspend fun getTrailerListLinkedToTruckById(truckId: String, flow: Boolean) =
-        read.getTrailerListLinkedToTruckById(truckId, flow)
+    override suspend fun fetchTrailerListLinkedToTruckById(id: String, flow: Boolean) =
+        read.fetchTrailerListLinkedToTruckById(id, flow)
 
 }

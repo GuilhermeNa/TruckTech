@@ -2,24 +2,32 @@ package br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_preview
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.exceptions.NullCustomerException
+import br.com.apps.model.exceptions.NullFreightException
 import br.com.apps.model.mapper.toDto
+import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.repository.util.WriteRequest
 import br.com.apps.usecase.usecase.FreightUseCase
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class FreightPreviewViewModel(
     private val vmData: FreightPreviewVmData,
-    private val repository: FreightRepository,
+    private val freightRepository: FreightRepository,
     private val customerRepository: CustomerRepository,
     private val useCase: FreightUseCase
 ) : ViewModel() {
+
+    private lateinit var customers: List<Customer>
 
     /**
      * LiveData holding the response data of type [Response] with a [Freight]
@@ -41,24 +49,41 @@ class FreightPreviewViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init {
-        loadData()
-    }
+    init { loadData() }
 
     private fun loadData() {
         viewModelScope.launch {
-            useCase.getFreightByIdFlow(vmData.freightId) { response ->
-                _data.value = when (response) {
-                    is Response.Error -> response
-                    is Response.Success -> {
-                        response.data?.let { freight ->
-                            _writeAuth.value = !freight.isValid
-                            Response.Success(freight)
-                        } ?: Response.Error(NullPointerException())
-                    }
-                }
+            customers = loadCustomers()
+            loadFreightFlow { fre ->
+                sendResponse(fre)
             }
         }
+    }
+
+    private suspend fun loadCustomers(): List<Customer> {
+        val response = customerRepository.fetchCustomerListByMasterUid(vmData.masterUid)
+            .asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullCustomerException(UNKNOWN_EXCEPTION)
+        }
+    }
+
+    private suspend fun loadFreightFlow(onComplete: (freight: Freight) -> Unit) {
+        freightRepository.fetchFreightById(id = vmData.freightId, flow = true)
+            .asFlow().collect { response ->
+                when (response) {
+                    is Response.Error -> throw response.exception
+                    is Response.Success -> response.data?.let { onComplete(it) }
+                        ?: throw NullFreightException(UNKNOWN_EXCEPTION)
+                }
+            }
+    }
+
+    private fun sendResponse(freight: Freight) {
+        setWriteAuth(!freight.isValid)
+        freight.setCustomerById(customers)
+        setFragmentData(freight)
     }
 
     fun delete() = liveData<Response<Unit>>(viewModelScope.coroutineContext) {
@@ -68,7 +93,6 @@ class FreightPreviewViewModel(
                 data = (data.value as Response.Success).data!!.toDto()
             )
             useCase.delete(writeReq)
-            //useCase.delete(vmData.permission, dto)
             emit(Response.Success())
         } catch (e: Exception) {
             e.printStackTrace()
@@ -90,9 +114,18 @@ class FreightPreviewViewModel(
         _darkLayer.value = false
     }
 
+    private fun setWriteAuth(hasAuth: Boolean) {
+        _writeAuth.value = hasAuth
+    }
+
+    private fun setFragmentData(freight: Freight) {
+        _data.value = Response.Success(freight)
+    }
+
 }
 
 data class FreightPreviewVmData(
+    val masterUid: String,
     val freightId: String,
     val permission: PermissionLevelType
 )

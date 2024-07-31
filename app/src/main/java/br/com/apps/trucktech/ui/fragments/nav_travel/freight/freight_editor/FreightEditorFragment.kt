@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.dto.travel.FreightDto
+import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.util.FAILED_TO_SAVE
@@ -16,7 +17,6 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentFreightEditorBinding
-import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
@@ -183,7 +183,7 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
 
             if (fieldsAreValid) {
                 val viewDto = FreightDto(
-                    customer = customer,
+                    customerId = viewModel.getCustomerId(customer),
                     origin = origin,
                     destiny = destiny,
                     cargo = cargo,

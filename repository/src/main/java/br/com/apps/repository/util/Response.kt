@@ -23,7 +23,14 @@ sealed class Response<out T> {
 
 }
 
-fun <T> Response<T>.extractResponse(): T{
+/**
+ * Extracts the response data from a sealed class Response<T>.
+ *
+ * @return the data of type T if the response is of type Response.Success<T>.
+ * @throws Throwable if the response is of type Response.Error, throws the stored exception.
+ * @throws NullPointerException if the response is of type Response.Success<T> but the data is null.
+ */
+fun <T> Response<T>.extractResponse(): T {
     when(this) {
         is Response.Error -> throw this.exception
         is Response.Success -> return this.data ?: throw NullPointerException()

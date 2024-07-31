@@ -2,6 +2,8 @@ package br.com.apps.repository.repository.employee
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.Admin
 import br.com.apps.model.model.employee.Driver
@@ -22,18 +24,19 @@ import br.com.apps.repository.util.toEmployeeObject
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class EmployeeReadImpl(fireStore: FirebaseFirestore) : EmployeeReadInterface {
 
     private val collectionDriver = fireStore.collection(FIRESTORE_COLLECTION_DRIVER)
     private val collectionAdmin = fireStore.collection(FIRESTORE_COLLECTION_ADMIN)
 
-    override suspend fun getEmployeeListByMasterUid(masterUid: String, flow: Boolean)
-            : LiveData<Response<List<Employee>>> {
+    override suspend fun fetchEmployeeListByMasterUid(masterUid: String, flow: Boolean): LiveData<Response<List<Employee>>> {
         val mediator = MediatorLiveData<Response<List<Employee>>>()
         val dataSet = mutableListOf<Employee>()
 
-        mediator.addSource(getAllDrivers(masterUid)) { response ->
+        mediator.addSource(fetchAllDrivers(masterUid)) { response ->
             when (response) {
                 is Response.Error -> {}
                 is Response.Success -> {
@@ -61,38 +64,61 @@ class EmployeeReadImpl(fireStore: FirebaseFirestore) : EmployeeReadInterface {
         return mediator
     }
 
-    private suspend fun getAllDrivers(masterUid: String, flow: Boolean = false)
-            : LiveData<Response<List<Employee>>> {
+    private suspend fun fetchAllDrivers(
+        masterUid: String,
+        flow: Boolean = false
+    ): LiveData<Response<List<Employee>>> = withContext(Dispatchers.IO) {
+        if (masterUid.isBlank())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("MasterUid cannot be blank")))
+
         val listener = collectionDriver.whereEqualTo(MASTER_UID, masterUid)
 
-        return if (flow) listener.onSnapShot { it.toEmployeeList() }
+        return@withContext if (flow) listener.onSnapShot { it.toEmployeeList() }
         else listener.onComplete { it.toEmployeeList() }
     }
 
-    private suspend fun getAllAdmins(masterUid: String, flow: Boolean = false)
-            : LiveData<Response<List<Employee>>> {
+    private suspend fun getAllAdmins(
+        masterUid: String,
+        flow: Boolean = false
+    ): LiveData<Response<List<Employee>>> = withContext(Dispatchers.IO) {
+        if (masterUid.isBlank())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("MasterUid cannot be blank")))
+
+
         val listener = collectionAdmin.whereEqualTo(MASTER_UID, masterUid)
 
-        return if (flow) listener.onSnapShot { it.toEmployeeList() }
+        return@withContext if (flow) listener.onSnapShot { it.toEmployeeList() }
         else listener.onComplete { it.toEmployeeList() }
     }
 
-    override suspend fun getById(id: String, type: EmployeeType, flow: Boolean)
-            : LiveData<Response<Employee>> {
+    override suspend fun fetchById(
+        id: String,
+        type: EmployeeType,
+        flow: Boolean
+    ) : LiveData<Response<Employee>> = withContext(Dispatchers.IO) {
+        if (id.isBlank())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be blank")))
+
         val collection = getCollectionReference(type)
         val listener = collection.document(id)
 
-        return if (flow) listener.onSnapShot { it.toEmployeeObject() }
+        return@withContext if (flow) listener.onSnapShot { it.toEmployeeObject() }
         else listener.onComplete { it.toEmployeeObject() }
     }
 
-    override suspend fun getEmployeeBankAccounts(id: String, type: EmployeeType, flow: Boolean)
-            : LiveData<Response<List<BankAccount>>> {
+    override suspend fun getEmployeeBankAccounts(
+        id: String,
+        type: EmployeeType,
+        flow: Boolean
+    ) : LiveData<Response<List<BankAccount>>> = withContext(Dispatchers.IO) {
+        if (id.isBlank())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be blank")))
+
         val collection = getCollectionReference(type)
         val listener = collection.document(id).collection(FIRESTORE_COLLECTION_BANK)
             .orderBy(INSERTION_DATE, Query.Direction.DESCENDING)
 
-        return if (flow) listener.onSnapShot { it.toBankAccountList() }
+        return@withContext if (flow) listener.onSnapShot { it.toBankAccountList() }
         else listener.onComplete { it.toBankAccountList() }
     }
 
@@ -101,12 +127,15 @@ class EmployeeReadImpl(fireStore: FirebaseFirestore) : EmployeeReadInterface {
         bankId: String,
         type: EmployeeType,
         flow: Boolean
-    ): LiveData<Response<BankAccount>> {
+    ): LiveData<Response<BankAccount>> = withContext(Dispatchers.IO) {
+        if (employeeId.isBlank() || bankId.isBlank())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be blank")))
+
         val collection = getCollectionReference(type)
         val listener = collection.document(employeeId)
             .collection(FIRESTORE_COLLECTION_BANK).document(bankId)
 
-        return if (flow) listener.onSnapShot { it.toBankAccountObject() }
+        return@withContext if (flow) listener.onSnapShot { it.toBankAccountObject() }
         else listener.onComplete { it.toBankAccountObject() }
     }
 

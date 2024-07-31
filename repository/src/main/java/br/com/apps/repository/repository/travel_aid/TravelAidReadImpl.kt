@@ -2,6 +2,7 @@ package br.com.apps.repository.repository.travel_aid
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.model.travel.TravelAid
 import br.com.apps.repository.util.DRIVER_ID
 import br.com.apps.repository.util.EMPLOYEE_ID
@@ -20,50 +21,60 @@ class TravelAidReadImpl(fireStore: FirebaseFirestore) : TravelAidReadInterface {
 
     private val collection = fireStore.collection(FIRESTORE_COLLECTION_COST_HELP)
 
-    override suspend fun getTravelAidByDriverIdAndIsNotDiscountedYet(
+    override suspend fun fetchTravelAidByDriverIdAndIsNotDiscountedYet(
         employeeId: String,
         flow: Boolean
     ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO) {
+        if (employeeId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be empty")))
+
         val listener = collection.whereEqualTo(EMPLOYEE_ID, employeeId)
             .whereEqualTo(IS_PAID, false)
 
-        if (flow) listener.onSnapShot { it.toTravelAidList() }
+        return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
         else listener.onComplete { it.toTravelAidList() }
     }
 
 
-    override suspend fun getTravelAidListByTravelId(
+    override suspend fun fetchTravelAidListByTravelId(
         travelId: String,
         flow: Boolean
     ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO) {
+        if (travelId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be empty")))
+
         val listener = collection.whereEqualTo(TRAVEL_ID, travelId)
             .whereEqualTo(IS_PAID, false)
 
-        if (flow) listener.onSnapShot { it.toTravelAidList() }
+        return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
         else listener.onComplete { it.toTravelAidList() }
     }
 
 
-    override suspend fun getTravelAidListByTravelIds(
+    override suspend fun fetchTravelAidListByTravelIds(
         travelIdList: List<String>,
         flow: Boolean
     ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO) {
-        if (travelIdList.isEmpty()) return@withContext MutableLiveData(Response.Success(emptyList()))
+        if (travelIdList.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id list cannot be empty")))
 
         val listener = collection.whereIn(TRAVEL_ID, travelIdList)
 
-        if (flow) listener.onSnapShot { it.toTravelAidList() }
+        return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
         else listener.onComplete { it.toTravelAidList() }
     }
 
 
-    override suspend fun getTravelAidListByDriverId(
+    override suspend fun fetchTravelAidListByDriverId(
         driverId: String,
         flow: Boolean
     ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO) {
+        if (driverId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be empty")))
+
         val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-        if (flow) listener.onSnapShot { it.toTravelAidList() }
+        return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
         else listener.onComplete { it.toTravelAidList() }
     }
 

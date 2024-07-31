@@ -1,33 +1,34 @@
 package br.com.apps.model.mapper
 
-import br.com.apps.model.dto.FineDto
-import br.com.apps.model.model.Fine
+import br.com.apps.model.dto.FleetFineDto
+import br.com.apps.model.model.FleetFine
 import br.com.apps.model.toDate
 import br.com.apps.model.toLocalDateTime
 import java.math.BigDecimal
 
 
-fun FineDto.toModel(): Fine {
-    return Fine(
-        masterUid = this.masterUid,
-        id = this.id,
-        truckId = this.truckId,
-        driverId = this.driverId,
-        date = this.date?.toLocalDateTime(),
-        description = this.description,
-        code = this.code,
-        value = this.value?.let { BigDecimal(it) }
+fun FleetFineDto.toModel(): FleetFine {
+    this.validateDataIntegrity()
+    return FleetFine(
+        masterUid = this.masterUid!!,
+        id = this.id!!,
+        fleetId = this.fleetId!!,
+        employeeId = this.employeeId!!,
+        date = this.date?.toLocalDateTime()!!,
+        description = this.description!!,
+        code = this.code!!,
+        value = BigDecimal(this.value!!)
     )
 }
 
-fun Fine.toDto(): FineDto =
-    FineDto(
+fun FleetFine.toDto(): FleetFineDto =
+    FleetFineDto(
         masterUid = this.masterUid,
         id = this.id,
-        truckId = this.truckId,
-        driverId = this.driverId,
-        date = this.date?.toDate(),
+        fleetId = this.fleetId,
+        employeeId = this.employeeId,
+        date = this.date.toDate(),
         description = this.description,
         code = this.code,
-        value = this.value?.toDouble()
+        value = this.value.toDouble()
     )

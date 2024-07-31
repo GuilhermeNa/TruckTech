@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.exceptions.UserNotFoundException
-import br.com.apps.model.model.Fine
+import br.com.apps.model.model.FleetFine
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.model.payroll.Advance
@@ -57,7 +57,7 @@ class MainActivityViewModel(
     private val _cachedTravels = MutableLiveData<List<Travel>>()
     val cachedTravels get() = _cachedTravels
 
-    private val _cachedFines = MutableLiveData<List<Fine>>()
+    private val _cachedFines = MutableLiveData<List<FleetFine>>()
     val cachedFines get() = _cachedFines
 
     private val _cachedAdvances = MutableLiveData<List<Advance>>()
@@ -94,6 +94,7 @@ class MainActivityViewModel(
                 fetchLoggedUser()
                 fetchData()
             } catch (e: Exception) {
+                e.printStackTrace()
                 setState(State.Error(e))
             }
         }
@@ -182,7 +183,7 @@ class MainActivityViewModel(
     }
 
     private suspend fun fetchAdvances(driverId: String) {
-        advanceRepository.getAdvanceListByEmployeeIdAndPaymentStatus(
+        advanceRepository.fetchAdvanceListByEmployeeIdAndPaymentStatus(
             employeeId = driverId, isPaid = false, flow = true
         ).asFlow().collect { response ->
             when (response) {
@@ -196,7 +197,7 @@ class MainActivityViewModel(
     }
 
     private suspend fun fetchLoans(driverId: String) {
-        loanRepository.getLoanListByEmployeeIdAndPaymentStatus(
+        loanRepository.fetchLoanListByEmployeeIdAndPaymentStatus(
             employeeId = driverId, isPaid = false, flow = true
         ).asFlow().collect { response ->
             when (response) {
@@ -211,7 +212,7 @@ class MainActivityViewModel(
     }
 
     private suspend fun fetchFines(driverId: String) {
-        fineRepository.getFineListByDriverId(driverId, flow = true)
+        fineRepository.fetchFineListByDriverId(driverId, flow = true)
             .asFlow().collect { response ->
                 when (response) {
                     is Response.Error -> throw response.exception
@@ -226,19 +227,19 @@ class MainActivityViewModel(
     private suspend fun fetchTravels(driverId: String) {
         coroutineScope {
 
-            val travelFLow = travelRepository.getTravelListByDriverId(driverId, flow = true)
+            val travelFLow = travelRepository.fetchTravelListByDriverId(driverId, flow = true)
                 .asFlow()
 
             val freightFlow = freightRepository.fetchFreightListByDriverId(driverId, flow = true)
                 .asFlow()
 
-            val refuelFlow = refuelRepository.getRefuelListByDriverId(driverId, flow = true)
+            val refuelFlow = refuelRepository.fetchRefuelListByDriverId(driverId, flow = true)
                 .asFlow()
 
-            val expendFlow = expendRepository.getExpendListByDriverId(driverId, flow = true)
+            val expendFlow = expendRepository.fetchExpendListByDriverId(driverId, flow = true)
                 .asFlow()
 
-            val aidFLow = aidRepository.getTravelAidListByDriverId(driverId, flow = true)
+            val aidFLow = aidRepository.fetchTravelAidListByDriverId(driverId, flow = true)
                 .asFlow()
 
             val combinedFlow = combineFlows(
@@ -249,13 +250,29 @@ class MainActivityViewModel(
                 aidFLow
             ) { travelResp, refuelResp, freightResp, expendResp, aidResp ->
                 val travels = travelResp.extractResponse()
+                val refuels = when (refuelResp) {
+                    is Response.Error -> emptyList()
+                    is Response.Success -> refuelResp.data ?: throw NullPointerException()
+                }
+                val freights = when (freightResp) {
+                    is Response.Error -> emptyList()
+                    is Response.Success -> freightResp.data ?: throw NullPointerException()
+                }
+                val expends = when (expendResp) {
+                    is Response.Error -> emptyList()
+                    is Response.Success -> expendResp.data ?: throw NullPointerException()
+                }
+                val aids = when (aidResp) {
+                    is Response.Error -> emptyList()
+                    is Response.Success -> aidResp.data ?: throw NullPointerException()
+                }
 
                 travelUseCase.mergeTravelData(
                     travelList = travels,
-                    refuelList = refuelResp.extractResponse(),
-                    freightList = freightResp.extractResponse(),
-                    expendList = expendResp.extractResponse(),
-                    aidList = aidResp.extractResponse()
+                    refuelList = refuels,
+                    freightList = freights,
+                    expendList = expends,
+                    aidList = aids
                 )
 
                 travels
@@ -306,7 +323,7 @@ class MainActivityViewModel(
         return cachedTravels.value ?: emptyList()
     }
 
-    fun getFines(): List<Fine> {
+    fun getFines(): List<FleetFine> {
         return cachedFines.value ?: emptyList()
     }
 

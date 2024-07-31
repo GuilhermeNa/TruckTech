@@ -13,8 +13,7 @@
         tools:listitem="@layout/item_settings"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:clipToPadding="false"
-        android:paddingBottom="80dp"
-        />
+        android:paddingBottom="80dp" />
 
     <View
         android:id="@+id/frag_settings_dark_layer"

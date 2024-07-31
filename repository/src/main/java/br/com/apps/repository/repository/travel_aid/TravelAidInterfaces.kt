@@ -16,7 +16,7 @@ interface TravelAidReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of TravelAid objects or an Error with an exception.
      */
-    suspend fun getTravelAidByDriverIdAndIsNotDiscountedYet(
+    suspend fun fetchTravelAidByDriverIdAndIsNotDiscountedYet(
         employeeId: String,
         flow: Boolean = false
     ): LiveData<Response<List<TravelAid>>>
@@ -29,7 +29,7 @@ interface TravelAidReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of TravelAid objects or an Error with an exception.
      */
-    suspend fun getTravelAidListByTravelId(travelId: String, flow: Boolean = false)
+    suspend fun fetchTravelAidListByTravelId(travelId: String, flow: Boolean = false)
             : LiveData<Response<List<TravelAid>>>
 
     /**
@@ -40,7 +40,7 @@ interface TravelAidReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of TravelAid objects or an Error with an exception.
      */
-    suspend fun getTravelAidListByTravelIds(travelIdList: List<String>, flow: Boolean = false)
+    suspend fun fetchTravelAidListByTravelIds(travelIdList: List<String>, flow: Boolean = false)
             : LiveData<Response<List<TravelAid>>>
 
     /**
@@ -51,7 +51,7 @@ interface TravelAidReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of TravelAid objects or an Error with an exception.
      */
-    suspend fun getTravelAidListByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchTravelAidListByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<TravelAid>>>
 
 }

@@ -121,19 +121,19 @@ class TravelUseCase(
             try {
 
                 val travelResp = async {
-                    repository.getTravelById(travelId).awaitData()
+                    repository.fetchTravelById(travelId).awaitData()
                 }
                 val freightsResp = async {
                     freightRepository.fetchFreightListByTravelId(travelId).awaitData()
                 }
                 val refuelsResp = async {
-                    refuelRepository.getRefuelListByTravelId(travelId).awaitData()
+                    refuelRepository.fetchRefuelListByTravelId(travelId).awaitData()
                 }
                 val expendsResp = async {
-                    expendRepository.getExpendListByTravelId(travelId).awaitData()
+                    expendRepository.fetchExpendListByTravelId(travelId).awaitData()
                 }
                 val aidsResp = async {
-                    aidRepository.getTravelAidListByTravelId(travelId).awaitData()
+                    aidRepository.fetchTravelAidListByTravelId(travelId).awaitData()
                 }
 
                 val travel = travelResp.await().also {
@@ -163,20 +163,20 @@ class TravelUseCase(
             : LiveData<Response<List<Travel>>> {
         return coroutineScope {
             try {
-                val travels = repository.getTravelListByDriverId(driverId).awaitData()
+                val travels = repository.fetchTravelListByDriverId(driverId).awaitData()
                 val ids = travels!!.mapNotNull { it.id }
 
                 val freightsDef = async {
                     freightRepository.fetchFreightListByTravelIds(ids).awaitData()
                 }
                 val refuelsDef = async {
-                    refuelRepository.getRefuelListByTravelIds(ids).awaitData()
+                    refuelRepository.fetchRefuelListByTravelIds(ids).awaitData()
                 }
                 val expendsDef = async {
-                    expendRepository.getExpendListByTravelIds(ids).awaitData()
+                    expendRepository.fetchExpendListByTravelIds(ids).awaitData()
                 }
                 val aidsDef = async {
-                    aidRepository.getTravelAidListByTravelIds(ids).awaitData()
+                    aidRepository.fetchTravelAidListByTravelIds(ids).awaitData()
                 }
 
                 mergeTravelData(
@@ -199,24 +199,24 @@ class TravelUseCase(
             : LiveData<Response<List<Travel>>> {
         return coroutineScope {
             try {
-                val travels = repository.getTravelListByDriverIdAndIsFinished(driverId).awaitData()
+                val travels = repository.fetchTravelListByDriverIdAndIsFinished(driverId).awaitData()
                 val ids = travels!!.mapNotNull { it.id }
 
                 val freightsDef = async {
                     freightRepository.fetchFreightListByTravelIds(ids).awaitData()
                 }
                 val refuelsDef = async {
-                    refuelRepository.getRefuelListByTravelIds(ids).awaitData()
+                    refuelRepository.fetchRefuelListByTravelIds(ids).awaitData()
                 }
                 val expendsDef = async {
-                    expendRepository.getExpendListByTravelIds(ids).awaitData()
+                    expendRepository.fetchExpendListByTravelIds(ids).awaitData()
                 }
                 val aidsDef = async {
-                    aidRepository.getTravelAidListByTravelIds(ids).awaitData()
+                    aidRepository.fetchTravelAidListByTravelIds(ids).awaitData()
                 }
 
                 mergeTravelData(
-                    travelList = travels!!,
+                    travelList = travels,
                     freightList = freightsDef.await(),
                     refuelList = refuelsDef.await(),
                     expendList = expendsDef.await(),
@@ -253,7 +253,7 @@ class TravelUseCase(
     }
 
     suspend fun setTravelFinished(permission: PermissionLevelType, dto: TravelDto) {
-        if (!dto.validateForDataBaseInsertion()) throw InvalidParameterException("Invalid Travel for finish")
+        dto.validateForDataBaseInsertion()
         repository.save(dto)
     }
 

@@ -11,12 +11,12 @@ interface CustomerReadInterface {
     /**
      * Suspended function to fetch a list of customers associated with a master UID asynchronously.
      *
-     * @param masterUid The master UID to identify which customers to retrieve.
+     * @param uid The master UID to identify which customers to retrieve.
      * @param flow If true, indicates to use a continuous flow of data updates.
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Customer objects or an Error with an exception.
      */
-    suspend fun getCustomerListByMasterUid(masterUid: String, flow: Boolean = false)
+    suspend fun fetchCustomerListByMasterUid(uid: String, flow: Boolean = false)
             : LiveData<Response<List<Customer>>>
 
     /**
@@ -27,6 +27,6 @@ interface CustomerReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with the Customer object or an Error with an exception.
      */
-    suspend fun getCustomerById(id: String, flow: Boolean = false): LiveData<Response<Customer>>
+    suspend fun fetchCustomerById(id: String, flow: Boolean = false): LiveData<Response<Customer>>
 
 }

@@ -17,7 +17,7 @@ class FreightTest {
             masterUid = "1",
             id = "2",
             truckId = "3",
-            driverId = "4",
+            employeeId = "4",
             travelId = "5",
             customerId = "6",
 

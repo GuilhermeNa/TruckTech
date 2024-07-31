@@ -46,8 +46,8 @@ class FleetUseCase(private val repository: FleetRepository) {
     suspend fun fetchTruckByDriverId(driverId: String): LiveData<Response<Truck>> {
         return coroutineScope {
             return@coroutineScope try {
-                val truck = repository.getTruckByDriverId(driverId).awaitData() ?: throw NullPointerException()
-                val trailers = repository.getTrailerListLinkedToTruckById(truck.id!!).awaitData()
+                val truck = repository.fetchTruckByDriverId(driverId).awaitData() ?: throw NullPointerException()
+                val trailers = repository.fetchTrailerListLinkedToTruckById(truck.id!!).awaitData()
                 truck.trailerList = trailers
                 MutableLiveData(Response.Success(truck))
             } catch (e: Exception) {

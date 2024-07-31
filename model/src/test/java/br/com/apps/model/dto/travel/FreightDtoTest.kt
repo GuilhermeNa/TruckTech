@@ -20,7 +20,7 @@ class FreightDtoTest {
           id = "2",
           truckId = "3",
           travelId = "4",
-          driverId = "5",
+          employeeId = "5",
           customerId = "6",
           origin = "Origin",
           customer = null,
@@ -70,7 +70,7 @@ class FreightDtoTest {
 
     @Test
     fun `should throw CorruptedFileException when driverId is null`() {
-        freightDto.driverId = null
+        freightDto.employeeId = null
         assertThrows(CorruptedFileException::class.java) {
             freightDto.validateDataIntegrity()
         }
@@ -186,7 +186,7 @@ class FreightDtoTest {
 
     @Test
     fun `should throw InvalidForSavingException when driverId is null for dataBase insertion`() {
-        freightDto.driverId = null
+        freightDto.employeeId = null
         assertThrows(InvalidForSavingException::class.java) {
             freightDto.validateForDataBaseInsertion()
         }

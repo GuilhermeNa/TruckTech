@@ -61,6 +61,7 @@ enum class LabelType(val description: String) {
     DOCUMENT("DOCUMENT");
 
     companion object {
+
         fun getType(s: String): LabelType {
             return when (s) {
                 "COST" -> COST

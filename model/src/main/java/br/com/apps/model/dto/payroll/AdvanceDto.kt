@@ -1,6 +1,6 @@
 package br.com.apps.model.dto.payroll
 
-import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
 import java.util.Date
 
@@ -18,7 +18,7 @@ data class AdvanceDto(
     var isApproved: Boolean? = null,
     var type: String? = null
 
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||

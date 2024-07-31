@@ -103,14 +103,14 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
                     binding.apply {
                         boxGif.loadingGif.loadGif(R.drawable.gif_document, requireContext())
                         fragDocumentBoxEmpty.layout.visibility = GONE
-                        freightFragmentRecycler.visibility = GONE
+                        fragDocListRecycler.visibility = GONE
                         fragmentDocumentsListToolbar.toolbar.visibility = GONE
                     }
                 }
 
                 is State.Loaded -> {
                     binding.apply {
-                        freightFragmentRecycler.apply {
+                        fragDocListRecycler.apply {
                             if (visibility == GONE) {
                                 val layoutAnim = AnimationUtils.loadLayoutAnimation(
                                     requireContext(),
@@ -133,7 +133,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
 
                 is State.Empty -> {
                     binding.apply {
-                        freightFragmentRecycler.visibility = GONE
+                        fragDocListRecycler.visibility = GONE
                         lifecycleScope.launch {
                             fragDocumentBoxEmpty.apply {
                                 if (layout.visibility == GONE) {
@@ -159,8 +159,7 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
 
                 is State.Error -> {
                     binding.apply {
-                        freightFragmentRecycler.visibility = GONE
-
+                        fragDocListRecycler.visibility = GONE
                         lifecycleScope.launch {
                             fragDocumentBoxEmpty.apply {
                                 if (layout.visibility == GONE) {
@@ -209,10 +208,11 @@ class DocumentsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun initRecyclerView() {
-        val recyclerView = binding.freightFragmentRecycler
+        val recyclerView = binding.fragDocListRecycler
         adapter = DocumentsListFragmentAdapter(
             requireContext(),
-            emptyList(),
+            plate = mainActVM.loggedUser.truck.plate,
+            dataSet = emptyList(),
             itemCLickListener = { document ->
                 requireView().navigateTo(
                     DocumentsListFragmentDirections.actionDocumentsListFragmentToDocumentFragment(

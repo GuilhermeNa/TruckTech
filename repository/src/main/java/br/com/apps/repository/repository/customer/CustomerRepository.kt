@@ -8,10 +8,10 @@ class CustomerRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getCustomerListByMasterUid(masterUid: String, flow: Boolean) =
-        read.getCustomerListByMasterUid(masterUid, flow)
+    override suspend fun fetchCustomerListByMasterUid(uid: String, flow: Boolean) =
+        read.fetchCustomerListByMasterUid(uid, flow)
 
-    override suspend fun getCustomerById(id: String, flow: Boolean) =
-        read.getCustomerById(id, flow)
+    override suspend fun fetchCustomerById(id: String, flow: Boolean) =
+        read.fetchCustomerById(id, flow)
 
 }

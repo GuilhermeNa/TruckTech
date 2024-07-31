@@ -43,7 +43,7 @@ class LabelUseCase(private val repository: LabelRepository) {
      * get by Id
      */
     suspend fun getLabelById(id: String): LiveData<Response<Label>> {
-        return repository.getLabelById(id)
+        return repository.fetchLabelById(id)
     }
 
     /**
@@ -63,12 +63,12 @@ class LabelUseCase(private val repository: LabelRepository) {
                 val deferredB = CompletableDeferred<Unit>()
 
                 val liveDataA =
-                    repository.getLabelListByMasterUidAndTypeAndOperational(
+                    repository.fetchLabelListByMasterUidAndTypeAndOperational(
                         masterUid,
                         type.description,
                         isOperational
                     )
-                val liveDataB = repository.getDefaultLabelList(type.description, isOperational)
+                val liveDataB = repository.fetchDefaultLabelList(type.description, isOperational)
 
                 mediator.addSource(liveDataA) { responseA ->
                     when (responseA) {

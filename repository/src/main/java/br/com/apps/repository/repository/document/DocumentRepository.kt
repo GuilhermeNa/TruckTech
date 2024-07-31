@@ -18,13 +18,13 @@ class DocumentRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getDocumentById(documentId: String, flow: Boolean) = read.getDocumentById(documentId, flow)
+    override suspend fun fetchDocumentById(id: String, flow: Boolean) = read.fetchDocumentById(id, flow)
 
-    override suspend fun getDocumentListByTruckId(truckId: String, flow: Boolean) =
-        read.getDocumentListByTruckId(truckId, flow)
+    override suspend fun fetchDocumentListByFleetId(id: String, flow: Boolean) =
+        read.fetchDocumentListByFleetId(id, flow)
 
-    override suspend fun fetchDocumentListByTruckIdList(idList: List<String>, flow: Boolean) =
-        read.fetchDocumentListByTruckIdList(idList, flow)
+    override suspend fun fetchDocumentListByFleetIdList(ids: List<String>, flow: Boolean) =
+        read.fetchDocumentListByFleetIdList(ids, flow)
 
 }
 

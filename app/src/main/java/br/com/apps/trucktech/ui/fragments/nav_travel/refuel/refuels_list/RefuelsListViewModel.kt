@@ -35,7 +35,7 @@ class RefuelsListViewModel(
     private fun loadData() {
         _state.value = State.Loading
         viewModelScope.launch {
-            repository.getRefuelListByTravelId(travelId, true).asFlow().collect { response ->
+            repository.fetchRefuelListByTravelId(travelId, true).asFlow().collect { response ->
                 response.buildUiResponse(state = _state, data = _data)
             }
         }

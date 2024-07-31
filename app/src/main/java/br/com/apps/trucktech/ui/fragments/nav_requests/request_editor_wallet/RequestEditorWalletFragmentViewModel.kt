@@ -44,7 +44,7 @@ class RequestEditorWalletFragmentViewModel(
      */
     fun loadData(walletId: String) {
         viewModelScope.launch {
-            repository.getItemById(vmData.requestId, walletId)
+            repository.fetchItemById(vmData.requestId, walletId)
                 .asFlow().collect {
                     _data.value = it
                 }

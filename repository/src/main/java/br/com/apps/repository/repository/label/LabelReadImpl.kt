@@ -3,6 +3,7 @@ package br.com.apps.repository.repository.label
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.model.label.Label
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_DEFAULT_LABELS
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_USER_LABELS
@@ -24,68 +25,94 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class LabelReadImpl(fireStore: FirebaseFirestore): LabelReadInterface {
+class LabelReadImpl(fireStore: FirebaseFirestore) : LabelReadInterface {
 
     private val userCollection = fireStore.collection(FIRESTORE_COLLECTION_USER_LABELS)
     private val defaultCollection = fireStore.collection(FIRESTORE_COLLECTION_DEFAULT_LABELS)
 
-    override suspend fun getLabelListByMasterUid(masterUid: String, flow: Boolean)
-    : LiveData<Response<List<Label>>> {
+    override suspend fun fetchLabelListByMasterUid(
+        masterUid: String,
+        flow: Boolean
+    ): LiveData<Response<List<Label>>> = withContext(Dispatchers.IO) {
+        if (masterUid.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("MasterUid cannot be empty")))
+
         val listener = userCollection.whereEqualTo(MASTER_UID, masterUid)
-        return if (flow) listener.onSnapShot { it.toLabelList() }
+
+        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
         else listener.onComplete { it.toLabelList() }
     }
 
-    override suspend fun getLabelListByMasterUidAndType(
+    override suspend fun fetchLabelListByMasterUidAndType(
         type: String,
         masterUid: String,
         flow: Boolean
-    ): LiveData<Response<List<Label>>> {
+    ): LiveData<Response<List<Label>>> = withContext(Dispatchers.IO) {
+        if (masterUid.isEmpty() || type.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Data cannot be empty")))
+
         val listener =
             userCollection.whereEqualTo(LABEL_TYPE, type).whereEqualTo(MASTER_UID, masterUid)
-        return if (flow) listener.onSnapShot { it.toLabelList() }
+
+        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
         else listener.onComplete { it.toLabelList() }
     }
 
-    override suspend fun getLabelById(labelId: String, flow: Boolean): LiveData<Response<Label>> {
+    override suspend fun fetchLabelById(
+        labelId: String,
+        flow: Boolean
+    ): LiveData<Response<Label>> = withContext(Dispatchers.IO) {
+        if (labelId.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Label id cannot be empty")))
+
         val listener = userCollection.document(labelId)
-        return if (flow) listener.onSnapShot { it.toLabelObject() }
+
+        return@withContext if (flow) listener.onSnapShot { it.toLabelObject() }
         else listener.onComplete { it.toLabelObject() }
     }
 
-    override suspend fun getLabelListByMasterUidAndTypeAndOperational(
+    override suspend fun fetchLabelListByMasterUidAndTypeAndOperational(
         masterUid: String,
         type: String,
         isOperational: Boolean,
         flow: Boolean
-    ): LiveData<Response<List<Label>>> {
+    ): LiveData<Response<List<Label>>> = withContext(Dispatchers.IO) {
+        if (masterUid.isEmpty() || type.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Data cannot be empty")))
+
         val listener = userCollection
             .whereEqualTo(MASTER_UID, masterUid)
             .whereEqualTo(LABEL_TYPE, type)
             .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
-        return if (flow) listener.onSnapShot { it.toLabelList() }
+
+        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
         else listener.onComplete { it.toLabelList() }
     }
 
-    override suspend fun getDefaultLabelList(
+    override suspend fun fetchDefaultLabelList(
         type: String,
         isOperational: Boolean,
         flow: Boolean
-    ): LiveData<Response<List<Label>>> {
+    ): LiveData<Response<List<Label>>> = withContext(Dispatchers.IO) {
+        if (type.isEmpty())
+            return@withContext MutableLiveData(Response.Error(EmptyDataException("Type cannot be empty")))
+
         val listener = defaultCollection.whereEqualTo(LABEL_TYPE, type)
             .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
-        return if (flow) listener.onSnapShot { it.toLabelList() }
+
+        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
         else listener.onComplete { it.toLabelList() }
     }
 
-    override suspend fun getDefaultExpendLabelList(
+    override suspend fun fetchDefaultExpendLabelList(
         isOperational: Boolean?,
         flow: Boolean
-    ): LiveData<Response<List<Label>>> {
+    ): LiveData<Response<List<Label>>> = withContext(Dispatchers.IO) {
         val listener = defaultCollection
             .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
             .whereIn(LABEL_TYPE, listOf("COST", "EXPENSE"))
-        return if (flow) listener.onSnapShot { it.toLabelList() }
+
+        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
         else listener.onComplete { it.toLabelList() }
     }
 

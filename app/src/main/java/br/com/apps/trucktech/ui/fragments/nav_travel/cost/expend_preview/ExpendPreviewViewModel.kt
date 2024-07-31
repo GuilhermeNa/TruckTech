@@ -46,7 +46,7 @@ class  ExpendPreviewViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.getExpendById(vmData.expendId, true)
+            repository.fetchExpendById(vmData.expendId, true)
                 .asFlow().collect { response ->
                     _data.value = when (response) {
                         is Response.Error -> response

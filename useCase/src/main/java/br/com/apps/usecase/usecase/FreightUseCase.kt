@@ -28,7 +28,7 @@ class FreightUseCase(
             try {
                 fRepository.fetchFreightById(id, true).observeFlow { f ->
                     launch {
-                        f.customer = customerRepository.getCustomerById(f.customerId).awaitData()
+                        f.customer = customerRepository.fetchCustomerById(f.customerId).awaitData()
                         onComplete(Response.Success(f))
                     }
                 }
@@ -53,8 +53,8 @@ class FreightUseCase(
         val auth = writeReq.authLevel
 
         validateAndProcess(
-            permission = { dto.validatePermission(auth) },
-            validator = { dto.validateForDataBaseInsertion() }
+            validatePermission = { dto.validatePermission(auth) },
+            validateData = { dto.validateForDataBaseInsertion() }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception
@@ -75,7 +75,7 @@ class FreightUseCase(
         val auth = writeReq.authLevel
 
         validateAndProcess(
-            permission = { dto.validatePermission(auth) }
+            validatePermission = { dto.validatePermission(auth) }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception

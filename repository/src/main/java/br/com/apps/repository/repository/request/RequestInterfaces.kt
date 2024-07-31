@@ -73,7 +73,7 @@ interface RequestReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [PaymentRequest] list.
      */
-    suspend fun getRequestListByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchRequestListByDriverId(driverId: String, flow: Boolean = false)
             : LiveData<Response<List<PaymentRequest>>>
 
     /**
@@ -83,7 +83,7 @@ interface RequestReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [RequestItem] list.
      */
-    suspend fun getItemListByRequests(idList: List<String>, flow: Boolean = false)
+    suspend fun fetchItemListByRequests(idList: List<String>, flow: Boolean = false)
             : LiveData<Response<List<RequestItem>>>
 
     /**
@@ -93,7 +93,7 @@ interface RequestReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [PaymentRequest] list.
      */
-    suspend fun getRequestById(
+    suspend fun fetchRequestById(
         requestId: String,
         flow: Boolean = false
     ): LiveData<Response<PaymentRequest>>
@@ -105,7 +105,7 @@ interface RequestReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [RequestItem] list.
      */
-    suspend fun getItemListByRequestId(requestId: String, flow: Boolean = false)
+    suspend fun fetchItemListByRequestId(requestId: String, flow: Boolean = false)
             : LiveData<Response<List<RequestItem>>>
 
     /**
@@ -116,7 +116,7 @@ interface RequestReadInterface {
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [PaymentRequest] list.
      */
-    suspend fun getItemById(
+    suspend fun fetchItemById(
         requestId: String,
         itemId: String,
         flow: Boolean = false

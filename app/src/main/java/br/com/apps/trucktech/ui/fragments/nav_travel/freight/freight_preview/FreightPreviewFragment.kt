@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
+import br.com.apps.model.expressions.getCompleteDateInPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
@@ -18,13 +20,11 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentFreightPreviewBinding
-import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toBold
-import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.expressions.toUnderline
 import br.com.apps.trucktech.ui.fragments.base_fragments.BasePreviewFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -51,6 +51,7 @@ class FreightPreviewFragment : BasePreviewFragment() {
     private val args: FreightPreviewFragmentArgs by navArgs()
     private val vmData by lazy {
         FreightPreviewVmData(
+            masterUid = mainActVM.loggedUser.masterUid,
             freightId = args.freightId,
             permission = mainActVM.loggedUser.permissionLevelType
         )
@@ -135,19 +136,15 @@ class FreightPreviewFragment : BasePreviewFragment() {
             }
             viewModel.writeAuth.removeObservers(viewLifecycleOwner)
         }
-
     }
 
     private fun bind(freight: Freight) {
         binding.apply {
-            fragmentFreightPreviewClient.text = freight.customer?.name
-            fragmentFreightPreviewValue.text = freight.value?.toCurrencyPtBr()
-            fragmentFreightPreviewBreakDown.text = freight.breakDown?.toCurrencyPtBr() ?: "-"
-            fragmentFreightPreviewDaily.text = freight.daily?.toString() ?: "-"
-            fragFreightPreviewDailyValue.text = freight.dailyTotalValue?.toCurrencyPtBr() ?: "-"
+            fragmentFreightPreviewClient.text = freight.getCustomerName()
+            fragmentFreightPreviewValue.text = freight.value.toCurrencyPtBr()
 
             val dateFormatted =
-                SpannableString(freight.loadingDate?.getCompleteDateInPtBr())
+                SpannableString(freight.loadingDate.getCompleteDateInPtBr())
                     .toBold()
                     .toUnderline()
 

@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.fine
 
-import br.com.apps.model.dto.FineDto
+import br.com.apps.model.dto.FleetFineDto
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_FINES
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,19 +15,19 @@ class FineWriteImpl(fireStore: FirebaseFirestore) : FineWriteInterface {
         collection.document(fineId).delete().await()
     }
 
-    override suspend fun save(dto: FineDto) {
+    override suspend fun save(dto: FleetFineDto) {
         if (dto.id == null) create(dto)
         else update(dto)
     }
 
-    private suspend fun create(dto: FineDto): String {
+    private suspend fun create(dto: FleetFineDto): String {
         val document = collection.document()
         dto.id = document.id
         document.set(dto).await()
         return document.id
     }
 
-    private suspend fun update(dto: FineDto) {
+    private suspend fun update(dto: FleetFineDto) {
         val id = dto.id ?: throw InvalidParameterException(EMPTY_ID)
         collection.document(id).set(dto).await()
     }

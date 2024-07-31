@@ -1,6 +1,6 @@
 package br.com.apps.model.dto.travel
 
-import br.com.apps.model.dto.DtoInterface
+import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.InvalidAuthLevelException
 import br.com.apps.model.exceptions.InvalidForSavingException
@@ -24,7 +24,7 @@ data class RefuelDto(
     var isCompleteRefuel: Boolean? = null,
     @field:JvmField
     var isValid: Boolean? = null
-) : DtoInterface {
+) : DtoObjectsInterface {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||

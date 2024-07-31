@@ -11,7 +11,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.IdHolder
+import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.Response
@@ -42,13 +42,13 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val args: BankPreviewFragmentArgs by navArgs()
-    private val idHolder by lazy {
-        IdHolder(
-            driverId = mainActVM.loggedUser.driverId,
+    private val vmData by lazy {
+        BankPVmData(
+            employeeId = mainActVM.loggedUser.driverId,
             bankAccountId = args.bankId
         )
     }
-    private val viewModel: BankPreviewViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: BankPreviewViewModel by viewModel { parametersOf(vmData) }
 
     //--------------------------------------------------------------------------------------------//
     //  ON CREATE VIEW
@@ -168,14 +168,14 @@ class BankPreviewFragment : BaseFragmentWithToolbar() {
 
     }
 
-    private fun bind(data: BankPFData) {
+    private fun bind(bankAcc: BankAccount) {
         binding.apply {
-            fragBankPreviewImage.loadImageThroughUrl(data.urlImage)
-            fragBankPreviewBank.text = data.bankAcc.bankName
-            fragBankPreviewBranch.text = data.bankAcc.branch.toString()
-            fragBankPreviewNumber.text = data.bankAcc.accNumber.toString()
-            fragBankPreviewType.text = data.bankAcc.getTypeDescription()
-            fragBankPreviewPix.text = data.bankAcc.pix
+            fragBankPreviewImage.loadImageThroughUrl(bankAcc.getBankUrlImage())
+            fragBankPreviewBank.text = bankAcc.getBankName()
+            fragBankPreviewBranch.text = bankAcc.branch.toString()
+            fragBankPreviewNumber.text = bankAcc.accNumber.toString()
+            fragBankPreviewType.text = bankAcc.getTypeDescription()
+            fragBankPreviewPix.text = bankAcc.pix
         }
     }
 

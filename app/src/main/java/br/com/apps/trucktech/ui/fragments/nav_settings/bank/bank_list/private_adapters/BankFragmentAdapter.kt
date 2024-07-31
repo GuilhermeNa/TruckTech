@@ -14,20 +14,17 @@ import br.com.apps.repository.util.INVALID_OBJECT_ID
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemBankBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
-import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankLFData
 import java.security.InvalidParameterException
 
 class BankFragmentAdapter(
     private val context: Context,
     _clickedPos: Int,
-    data: BankLFData,
+    data: List<BankAccount>,
     private val clickListener: (id: String, pos: Int) -> Unit,
     private val defineNewMainAccount: (id: String) -> Unit
 ) : RecyclerView.Adapter<BankFragmentAdapter.ViewHolder>() {
 
-    private var bankList = data.bankList
-
-    private val _dataSet = data.bankAccList.toMutableList()
+    private val _dataSet = data.toMutableList()
     val data get() = _dataSet
 
     private var clickedPos = _clickedPos
@@ -107,9 +104,9 @@ class BankFragmentAdapter(
 
     private fun bind(holder: ViewHolder, bankAccount: BankAccount) {
         holder.apply {
-            val urlImage = bankList.first { it.code == bankAccount.code }.urlImage
+            val urlImage = bankAccount.getBankUrlImage()
             bankImage.loadImageThroughUrl(urlImage)
-            name.text = bankAccount.bankName
+            name.text = bankAccount.getBankName()
             bankAccount.mainAccount.let { isTrue ->
                 if (isTrue) checkImage.visibility = VISIBLE
                 else checkImage.visibility = GONE
@@ -117,13 +114,14 @@ class BankFragmentAdapter(
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun update(dataSet: BankLFData) {
-        this.bankList = dataSet.bankList
+    fun update(dataSet: List<BankAccount>) {
         this._dataSet.clear()
-        this._dataSet.addAll(dataSet.bankAccList)
-        notifyDataSetChanged()
+        this._dataSet.addAll(dataSet)
+        notifyChange()
     }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun notifyChange() = notifyDataSetChanged()
 
     fun remove() {
         if(clickedPos != -1) {

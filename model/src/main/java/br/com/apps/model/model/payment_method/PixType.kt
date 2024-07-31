@@ -10,6 +10,13 @@ enum class PixType(val description: String) {
 
     companion object {
 
+        val listOfPixDescriptions = listOf(
+            "Celular",
+            "Email",
+            "Cpf",
+            "Cnpj"
+        )
+
         fun getType(type: String): PixType {
             return when (type) {
                 "PHONE" -> PHONE

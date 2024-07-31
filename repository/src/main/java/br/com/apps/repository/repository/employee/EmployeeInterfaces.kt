@@ -60,6 +60,8 @@ interface EmployeeWriteInterface {
         type: EmployeeType
     )
 
+
+
 }
 
 interface EmployeeReadInterface {
@@ -72,7 +74,7 @@ interface EmployeeReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of Employee objects or an Error with an exception.
      */
-    suspend fun getEmployeeListByMasterUid(masterUid: String, flow: Boolean = false)
+    suspend fun fetchEmployeeListByMasterUid(masterUid: String, flow: Boolean = false)
     : LiveData<Response<List<Employee>>>
 
     /**
@@ -84,7 +86,7 @@ interface EmployeeReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with the Employee object or an Error with an exception.
      */
-    suspend fun getById(id: String, type: EmployeeType, flow: Boolean = false)
+    suspend fun fetchById(id: String, type: EmployeeType, flow: Boolean = false)
     : LiveData<Response<Employee>>
 
     /**

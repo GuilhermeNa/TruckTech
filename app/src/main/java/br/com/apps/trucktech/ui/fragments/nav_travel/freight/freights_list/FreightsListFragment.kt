@@ -10,12 +10,12 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.IdHolder
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.NULL_DATE
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentFreightsListBinding
-import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.KEY_ID
 import br.com.apps.trucktech.ui.PAGE_FREIGHT
@@ -77,7 +77,7 @@ class FreightsListFragment : Fragment() {
             when (state) {
                 is State.Loading -> {
                     binding.apply {
-                        freightFragmentRecycler.visibility = View.GONE
+                        fragFreightListRecycler.visibility = View.GONE
                         fragFreightsBoxError.layout.visibility = View.GONE
                         fragFreightsBoxError.error.visibility = View.GONE
                         fragFreightsBoxError.empty.visibility = View.GONE
@@ -85,7 +85,7 @@ class FreightsListFragment : Fragment() {
                 }
                 is State.Loaded -> {
                     binding.apply {
-                        freightFragmentRecycler.visibility = View.VISIBLE
+                        fragFreightListRecycler.visibility = View.VISIBLE
                         fragFreightsBoxError.layout.visibility = View.GONE
                         fragFreightsBoxError.error.visibility = View.GONE
                         fragFreightsBoxError.empty.visibility = View.GONE
@@ -93,7 +93,7 @@ class FreightsListFragment : Fragment() {
                 }
                 is State.Empty -> {
                     binding.apply {
-                        freightFragmentRecycler.visibility = View.GONE
+                        fragFreightListRecycler.visibility = View.GONE
                         fragFreightsBoxError.layout.visibility = View.VISIBLE
                         fragFreightsBoxError.error.visibility = View.GONE
                         fragFreightsBoxError.empty.visibility = View.VISIBLE
@@ -101,7 +101,7 @@ class FreightsListFragment : Fragment() {
                 }
                 is State.Error -> {
                     binding.apply {
-                        freightFragmentRecycler.visibility = View.GONE
+                        fragFreightListRecycler.visibility = View.GONE
                         fragFreightsBoxError.layout.visibility = View.VISIBLE
                         fragFreightsBoxError.error.visibility = View.VISIBLE
                         fragFreightsBoxError.empty.visibility = View.GONE
@@ -124,7 +124,7 @@ class FreightsListFragment : Fragment() {
      */
     private fun initRecyclerView(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
         val concatAdapter = ConcatAdapter(adapters)
-        val recyclerView = binding.freightFragmentRecycler
+        val recyclerView = binding.fragFreightListRecycler
         recyclerView.adapter = concatAdapter
     }
 

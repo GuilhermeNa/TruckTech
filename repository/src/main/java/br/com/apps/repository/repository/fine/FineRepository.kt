@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.fine
 
-import br.com.apps.model.dto.FineDto
+import br.com.apps.model.dto.FleetFineDto
 
 class FineRepository(
     private val write: FineWriteImpl,
@@ -13,18 +13,18 @@ class FineRepository(
 
     override suspend fun delete(fineId: String) = write.delete(fineId)
 
-    override suspend fun save(dto: FineDto) = write.save(dto)
+    override suspend fun save(dto: FleetFineDto) = write.save(dto)
 
     //---------------------------------------------------------------------------------------------//
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun getFineListByDriverId(driverId: String, flow: Boolean) =
-        read.getFineListByDriverId(driverId, flow)
+    override suspend fun fetchFineListByDriverId(id: String, flow: Boolean) =
+        read.fetchFineListByDriverId(id, flow)
 
-    override suspend fun getFineListByTruckId(truckId: String, flow: Boolean) =
-        read.getFineListByTruckId(truckId, flow)
+    override suspend fun fetchFineListByFleetId(id: String, flow: Boolean) =
+        read.fetchFineListByFleetId(id, flow)
 
-    override suspend fun getFineById(fineId: String, flow: Boolean) = read.getFineById(fineId, flow)
+    override suspend fun fetchFineById(id: String, flow: Boolean) = read.fetchFineById(id, flow)
 
 }
