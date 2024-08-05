@@ -6,12 +6,12 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.TravelRequestDto
+import br.com.apps.model.enums.PaymentRequestStatusType
 import br.com.apps.model.expressions.atBrZone
-import br.com.apps.model.model.request.travel_requests.PaymentRequest
-import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.model.toDate
+import br.com.apps.model.model.request.PaymentRequest
+import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.util.toDate
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
@@ -225,5 +225,5 @@ data class RequestLVMData(
     val uid: String,
     val truckId: String,
     val driverId: String,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )

@@ -1,6 +1,7 @@
 package br.com.apps.model.dto
 
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.Customer
 
 /**
@@ -16,7 +17,7 @@ data class CustomerDto(
     val id: String? = null,
     val cnpj: String? = null,
     val name: String? = null
-) : DtoObjectsInterface {
+) : DtoObjectInterface<Customer> {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||
@@ -26,8 +27,18 @@ data class CustomerDto(
         ) throw CorruptedFileException("CustomerDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {
+    override fun validateDataForDbInsertion() {
         TODO("Not yet implemented")
+    }
+
+    override fun toModel(): Customer {
+        validateDataIntegrity()
+        return Customer(
+            masterUid = masterUid!!,
+            id = id!!,
+            cnpj = cnpj!!,
+            name = name!!
+        )
     }
 
 }

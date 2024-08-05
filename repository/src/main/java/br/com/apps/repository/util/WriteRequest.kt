@@ -1,6 +1,6 @@
 package br.com.apps.repository.util
 
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.model.user.AccessLevel
 
 /**
  * Represents a request to write data of type T, along with the required permission level.
@@ -9,7 +9,7 @@ import br.com.apps.model.model.user.PermissionLevelType
  * @property data The data of type T to be written.
  */
 data class WriteRequest<T>(
-    val authLevel: PermissionLevelType? = null,
+    val authLevel: AccessLevel? = null,
     val data: T
 )
 

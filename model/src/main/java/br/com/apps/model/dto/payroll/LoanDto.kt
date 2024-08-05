@@ -1,7 +1,10 @@
 package br.com.apps.model.dto.payroll
 
-import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.interfaces.DtoObjectInterface
+import br.com.apps.model.model.payroll.Loan
+import br.com.apps.model.util.toLocalDateTime
+import java.math.BigDecimal
 import java.util.Date
 
 data class LoanDto(
@@ -14,7 +17,7 @@ data class LoanDto(
     var installmentsAlreadyPaid: Int? = null,
     @field:JvmField
     var isPaid: Boolean? = null
-) : DtoObjectsInterface {
+) : DtoObjectInterface<Loan> {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||
@@ -28,6 +31,20 @@ data class LoanDto(
         ) throw CorruptedFileException("LoanDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {}
+    override fun validateDataForDbInsertion() {}
+
+    override fun toModel(): Loan {
+        validateDataIntegrity()
+        return Loan(
+            masterUid = masterUid!!,
+            id = id,
+            employeeId = employeeId!!,
+            date = date?.toLocalDateTime()!!,
+            value = this.value?.let { BigDecimal(it) }!!,
+            installments = this.installments!!,
+            installmentsAlreadyPaid = this.installmentsAlreadyPaid!!,
+            isPaid = this.isPaid!!
+        )
+    }
 
 }

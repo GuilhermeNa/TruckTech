@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.model.travel.Outlay
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.trucktech.databinding.FragmentRefundBinding
 import br.com.apps.trucktech.expressions.snackBarRed
@@ -28,7 +28,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
 
     private val viewModel: RefundViewModel by viewModel()
-    private var adapter: ToReceiveRecyclerAdapter<Expend>? = null
+    private var adapter: ToReceiveRecyclerAdapter<Outlay>? = null
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -131,7 +131,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
         }
     }
 
-    private fun bindText(dataSet: List<Expend>) {
+    private fun bindText(dataSet: List<Outlay>) {
         val numberOfExpends = dataSet.size
         val totalExpends = dataSet.sumOf { it.value }
 

@@ -5,7 +5,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.model.travel.Outlay
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemToReceiveBinding
@@ -68,20 +68,20 @@ class ToReceiveRecyclerAdapter<T>(
                 bindFreight(holder, t)
             }
 
-            is Expend -> {
+            is Outlay -> {
                 bindCost(holder, t)
             }
         }
     }
 
-    private fun bindCost(holder: ViewHolder, expend: Expend) {
+    private fun bindCost(holder: ViewHolder, outlay: Outlay) {
         holder.dataLayout.setBackgroundResource(R.drawable.shape_badge_selected_default)
-        holder.month.text = expend.date?.getMonthInPtBrAbbreviated()
-        holder.day.text = expend.date?.getDayFormatted()
+        holder.month.text = outlay.date?.getMonthInPtBrAbbreviated()
+        holder.day.text = outlay.date?.getDayFormatted()
         holder.valueText.text = VALUE_TEXT_EXPEND
-        holder.value.text = expend.value?.toCurrencyPtBr()
+        holder.value.text = outlay.value?.toCurrencyPtBr()
         val description = buildString {
-            append("Você realizou um pagamento de R$ ${expend.value}." )
+            append("Você realizou um pagamento de R$ ${outlay.value}." )
         }
         holder.description.text = description
     }

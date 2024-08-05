@@ -5,11 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.exceptions.NullBankAccountException
-import br.com.apps.model.exceptions.NullBankException
+import br.com.apps.model.enums.WorkRole
+import br.com.apps.model.exceptions.null_objects.NullBankAccountException
+import br.com.apps.model.exceptions.null_objects.NullBankException
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
-import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
@@ -66,7 +66,7 @@ class BankPreviewViewModel(
         repository.getBankAccountById(
             vmData.employeeId,
             vmData.bankAccountId,
-            EmployeeType.DRIVER,
+            WorkRole.TRUCK_DRIVER,
             true
         ).asFlow().collect { response ->
             when (response) {
@@ -85,7 +85,7 @@ class BankPreviewViewModel(
     suspend fun delete() =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                repository.deleteBankAcc(vmData.employeeId, vmData.bankAccountId, EmployeeType.DRIVER)
+                repository.deleteBankAcc(vmData.employeeId, vmData.bankAccountId, WorkRole.TRUCK_DRIVER)
                 emit(Response.Success())
             } catch (e: Exception) {
                 emit(Response.Error(e))

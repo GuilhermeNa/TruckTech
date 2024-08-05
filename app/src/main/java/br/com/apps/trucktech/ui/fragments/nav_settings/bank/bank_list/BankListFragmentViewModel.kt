@@ -4,10 +4,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.exceptions.NullBankException
+import br.com.apps.model.enums.WorkRole
+import br.com.apps.model.exceptions.null_objects.NullBankException
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
-import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
@@ -73,7 +73,7 @@ class BankListFragmentViewModel(
     }
 
     private suspend fun loadAccountsFlow(onComplete: (accounts: List<BankAccount>) -> Unit) {
-        employeeRepository.getEmployeeBankAccounts(employeeId, EmployeeType.DRIVER, true)
+        employeeRepository.getEmployeeBankAccounts(employeeId, WorkRole.TRUCK_DRIVER, true)
             .asFlow().collect { response ->
                 when (response) {
                     is Response.Error -> throw response.exception
@@ -100,7 +100,7 @@ class BankListFragmentViewModel(
             employeeId,
             oldMainAccId,
             newMainAccId,
-            EmployeeType.DRIVER
+            WorkRole.TRUCK_DRIVER
         )
     }
 

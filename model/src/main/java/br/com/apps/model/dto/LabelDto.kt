@@ -1,6 +1,9 @@
 package br.com.apps.model.dto
 
+import br.com.apps.model.enums.LabelCategory
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.interfaces.DtoObjectInterface
+import br.com.apps.model.model.label.Label
 
 data class LabelDto(
     var masterUid: String? = null,
@@ -13,7 +16,7 @@ data class LabelDto(
     var isDefaultLabel: Boolean? = null,
     @field:JvmField
     var isOperational: Boolean? = null
-) : DtoObjectsInterface {
+) : DtoObjectInterface<Label> {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||
@@ -25,6 +28,20 @@ data class LabelDto(
         ) throw CorruptedFileException("LabelDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {}
+    override fun validateDataForDbInsertion() {}
+
+    override fun toModel(): Label {
+        validateDataIntegrity()
+        return Label(
+            masterUid = this.masterUid!!,
+            id = this.id,
+            name = this.name!!,
+            urlIcon = this.urlIcon,
+            color = this.color,
+            type = LabelCategory.valueOf(this.type!!),
+            isDefaultLabel = this.isDefaultLabel!!,
+            isOperational = this.isOperational!!
+        )
+    }
 
 }

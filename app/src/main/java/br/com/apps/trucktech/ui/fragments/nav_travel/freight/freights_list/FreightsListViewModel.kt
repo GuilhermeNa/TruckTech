@@ -4,20 +4,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
+import br.com.apps.model.exceptions.null_objects.NullCustomerException
+import br.com.apps.model.exceptions.null_objects.NullFreightException
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
+import br.com.apps.model.model.travel.Freight.Companion.merge
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
-import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.util.state.State
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class FreightsListViewModel(
-    private val idHolder: IdHolder,
+    private val vmData: FreightLVmData,
     private val fRepository: FreightRepository,
     private val cRepository: CustomerRepository
 ) : ViewModel() {
@@ -37,68 +38,66 @@ class FreightsListViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        loadData { customers, freights ->
-            processData(customers, freights)
-            sendResponse(freights)
-        }
+        setState(State.Loading)
+        loadData()
     }
 
-    private fun loadData(complete: (customers: List<Customer>, freights: List<Freight>) -> Unit) {
-        _state.value = State.Loading
-
+    private fun loadData() {
         viewModelScope.launch {
-            val customersResult = loadCustomers()
-            val customers = customersResult.await()
-
-            loadFreights { freights ->
-                complete(customers, freights)
-            }
-        }
-    }
-
-    private suspend fun loadCustomers(): CompletableDeferred<List<Customer>> {
-        val deferred = CompletableDeferred<List<Customer>>()
-
-        cRepository.fetchCustomerListByMasterUid(idHolder.masterUid!!).asFlow().first { response ->
-            when (response) {
-                is Response.Error -> {
-                    _state.value = State.Error(response.exception)
-                    deferred.completeExceptionally(response.exception)
+            try {
+                val cus = loadCustomers()
+                loadFreights { fre ->
+                    sendResponse(fre, cus)
                 }
 
-                is Response.Success -> response.data?.let { deferred.complete(it) }
-                    ?: deferred.completeExceptionally(NullPointerException(EMPTY_DATASET))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                setState(State.Error(e))
 
             }
-            true
         }
+    }
 
-        return deferred
+    private suspend fun loadCustomers(): List<Customer> {
+        val response =
+            cRepository.fetchCustomerListByMasterUid(vmData.masterUid).asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullCustomerException(UNKNOWN_EXCEPTION)
+        }
     }
 
     private suspend fun loadFreights(complete: (freights: List<Freight>) -> Unit) {
-        fRepository.fetchFreightListByTravelId(idHolder.travelId!!, true).asFlow()
+        fRepository.fetchFreightListByTravelId(vmData.travelId, true).asFlow()
             .collect { response ->
                 when (response) {
-                    is Response.Error -> _state.value = State.Error(response.exception)
+                    is Response.Error -> throw response.exception
                     is Response.Success -> response.data?.let { complete(it) }
+                        ?: throw NullFreightException(UNKNOWN_EXCEPTION)
                 }
             }
     }
 
-    private fun processData(customers: List<Customer>, freights: List<Freight>) {
-        freights.forEach { f ->
-            f.customer = customers.first { it.id == f.customerId }
+    private fun sendResponse(freights: List<Freight>, customers: List<Customer>) {
+        if (freights.isEmpty()) setState(State.Empty)
+        else {
+            freights.merge(customers)
+            setState(State.Loaded)
+            setFreightData(freights)
         }
     }
 
-    private fun sendResponse(freights: List<Freight>) {
-        if(freights.isEmpty()) {
-            _state.value = State.Empty
-        } else {
-            _state.value = State.Loaded
-            _data.value = freights
-        }
+    private fun setState(state: State) {
+        if (state != _state.value) _state.value = state
+    }
+
+    private fun setFreightData(freights: List<Freight>) {
+        _data.value = freights
     }
 
 }
+
+class FreightLVmData(
+    val masterUid: String,
+    val travelId: String
+)

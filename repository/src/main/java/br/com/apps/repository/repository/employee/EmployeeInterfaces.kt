@@ -3,9 +3,9 @@ package br.com.apps.repository.repository.employee
 import androidx.lifecycle.LiveData
 import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.dto.employee_dto.EmployeeDto
+import br.com.apps.model.enums.WorkRole
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.Employee
-import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.util.Response
 
 interface EmployeeRepositoryInterface : EmployeeWriteInterface, EmployeeReadInterface
@@ -26,7 +26,7 @@ interface EmployeeWriteInterface {
      * @param id The ID of the employee to delete.
      * @param type The type of employee (e.g., regular, manager, etc.).
      */
-    suspend fun delete(id: String, type: EmployeeType)
+    suspend fun delete(id: String, type: WorkRole)
 
     /**
      * Deletes a bank account associated with an employee based on employee ID, bank ID, and employee type.
@@ -35,7 +35,7 @@ interface EmployeeWriteInterface {
      * @param bankId The ID of the bank account to delete.
      * @param type The type of employee (e.g., regular, manager, etc.).
      */
-    suspend fun deleteBankAcc(employeeId: String, bankId: String, type: EmployeeType)
+    suspend fun deleteBankAcc(employeeId: String, bankId: String, type: WorkRole)
 
     /**
      * Saves a bank account for an employee.
@@ -43,7 +43,7 @@ interface EmployeeWriteInterface {
      * @param bankAccDto The DTO containing bank account information.
      * @param type The type of employee (e.g., regular, manager, etc.).
      */
-    suspend fun saveBankAccount(bankAccDto: BankAccountDto, type: EmployeeType)
+    suspend fun saveBankAccount(bankAccDto: BankAccountDto, type: WorkRole)
 
     /**
      * Updates the main account ID associated with an employee.
@@ -57,7 +57,7 @@ interface EmployeeWriteInterface {
         employeeId: String,
         oldMainAccId: String?,
         newMainAccId: String,
-        type: EmployeeType
+        type: WorkRole
     )
 
 
@@ -86,7 +86,7 @@ interface EmployeeReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with the Employee object or an Error with an exception.
      */
-    suspend fun fetchById(id: String, type: EmployeeType, flow: Boolean = false)
+    suspend fun fetchById(id: String, type: WorkRole, flow: Boolean = false)
     : LiveData<Response<Employee>>
 
     /**
@@ -98,7 +98,7 @@ interface EmployeeReadInterface {
      * @return A LiveData object containing the response of the operation,
      *         either a Success with a list of BankAccount objects or an Error with an exception.
      */
-    suspend fun getEmployeeBankAccounts(id: String, type: EmployeeType, flow: Boolean = false)
+    suspend fun getEmployeeBankAccounts(id: String, type: WorkRole, flow: Boolean = false)
             : LiveData<Response<List<BankAccount>>>
 
     /**
@@ -114,7 +114,7 @@ interface EmployeeReadInterface {
     suspend fun getBankAccountById(
         employeeId: String,
         bankId: String,
-        type: EmployeeType,
+        type: WorkRole,
         flow: Boolean = false
     ): LiveData<Response<BankAccount>>
 

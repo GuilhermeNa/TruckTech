@@ -1,9 +1,11 @@
 package br.com.apps.model.dto.employee_dto
 
-import br.com.apps.model.dto.DtoObjectsInterface
+import br.com.apps.model.enums.PixType.Companion.toPixType
 import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.bank.BankAccount
+import br.com.apps.model.util.toLocalDateTime
 import java.util.Date
 
 /**
@@ -29,7 +31,7 @@ data class BankAccountDto(
     var pix: String? = null,
     var pixType: String? = null
 
-) : DtoObjectsInterface {
+) : DtoObjectInterface<BankAccount> {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||
@@ -43,7 +45,7 @@ data class BankAccountDto(
         ) throw CorruptedFileException("BankAccountDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {
+    override fun validateDataForDbInsertion() {
         if (masterUid == null ||
             employeeId == null ||
             bankId == null ||
@@ -52,6 +54,22 @@ data class BankAccountDto(
             accNumber == null ||
             mainAccount == null
         ) throw InvalidForSavingException("BankAccountDto data is invalid: ($this)")
+    }
+
+    override fun toModel(): BankAccount {
+        validateDataIntegrity()
+        return BankAccount(
+            masterUid = masterUid!!,
+            id = id!!,
+            employeeId = employeeId!!,
+            bankId = bankId!!,
+            insertionDate = insertionDate!!.toLocalDateTime(),
+            branch = branch!!,
+            accNumber = accNumber!!,
+            mainAccount = mainAccount!!,
+            pix = pix,
+            pixType = pixType?.toPixType()
+        )
     }
 
 }

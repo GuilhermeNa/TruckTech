@@ -6,15 +6,14 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.travel.RefuelDto
-import br.com.apps.model.factory.RefuelFactory
-import br.com.apps.model.mapper.toDto
+import br.com.apps.model.exceptions.null_objects.NullRefuelException
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.model.toDate
+import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.repository.util.WriteRequest
-import br.com.apps.model.expressions.atBrZone
 import br.com.apps.usecase.usecase.RefuelUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -50,21 +49,29 @@ class RefuelEditorViewModel(
 
     init {
         if (isEditing) loadData()
-        else _date.value = LocalDateTime.now().atBrZone()
+        else setDate(LocalDateTime.now().atBrZone())
     }
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.fetchRefuelById(vmData.refuelId!!).asFlow().first { response ->
-                    when (response) {
-                        is Response.Error -> _data.value = response
-                        is Response.Success -> {
-                            _data.value = response
-                            _date.value = response.data?.date ?: LocalDateTime.now().atBrZone()
-                        }
-                    }
-                true
+            try {
+                val ref = loadRefuel()
+                setDate(ref.date.atBrZone())
+                setFragmentData(Response.Success(ref))
+
+            } catch (e: Exception) {
+                setFragmentData(Response.Error(e))
+
             }
+        }
+    }
+
+    private suspend fun loadRefuel(): Refuel {
+        val response = repository.fetchRefuelById(vmData.refuelId!!)
+            .asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullRefuelException(UNKNOWN_EXCEPTION)
         }
     }
 
@@ -76,38 +83,47 @@ class RefuelEditorViewModel(
             try {
                 val writeReq = WriteRequest(
                     authLevel = vmData.permission,
-                    data = createOrUpdate(viewDto)
+                    data = generateDto(viewDto)
                 )
                 useCase.save(writeReq)
                 emit(Response.Success())
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 emit(Response.Error(e))
+
             }
         }
 
-    private fun createOrUpdate(viewDto: RefuelDto): RefuelDto {
-        viewDto.apply {
-            date = _date.value!!.toDate()
+    private fun generateDto(viewDto: RefuelDto): RefuelDto {
+        fun setCommonFields() {
+            viewDto.run {
+                masterUid = vmData.masterUid
+                truckId = vmData.truckId
+                travelId = vmData.travelId
+            }
         }
 
-        return when(isEditing) {
-            true -> {
-                val refuel = (data.value as Response.Success).data!!
-                RefuelFactory.update(refuel, viewDto)
-                refuel.toDto()
-            }
-            false -> {
-                viewDto.apply {
-                    masterUid = vmData.masterUid
-                    truckId = vmData.truckId
-                    travelId = vmData.travelId
-                    driverId = vmData.driverId
-                    isValid = false
-                }
-                RefuelFactory.create(viewDto).toDto()
+        fun whenEditing(): RefuelDto {
+            val refuel = (data.value as Response.Success).data!!
+            setCommonFields()
+
+            return viewDto.apply {
+                id = refuel.id
+                isValid = refuel.isValid
             }
         }
+
+        fun whenCreating(): RefuelDto {
+            setCommonFields()
+
+            return viewDto.apply {
+                isValid = false
+            }
+        }
+
+        return if(isEditing) whenEditing()
+        else whenCreating()
     }
 
     /**
@@ -120,6 +136,14 @@ class RefuelEditorViewModel(
         _date.value = datetime
     }
 
+    private fun setDate(date: LocalDateTime) {
+        _date.value = date
+    }
+
+    private fun setFragmentData(response: Response<Refuel>) {
+        _data.value = response
+    }
+
 }
 
 data class RefuelEVMData(
@@ -128,5 +152,5 @@ data class RefuelEVMData(
     val travelId: String,
     val driverId: String,
     val refuelId: String? = null,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )

@@ -49,7 +49,7 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
     private val vmData: TravelPreviewVmData by lazy {
         TravelPreviewVmData(
             travelId = args.travelId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: TravelPreviewViewModel by viewModel { parametersOf(vmData) }

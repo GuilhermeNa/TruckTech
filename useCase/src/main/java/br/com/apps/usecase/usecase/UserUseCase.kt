@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import br.com.apps.model.dto.user_dto.CommonUserDto
 import br.com.apps.model.dto.user_dto.MasterUserDto
 import br.com.apps.model.dto.user_dto.UserDto
-import br.com.apps.model.model.employee.EmployeeType
+import br.com.apps.model.enums.WorkRole
 import br.com.apps.model.model.user.User
 import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.util.Resource
@@ -31,10 +31,10 @@ class UserUseCase(private val repository: UserRepository) {
     /**
      * Retrieve the user by its Id
      */
-    fun getById(uid: String, type: EmployeeType): LiveData<User> {
+    fun getById(uid: String, type: WorkRole): LiveData<User> {
         return when(type) {
-            EmployeeType.ADMIN,
-            EmployeeType.DRIVER -> repository.getCommonUser(uid)
+            WorkRole.ADMIN,
+            WorkRole.TRUCK_DRIVER -> repository.getCommonUser(uid)
             else -> throw IllegalArgumentException("Not type for Employee")
         }
     }

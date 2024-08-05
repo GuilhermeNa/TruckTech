@@ -5,14 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.model.request.travel_requests.PaymentRequest
-import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.repository.repository.request.RequestRepository
-import br.com.apps.repository.util.Response
+import br.com.apps.model.enums.PaymentRequestStatusType
 import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.model.request.PaymentRequest
+import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.repository.repository.request.RequestRepository
+import br.com.apps.repository.util.Response
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.RequestUseCase
 import kotlinx.coroutines.CompletableDeferred
@@ -168,5 +168,5 @@ class RequestPreviewViewModel(
 
 data class RequestPreviewVmData(
     val requestId: String,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )

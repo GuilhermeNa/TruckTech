@@ -4,11 +4,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.exceptions.null_objects.NullRefuelException
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.util.state.State
-import br.com.apps.trucktech.util.buildUiResponse
 import kotlinx.coroutines.launch
 
 class RefuelsListViewModel(
@@ -30,15 +31,48 @@ class RefuelsListViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init { loadData() }
+    init {
+        setFragmentState(State.Loading)
+        loadData()
+    }
 
     private fun loadData() {
-        _state.value = State.Loading
         viewModelScope.launch {
-            repository.fetchRefuelListByTravelId(travelId, true).asFlow().collect { response ->
-                response.buildUiResponse(state = _state, data = _data)
+            try {
+                loadRefuels(::sendResponse)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                setFragmentState(State.Error(e))
+
             }
         }
+    }
+
+    private suspend fun loadRefuels(complete: (refuels: List<Refuel>) -> Unit) {
+        repository.fetchRefuelListByTravelId(travelId, true).asFlow().collect { response ->
+            when(response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data?.let { complete(it) }
+                    ?: throw NullRefuelException(UNKNOWN_EXCEPTION)
+            }
+        }
+    }
+
+    private fun sendResponse(data: List<Refuel>) {
+        if(data.isEmpty()) setFragmentState(State.Empty)
+        else {
+            setFragmentData(data)
+            setFragmentState(State.Loaded)
+        }
+    }
+
+    private fun setFragmentState(state: State) {
+        if(state != _state.value) _state.value
+    }
+
+    private fun setFragmentData(refuels: List<Refuel>) {
+        _data.value = refuels
     }
 
 }

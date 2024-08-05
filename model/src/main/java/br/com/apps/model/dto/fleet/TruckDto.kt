@@ -1,8 +1,19 @@
 package br.com.apps.model.dto.fleet
 
-import br.com.apps.model.dto.DtoObjectsInterface
+import br.com.apps.model.enums.FleetCategory
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.interfaces.DtoObjectInterface
+import br.com.apps.model.model.fleet.Truck
+import java.math.BigDecimal
 
+/**
+ * Data Transfer Object (DTO) representing a [Truck].
+ *
+ * This class is used to transfer information between different parts
+ * of the application or between different systems. It plays a crucial role in
+ * communicating with the database by being used to send and receive data from
+ * the database.
+ */
 data class TruckDto(
     var id: String? = null,
     var masterUid: String? = null,
@@ -14,7 +25,7 @@ data class TruckDto(
     var color: String? = null,
     var commissionPercentual: Double? = null,
     var fleetType: String? = null
-) : DtoObjectsInterface {
+) : DtoObjectInterface<Truck> {
 
     override fun validateDataIntegrity() {
         if (id == null ||
@@ -29,6 +40,21 @@ data class TruckDto(
         ) throw CorruptedFileException("TruckDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {}
+    override fun validateDataForDbInsertion() {}
+
+    override fun toModel(): Truck {
+        validateDataIntegrity()
+        return Truck(
+            id = id!!,
+            employeeId = driverId!!,
+            masterUid = masterUid!!,
+            averageAim = averageAim!!,
+            performanceAim = performanceAim!!,
+            plate = plate ?: "-",
+            color = color ?: "-",
+            commissionPercentual = BigDecimal(commissionPercentual!!),
+            fleetType = FleetCategory.valueOf(fleetType!!)
+        )
+    }
 
 }

@@ -6,10 +6,9 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.TravelRequestDto
-import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.request.travel_requests.PaymentRequest
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.model.request.PaymentRequest
+import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
@@ -150,5 +149,5 @@ class RequestEditorViewModel(
 
 data class RequestEditorVmData(
     val requestId: String,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )

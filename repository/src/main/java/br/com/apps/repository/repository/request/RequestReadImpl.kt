@@ -3,8 +3,8 @@ package br.com.apps.repository.repository.request
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.exceptions.EmptyDataException
-import br.com.apps.model.model.request.travel_requests.PaymentRequest
-import br.com.apps.model.model.request.travel_requests.RequestItem
+import br.com.apps.model.model.request.PaymentRequest
+import br.com.apps.model.model.request.RequestItem
 import br.com.apps.repository.util.DRIVER_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_ITEMS
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_REQUESTS

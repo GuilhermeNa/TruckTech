@@ -34,41 +34,41 @@ interface RefuelReadInterface {
     /**
      * Fetches the [Refuel] dataSet for the specified driver ID.
      *
-     * @param driverId The ID of the [Employee].
+     * @param id The ID of the [Employee].
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Refuel] list.
      */
-    suspend fun fetchRefuelListByDriverId(driverId: String, flow: Boolean = false)
+    suspend fun fetchRefuelListByDriverId(id: String, flow: Boolean = false)
             : LiveData<Response<List<Refuel>>>
 
     /**
      * Fetches the [Refuel] dataSet for the specified travel ID.
      *
-     * @param travelId The ID of the [Travel].
+     * @param id The ID of the [Travel].
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Travel] list.
      */
-    suspend fun fetchRefuelListByTravelId(travelId: String, flow: Boolean = false)
+    suspend fun fetchRefuelListByTravelId(id: String, flow: Boolean = false)
             : LiveData<Response<List<Refuel>>>
 
     /**
      * Fetches the [Refuel] dataSet for the specified travel IDs.
      *
-     * @param idList The ID of the [Travel]'s.
+     * @param ids The ID of the [Travel]'s.
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Refuel] list.
      */
-    suspend fun fetchRefuelListByTravelIds(idList: List<String>, flow: Boolean = false)
+    suspend fun fetchRefuelListByTravelIds(ids: List<String>, flow: Boolean = false)
             : LiveData<Response<List<Refuel>>>
 
     /**
      * Fetches the [Refuel] dataSet for the specified ID.
      *
-     * @param refuelId The ID of the [Refuel].
+     * @param id The ID of the [Refuel].
      * @param flow If the user wants to keep observing the data.
      * @return A [Response] with the [Refuel].
      */
-    suspend fun fetchRefuelById(refuelId: String, flow: Boolean = false)
+    suspend fun fetchRefuelById(id: String, flow: Boolean = false)
             : LiveData<Response<Refuel>>
 
 }

@@ -53,7 +53,7 @@ class FreightPreviewFragment : BasePreviewFragment() {
         FreightPreviewVmData(
             masterUid = mainActVM.loggedUser.masterUid,
             freightId = args.freightId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: FreightPreviewViewModel by viewModel { parametersOf(vmData) }

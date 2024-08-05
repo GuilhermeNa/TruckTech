@@ -5,11 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.travel.Travel
-import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.repository.util.Response
 import br.com.apps.model.expressions.atBrZone
+import br.com.apps.model.model.travel.Travel
+import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.repository.util.Response
 import br.com.apps.usecase.usecase.TravelUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -87,10 +86,10 @@ class TravelPreviewViewModel(
         try {
             val travel = data.value!!
             val dto = travel.apply {
-                finalOdometerMeasurement = refuelsList?.last()?.odometerMeasure
+                finalOdometerMeasurement = refuels?.last()?.odometerMeasure
                 finalDate = LocalDateTime.now().atBrZone()
                 isFinished = true
-                considerAverage = travel.shouldConsiderAverage()
+                isClosed = travel.shouldConsiderAverage()
                 validateForSaving()
             }.toDto()
             useCase.setTravelFinished(vmData.permission, dto)
@@ -131,7 +130,7 @@ sealed class StateAppBarTP {
 
 data class TravelPreviewVmData(
     val travelId: String,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )
 
 

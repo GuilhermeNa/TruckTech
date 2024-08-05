@@ -1,9 +1,9 @@
 package br.com.apps.trucktech.screens
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import br.com.apps.model.dto.travel.ExpendDto
+import br.com.apps.model.dto.travel.OutlayDto
 import br.com.apps.model.dto.travel.TravelDto
-import br.com.apps.model.toDate
+import br.com.apps.model.util.toDate
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_EXPENDS
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_TRAVELS
 import br.com.apps.repository.util.MASTER_UID
@@ -64,18 +64,18 @@ class RefundScreenTest: BaseInstrumentedTest() {
         val travel = TravelDto(
             masterUid = T_MASTER_UID,
             id = "1",
-            driverId = T_DRIVER_ID,
+            employeeId = T_DRIVER_ID,
             truckId = T_TRUCK_ID,
             isFinished = false,
-            considerAverage = false,
+            isClosed = false,
             initialDate = LocalDateTime.of(2024, 6, 1, 1, 10).toDate(),
             initialOdometerMeasurement = 10000.0,
         )
 
-        val expend = ExpendDto(
+        val expend = OutlayDto(
             masterUid = T_MASTER_UID,
             truckId = T_TRUCK_ID,
-            driverId = T_DRIVER_ID,
+            employeeId = T_DRIVER_ID,
             travelId = "1",
             labelId = T_EXPEND_LABEL_ID,
             company = "Borracharia x",

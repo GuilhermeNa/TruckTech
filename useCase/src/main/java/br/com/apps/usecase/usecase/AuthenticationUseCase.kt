@@ -3,7 +3,6 @@ package br.com.apps.usecase.usecase
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import br.com.apps.model.dto.user_dto.CommonUserDto
-import br.com.apps.model.factory.UserFactory
 import br.com.apps.model.model.UserCredentials
 import br.com.apps.repository.repository.auth.AuthenticationRepository
 import br.com.apps.repository.util.Resource
@@ -54,9 +53,9 @@ class AuthenticationUseCase(
 
     }
 
-    /**
+/*    *//**
      * Autehtnicate a user that already exists
-     */
+     *//*
     fun authenticateAnExistingUser(credentials: UserCredentials, employeeId: String):
             LiveData<Resource<Boolean>> {
         val mediatorLiveData = MediatorLiveData<Resource<Boolean>>()
@@ -81,7 +80,7 @@ class AuthenticationUseCase(
             }
         }
         return mediatorLiveData
-    }
+    }*/
 
     /**
      * Retrieve the user currently logged in.

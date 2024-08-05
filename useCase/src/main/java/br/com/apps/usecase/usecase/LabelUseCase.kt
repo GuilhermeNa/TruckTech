@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.LabelDto
+import br.com.apps.model.enums.LabelCategory
 import br.com.apps.model.model.label.Label
-import br.com.apps.model.model.label.LabelType
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.Response
 import kotlinx.coroutines.CompletableDeferred
@@ -25,7 +25,7 @@ class LabelUseCase(private val repository: LabelRepository) {
         //return repository.getAll(uid)
     }*/
 
-    /*   suspend fun getAllByType(type: LabelType, uid: String): LiveData<Response<List<Label>>> {
+    /*   suspend fun getAllByType(type: LabelCategory, uid: String): LiveData<Response<List<Label>>> {
            return repository.getAllByType(type.description, uid)
        }*/
 
@@ -51,7 +51,7 @@ class LabelUseCase(private val repository: LabelRepository) {
      */
     suspend fun getOperationalLabels(
         masterUid: String,
-        type: LabelType,
+        type: LabelCategory,
         isOperational: Boolean
     ): LiveData<Response<List<Label>>> {
         return coroutineScope {
@@ -65,10 +65,10 @@ class LabelUseCase(private val repository: LabelRepository) {
                 val liveDataA =
                     repository.fetchLabelListByMasterUidAndTypeAndOperational(
                         masterUid,
-                        type.description,
+                        type.toString(),
                         isOperational
                     )
-                val liveDataB = repository.fetchDefaultLabelList(type.description, isOperational)
+                val liveDataB = repository.fetchDefaultLabelList(type.toString(), isOperational)
 
                 mediator.addSource(liveDataA) { responseA ->
                     when (responseA) {

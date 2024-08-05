@@ -1,12 +1,12 @@
 package br.com.apps.model.model
 
-import br.com.apps.model.model.fleet.FleetType
 import br.com.apps.model.model.fleet.Trailer
 import br.com.apps.model.model.fleet.Truck
-import org.junit.Assert
+import br.com.apps.model.test_cases.sampleTrailer
+import br.com.apps.model.test_cases.sampleTruck
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import java.math.BigDecimal
 
 class TruckTest {
 
@@ -14,20 +14,7 @@ class TruckTest {
 
     @Before
     fun setup() {
-        truck = Truck(
-            masterUid = "1",
-            id = "2",
-            plate = "ABC1234",
-            fleetType = FleetType.TRUCK,
-            driverId = "3",
-            averageAim = 10.0,
-            performanceAim = 8.5,
-            color = "Red",
-            commissionPercentual = BigDecimal("5.0"),
-            trailerList = listOf(
-                Trailer("1", "3", "XYZ5678", FleetType.FOUR_AXIS, truckId = "2")
-            )
-        )
+        truck = sampleTruck()
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -36,30 +23,45 @@ class TruckTest {
 
     @Test
     fun `should return the list of fleet id when there is one or more trailers`() {
-        val ids = listOf("2", "3")
-        Assert.assertEquals(ids, truck.getFleetIds())
+        truck.addTrailer(sampleTrailer())
+        val ids = listOf("truckId1", "trailerId1")
+        assertEquals(ids, truck.getFleetIds())
     }
 
     @Test
     fun `should return the list just with truckId when there is no trailers`() {
-        truck.trailerList = emptyList()
-        val ids = listOf("2")
-        Assert.assertEquals(ids, truck.getFleetIds())
+        val ids = listOf("truckId1")
+        assertEquals(ids, truck.getFleetIds())
     }
+
+    //---------------------------------------------------------------------------------------------//
+    // clearTrailers()
+    //---------------------------------------------------------------------------------------------//
 
     @Test
-    fun `should return the list just with truckId when trailer list is null`() {
-        truck.trailerList = null
-        val ids = listOf("2")
-        Assert.assertEquals(ids, truck.getFleetIds())
+    fun`should clear the trailers`() {
+        truck.addTrailer(sampleTrailer())
+        truck.clearTrailers()
+        assertEquals(mutableListOf<Trailer>(), truck.trailers)
     }
+
+    //---------------------------------------------------------------------------------------------//
+    // toDto()
+    //---------------------------------------------------------------------------------------------//
 
     @Test
-    fun `should return the list just with truckId when trailer id is null`() {
-        truck.trailerList!![0].id = null
-        val ids = listOf("2")
-        Assert.assertEquals(ids, truck.getFleetIds())
-    }
+    fun `should return a dto representing this model`() {
+        val dto = truck.toDto()
 
+        assertEquals(truck.masterUid, dto.masterUid)
+        assertEquals(truck.id, dto.id)
+        assertEquals(truck.employeeId, dto.driverId)
+        assertEquals(truck.averageAim, dto.averageAim)
+        assertEquals(truck.performanceAim, dto.performanceAim)
+        assertEquals(truck.plate, dto.plate)
+        assertEquals(truck.color, dto.color)
+        assertEquals(truck.commissionPercentual.toDouble(), dto.commissionPercentual)
+        assertEquals(truck.fleetType.name, dto.fleetType)
+    }
 
 }

@@ -4,7 +4,7 @@ import br.com.apps.model.dto.employee_dto.AdminEmployeeDto
 import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
 import br.com.apps.model.dto.employee_dto.EmployeeDto
-import br.com.apps.model.model.employee.EmployeeType
+import br.com.apps.model.enums.WorkRole
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_ADMIN
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_BANK
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_DRIVER
@@ -21,8 +21,8 @@ class EmployeeWriteImpl(fireStore: FirebaseFirestore) : EmployeeWriteInterface {
 
     override suspend fun save(dto: EmployeeDto): String {
         val collection = when (dto) {
-            is DriverEmployeeDto -> getCollectionReference(EmployeeType.DRIVER)
-            is AdminEmployeeDto -> getCollectionReference(EmployeeType.ADMIN)
+            is DriverEmployeeDto -> getCollectionReference(WorkRole.TRUCK_DRIVER)
+            is AdminEmployeeDto -> getCollectionReference(WorkRole.ADMIN)
             else -> throw InvalidParameterException()
         }
 
@@ -43,17 +43,17 @@ class EmployeeWriteImpl(fireStore: FirebaseFirestore) : EmployeeWriteInterface {
         return dto.id!!
     }
 
-    override suspend fun delete(id: String, type: EmployeeType) {
+    override suspend fun delete(id: String, type: WorkRole) {
         val collection = getCollectionReference(type)
         collection.document(id).delete().await()
     }
 
-    override suspend fun deleteBankAcc(employeeId: String, bankId: String, type: EmployeeType) {
+    override suspend fun deleteBankAcc(employeeId: String, bankId: String, type: WorkRole) {
         val collection = getCollectionReference(type)
         collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK).document(bankId).delete()
     }
 
-    override suspend fun saveBankAccount(bankAccDto: BankAccountDto, type: EmployeeType) {
+    override suspend fun saveBankAccount(bankAccDto: BankAccountDto, type: WorkRole) {
         val collection = getCollectionReference(type)
 
         if (bankAccDto.id == null) {
@@ -81,7 +81,7 @@ class EmployeeWriteImpl(fireStore: FirebaseFirestore) : EmployeeWriteInterface {
         employeeId: String,
         oldMainAccId: String?,
         newMainAccId: String,
-        type: EmployeeType
+        type: WorkRole
     ) {
         val collection = getCollectionReference(type)
 
@@ -95,10 +95,10 @@ class EmployeeWriteImpl(fireStore: FirebaseFirestore) : EmployeeWriteInterface {
 
     }
 
-    private fun getCollectionReference(type: EmployeeType): CollectionReference {
+    private fun getCollectionReference(type: WorkRole): CollectionReference {
         val collection = when (type) {
-            EmployeeType.DRIVER -> collectionDriver
-            EmployeeType.ADMIN -> collectionAdmin
+            WorkRole.TRUCK_DRIVER -> collectionDriver
+            WorkRole.ADMIN -> collectionAdmin
         }
         return collection
     }

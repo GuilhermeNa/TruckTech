@@ -3,7 +3,7 @@ package br.com.apps.trucktech.adapters
 import android.content.Context
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
-import br.com.apps.model.model.payment_method.PixType
+import br.com.apps.model.enums.PixType
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankLFData
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.private_adapters.BankFragmentAdapter
 import io.mockk.every

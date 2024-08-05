@@ -1,7 +1,11 @@
 package br.com.apps.model.dto.payroll
 
-import br.com.apps.model.dto.DtoObjectsInterface
+import br.com.apps.model.enums.AdvanceType
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.interfaces.DtoObjectInterface
+import br.com.apps.model.model.payroll.Advance
+import br.com.apps.model.util.toLocalDateTime
+import java.math.BigDecimal
 import java.util.Date
 
 data class AdvanceDto(
@@ -18,7 +22,7 @@ data class AdvanceDto(
     var isApproved: Boolean? = null,
     var type: String? = null
 
-) : DtoObjectsInterface {
+) : DtoObjectInterface<Advance> {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||
@@ -32,6 +36,21 @@ data class AdvanceDto(
         ) throw CorruptedFileException("AdvanceDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {}
+    override fun validateDataForDbInsertion() {}
+
+    override fun toModel(): Advance {
+        validateDataIntegrity()
+        return Advance(
+            masterUid = masterUid!!,
+            id = id,
+            travelId = travelId,
+            employeeId = employeeId!!,
+            date = date!!.toLocalDateTime(),
+            value = BigDecimal(value!!),
+            isPaid = isPaid!!,
+            isApproved = isApproved!!,
+            type = AdvanceType.valueOf(type!!)
+        )
+    }
 
 }

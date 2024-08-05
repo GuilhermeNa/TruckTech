@@ -9,12 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.NULL_DATE
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRefuelsListBinding
-import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.KEY_ID
 import br.com.apps.trucktech.ui.PAGE_REFUEL
@@ -133,7 +133,7 @@ class RefuelsListFragment : Fragment() {
             .sortedBy { it.date }
             .reversed()
             .groupBy {
-                it.date?.getMonthAndYearInPtBr() ?: throw InvalidParameterException(NULL_DATE)
+                it.date.getMonthAndYearInPtBr() ?: throw InvalidParameterException(NULL_DATE)
             }
             .map { createAdapters(it) }
             .flatten()
@@ -152,9 +152,9 @@ class RefuelsListFragment : Fragment() {
                 })
         )
 
-//---------------------------------------------------------------------------------------------//
-// ON DESTROY VIEW
-//---------------------------------------------------------------------------------------------//
+    //---------------------------------------------------------------------------------------------//
+    // ON DESTROY VIEW
+    //---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -20,7 +20,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import br.com.apps.model.dto.bank.BankDto
 import br.com.apps.model.dto.employee_dto.BankAccountDto
 import br.com.apps.model.dto.travel.TravelDto
-import br.com.apps.model.toDate
+import br.com.apps.model.util.toDate
 import br.com.apps.trucktech.BaseInstrumentedTest.Companion.T_BANK_ID
 import br.com.apps.trucktech.BaseInstrumentedTest.Companion.T_DRIVER_ID
 import br.com.apps.trucktech.BaseInstrumentedTest.Companion.T_MASTER_UID
@@ -339,10 +339,10 @@ abstract class TestDataGenerator {
 
             TravelDto(
                 masterUid = T_MASTER_UID,
-                driverId = T_DRIVER_ID,
+                employeeId = T_DRIVER_ID,
                 truckId = T_TRUCK_ID,
                 isFinished = false,
-                considerAverage = false,
+                isClosed = false,
                 initialDate = initDate.toDate(),
                 initialOdometerMeasurement = 10000.0,
             )

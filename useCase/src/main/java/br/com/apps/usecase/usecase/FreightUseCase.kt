@@ -1,44 +1,12 @@
 package br.com.apps.usecase.usecase
 
 import br.com.apps.model.dto.travel.FreightDto
-import br.com.apps.model.model.travel.Freight
-import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
 import br.com.apps.repository.util.validateAndProcess
-import br.com.apps.usecase.util.awaitData
-import br.com.apps.usecase.util.observeFlow
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
-class FreightUseCase(
-    private val fRepository: FreightRepository,
-    private val customerRepository: CustomerRepository
-) {
-
-    /**
-     * Retrieves a freight by its ID asynchronously using Flow, including associated customer information.
-     *
-     * @param id The ID of the freight to retrieve.
-     * @param onComplete Callback function to handle the response when retrieval is complete.
-     */
-    suspend fun getFreightByIdFlow(id: String, onComplete: (Response<Freight>) -> Unit) {
-        coroutineScope {
-            try {
-                fRepository.fetchFreightById(id, true).observeFlow { f ->
-                    launch {
-                        f.customer = customerRepository.fetchCustomerById(f.customerId).awaitData()
-                        onComplete(Response.Success(f))
-                    }
-                }
-
-            } catch (e: Exception) {
-                onComplete(Response.Error(e))
-            }
-
-        }
-    }
+class FreightUseCase(private val fRepository: FreightRepository) {
 
     /**
      * Saves a freight DTO to the repository.
@@ -53,8 +21,8 @@ class FreightUseCase(
         val auth = writeReq.authLevel
 
         validateAndProcess(
-            validatePermission = { dto.validatePermission(auth) },
-            validateData = { dto.validateForDataBaseInsertion() }
+            validatePermission = { dto.validateWriteAccess(auth) },
+            validateData = { dto.validateDataForDbInsertion() }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception
@@ -75,7 +43,7 @@ class FreightUseCase(
         val auth = writeReq.authLevel
 
         validateAndProcess(
-            validatePermission = { dto.validatePermission(auth) }
+            validatePermission = { dto.validateWriteAccess(auth) }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception

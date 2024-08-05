@@ -4,28 +4,30 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.IdHolder
-import br.com.apps.model.model.travel.Expend
-import br.com.apps.repository.util.EMPTY_ID
+import br.com.apps.model.exceptions.null_objects.NullExpendException
+import br.com.apps.model.exceptions.null_objects.NullLabelException
+import br.com.apps.model.model.label.Label
+import br.com.apps.model.model.travel.Outlay
+import br.com.apps.model.model.travel.Outlay.Companion.merge
+import br.com.apps.repository.repository.outlay.OutlayRepository
+import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.trucktech.util.state.State
-import br.com.apps.trucktech.util.buildUiResponse
-import br.com.apps.usecase.usecase.ExpendUseCase
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ExpendListViewModel(
-    private val idHolder: IdHolder,
-    private val useCase: ExpendUseCase
-): ViewModel() {
-
-    val travelId = idHolder.travelId ?: throw IllegalArgumentException(EMPTY_ID)
-    val masterUid = idHolder.masterUid ?: throw IllegalArgumentException(EMPTY_ID)
+    private val vmData: ExpendLVmData,
+    private val labelRepo: LabelRepository,
+    private val expendRepo: OutlayRepository
+) : ViewModel() {
 
     /**
-     * LiveData holding the response data of type [Response] with a list of expenditures [Expend]
+     * LiveData holding the response data of type [Response] with a list of expenditures [Outlay]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<List<Expend>>()
+    private val _data = MutableLiveData<List<Outlay>>()
     val data get() = _data
 
     private val _state = MutableLiveData<State>()
@@ -36,16 +38,65 @@ class ExpendListViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
+        setState(State.Loading)
         loadData()
     }
 
     private fun loadData() {
-        _state.value = State.Loading
         viewModelScope.launch {
-            useCase.getExpendListWithLabelByTravelId(masterUid, travelId).asFlow().collect { response ->
-                response.buildUiResponse(_state, _data)
+            try {
+                val labels = loadLabels()
+                loadExpends { expends ->
+                    sendResponse(labels, expends)
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                setState(State.Error(e))
+
             }
         }
     }
 
+    private suspend fun loadLabels(): List<Label> {
+        val response = labelRepo.fetchLabelListByMasterUid(vmData.masterUid)
+            .asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullLabelException(UNKNOWN_EXCEPTION)
+        }
+    }
+
+    private suspend fun loadExpends(complete: (List<Outlay>) -> Unit) {
+        expendRepo.fetchOutlayListByTravelId(vmData.travelId).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data?.let { complete(it) }
+                    ?: throw NullExpendException(UNKNOWN_EXCEPTION)
+            }
+        }
+    }
+
+    private fun sendResponse(labels: List<Label>, outlays: List<Outlay>) {
+        if (outlays.isEmpty()) setState(State.Empty)
+        else {
+            outlays.merge(labels)
+            setFragmentData(outlays)
+            setState(State.Loaded)
+        }
+    }
+
+    private fun setFragmentData(data: List<Outlay>) {
+        _data.value = data
+    }
+
+    private fun setState(state: State) {
+        if (state != _state.value) _state.value = state
+    }
+
 }
+
+class ExpendLVmData(
+    val masterUid: String,
+    val travelId: String
+)

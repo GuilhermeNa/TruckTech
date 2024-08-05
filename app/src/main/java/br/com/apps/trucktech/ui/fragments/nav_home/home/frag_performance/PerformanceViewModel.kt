@@ -143,11 +143,11 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
         var mapIndex = 0
 
         travels.forEachIndexed { index, travel ->
-            if (travel.considerAverage) {
+            if (travel.isClosed) {
                 val nextInd = (index + 1)
                 val isTheLastOfList = nextInd == travels.size
-                val isTheNextOk = nextInd < travels.size && travels[index + 1].considerAverage
-                val isTheNextInvalid = nextInd < travels.size && !travels[index + 1].considerAverage
+                val isTheNextOk = nextInd < travels.size && travels[index + 1].isClosed
+                val isTheNextInvalid = nextInd < travels.size && !travels[index + 1].isClosed
 
                 val subList = when {
                     isTheLastOfList -> listOf(travel)
@@ -156,7 +156,7 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
 
                     isTheNextInvalid -> {
                         val partialEndIndex =
-                            travels.drop(nextInd).indexOfFirst { it.considerAverage }
+                            travels.drop(nextInd).indexOfFirst { it.isClosed }
 
                         val endIndex = if (partialEndIndex == -1) {
                             travels.size
@@ -197,14 +197,14 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
         travels.forEachIndexed label@{ index, pair ->
             val nextInd = (index + 1)
             val isNextMonthInvalid =
-                nextInd < travels.size && !travels[nextInd].second.first().considerAverage
+                nextInd < travels.size && !travels[nextInd].second.first().isClosed
 
             when {
                 isNextMonthInvalid -> {
                     val nextMonthList = travels[nextInd].second
                     val thisMonthList = pair.second
 
-                    val transferIndex = thisMonthList.indexOfLast { it.considerAverage }
+                    val transferIndex = thisMonthList.indexOfLast { it.isClosed }
 
                     thisMonthList.subList(transferIndex, thisMonthList.size).forEach {
                         nextMonthList.add(0, it)

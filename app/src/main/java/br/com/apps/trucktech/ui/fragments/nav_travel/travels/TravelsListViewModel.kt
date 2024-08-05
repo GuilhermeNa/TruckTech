@@ -6,7 +6,7 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.model.toDate
+import br.com.apps.model.util.toDate
 import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.model.expressions.atBrZone
@@ -58,10 +58,10 @@ class TravelsListViewModel(
             fun createDto() = TravelDto(
                     masterUid = vmData.masterUid,
                     truckId = vmData.truckId,
-                    driverId = vmData.driverId,
+                    employeeId = vmData.driverId,
                     isFinished = false,
                     initialDate = LocalDateTime.now().atBrZone().toDate(),
-                    considerAverage = false,
+                    isClosed = false,
                     initialOdometerMeasurement = odometerMeasurement
                 )
 

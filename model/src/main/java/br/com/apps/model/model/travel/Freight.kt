@@ -1,21 +1,28 @@
 package br.com.apps.model.model.travel
 
-import br.com.apps.model.exceptions.NullCustomerException
+import br.com.apps.model.dto.travel.FreightDto
+import br.com.apps.model.exceptions.EmptyDataException
+import br.com.apps.model.exceptions.null_objects.NullCustomerException
 import br.com.apps.model.expressions.toPercentValue
+import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.fleet.Truck
+import br.com.apps.model.util.ERROR_STRING
+import br.com.apps.model.util.toDate
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 /**
  * This class encapsulates details of a cargo logistical shipment.
  *
- *  Observe:
+ *  Notes:
  *  * Freights are transported by a [Truck].
  *  * Each freight has a [Customer] who ordered the transport.
- *  * Each freight is associated with a specific [Travel] and is part of a list of freights.
+ *  * Each freight is associated with a specific [Travel] and is part of its list of freights.
  *  * Must generate a commission payment for the (driver) [Employee] who performed the transport.
+ *  * This object needs to be validated([isValid]) by an administrator to verify its accuracy.
+ *    After validation, it cannot be modified by users without appropriate permissions.
  *
  * @property masterUid Unique identifier for the master record associated with this freight.
  * @property id Unique identifier for the [Freight].
@@ -49,16 +56,31 @@ data class Freight(
     var weight: BigDecimal,
     var loadingDate: LocalDateTime,
     var commissionPercentual: BigDecimal,
-    @field:JvmField
-    var isValid: Boolean,
-    @field:JvmField
-    var isCommissionPaid: Boolean,
     var customer: Customer? = null,
-) {
+    @field:JvmField var isValid: Boolean
+) : ModelObjectInterface<FreightDto> {
+
+    companion object {
+
+        /**
+         * Extension function for list of [Freight]'s to merge with a list of [Customer]'s.
+         *
+         * Each freight in the list will have its customer updated with
+         * the corresponding from the customers list.
+         *
+         * @param customers A list of customers objects.
+         *
+         * @return A [List] of [Freight] with valid [Customer]'s.
+         */
+        fun List<Freight>.merge(customers: List<Customer>) {
+            this.forEach { it.setCustomerById(customers) }
+        }
+
+    }
 
     /**
      * Calculates and returns the commission value based on the freight value
-     * and commission percentage.
+     * and [commissionPercentual].
      *
      * @return The calculated commission value as a BigDecimal.
      */
@@ -74,6 +96,8 @@ data class Freight(
      * of this document.
      */
     fun setCustomerById(customers: List<Customer>) {
+        if (customers.isEmpty()) throw EmptyDataException("Customer list cannot be empty")
+
         customer = customers.firstOrNull { it.id == customerId }
             ?: throw NullCustomerException("Customer not found")
     }
@@ -86,7 +110,7 @@ data class Freight(
             customer!!.name
         } catch (e: Exception) {
             e.printStackTrace()
-            "Erro"
+            ERROR_STRING
         }
     }
 
@@ -95,27 +119,28 @@ data class Freight(
      */
     fun getCustomerCnpj(): String {
         return try {
-            customer!!.name
+            customer!!.cnpj
         } catch (e: Exception) {
             e.printStackTrace()
-            "Erro"
+            ERROR_STRING
         }
     }
 
-    companion object {
-        /**
-         * Extension function for list of [Freight]'s to merge with a list of [Customer]'s.
-         *
-         * Each freight in the list will have its customer updated with
-         * the corresponding from the customers list.
-         *
-         * @param customers A list of customers objects.
-         *
-         * @return A [List] of [Freight] with valid [Customer]'s.
-         */
-        fun List<Freight>.merge(customers: List<Customer>) {
-            this.forEach { it.setCustomerById(customers) }
-        }
-    }
+    override fun toDto() = FreightDto(
+        masterUid = masterUid,
+        id = id,
+        truckId = truckId,
+        travelId = travelId,
+        employeeId = employeeId,
+        customerId = customerId,
+        origin = origin,
+        destiny = destiny,
+        cargo = cargo,
+        weight = weight.toDouble(),
+        value = value.toDouble(),
+        loadingDate = loadingDate.toDate(),
+        commissionPercentual = commissionPercentual.toDouble(),
+        isValid = isValid
+    )
 
 }

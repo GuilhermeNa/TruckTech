@@ -15,11 +15,11 @@ class TravelAidDtoTest {
         travelAidDto = TravelAidDto(
             masterUid = "1",
             id = "2",
-            driverId = "3",
+            employeeId = "3",
             travelId = "4",
             date = Date(),
             value = 500.0,
-            isPaid = false
+            isValid = false
         )
     }
 
@@ -45,7 +45,7 @@ class TravelAidDtoTest {
 
     @Test
     fun `should throw CorruptedFileException when driverId is null`() {
-        travelAidDto.driverId = null
+        travelAidDto.employeeId = null
         Assert.assertThrows(CorruptedFileException::class.java) {
             travelAidDto.validateDataIntegrity()
         }
@@ -75,12 +75,5 @@ class TravelAidDtoTest {
         }
     }
 
-    @Test
-    fun `should throw CorruptedFileException when isPaid is null`() {
-        travelAidDto.isPaid = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
-            travelAidDto.validateDataIntegrity()
-        }
-    }
 
 }

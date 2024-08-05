@@ -11,7 +11,9 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.dto.travel.RefuelDto
+import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.model.model.travel.Refuel
+import br.com.apps.model.util.toDate
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
@@ -19,7 +21,6 @@ import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRefuelEditorBinding
-import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
@@ -47,7 +48,7 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
             travelId = args.travelId,
             driverId = mainActVM.loggedUser.driverId,
             refuelId = args.refuelId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: RefuelEditorViewModel by viewModel { parametersOf(vmData) }
@@ -190,6 +191,7 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
 
             if (fieldsAreValid) {
                 val viewDto = RefuelDto(
+                    date = viewModel.date.value!!.toDate(),
                     station = station,
                     odometerMeasure = odometer.formatPriceSave().toDouble(),
                     amountLiters = amountLiters.formatPriceSave().toDouble(),

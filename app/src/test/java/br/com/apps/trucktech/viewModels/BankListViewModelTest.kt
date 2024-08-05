@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
-import br.com.apps.model.model.payment_method.PixType
+import br.com.apps.model.enums.PixType
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankLFData
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_list.BankListFragmentViewModel
 import br.com.apps.trucktech.util.state.State

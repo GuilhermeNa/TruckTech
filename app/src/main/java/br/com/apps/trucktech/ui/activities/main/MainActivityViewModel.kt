@@ -4,25 +4,27 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.enums.WorkRole
 import br.com.apps.model.exceptions.UserNotFoundException
 import br.com.apps.model.model.FleetFine
-import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
-import br.com.apps.model.model.travel.Expend
 import br.com.apps.model.model.travel.Freight
+import br.com.apps.model.model.travel.Outlay
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.model.travel.TravelAid
+import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.model.model.user.CommonUser
-import br.com.apps.model.model.user.PermissionLevelType
 import br.com.apps.repository.repository.advance.AdvanceRepository
 import br.com.apps.repository.repository.auth.AuthenticationRepository
-import br.com.apps.repository.repository.expend.ExpendRepository
+import br.com.apps.repository.repository.outlay.OutlayRepository
 import br.com.apps.repository.repository.fine.FineRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.repository.loan.LoanRepository
+import br.com.apps.repository.repository.payable.EmployeePayableRepository
+import br.com.apps.repository.repository.receivable.EmployeeReceivableRepository
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.repository.travel_aid.TravelAidRepository
@@ -34,6 +36,7 @@ import br.com.apps.usecase.usecase.TravelUseCase
 import br.com.apps.usecase.usecase.UserUseCase
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -49,9 +52,11 @@ class MainActivityViewModel(
     private val travelRepository: TravelRepository,
     private val refuelRepository: RefuelRepository,
     private val freightRepository: FreightRepository,
-    private val expendRepository: ExpendRepository,
+    private val outlayRepository: OutlayRepository,
     private val aidRepository: TravelAidRepository,
-    private val travelUseCase: TravelUseCase
+    private val travelUseCase: TravelUseCase,
+    private val receivableRepo: EmployeeReceivableRepository,
+    private val payableRepo: EmployeePayableRepository
 ) : ViewModel() {
 
     private val _cachedTravels = MutableLiveData<List<Travel>>()
@@ -89,10 +94,22 @@ class MainActivityViewModel(
 
     init {
         setState(State.Loading)
+        loadData()
+    }
+
+    private fun loadData() {
         viewModelScope.launch {
             try {
-                fetchLoggedUser()
-                fetchData()
+
+                val employeeId = fetchLoggedUser()
+
+                launch { fetchEmployeePayablesFlow(employeeId) }
+                launch { fetchEmployeeReceivablesFlow(employeeId) }
+                launch { fetchAdvancesFlow(employeeId) }
+                launch { fetchLoansFlow(employeeId) }
+                launch { fetchFinesFlow(employeeId) }
+                fetchTravelsFlow(employeeId)
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 setState(State.Error(e))
@@ -119,7 +136,7 @@ class MainActivityViewModel(
     /**
      * Load user data
      */
-    private suspend fun fetchLoggedUser() {
+    private suspend fun fetchLoggedUser(): String {
         val userId = authRepository.getCurrentUser()?.uid
             ?: throw UserNotFoundException()
 
@@ -127,10 +144,11 @@ class MainActivityViewModel(
         val truck = fetchTruck(user.employeeId)
         mergeLoggedUserData(user, truck)
 
+        return user.employeeId
     }
 
     private suspend fun fetchUser(userId: String): CommonUser {
-        val response = userUseCase.getById(userId, EmployeeType.DRIVER).asFlow().first()
+        val response = userUseCase.getById(userId, WorkRole.TRUCK_DRIVER).asFlow().first()
         return response as CommonUser
     }
 
@@ -150,7 +168,7 @@ class MainActivityViewModel(
         loggedUser =
             LoggedUser(
                 masterUid = truck.masterUid,
-                driverId = truck.driverId,
+                driverId = truck.employeeId,
                 truckId = truck.id!!,
                 uid = user.uid,
                 truck = truck,
@@ -161,28 +179,34 @@ class MainActivityViewModel(
                 averageAim = BigDecimal(truck.averageAim),
                 performanceAim = BigDecimal(truck.performanceAim),
                 urlImage = user.urlImage,
-                permissionLevelType = user.permission,
+                accessLevel = user.permission,
                 commissionPercentual = truck.commissionPercentual
             )
 
     }
 
-    /**
-     * Initialize listener to get common data for fragments in cache
-     */
-    private suspend fun fetchData() {
-        coroutineScope {
+    private suspend fun fetchEmployeeReceivablesFlow(employeeId: String) {
+        receivableRepo.fetchReceivableByEmployeeIdAndStatus(
+            id = employeeId, isReceived = false, flow = true
+        ).asFlow().collect {
 
-            val driverId = loggedUser.driverId
 
-            launch { fetchAdvances(driverId) }
-            launch { fetchLoans(driverId) }
-            launch { fetchFines(driverId) }
-            fetchTravels(driverId)
+        }
+
+        val outFlow = outlayRepository.fetch()
+
+
+    }
+
+    private suspend fun fetchEmployeePayablesFlow(employeeId: String) {
+        payableRepo.fetchPayablesByEmployeeIdAndStatus(
+            id = employeeId, isPaid = false, flow = true
+        ).asFlow().collect {
+
         }
     }
 
-    private suspend fun fetchAdvances(driverId: String) {
+    private suspend fun fetchAdvancesFlow(driverId: String) {
         advanceRepository.fetchAdvanceListByEmployeeIdAndPaymentStatus(
             employeeId = driverId, isPaid = false, flow = true
         ).asFlow().collect { response ->
@@ -196,7 +220,7 @@ class MainActivityViewModel(
         }
     }
 
-    private suspend fun fetchLoans(driverId: String) {
+    private suspend fun fetchLoansFlow(driverId: String) {
         loanRepository.fetchLoanListByEmployeeIdAndPaymentStatus(
             employeeId = driverId, isPaid = false, flow = true
         ).asFlow().collect { response ->
@@ -211,7 +235,7 @@ class MainActivityViewModel(
 
     }
 
-    private suspend fun fetchFines(driverId: String) {
+    private suspend fun fetchFinesFlow(driverId: String) {
         fineRepository.fetchFineListByDriverId(driverId, flow = true)
             .asFlow().collect { response ->
                 when (response) {
@@ -224,7 +248,7 @@ class MainActivityViewModel(
             }
     }
 
-    private suspend fun fetchTravels(driverId: String) {
+    private suspend fun fetchTravelsFlow(driverId: String) {
         coroutineScope {
 
             val travelFLow = travelRepository.fetchTravelListByDriverId(driverId, flow = true)
@@ -236,7 +260,7 @@ class MainActivityViewModel(
             val refuelFlow = refuelRepository.fetchRefuelListByDriverId(driverId, flow = true)
                 .asFlow()
 
-            val expendFlow = expendRepository.fetchExpendListByDriverId(driverId, flow = true)
+            val expendFlow = outlayRepository.fetchOutlayListByDriverId(driverId, flow = true)
                 .asFlow()
 
             val aidFLow = aidRepository.fetchTravelAidListByDriverId(driverId, flow = true)
@@ -271,7 +295,7 @@ class MainActivityViewModel(
                     travelList = travels,
                     refuelList = refuels,
                     freightList = freights,
-                    expendList = expends,
+                    outlayList = expends,
                     aidList = aids
                 )
 
@@ -290,13 +314,13 @@ class MainActivityViewModel(
         travelFlow: Flow<Response<List<Travel>>>,
         refuelFlow: Flow<Response<List<Refuel>>>,
         freightFlow: Flow<Response<List<Freight>>>,
-        expendFlow: Flow<Response<List<Expend>>>,
+        outlayFlow: Flow<Response<List<Outlay>>>,
         aidFLow: Flow<Response<List<TravelAid>>>,
         transform: (
             Response<List<Travel>>,
             Response<List<Refuel>>,
             Response<List<Freight>>,
-            Response<List<Expend>>,
+            Response<List<Outlay>>,
             Response<List<TravelAid>>
         ) -> List<Travel>
     ): Flow<List<Travel>> {
@@ -305,7 +329,7 @@ class MainActivityViewModel(
                 Pair(tra, ref)
             }
             .combine(freightFlow) { (tra, ref), fre -> Triple(tra, ref, fre) }
-            .combine(expendFlow) { (tra, ref, fre), exp -> Quadruple(tra, ref, fre, exp) }
+            .combine(outlayFlow) { (tra, ref, fre), exp -> Quadruple(tra, ref, fre, exp) }
             .combine(aidFLow) { (tra, ref, fre, exp), aid ->
                 transform(tra, ref, fre, exp, aid)
             }
@@ -352,6 +376,6 @@ data class LoggedUser(
     val averageAim: BigDecimal,
     val performanceAim: BigDecimal,
     val urlImage: String? = null,
-    val permissionLevelType: PermissionLevelType,
+    val accessLevel: AccessLevel,
     val commissionPercentual: BigDecimal
 )

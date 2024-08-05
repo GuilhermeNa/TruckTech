@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.IdHolder
 import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
@@ -33,14 +32,13 @@ class FreightsListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val sharedViewModel by viewModels<RecordsViewModel>({ requireParentFragment() })
-
-    private val idHolder by lazy {
-        IdHolder(
+    private val vmData by lazy {
+        FreightLVmData(
             masterUid = sharedViewModel.masterUid,
             travelId = sharedViewModel.travelId
         )
     }
-    private val viewModel: FreightsListViewModel by viewModel { parametersOf(idHolder) }
+    private val viewModel: FreightsListViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -133,7 +131,7 @@ class FreightsListFragment : Fragment() {
             .sortedBy { it.loadingDate }
             .reversed()
             .groupBy {
-                it.loadingDate?.getMonthAndYearInPtBr() ?: throw InvalidParameterException(NULL_DATE)
+                it.loadingDate.getMonthAndYearInPtBr() ?: throw InvalidParameterException(NULL_DATE)
             }
             .map { createAdapters(it) }
             .flatten()

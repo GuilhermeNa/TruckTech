@@ -11,9 +11,9 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.enums.PixType
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
-import br.com.apps.model.model.payment_method.PixType
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
@@ -218,7 +218,7 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                         bankId = viewModel.getBankId(bankName),
                         branch = branch.toInt(),
                         accNumber = accNumber.toInt(),
-                        pixType = PixType.getTypeInString(type),
+                        pixType = getTypeInString(type),
                         pix = pix,
                         mainAccount = false,
                     )
@@ -226,6 +226,16 @@ class BankEditorFragment : BaseFragmentWithToolbar() {
                 }
 
             }
+        }
+    }
+
+    private fun getTypeInString(text: String): String {
+        return when (text) {
+            "Celular" -> "PHONE"
+            "Email" -> "EMAIL"
+            "Cpf" -> "CPF"
+            "Cnpj" -> "CNPJ"
+            else -> throw IllegalArgumentException("Invalid text for ($text)")
         }
     }
 

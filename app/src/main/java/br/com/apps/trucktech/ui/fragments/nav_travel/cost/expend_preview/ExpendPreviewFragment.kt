@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.model.travel.Outlay
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_REMOVE
@@ -41,7 +41,7 @@ class ExpendPreviewFragment : BasePreviewFragment() {
     private val vmData by lazy {
         ExpendPreviewVmData(
             expendId = args.costId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: ExpendPreviewViewModel by viewModel{ parametersOf(vmData) }
@@ -82,7 +82,7 @@ class ExpendPreviewFragment : BasePreviewFragment() {
     /**
      * Initializes the state manager and observes [viewModel] data.
      *
-     *  - Observes expendData to bind the [Expend].
+     *  - Observes expendData to bind the [Outlay].
      *
      */
     private fun initStateManager() {
@@ -128,19 +128,19 @@ class ExpendPreviewFragment : BasePreviewFragment() {
 
     }
 
-    private fun bind(expend: Expend) {
+    private fun bind(outlay: Outlay) {
         binding.apply {
-            fragmentCostPreviewCompany.text = expend.company
-            fragmentCostPreviewValue.text = expend.value.toCurrencyPtBr()
-            fragmentCostPreviewDate.text = expend.date.getCompleteDateInPtBr()
-            fragmentCostPreviewDescription.text = expend.description
+            fragmentCostPreviewCompany.text = outlay.company
+            fragmentCostPreviewValue.text = outlay.value.toCurrencyPtBr()
+            fragmentCostPreviewDate.text = outlay.date.getCompleteDateInPtBr()
+            fragmentCostPreviewDescription.text = outlay.description
         }
     }
 
     /**
-     * Try to delete the [Expend].
-     *  1. Displays a confirmation dialog to delete the [Expend].
-     *  2. Sends a request to the [viewModel] to delete the [Expend].
+     * Try to delete the [Outlay].
+     *  1. Displays a confirmation dialog to delete the [Outlay].
+     *  2. Sends a request to the [viewModel] to delete the [Outlay].
      */
     override fun onDeleteMenuClick() { showDeleteDialog() }
 

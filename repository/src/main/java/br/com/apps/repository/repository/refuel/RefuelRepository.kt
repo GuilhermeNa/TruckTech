@@ -19,16 +19,16 @@ class RefuelRepository(
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun fetchRefuelListByDriverId(driverId: String, flow: Boolean) =
-        read.fetchRefuelListByDriverId(driverId, flow)
+    override suspend fun fetchRefuelListByDriverId(id: String, flow: Boolean) =
+        read.fetchRefuelListByDriverId(id, flow)
 
-    override suspend fun fetchRefuelListByTravelId(travelId: String, flow: Boolean) =
-        read.fetchRefuelListByTravelId(travelId, flow)
+    override suspend fun fetchRefuelListByTravelId(id: String, flow: Boolean) =
+        read.fetchRefuelListByTravelId(id, flow)
 
-    override suspend fun fetchRefuelListByTravelIds(idList: List<String>, flow: Boolean) =
-        read.fetchRefuelListByTravelIds(idList, flow)
+    override suspend fun fetchRefuelListByTravelIds(ids: List<String>, flow: Boolean) =
+        read.fetchRefuelListByTravelIds(ids, flow)
 
-    override suspend fun fetchRefuelById(refuelId: String, flow: Boolean) =
-        read.fetchRefuelById(refuelId, flow)
+    override suspend fun fetchRefuelById(id: String, flow: Boolean) =
+        read.fetchRefuelById(id, flow)
 
 }

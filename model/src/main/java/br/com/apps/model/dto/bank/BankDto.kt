@@ -1,7 +1,7 @@
 package br.com.apps.model.dto.bank
 
-import br.com.apps.model.dto.DtoObjectsInterface
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.bank.Bank
 
 /**
@@ -17,13 +17,23 @@ class BankDto(
     var name: String? = null,
     var code: Int? = null,
     var urlImage: String? = null
-) : DtoObjectsInterface {
+) : DtoObjectInterface<Bank> {
 
     override fun validateDataIntegrity() {
-        if((id == null || name == null || code == null || urlImage == null))
+        if ((id == null || name == null || code == null || urlImage == null))
             throw CorruptedFileException("BankDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {}
+    override fun validateDataForDbInsertion() {}
+
+    override fun toModel(): Bank {
+        validateDataIntegrity()
+        return Bank(
+            id = this.id!!,
+            name = this.name!!,
+            code = this.code!!.toInt(),
+            urlImage = this.urlImage!!
+        )
+    }
 
 }

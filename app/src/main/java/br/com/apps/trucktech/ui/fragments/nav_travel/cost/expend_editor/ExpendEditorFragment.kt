@@ -8,17 +8,16 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.dto.travel.ExpendDto
+import br.com.apps.model.dto.travel.OutlayDto
+import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.label.Label.Companion.containsByName
-import br.com.apps.model.model.label.Label.Companion.getIdByName
-import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.model.travel.Outlay
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentExpendEditorBinding
-import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
@@ -46,7 +45,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
             driverId = mainActVM.loggedUser.driverId,
             travelId = args.travelId,
             expendId = args.costId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: ExpendEditorViewModel by viewModel { parametersOf(vmData) }
@@ -135,7 +134,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
     }
 
     /**
-     * Try to save an [Expend].
+     * Try to save an [Outlay].
      *  1. Validate the fields.
      *  2. Convert to DTO.
      *  3. Send DTO to be saved.
@@ -172,8 +171,9 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
             }
 
             if (fieldsAreValid) {
-                val viewDto = ExpendDto(
-                    labelId = viewModel.data.value!!.labelList.getIdByName(name),
+                val viewDto = OutlayDto(
+                    labelId = viewModel.getLabelId(name),
+                    date = viewModel.getDate(),
                     company = company,
                     value = value.formatPriceSave().toDouble(),
                     description = description,
@@ -185,7 +185,7 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
         }
     }
 
-    private fun save(viewDto: ExpendDto) {
+    private fun save(viewDto: OutlayDto) {
         viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> {
@@ -209,13 +209,13 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
      *
      *   - Observes labelData to initialize auto-complete EditText.
      *
-     *   - Observes expendData to bind [Expend] if the user is editing.
+     *   - Observes expendData to bind [Outlay] if the user is editing.
      */
     private fun initStateManager() {
         viewModel.data.observe(viewLifecycleOwner) { data ->
             data.apply {
                 initAutoCompleteAdapter(labelList)
-                expend?.run { bind(this) }
+                outlay?.run { bind(this) }
             }
         }
 
@@ -238,13 +238,13 @@ class ExpendEditorFragment : BaseFragmentWithToolbar() {
 
     }
 
-    private fun bind(expend: Expend) {
+    private fun bind(outlay: Outlay) {
         binding.apply {
-            fragExpendEditorAutoComplete.setText(expend.label?.name)
-            fragExpendEditorCompany.setText(expend.company)
-            fragExpendEditorValue.setText(expend.value.formatPriceShow())
-            fragExpendEditorDescription.setText(expend.description)
-            expend.isPaidByEmployee.let { fragExpendPaidByEmployeeCheckbox.isChecked = it }
+            fragExpendEditorAutoComplete.setText(outlay.label?.name)
+            fragExpendEditorCompany.setText(outlay.company)
+            fragExpendEditorValue.setText(outlay.value.formatPriceShow())
+            fragExpendEditorDescription.setText(outlay.description)
+            outlay.isPaidByEmployee.let { fragExpendPaidByEmployeeCheckbox.isChecked = it }
         }
     }
 

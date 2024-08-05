@@ -15,18 +15,18 @@ class TravelRepository(
 
     override suspend fun delete(travelId: String) = write.delete(travelId)
 
-    override suspend fun fetchTravelListByDriverIdAndIsFinished(driverId: String, flow: Boolean) =
-        read.fetchTravelListByDriverIdAndIsFinished(driverId, flow)
-
     //---------------------------------------------------------------------------------------------//
     // READ
     //---------------------------------------------------------------------------------------------//
 
-    override suspend fun fetchTravelListByDriverId(driverId: String, flow: Boolean) =
-        read.fetchTravelListByDriverId(driverId, flow)
+    override suspend fun fetchTravelListByDriverIdAndIsFinished(id: String, flow: Boolean) =
+        read.fetchTravelListByDriverIdAndIsFinished(id, flow)
 
-    override suspend fun fetchTravelById(travelId: String, flow: Boolean) =
-        read.fetchTravelById(travelId, flow)
+    override suspend fun fetchTravelListByDriverId(id: String, flow: Boolean) =
+        read.fetchTravelListByDriverId(id, flow)
+
+    override suspend fun fetchTravelById(id: String, flow: Boolean) =
+        read.fetchTravelById(id, flow)
 
 }
 

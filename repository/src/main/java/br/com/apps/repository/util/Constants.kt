@@ -10,6 +10,10 @@ const val MASTER_UID = "masterUid"
 
 const val INSERTION_DATE = "insertionDate"
 
+const val PARENT_ID = "parentId"
+
+const val TYPE = "type"
+
 const val DRIVER_ID = "driverId"
 
 const val TRAVEL_ID = "travelId"
@@ -19,6 +23,8 @@ const val TRUCK_ID = "truckId"
 const val FLEET_ID = "fleetId"
 
 const val EMPLOYEE_ID = "employeeId"
+
+const val IS_RECEIVED = "isReceived"
 
 const val IS_PAID = "isPaid"
 
@@ -93,6 +99,10 @@ internal const val FIRESTORE_COLLECTION_REFUELS = "refuels"
 internal const val FIRESTORE_COLLECTION_ADVANCES = "advances"
 
 const val FIRESTORE_COLLECTION_EXPENDS = "expends"
+
+internal const val FIRESTORE_COLLECTION_EMPLOYEE_PAYABLE = "employee_payables"
+
+internal const val FIRESTORE_COLLECTION_EMPLOYEE_RECEIVABLE = "employee_receivables"
 
 internal const val FIRESTORE_COLLECTION_LOANS = "loans"
 

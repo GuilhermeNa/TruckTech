@@ -47,8 +47,8 @@ class FleetUseCase(private val repository: FleetRepository) {
         return coroutineScope {
             return@coroutineScope try {
                 val truck = repository.fetchTruckByDriverId(driverId).awaitData() ?: throw NullPointerException()
-                val trailers = repository.fetchTrailerListLinkedToTruckById(truck.id!!).awaitData()
-                truck.trailerList = trailers
+                val trailers = repository.fetchTrailerListLinkedToTruckById(truck.id).awaitData()
+                trailers?.forEach { truck.addTrailer(it)  }
                 MutableLiveData(Response.Success(truck))
             } catch (e: Exception) {
                 MutableLiveData(Response.Error(e))

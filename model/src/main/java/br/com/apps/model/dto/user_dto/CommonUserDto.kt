@@ -1,7 +1,8 @@
 package br.com.apps.model.dto.user_dto
 
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.model.user.CommonUser
+import br.com.apps.model.model.user.AccessLevel
 
 data class CommonUserDto(
     var uid: String? = null,
@@ -13,9 +14,9 @@ data class CommonUserDto(
     override val email: String? = null,
     override val name: String? = null,
     val urlImage: String? = null,
-    val permission: PermissionLevelType? = null
+    val permission: AccessLevel? = null
 
-) : UserDto(
+) : UserDto (
     masterUid = masterUid,
     email = email,
     name = name,
@@ -35,8 +36,23 @@ data class CommonUserDto(
         ) throw CorruptedFileException("CommonUserDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {
+    override fun validateDataForDbInsertion() {
 
+    }
+
+    override fun toModel(): CommonUser {
+       validateDataIntegrity()
+        return CommonUser(
+            masterUid = masterUid!!,
+            uid = uid!!,
+            employeeId = employeeId!!,
+            orderCode = orderCode!!,
+            orderNumber = orderNumber!!,
+            email = email!!,
+            name = name!!,
+            urlImage = urlImage,
+            permission = permission!!
+        )
     }
 
 }

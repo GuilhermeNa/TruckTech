@@ -9,13 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.IdHolder
-import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
+import br.com.apps.model.model.travel.Outlay
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.NULL_DATE
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentExpendListBinding
-import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.KEY_ID
 import br.com.apps.trucktech.ui.PAGE_COST
@@ -33,8 +32,13 @@ class ExpendListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val sharedViewModel: RecordsViewModel by viewModels({ requireParentFragment() })
-    private val idHolder by lazy { IdHolder(masterUid = sharedViewModel.masterUid, travelId = sharedViewModel.travelId) }
-    private val viewModel: ExpendListViewModel by viewModel { parametersOf(idHolder) }
+    private val vmData by lazy {
+        ExpendLVmData(
+            masterUid = sharedViewModel.masterUid,
+            travelId = sharedViewModel.travelId
+        )
+    }
+    private val viewModel: ExpendListViewModel by viewModel { parametersOf(vmData) }
 
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
@@ -77,6 +81,7 @@ class ExpendListFragment : Fragment() {
                         fragExpendBoxError.empty.visibility = View.GONE
                     }
                 }
+
                 is State.Loaded -> {
                     binding.apply {
                         costFragmentRecycler.visibility = View.VISIBLE
@@ -85,6 +90,7 @@ class ExpendListFragment : Fragment() {
                         fragExpendBoxError.empty.visibility = View.GONE
                     }
                 }
+
                 is State.Empty -> {
                     binding.apply {
                         costFragmentRecycler.visibility = View.GONE
@@ -93,6 +99,7 @@ class ExpendListFragment : Fragment() {
                         fragExpendBoxError.empty.visibility = View.VISIBLE
                     }
                 }
+
                 is State.Error -> {
                     binding.apply {
                         costFragmentRecycler.visibility = View.GONE
@@ -123,7 +130,7 @@ class ExpendListFragment : Fragment() {
         recyclerView.adapter = concatAdapter
     }
 
-    private fun initAdapters(dataSet: List<Expend>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
+    private fun initAdapters(dataSet: List<Outlay>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
         return dataSet
             .sortedBy { it.date }
             .reversed()
@@ -134,7 +141,7 @@ class ExpendListFragment : Fragment() {
             .flatten()
     }
 
-    private fun createAdapters(itemsMap: Map.Entry<String, List<Expend>>) =
+    private fun createAdapters(itemsMap: Map.Entry<String, List<Outlay>>) =
         listOf(
             DateRecyclerAdapter(requireContext(), listOf(itemsMap.key)),
             RecordsItemRecyclerAdapter(

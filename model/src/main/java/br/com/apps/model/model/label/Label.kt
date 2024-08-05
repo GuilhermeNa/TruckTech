@@ -1,19 +1,21 @@
 package br.com.apps.model.model.label
 
-import br.com.apps.model.exceptions.InvalidTypeException
+import br.com.apps.model.dto.LabelDto
+import br.com.apps.model.enums.LabelCategory
+import br.com.apps.model.interfaces.ModelObjectInterface
 
 data class Label(
     val masterUid: String,
-    val id: String? = null,
+    var id: String? = null,
     var name: String,
     var urlIcon: String? = null,
     var color: Int? = 0,
-    val type: LabelType,
+    val type: LabelCategory,
     @field:JvmField
     val isDefaultLabel: Boolean,
     @field:JvmField
     val isOperational: Boolean
-) {
+) : ModelObjectInterface<LabelDto> {
 
     companion object {
 
@@ -51,29 +53,11 @@ data class Label(
 
     }
 
-}
-
-enum class LabelType(val description: String) {
-    COST("COST"),
-    EXPENSE("EXPENSE"),
-    INCOME("INCOME"),
-    TRUCK_WALLET("TRUCK_WALLET"),
-    DOCUMENT("DOCUMENT");
-
-    companion object {
-
-        fun getType(s: String): LabelType {
-            return when (s) {
-                "COST" -> COST
-                "EXPENSE" -> EXPENSE
-                "INCOME" -> INCOME
-                "TRUCK_WALLET" -> TRUCK_WALLET
-                "DOCUMENT" -> DOCUMENT
-                else -> throw InvalidTypeException("Invalid Label type for ($s)")
-
-            }
-        }
+    override fun toDto(): LabelDto {
+        TODO("Not yet implemented")
     }
 
 }
+
+
 

@@ -28,7 +28,7 @@ val useCaseModules = module {
     single<ExpendUseCase> { ExpendUseCase(get(), get()) }
     single<FineUseCase> { FineUseCase(get()) }
     single<FleetUseCase> { FleetUseCase(get()) }
-    single<FreightUseCase> { FreightUseCase(get(), get()) }
+    single<FreightUseCase> { FreightUseCase(get()) }
     single<LabelUseCase> { LabelUseCase(get()) }
     single<OrderUseCase> { OrderUseCase() }
     single<RequestUseCase> { RequestUseCase(get(), get(), get(), get()) }

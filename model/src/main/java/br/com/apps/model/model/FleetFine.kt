@@ -1,7 +1,10 @@
 package br.com.apps.model.model
 
+import br.com.apps.model.dto.FleetFineDto
+import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.fleet.Fleet
+import br.com.apps.model.util.toDate
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -27,4 +30,17 @@ data class FleetFine(
     val description: String,
     val code: String,
     val value: BigDecimal
-)
+) : ModelObjectInterface<FleetFineDto> {
+
+    override fun toDto() = FleetFineDto(
+        masterUid = this.masterUid,
+        id = this.id,
+        fleetId = this.fleetId,
+        employeeId = this.employeeId,
+        date = this.date.toDate(),
+        description = this.description,
+        code = this.code,
+        value = this.value.toDouble()
+    )
+
+}

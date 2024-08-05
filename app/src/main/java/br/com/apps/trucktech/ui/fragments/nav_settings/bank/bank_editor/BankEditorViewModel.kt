@@ -6,14 +6,14 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.employee_dto.BankAccountDto
-import br.com.apps.model.exceptions.NullBankAccountException
-import br.com.apps.model.exceptions.NullBankException
+import br.com.apps.model.enums.WorkRole
+import br.com.apps.model.enums.PixType.Companion.getPixTypeDescriptions
+import br.com.apps.model.exceptions.null_objects.NullBankAccountException
+import br.com.apps.model.exceptions.null_objects.NullBankException
 import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
-import br.com.apps.model.model.employee.EmployeeType
-import br.com.apps.model.model.payment_method.PixType.Companion.listOfPixDescriptions
-import br.com.apps.model.toDate
+import br.com.apps.model.util.toDate
 import br.com.apps.repository.repository.bank.BankRepository
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.util.Response
@@ -67,7 +67,7 @@ class BankEditorViewModel(
         val response = employeeRepository.getBankAccountById(
             vmData.employeeId,
             bankAccId,
-            EmployeeType.DRIVER
+            WorkRole.TRUCK_DRIVER
         ).asFlow().first()
         return when (response) {
             is Response.Error -> throw response.exception
@@ -81,7 +81,7 @@ class BankEditorViewModel(
             bankAcc?.setBankById(bankList)
             return BankEFData(
                 bankList = bankList,
-                pixList = listOfPixDescriptions.sorted(),
+                pixList = getPixTypeDescriptions().sorted(),
                 bankAcc = bankAcc
             )
         }
@@ -89,7 +89,7 @@ class BankEditorViewModel(
         fun whenCreating(): BankEFData {
             return BankEFData(
                 bankList = bankList,
-                pixList = listOfPixDescriptions.sorted()
+                pixList = getPixTypeDescriptions().sorted()
             )
         }
 
@@ -103,7 +103,7 @@ class BankEditorViewModel(
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val writeReq = WriteRequest(data = generateDto(viewDto))
-                employeeUseCase.saveBankAccount(writeReq, EmployeeType.DRIVER)
+                employeeUseCase.saveBankAccount(writeReq, WorkRole.TRUCK_DRIVER)
                 emit(Response.Success())
 
             } catch (e: Exception) {

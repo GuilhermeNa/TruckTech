@@ -1,5 +1,7 @@
 package br.com.apps.model.model.employee
 
+import br.com.apps.model.enums.WorkRole
+
 data class Driver(
 
     override val masterUid: String? = null,
@@ -7,11 +9,16 @@ data class Driver(
     var truckId: String? = null,
 
     override val name: String? = "",
-    override val type: EmployeeType? = null
+    override val type: WorkRole? = null
 
 ): Employee(
     masterUid = masterUid,
     id = id,
     name = name,
     type = type
-)
+) {
+    override fun toDto(): Employee {
+        TODO("Not yet implemented")
+    }
+
+}

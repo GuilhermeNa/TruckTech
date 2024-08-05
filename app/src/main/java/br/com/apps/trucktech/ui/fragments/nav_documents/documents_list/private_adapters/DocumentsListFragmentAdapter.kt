@@ -56,7 +56,7 @@ class DocumentsListFragmentAdapter(
     private fun bind(holder: ViewHolder, document: TruckDocument) {
         holder.tittle.text = buildString {
             val plate = plate
-            val name = document.getDocumentName()
+            val name = document.getLabelName()
 
             append(plate)
             append(" - ")

@@ -5,12 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.exceptions.NullCustomerException
-import br.com.apps.model.exceptions.NullFreightException
-import br.com.apps.model.mapper.toDto
+import br.com.apps.model.exceptions.null_objects.NullCustomerException
+import br.com.apps.model.exceptions.null_objects.NullFreightException
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
@@ -127,5 +126,5 @@ class FreightPreviewViewModel(
 data class FreightPreviewVmData(
     val masterUid: String,
     val freightId: String,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )

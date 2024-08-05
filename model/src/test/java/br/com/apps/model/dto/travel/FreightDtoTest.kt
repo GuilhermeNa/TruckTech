@@ -1,13 +1,13 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.exceptions.AccessLevelException
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidAuthLevelException
 import br.com.apps.model.exceptions.InvalidForSavingException
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.test_cases.sampleFreightDto
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import java.util.Date
 
 class FreightDtoTest {
 
@@ -15,29 +15,7 @@ class FreightDtoTest {
 
     @Before
     fun setup() {
-      freightDto = FreightDto(
-          masterUid = "1",
-          id = "2",
-          truckId = "3",
-          travelId = "4",
-          employeeId = "5",
-          customerId = "6",
-          origin = "Origin",
-          customer = null,
-          destiny = "Destiny",
-          weight = 10.0,
-          cargo = "Cargo",
-          value = 100.0,
-          breakDown = 10.0,
-          loadingDate = Date(),
-          dailyValue = 20.0,
-          daily = 2,
-          dailyTotalValue = 40.0,
-          complement = emptyList(),
-          isCommissionPaid = true,
-          commissionPercentual = 10.0,
-          isValid = true
-      )
+      freightDto = sampleFreightDto()
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -132,13 +110,6 @@ class FreightDtoTest {
         }
     }
 
-    @Test
-    fun `should throw CorruptedFileException when isCommissionPaid is null`() {
-        freightDto.isCommissionPaid = null
-        assertThrows(CorruptedFileException::class.java) {
-            freightDto.validateDataIntegrity()
-        }
-    }
 
     @Test
     fun `should throw CorruptedFileException when commissionPercentual is null`() {
@@ -164,7 +135,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when masterUid is null for dataBase insertion`() {
         freightDto.masterUid = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -172,7 +143,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when truckId is null for dataBase insertion`() {
         freightDto.truckId = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -180,7 +151,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when travelId is null for dataBase insertion`() {
         freightDto.travelId = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -188,7 +159,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when driverId is null for dataBase insertion`() {
         freightDto.employeeId = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -196,7 +167,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when customerId is null for dataBase insertion`() {
         freightDto.customerId = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -204,7 +175,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when origin is null for dataBase insertion`() {
         freightDto.origin = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -212,7 +183,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when destiny is null for dataBase insertion`() {
         freightDto.destiny = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -220,7 +191,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when weight is null for dataBase insertion`() {
         freightDto.weight = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -228,7 +199,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when cargo is null for dataBase insertion`() {
         freightDto.cargo = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -236,7 +207,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when value is null for dataBase insertion`() {
         freightDto.value = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -244,15 +215,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when loadingDate is null for dataBase insertion`() {
         freightDto.loadingDate = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
-        }
-    }
-
-    @Test
-    fun `should throw InvalidForSavingException when isCommissionPaid is null for dataBase insertion`() {
-        freightDto.isCommissionPaid = null
-        assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -260,7 +223,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when commissionPercentual is null for dataBase insertion`() {
         freightDto.commissionPercentual = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -268,7 +231,7 @@ class FreightDtoTest {
     fun `should throw InvalidForSavingException when isValid is null for dataBase insertion`() {
         freightDto.isValid = null
         assertThrows(InvalidForSavingException::class.java) {
-            freightDto.validateForDataBaseInsertion()
+            freightDto.validateDataForDbInsertion()
         }
     }
 
@@ -279,7 +242,7 @@ class FreightDtoTest {
     @Test
     fun `validatePermission() - should throw NullPointerException when authLevel is null`() {
         assertThrows(NullPointerException::class.java) {
-            freightDto.validatePermission(null)
+            freightDto.validateWriteAccess(null)
         }
     }
 
@@ -287,31 +250,31 @@ class FreightDtoTest {
     fun `validatePermission() - should throw NullPointerException when isValid is null`() {
         freightDto.isValid = null
         assertThrows(NullPointerException::class.java) {
-            freightDto.validatePermission(PermissionLevelType.MANAGER)
+            freightDto.validateWriteAccess(AccessLevel.MANAGER)
         }
     }
 
     @Test
     fun `validatePermission() - should throw InvalidAuthLevelException when authLevel is OPERATIONAL`() {
         freightDto.isValid = true
-        assertThrows(InvalidAuthLevelException::class.java) {
-            freightDto.validatePermission(PermissionLevelType.OPERATIONAL)
+        assertThrows(AccessLevelException::class.java) {
+            freightDto.validateWriteAccess(AccessLevel.OPERATIONAL)
         }
     }
 
     @Test
     fun `validatePermission() - should throw InvalidAuthLevelException when authLevel is TRAINEE`() {
         freightDto.isValid = true
-        assertThrows(InvalidAuthLevelException::class.java) {
-            freightDto.validatePermission(PermissionLevelType.TRAINEE)
+        assertThrows(AccessLevelException::class.java) {
+            freightDto.validateWriteAccess(AccessLevel.TRAINEE)
         }
     }
 
     @Test
     fun `validatePermission() - should throw InvalidAuthLevelException when authLevel is ADMIN_ASSISTANT`() {
         freightDto.isValid = true
-        assertThrows(InvalidAuthLevelException::class.java) {
-            freightDto.validatePermission(PermissionLevelType.ADMIN_ASSISTANT)
+        assertThrows(AccessLevelException::class.java) {
+            freightDto.validateWriteAccess(AccessLevel.ADMIN_ASSISTANT)
         }
     }
 }

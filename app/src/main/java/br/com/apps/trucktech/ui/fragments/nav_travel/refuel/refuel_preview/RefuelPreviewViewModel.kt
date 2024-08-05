@@ -5,11 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.mapper.toDto
+import br.com.apps.model.exceptions.null_objects.NullRefuelException
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.repository.util.WriteRequest
 import br.com.apps.usecase.usecase.RefuelUseCase
 import kotlinx.coroutines.launch
@@ -40,24 +41,34 @@ class RefuelPreviewViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init {
-        loadData()
-    }
+    init { loadData() }
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.fetchRefuelById(vmData.refuelId, true).asFlow().collect { response ->
-                _data.value = when (response) {
-                    is Response.Error -> response
-                    is Response.Success -> {
-                        response.data?.let { refuel ->
-                            _writeAuth.value = !refuel.isValid
-                            Response.Success(refuel)
-                        } ?: Response.Error(NullPointerException())
-                    }
-                }
+            try {
+                loadRefuel(::sendResponse)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                setFragmentData(Response.Error(e))
+
             }
         }
+    }
+
+    private suspend fun loadRefuel(complete: (refuels: Refuel) -> Unit) {
+        repository.fetchRefuelById(vmData.refuelId, true).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data?.let { complete(it) }
+                    ?: throw NullRefuelException(UNKNOWN_EXCEPTION)
+            }
+        }
+    }
+
+    private fun sendResponse(refuel: Refuel) {
+        _writeAuth.value = !refuel.isValid
+        setFragmentData(Response.Success(refuel))
     }
 
     fun delete() =
@@ -69,9 +80,11 @@ class RefuelPreviewViewModel(
                 )
                 useCase.delete(writeReq)
                 emit(Response.Success())
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 emit(Response.Error(e))
+
             }
         }
 
@@ -89,9 +102,13 @@ class RefuelPreviewViewModel(
         _darkLayer.value = false
     }
 
+    private fun setFragmentData(response: Response<Refuel>) {
+        _data.value = response
+    }
+
 }
 
 data class RefuelPreviewVmData(
     val refuelId: String,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )

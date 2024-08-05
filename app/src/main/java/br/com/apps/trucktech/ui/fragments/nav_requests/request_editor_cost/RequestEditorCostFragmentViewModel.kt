@@ -7,13 +7,12 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.factory.RequestItemFactory
-import br.com.apps.model.mapper.toDto
+import br.com.apps.model.enums.LabelCategory
+import br.com.apps.model.enums.RequestItemType
 import br.com.apps.model.model.label.Label
-import br.com.apps.model.model.label.LabelType
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.request.travel_requests.RequestItemType
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.request.RequestItemFactory
+import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
@@ -65,7 +64,7 @@ class RequestEditorCostFragmentViewModel(
     private suspend fun loadLabels(): List<Label> {
         val deferred = CompletableDeferred<List<Label>>()
 
-        labelUseCase.getOperationalLabels(vmData.masterUid, LabelType.COST, true)
+        labelUseCase.getOperationalLabels(vmData.masterUid, LabelCategory.COST, true)
             .asFlow().first { response ->
                 val data = when (response) {
                     is Response.Error -> throw response.exception
@@ -199,7 +198,7 @@ data class RequestEditorCostVmData(
     val masterUid: String,
     val requestId: String,
     val costReqId: String? = null,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )
 
 data class RequestEditorCostFData(

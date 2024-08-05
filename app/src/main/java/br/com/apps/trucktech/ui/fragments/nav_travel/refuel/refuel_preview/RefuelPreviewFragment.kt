@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
 import androidx.navigation.fragment.navArgs
+import br.com.apps.model.expressions.getCompleteDateInPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
@@ -17,13 +19,11 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRefuelPreviewBinding
-import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toBold
-import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.expressions.toUnderline
 import br.com.apps.trucktech.ui.fragments.base_fragments.BasePreviewFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -47,7 +47,7 @@ class RefuelPreviewFragment : BasePreviewFragment() {
     private val vmData by lazy {
         RefuelPreviewVmData(
             refuelId = args.refuelId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: RefuelPreviewViewModel by viewModel { parametersOf(vmData) }

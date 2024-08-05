@@ -1,18 +1,23 @@
 package br.com.apps.model.model.bank
 
+import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.enums.PixType
 import br.com.apps.model.exceptions.InvalidTypeException
-import br.com.apps.model.exceptions.NullBankException
+import br.com.apps.model.exceptions.null_objects.NullBankException
+import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.employee.Employee
-import br.com.apps.model.model.payment_method.PixType
+import br.com.apps.model.util.ERROR_INT
+import br.com.apps.model.util.ERROR_STRING
+import br.com.apps.model.util.toDate
 import java.time.LocalDateTime
 
 /**
  * Represents a bank account associated with an [Employee].
  *
- * Each employee can register multiple bank accounts; however, only one account can
- * be designated as the [mainAccount]. The main account is specifically used for salary
- * payments and other primary transactions. This ensures that there is a clear,
- * designated account for essential financial operations related to the employee.
+ * Notes:
+ * * Each employee can register multiple bank accounts.
+ * * Only one account can be designated as the [mainAccount]. The main account is specifically
+ * used for salary payments and other primary transactions.
  *
  * @property masterUid Unique identifier of the master account associated with this account.
  * @property id Unique identifier of the [BankAccount].
@@ -38,7 +43,7 @@ data class BankAccount(
     var pixType: PixType? = null,
     var pix: String? = null,
     var bank: Bank? = null
-) {
+) : ModelObjectInterface<BankAccountDto> {
 
     /**
      * Returns a description based on the PIX type.
@@ -65,7 +70,7 @@ data class BankAccount(
             bank!!.name
         } catch (e: Exception) {
             e.printStackTrace()
-            "Erro"
+            ERROR_STRING
         }
     }
 
@@ -78,7 +83,7 @@ data class BankAccount(
             bank!!.urlImage
         } catch (e: Exception) {
             e.printStackTrace()
-            ""
+            ERROR_STRING
         }
     }
 
@@ -98,11 +103,24 @@ data class BankAccount(
     fun getBankCode(): Int {
         return try {
             bank!!.code
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
-            -1
+            ERROR_INT
         }
     }
+
+    override fun toDto() = BankAccountDto(
+        masterUid = masterUid,
+        id = id,
+        employeeId = employeeId,
+        bankId = bankId,
+        insertionDate = insertionDate.toDate(),
+        branch = branch,
+        accNumber = accNumber,
+        pix = pix,
+        mainAccount = mainAccount,
+        pixType = pixType?.toString()
+    )
 
 }
 

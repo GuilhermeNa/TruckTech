@@ -5,30 +5,31 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.dto.travel.ExpendDto
-import br.com.apps.model.factory.ExpendFactory
-import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.label.Label
-import br.com.apps.model.model.travel.Expend
-import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.model.toDate
-import br.com.apps.repository.repository.expend.ExpendRepository
-import br.com.apps.repository.repository.label.LabelRepository
-import br.com.apps.repository.util.EMPTY_DATASET
-import br.com.apps.repository.util.Response
-import br.com.apps.repository.util.WriteRequest
+import br.com.apps.model.dto.travel.OutlayDto
+import br.com.apps.model.exceptions.null_objects.NullExpendException
+import br.com.apps.model.exceptions.null_objects.NullLabelException
 import br.com.apps.model.expressions.atBrZone
+import br.com.apps.model.model.label.Label
+import br.com.apps.model.model.label.Label.Companion.getIdByName
+import br.com.apps.model.model.travel.Outlay
+import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.util.toDate
+import br.com.apps.repository.repository.outlay.OutlayRepository
+import br.com.apps.repository.repository.label.LabelRepository
+import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
+import br.com.apps.repository.util.WriteRequest
 import br.com.apps.usecase.usecase.ExpendUseCase
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.Date
 
 class ExpendEditorViewModel(
     private val vmData: ExpendEVMData,
-    private val expendRepository: ExpendRepository,
+    private val expendRepository: OutlayRepository,
     private val labelRepository: LabelRepository,
     private val useCase: ExpendUseCase
 ) : ViewModel() {
@@ -36,15 +37,15 @@ class ExpendEditorViewModel(
     private var isEditing: Boolean = vmData.expendId?.let { true } ?: false
 
     /**
-     * LiveData containing the [LocalDateTime] of the [Expend] date,
-     * or LocalDateTime.now() if there is no [Expend] to be loaded.
+     * LiveData containing the [LocalDateTime] of the [Outlay] date,
+     * or LocalDateTime.now() if there is no [Outlay] to be loaded.
      */
     private val _date = MutableLiveData<LocalDateTime>()
     val date get() = _date
 
     /**
-     * if there is an [Expend] to be loaded, this liveData is
-     * responsible for holding the [Response] data of the [Expend].
+     * if there is an [Outlay] to be loaded, this liveData is
+     * responsible for holding the [Response] data of the [Outlay].
      */
     private val _data = MutableLiveData<ExpendEFData>()
     val data get() = _data
@@ -53,74 +54,57 @@ class ExpendEditorViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init {
-        loadData { labels, expend ->
-            processData(labels, expend)
-            sendResponse(labels, expend)
-        }
-    }
+    init { loadData() }
 
     /**
      * Loads data asynchronously.
      *  1. Load the [Label] list.
-     *  2. Load the [Expend] if there is an ID to be loaded.
+     *  2. Load the [Outlay] if there is an ID to be loaded.
      */
-    private fun loadData(complete: (labels: List<Label>, expend: Expend?) -> Unit) {
+    private fun loadData() {
         viewModelScope.launch {
-            val labelResponse = loadLabels()
-            val labels = labelResponse.await()
+            try {
+                val labels = loadLabels()
+                val nExpend = vmData.expendId?.let { loadExpend(it) }
+                sendResponse(labels, nExpend)
 
-            val expendResponse = vmData.expendId?.let { loadExpend(it) }
-            val expend = expendResponse?.await()
+            } catch (e: Exception) {
+                e.printStackTrace()
 
-            complete(labels, expend)
+            }
         }
     }
 
-    private suspend fun loadLabels(): CompletableDeferred<List<Label>> {
-        val deferred = CompletableDeferred<List<Label>>()
-
-        labelRepository.getAllOperationalLabelListForDrivers(vmData.masterUid)
-            .asFlow().first { response ->
-                when (response) {
-                    is Response.Error -> deferred.completeExceptionally(response.exception)
-                    is Response.Success -> {
-                        response.data?.let { deferred.complete(it) }
-                            ?: deferred.completeExceptionally(NullPointerException(EMPTY_DATASET))
-                    }
-                }
-                true
-            }
-
-        return deferred
-    }
-
-    private suspend fun loadExpend(expendId: String): CompletableDeferred<Expend> {
-        val deferred = CompletableDeferred<Expend>()
-
-        expendRepository.fetchExpendById(expendId).asFlow().first { response ->
-            when (response) {
-                is Response.Error -> deferred.completeExceptionally(response.exception)
-                is Response.Success -> {
-                    response.data?.let { deferred.complete(it) }
-                        ?: deferred.completeExceptionally(NullPointerException(EMPTY_DATASET))
-                }
-            }
-            true
+    private suspend fun loadLabels(): List<Label> {
+        val response =
+            labelRepository.getAllOperationalLabelListForDrivers(vmData.masterUid)
+                .asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullLabelException(UNKNOWN_EXCEPTION)
         }
-
-        return deferred
     }
 
-    private fun processData(labels: List<Label>, expend: Expend?) {
-        _date.value = expend?.date ?: LocalDateTime.now().atBrZone()
-
-        expend?.let { it.label = labels.firstOrNull { l -> l.id == it.labelId } }
-
+    private suspend fun loadExpend(expendId: String): Outlay {
+        val response = expendRepository.fetchOutlayById(expendId)
+            .asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data ?: throw NullExpendException(UNKNOWN_EXCEPTION)
+        }
     }
 
-    private fun sendResponse(labels: List<Label>, expend: Expend?) {
-        _data.value = ExpendEFData(labelList = labels, expend = expend)
+    private fun sendResponse(labels: List<Label>, nOutlay: Outlay?) {
+        if (isEditing) {
+            nOutlay!!.setLabelById(labels)
+            setDate(nOutlay.date)
+            setFragmentData(ExpendEFData(labelList = labels, outlay = nOutlay))
+
+        } else {
+            setDate(LocalDateTime.now().atBrZone())
+            setFragmentData(ExpendEFData(labelList = labels))
+
+        }
     }
 
     /**
@@ -134,15 +118,14 @@ class ExpendEditorViewModel(
     }
 
     /**
-     * Send the [Expend] to be created or updated.
+     * Send the [Outlay] to be created or updated.
      */
-    fun save(viewDto: ExpendDto) =
+    fun save(viewDto: OutlayDto) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val dto = createOrUpdate(viewDto)
                 val writeReq = WriteRequest(
                     authLevel = vmData.permission,
-                    dto
+                    data = generateExpend(viewDto)
                 )
                 useCase.save(writeReq)
                 emit(Response.Success())
@@ -152,32 +135,50 @@ class ExpendEditorViewModel(
             }
         }
 
-    private fun createOrUpdate(viewDto: ExpendDto): ExpendDto {
-        viewDto.apply {
-            date = _date.value!!.toDate()
-            label = null
-        }
-
-        return when(isEditing) {
-            true -> {
-                val expend = _data.value!!.expend!!
-                ExpendFactory.update(expend, viewDto)
-                expend.toDto()
-            }
-
-            false -> {
-                viewDto.apply {
-                    masterUid = vmData.masterUid
-                    truckId = vmData.truckId
-                    travelId = vmData.travelId
-                    driverId = vmData.driverId
-                    isAlreadyRefunded = false
-                    isValid = false
-                }
-                ExpendFactory.create(viewDto).toDto()
+    private fun generateExpend(viewDto: OutlayDto): OutlayDto {
+        fun setCommonFields() {
+            viewDto.apply {
+                masterUid = vmData.masterUid
+                truckId = vmData.truckId
+                travelId = vmData.travelId
+                employeeId = vmData.driverId
             }
         }
+
+        fun whenEditing(): OutlayDto {
+            val expend = data.value!!.outlay!!
+            setCommonFields()
+            return viewDto.also {
+                it.isAlreadyRefunded = expend.isAlreadyRefunded
+                it.isValid = expend.isValid
+                it.id = expend.id
+            }
+        }
+
+        fun whenCreating(): OutlayDto {
+            setCommonFields()
+            return viewDto.also {
+                it.isAlreadyRefunded = false
+                it.isValid = false
+            }
+        }
+
+        return if(isEditing) whenEditing()
+        else whenCreating()
+
     }
+
+    private fun setDate(date: LocalDateTime) {
+        _date.value = date
+    }
+
+    private fun setFragmentData(data: ExpendEFData) {
+        _data.value = data
+    }
+
+    fun getDate(): Date = date.value!!.toDate()
+
+    fun getLabelId(name: String): String = data.value!!.labelList.getIdByName(name)!!
 
 }
 
@@ -187,10 +188,10 @@ class ExpendEVMData(
     val driverId: String,
     val travelId: String,
     val expendId: String? = null,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )
 
 class ExpendEFData(
     val labelList: List<Label>,
-    val expend: Expend?
+    val outlay: Outlay? = null
 )

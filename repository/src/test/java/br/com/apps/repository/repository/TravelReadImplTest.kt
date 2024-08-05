@@ -19,7 +19,7 @@ class TravelReadImplTest {
     fun `should return travel list by driver ID and is finished`() = runTest {
         coEvery {
             repository.fetchTravelListByDriverIdAndIsFinished(
-                driverId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -33,7 +33,7 @@ class TravelReadImplTest {
     fun `should return travel list by driver ID`() = runTest {
         coEvery {
             repository.fetchTravelListByDriverId(
-                driverId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -47,7 +47,7 @@ class TravelReadImplTest {
     fun `should return travel by ID`() = runTest {
         coEvery {
             repository.fetchTravelById(
-                travelId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())

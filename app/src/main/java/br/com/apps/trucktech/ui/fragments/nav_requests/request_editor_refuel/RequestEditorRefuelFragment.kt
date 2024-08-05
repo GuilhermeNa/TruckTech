@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.model.request.travel_requests.RequestItem
+import br.com.apps.model.model.request.RequestItem
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.RESULT_KEY
 import br.com.apps.repository.util.Response
@@ -44,7 +44,7 @@ class RequestEditorRefuelFragment : BaseFragmentWithToolbar() {
         RequestEditorRefuelVmData(
             requestId = args.requestId,
             refuelReqId = args.refuelId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: RequestEditorRefuelViewModel by viewModel { parametersOf(vmData) }

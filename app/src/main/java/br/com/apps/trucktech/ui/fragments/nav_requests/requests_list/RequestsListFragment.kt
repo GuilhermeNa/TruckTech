@@ -12,7 +12,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.PaymentRequest
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.FAILED_TO_SAVE
@@ -55,7 +55,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
             uid = mainActVM.loggedUser.uid,
             truckId = mainActVM.loggedUser.truckId,
             driverId = mainActVM.loggedUser.driverId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: RequestsListViewModel by viewModel { parametersOf(vmData) }

@@ -5,26 +5,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.travel.Expend
-import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.repository.repository.expend.ExpendRepository
+import br.com.apps.model.exceptions.null_objects.NullExpendException
+import br.com.apps.model.model.travel.Outlay
+import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.repository.repository.outlay.OutlayRepository
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.repository.util.WriteRequest
 import br.com.apps.usecase.usecase.ExpendUseCase
 import kotlinx.coroutines.launch
 
 class  ExpendPreviewViewModel(
     private val vmData: ExpendPreviewVmData,
-    private val repository: ExpendRepository,
+    private val repository: OutlayRepository,
     private val useCase: ExpendUseCase
 ) : ViewModel() {
 
     /**
-     * LiveData holding the response data of type [Response] with a [Expend]
+     * LiveData holding the response data of type [Response] with a [Outlay]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<Response<Expend>>()
+    private val _data = MutableLiveData<Response<Outlay>>()
     val data get() = _data
 
     private val _writeAuth = MutableLiveData<Boolean>()
@@ -40,25 +41,33 @@ class  ExpendPreviewViewModel(
     // -
     //---------------------------------------------------------------------------------------------//
 
-    init {
-        loadData()
-    }
+    init { loadData() }
 
     private fun loadData() {
         viewModelScope.launch {
-            repository.fetchExpendById(vmData.expendId, true)
-                .asFlow().collect { response ->
-                    _data.value = when (response) {
-                        is Response.Error -> response
-                        is Response.Success -> {
-                            response.data?.let { expend ->
-                                _writeAuth.value = !expend.isValid
-                                Response.Success(expend)
-                            } ?: Response.Error(NullPointerException())
-                        }
-                    }
-                }
+            try {
+                loadExpendFlow(::sendResponse)
+
+            } catch (e: Exception) {
+                setFragmentData(Response.Error(e))
+
+            }
         }
+    }
+
+    private suspend fun loadExpendFlow(complete: (expends: Outlay) -> Unit) {
+        repository.fetchOutlayById(vmData.expendId, true).asFlow().collect { response ->
+            when(response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data?.let { complete(it) }
+                    ?: throw NullExpendException(UNKNOWN_EXCEPTION)
+            }
+        }
+    }
+
+    private fun sendResponse(outlay: Outlay) {
+        setWriteAuth(!outlay.isValid)
+        setFragmentData(Response.Success(data = outlay))
     }
 
     fun delete() = liveData<Response<Unit>>(viewModelScope.coroutineContext) {
@@ -89,9 +98,17 @@ class  ExpendPreviewViewModel(
         _darkLayer.value = false
     }
 
+    private fun setWriteAuth(hasAuth: Boolean) {
+        _writeAuth.value = hasAuth
+    }
+
+    private fun setFragmentData(response: Response<Outlay>) {
+        _data.value = response
+    }
+
 }
 
 data class ExpendPreviewVmData(
     val expendId: String,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )

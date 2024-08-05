@@ -14,7 +14,7 @@ class TravelAidUseCase(private val repository: TravelAidRepository) {
         travelList.forEach { travel ->
             val travelId = travel.id ?: throw InvalidParameterException(EMPTY_ID)
             val aid = aidList.filter { it.travelId == travelId }
-            travel.aidList = aid
+            travel.aids = aid
         }
     }
 

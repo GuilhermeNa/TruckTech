@@ -68,7 +68,7 @@ class RequestItemDtoTest {
     fun `should throw InvalidForSavingException when requestId is null for dataBase insertion`() {
         requestItemDto.requestId = null
         Assert.assertThrows(InvalidForSavingException::class.java) {
-            requestItemDto.validateForDataBaseInsertion()
+            requestItemDto.validateDataForDbInsertion()
         }
     }
 
@@ -76,7 +76,7 @@ class RequestItemDtoTest {
     fun `should throw InvalidForSavingException when value is null for dataBase insertion`() {
         requestItemDto.value = null
         Assert.assertThrows(InvalidForSavingException::class.java) {
-            requestItemDto.validateForDataBaseInsertion()
+            requestItemDto.validateDataForDbInsertion()
         }
     }
 
@@ -84,7 +84,7 @@ class RequestItemDtoTest {
     fun `should throw InvalidForSavingException when type is null for dataBase insertion`() {
         requestItemDto.type = null
         Assert.assertThrows(InvalidForSavingException::class.java) {
-            requestItemDto.validateForDataBaseInsertion()
+            requestItemDto.validateDataForDbInsertion()
         }
     }
 

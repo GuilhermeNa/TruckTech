@@ -19,7 +19,7 @@ class RefuelReadImplTest {
     fun `should return refuel list by driver ID`() = runTest {
         coEvery {
             repository.fetchRefuelListByDriverId(
-                driverId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -33,7 +33,7 @@ class RefuelReadImplTest {
     fun `should return refuel list by travel ID`() = runTest {
         coEvery {
             repository.fetchRefuelListByTravelId(
-                travelId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -47,7 +47,7 @@ class RefuelReadImplTest {
     fun `should return refuel list by list of travel IDs`() = runTest {
         coEvery {
             repository.fetchRefuelListByTravelIds(
-                idList = listOf("1", "2"),
+                ids = listOf("1", "2"),
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -61,7 +61,7 @@ class RefuelReadImplTest {
     fun `should return refuel by ID`() = runTest {
         coEvery {
             repository.fetchRefuelById(
-                refuelId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())

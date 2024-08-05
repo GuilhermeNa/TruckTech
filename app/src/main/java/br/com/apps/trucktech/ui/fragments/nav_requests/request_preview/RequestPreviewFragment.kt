@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.request.travel_requests.PaymentRequest
+import br.com.apps.model.model.request.PaymentRequest
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.OK
@@ -48,7 +48,7 @@ class RequestPreviewFragment : BaseFragmentWithToolbar() {
     private val vmData by lazy {
         RequestPreviewVmData(
             requestId = args.requestId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: RequestPreviewViewModel by viewModel { parametersOf(vmData) }

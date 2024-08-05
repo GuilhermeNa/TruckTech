@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
 import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.model.request.travel_requests.RequestItem
+import br.com.apps.model.model.request.RequestItem
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
@@ -36,7 +36,7 @@ class RequestEditorWalletFragment : BaseFragmentWithToolbar() {
         RequestEditorWalletVmData(
             requestId = args.requestId,
             walletId = args.walletId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: RequestEditorWalletFragmentViewModel by viewModel { parametersOf(vmData) }

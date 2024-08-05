@@ -1,7 +1,10 @@
 package br.com.apps.model.dto
 
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.FleetFine
+import br.com.apps.model.util.toLocalDateTime
+import java.math.BigDecimal
 import java.util.Date
 
 /**
@@ -24,7 +27,7 @@ data class FleetFineDto(
     val description: String? = null,
     val code: String? = null,
     val value: Double? = null
-) : DtoObjectsInterface {
+) : DtoObjectInterface<FleetFine> {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||
@@ -38,8 +41,22 @@ data class FleetFineDto(
         ) throw CorruptedFileException("FleetFineDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {
+    override fun validateDataForDbInsertion() {
         TODO("Not yet implemented")
+    }
+
+    override fun toModel(): FleetFine {
+        validateDataIntegrity()
+        return FleetFine(
+            masterUid = masterUid!!,
+            id = id!!,
+            fleetId = fleetId!!,
+            employeeId = employeeId!!,
+            date = date?.toLocalDateTime()!!,
+            description = description!!,
+            code = code!!,
+            value = BigDecimal(value!!)
+        )
     }
 
 }

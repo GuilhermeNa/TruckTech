@@ -19,7 +19,7 @@ class RefuelUseCase(private val repository: RefuelRepository) {
         val auth = writeReq.authLevel
 
         validateAndProcess(
-            validatePermission = { dto.validatePermission(auth) }
+            validatePermission = { dto.validateWriteAccess(auth) }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception
@@ -40,8 +40,8 @@ class RefuelUseCase(private val repository: RefuelRepository) {
         val auth = writeReq.authLevel
 
         validateAndProcess(
-            validatePermission = { dto.validatePermission(auth) },
-            validateData = { dto.validateForDataBaseInsertion() }
+            validatePermission = { dto.validateWriteAccess(auth) },
+            validateData = { dto.validateDataForDbInsertion() }
         ).let { response ->
             when (response) {
                 is Response.Error -> throw response.exception

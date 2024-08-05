@@ -4,10 +4,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.enums.LabelCategory
 import br.com.apps.model.model.TruckDocument
 import br.com.apps.model.model.TruckDocument.Companion.merge
 import br.com.apps.model.model.label.Label
-import br.com.apps.model.model.label.LabelType
 import br.com.apps.repository.repository.document.DocumentRepository
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.Response
@@ -69,7 +69,7 @@ class DocumentsListFragmentViewModel(
     private suspend fun loadLabels(): List<Label> {
         val response =
             labelRepository
-                .fetchLabelListByMasterUidAndType(LabelType.DOCUMENT.description, vmData.masterUid)
+                .fetchLabelListByMasterUidAndType(LabelCategory.DOCUMENT.toString(), vmData.masterUid)
                 .asFlow().first()
         return when (response) {
             is Response.Error -> throw response.exception

@@ -32,7 +32,7 @@ Date:   Mon May 13 08:25:51 2024 -0300
     #       app/src/main/java/br/com/apps/trucktech/ui/fragments/nav_home/home/FineBoxFromHomeViewModel.kt
     #       app/src/main/java/br/com/apps/trucktech/ui/fragments/nav_home/home/HomeFragment.kt
     #       app/src/main/java/br/com/apps/trucktech/ui/fragments/nav_home/home/ToReceiveBoxFromHomeViewModel.kt
-    #       repository/src/main/java/br/com/apps/repository/repository/ExpendRepository.kt
+    #       repository/src/main/java/br/com/apps/repository/repository/OutlayRepository.kt
     #       repository/src/main/java/br/com/apps/repository/repository/FreightRepository.kt
     #       useCase/src/main/java/br/com/apps/usecase/AppModules.kt
 

@@ -6,11 +6,10 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.factory.RequestItemFactory
-import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.request.travel_requests.RequestItemType
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.enums.RequestItemType
+import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.request.RequestItemFactory
+import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
@@ -145,5 +144,5 @@ class RequestEditorRefuelViewModel(
 data class RequestEditorRefuelVmData(
     val requestId: String,
     val refuelReqId: String? = null,
-    val permission: PermissionLevelType
+    val permission: AccessLevel
 )

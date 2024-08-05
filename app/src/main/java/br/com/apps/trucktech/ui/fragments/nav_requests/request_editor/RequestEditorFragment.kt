@@ -12,8 +12,9 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.request.travel_requests.RequestItemType
+import br.com.apps.model.enums.RequestItemType
+import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.model.request.RequestItem
 import br.com.apps.repository.util.CANCEL
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.OK
@@ -26,7 +27,6 @@ import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
-import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.ui.activities.CameraActivity
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapter.RequestEditorRecyclerAdapter
@@ -53,7 +53,7 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
     private val vmData by lazy {
         RequestEditorVmData(
             requestId = args.requestId,
-            permission = mainActVM.loggedUser.permissionLevelType
+            permission = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: RequestEditorViewModel by viewModel { parametersOf(vmData) }

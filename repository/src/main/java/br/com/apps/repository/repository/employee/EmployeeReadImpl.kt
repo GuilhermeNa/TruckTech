@@ -3,12 +3,12 @@ package br.com.apps.repository.repository.employee
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import br.com.apps.model.enums.WorkRole
 import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.Admin
 import br.com.apps.model.model.employee.Driver
 import br.com.apps.model.model.employee.Employee
-import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_ADMIN
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_BANK
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_DRIVER
@@ -93,7 +93,7 @@ class EmployeeReadImpl(fireStore: FirebaseFirestore) : EmployeeReadInterface {
 
     override suspend fun fetchById(
         id: String,
-        type: EmployeeType,
+        type: WorkRole,
         flow: Boolean
     ) : LiveData<Response<Employee>> = withContext(Dispatchers.IO) {
         if (id.isBlank())
@@ -108,7 +108,7 @@ class EmployeeReadImpl(fireStore: FirebaseFirestore) : EmployeeReadInterface {
 
     override suspend fun getEmployeeBankAccounts(
         id: String,
-        type: EmployeeType,
+        type: WorkRole,
         flow: Boolean
     ) : LiveData<Response<List<BankAccount>>> = withContext(Dispatchers.IO) {
         if (id.isBlank())
@@ -125,7 +125,7 @@ class EmployeeReadImpl(fireStore: FirebaseFirestore) : EmployeeReadInterface {
     override suspend fun getBankAccountById(
         employeeId: String,
         bankId: String,
-        type: EmployeeType,
+        type: WorkRole,
         flow: Boolean
     ): LiveData<Response<BankAccount>> = withContext(Dispatchers.IO) {
         if (employeeId.isBlank() || bankId.isBlank())
@@ -139,10 +139,10 @@ class EmployeeReadImpl(fireStore: FirebaseFirestore) : EmployeeReadInterface {
         else listener.onComplete { it.toBankAccountObject() }
     }
 
-    private fun getCollectionReference(type: EmployeeType): CollectionReference {
+    private fun getCollectionReference(type: WorkRole): CollectionReference {
         val collection = when (type) {
-            EmployeeType.DRIVER -> collectionDriver
-            EmployeeType.ADMIN -> collectionAdmin
+            WorkRole.TRUCK_DRIVER -> collectionDriver
+            WorkRole.ADMIN -> collectionAdmin
         }
         return collection
     }

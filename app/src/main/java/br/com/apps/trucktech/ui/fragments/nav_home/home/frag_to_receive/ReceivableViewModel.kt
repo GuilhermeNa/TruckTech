@@ -56,7 +56,7 @@ data class ReceivableFData(
 
     private fun calculateFreightCommission(): BigDecimal {
         return travels
-            .mapNotNull { it.freightsList }
+            .mapNotNull { it.freights }
             .flatten()
             .filter { !it.isCommissionPaid }
             .sumOf { it.getCommissionValue() }
@@ -64,7 +64,7 @@ data class ReceivableFData(
 
     private fun calculateExpendValue(): BigDecimal {
         return travels
-            .mapNotNull { it.expendsList }
+            .mapNotNull { it.expends }
             .flatten()
             .filter { it.isPaidByEmployee && !it.isAlreadyRefunded }
             .sumOf { it.value }

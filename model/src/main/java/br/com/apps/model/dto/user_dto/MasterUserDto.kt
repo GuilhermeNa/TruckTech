@@ -1,5 +1,7 @@
 package br.com.apps.model.dto.user_dto
 
+import br.com.apps.model.model.user.MasterUser
+
 data class MasterUserDto(
 
     override var masterUid: String? = null,
@@ -19,6 +21,17 @@ data class MasterUserDto(
 
     override fun validateDataIntegrity() {}
 
-    override fun validateForDataBaseInsertion() {}
+    override fun validateDataForDbInsertion() {}
+
+    override fun toModel(): MasterUser {
+        validateDataIntegrity()
+        return MasterUser(
+            masterUid = masterUid!!,
+            email = email!!,
+            name = name!!,
+            orderCode = orderCode!!,
+            orderNumber = orderNumber!!
+        )
+    }
 
 }

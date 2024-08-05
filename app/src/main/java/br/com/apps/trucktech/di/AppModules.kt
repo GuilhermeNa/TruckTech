@@ -1,6 +1,5 @@
 package br.com.apps.trucktech.di
 
-import br.com.apps.model.IdHolder
 import br.com.apps.repository.di.fireBaseModules
 import br.com.apps.repository.di.readModules
 import br.com.apps.repository.di.repositoryModules
@@ -42,6 +41,7 @@ import br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsVmData
 import br.com.apps.trucktech.ui.fragments.nav_settings.themes.ThemeFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEVMData
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEditorViewModel
+import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list.ExpendLVmData
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list.ExpendListViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_preview.ExpendPreviewViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_preview.ExpendPreviewVmData
@@ -49,6 +49,7 @@ import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_editor.Frei
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_editor.FreightEditorViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_preview.FreightPreviewViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_preview.FreightPreviewVmData
+import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freights_list.FreightLVmData
 import br.com.apps.trucktech.ui.fragments.nav_travel.freight.freights_list.FreightsListViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.records.RecordsViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.refuel.refuel_editor.RefuelEVMData
@@ -90,7 +91,7 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<ExpendListViewModel> { (idHolder: IdHolder) -> ExpendListViewModel(idHolder, get()) }
+    viewModel<ExpendListViewModel> { (vmData: ExpendLVmData) -> ExpendListViewModel(vmData, get(), get()) }
     viewModel<DocumentsListFragmentViewModel> { (vmData: DocumentListVmData) ->
         DocumentsListFragmentViewModel(
             vmData,
@@ -115,12 +116,8 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<FreightsListViewModel> { (idHolder: IdHolder) ->
-        FreightsListViewModel(
-            idHolder,
-            get(),
-            get()
-        )
+    viewModel<FreightsListViewModel> { (vmData: FreightLVmData) ->
+        FreightsListViewModel(vmData, get(), get())
     }
     viewModel<AuthViewModel> { AuthViewModel(get()) }
     viewModel<RequestEditorViewModel> { (vmData: RequestEditorVmData) -> RequestEditorViewModel(vmData, get(), get(), get()) }

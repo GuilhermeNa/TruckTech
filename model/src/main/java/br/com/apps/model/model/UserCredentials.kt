@@ -1,6 +1,6 @@
 package br.com.apps.model.model
 
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.model.user.AccessLevel
 
 data class UserCredentials(
 
@@ -8,7 +8,7 @@ data class UserCredentials(
     val name: String,
     val email: String,
     val password: String,
-    val permissionLevel: PermissionLevelType
+    val permissionLevel: AccessLevel
 
 )
 

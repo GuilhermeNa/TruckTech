@@ -2,7 +2,7 @@ package br.com.apps.repository.repository.fleet
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import br.com.apps.model.model.fleet.FleetType
+import br.com.apps.model.enums.FleetCategory
 import br.com.apps.model.model.fleet.Trailer
 import br.com.apps.model.model.fleet.Truck
 import br.com.apps.repository.util.DRIVER_ID
@@ -32,7 +32,7 @@ class FleetReadImpl(fireStore: FirebaseFirestore) : FleetReadInterface {
         uid.validateId()?.let { error -> return@withContext MutableLiveData(error) }
 
         val listener = collection.whereEqualTo(MASTER_UID, uid)
-            .whereEqualTo(FLEET_TYPE, FleetType.TRUCK.description)
+            .whereEqualTo(FLEET_TYPE, FleetCategory.TRUCK.toString())
 
         return@withContext if (flow) listener.onSnapShot { it.toTruckList() }
         else listener.onComplete { it.toTruckList() }
@@ -57,7 +57,7 @@ class FleetReadImpl(fireStore: FirebaseFirestore) : FleetReadInterface {
         id.validateId()?.let { error -> return@withContext MutableLiveData(error) }
 
         val listener = collection.whereEqualTo(DRIVER_ID, id)
-            .whereEqualTo(FLEET_TYPE, FleetType.TRUCK.description).limit(1)
+            .whereEqualTo(FLEET_TYPE, FleetCategory.TRUCK.toString()).limit(1)
 
         return@withContext if (flow) listener.onSnapShot { it.toTruckList()[0] }
         else listener.onComplete { it.toTruckList()[0] }

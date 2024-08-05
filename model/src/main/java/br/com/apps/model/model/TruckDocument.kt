@@ -1,8 +1,14 @@
 package br.com.apps.model.model
 
-import br.com.apps.model.exceptions.NullLabelException
+import br.com.apps.model.util.ERROR_STRING
+import br.com.apps.model.dto.TruckDocumentDto
+import br.com.apps.model.exceptions.EmptyDataException
+import br.com.apps.model.exceptions.null_objects.NullLabelException
+import br.com.apps.model.interfaces.LabelInterface
+import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.fleet.Fleet
 import br.com.apps.model.model.label.Label
+import br.com.apps.model.util.toDate
 import java.io.Serializable
 import java.time.LocalDateTime
 
@@ -31,31 +37,33 @@ data class TruckDocument(
     val expeditionDate: LocalDateTime,
     val expirationDate: LocalDateTime? = null,
     var label: Label? = null
-) : Serializable {
+) : LabelInterface, Serializable, ModelObjectInterface<TruckDocumentDto> {
 
-    /**
-     * Get the name of the document.
-     * @return The name of the document or "Error" if the label is not registered.
-     */
-    fun getDocumentName(): String {
+    override fun setLabelById(labels: List<Label>) {
+        if (labels.isEmpty()) throw EmptyDataException("Label list cannot be empty")
+
+        label = labels.firstOrNull { it.id == labelId }
+            ?: throw NullLabelException("Label not found")
+    }
+
+    override fun getLabelName(): String {
         return try {
             label!!.name
         } catch (e: Exception) {
             e.printStackTrace()
-            "Erro"
+            ERROR_STRING
         }
     }
 
-    /**
-     * Sets the [label] property of this document based on the provided list of labels.
-     * @param labels A list of labels objects to search for the label with the matching ID.
-     * @throws NullLabelException If no label in the label list has an ID that matches the [labelId]
-     * of this truck document.
-     */
-    fun setLabelById(labels: List<Label>) {
-        label =
-            labels.firstOrNull { it.id == labelId } ?: throw NullLabelException("Label not found")
-    }
+    override fun toDto() = TruckDocumentDto(
+        masterUid = this.masterUid,
+        id = this.id,
+        fleetId = this.fleetId,
+        labelId = this.labelId,
+        urlImage = this.urlImage,
+        expeditionDate = this.expeditionDate.toDate(),
+        expirationDate = this.expirationDate?.toDate()
+    )
 
     companion object {
 
@@ -72,7 +80,6 @@ data class TruckDocument(
         fun List<TruckDocument>.merge(labels: List<Label>) {
             this.forEach { it.setLabelById(labels) }
         }
-
     }
 
 }

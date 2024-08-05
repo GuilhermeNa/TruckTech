@@ -45,7 +45,7 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
             driverId = mainActVM.loggedUser.driverId,
             freightId = args.freightId,
             commissionPercentual = mainActVM.loggedUser.commissionPercentual,
-            permissionLevel = mainActVM.loggedUser.permissionLevelType
+            permissionLevel = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: FreightEditorViewModel by viewModel { parametersOf(vmData) }

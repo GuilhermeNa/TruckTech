@@ -1,6 +1,9 @@
 package br.com.apps.model.model.payroll
 
-import br.com.apps.model.exceptions.InvalidTypeException
+import br.com.apps.model.dto.payroll.AdvanceDto
+import br.com.apps.model.enums.AdvanceType
+import br.com.apps.model.interfaces.ModelObjectInterface
+import br.com.apps.model.util.toDate
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -16,20 +19,20 @@ data class Advance(
     @field:JvmField
     val isApproved: Boolean,
     val type: AdvanceType
-)
+): ModelObjectInterface<AdvanceDto> {
 
-enum class AdvanceType(val description: String) {
-    COMMISSION("COMMISSION"),
-    PAYROLL("PAYROLL");
-
-    companion object {
-        fun getType(type: String): AdvanceType {
-            return when (type) {
-                "COMMISSION" -> COMMISSION
-                "PAYROLL" -> PAYROLL
-                else -> throw InvalidTypeException("Invalid type for string ($type)")
-            }
-        }
-    }
+    override fun toDto() = AdvanceDto(
+            masterUid = masterUid,
+            id = id,
+            travelId = travelId,
+            employeeId = employeeId,
+            date = date.toDate(),
+            value = value.toDouble(),
+            isPaid = isPaid,
+            isApproved = isApproved,
+            type = type.toString()
+        )
 
 }
+
+

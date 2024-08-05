@@ -2,11 +2,10 @@ package br.com.apps.usecase.usecase
 
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.dto.request.request.TravelRequestDto
-import br.com.apps.model.mapper.toDto
-import br.com.apps.model.model.request.travel_requests.PaymentRequest
-import br.com.apps.model.model.request.travel_requests.PaymentRequestStatusType
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.user.PermissionLevelType
+import br.com.apps.model.enums.PaymentRequestStatusType
+import br.com.apps.model.model.request.PaymentRequest
+import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.repository.request.RequestRepository
@@ -50,7 +49,7 @@ class RequestUseCase(
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun delete(permission: PermissionLevelType, request: PaymentRequest) {
+    suspend fun delete(permission: AccessLevel, request: PaymentRequest) {
         val id = request.id ?: throw NullPointerException(EMPTY_ID)
         val itemsId = request.itemsList?.mapNotNull { it.id }
         val dto = request.toDto()
@@ -69,25 +68,25 @@ class RequestUseCase(
 
     }
 
-    suspend fun save(permission: PermissionLevelType, dto: TravelRequestDto) {
-       dto.validateForDataBaseInsertion()
+    suspend fun save(permission: AccessLevel, dto: TravelRequestDto) {
+       dto.validateDataForDbInsertion()
         validatePermission(permission, dto)
         repository.save(dto)
     }
 
-    override fun validatePermission(permission: PermissionLevelType, dto: TravelRequestDto) {
-        val status = dto.status?.let { PaymentRequestStatusType.getType(it) }
+    override fun validatePermission(permission: AccessLevel, dto: TravelRequestDto) {
+        val status = dto.status?.let { PaymentRequestStatusType.valueOf(it) }
             ?: throw InvalidParameterException("Status is null")
 
         if (status != PaymentRequestStatusType.SENT &&
-            permission != PermissionLevelType.MANAGER
+            permission != AccessLevel.MANAGER
         ) throw InvalidParameterException("Invalid credentials for $permission")
 
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun deleteItem(
-        permission: PermissionLevelType,
+        permission: AccessLevel,
         dto: TravelRequestDto,
         item: RequestItem
     ) {
@@ -107,7 +106,7 @@ class RequestUseCase(
 
     }
 
-    suspend fun saveItem(permission: PermissionLevelType, dto: RequestItemDto): String {
+    suspend fun saveItem(permission: AccessLevel, dto: RequestItemDto): String {
         val requestId = dto.requestId ?: throw NullPointerException(EMPTY_ID)
         dto.validateDataIntegrity()
 

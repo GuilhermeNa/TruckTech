@@ -94,7 +94,7 @@ class TravelRequestDtoTest {
     fun `should throw InvalidForSavingException when masterUid is null for database insertion`() {
         requestDto.masterUid = null
         assertThrows(InvalidForSavingException::class.java) {
-            requestDto.validateForDataBaseInsertion()
+            requestDto.validateDataForDbInsertion()
         }
     }
 
@@ -102,7 +102,7 @@ class TravelRequestDtoTest {
     fun `should throw InvalidForSavingException when truckId is null for database insertion`() {
         requestDto.truckId = null
         assertThrows(InvalidForSavingException::class.java) {
-            requestDto.validateForDataBaseInsertion()
+            requestDto.validateDataForDbInsertion()
         }
     }
 
@@ -110,7 +110,7 @@ class TravelRequestDtoTest {
     fun `should throw InvalidForSavingException when driverId is null for database insertion`() {
         requestDto.driverId = null
         assertThrows(InvalidForSavingException::class.java) {
-            requestDto.validateForDataBaseInsertion()
+            requestDto.validateDataForDbInsertion()
         }
     }
 
@@ -118,7 +118,7 @@ class TravelRequestDtoTest {
     fun `should throw InvalidForSavingException when date is null for database insertion`() {
         requestDto.date = null
         assertThrows(InvalidForSavingException::class.java) {
-            requestDto.validateForDataBaseInsertion()
+            requestDto.validateDataForDbInsertion()
         }
     }
 
@@ -126,7 +126,7 @@ class TravelRequestDtoTest {
     fun `should throw InvalidForSavingException when requestNumber is null for database insertion`() {
         requestDto.requestNumber = null
         assertThrows(InvalidForSavingException::class.java) {
-            requestDto.validateForDataBaseInsertion()
+            requestDto.validateDataForDbInsertion()
         }
     }
 
@@ -134,7 +134,7 @@ class TravelRequestDtoTest {
     fun `should throw InvalidForSavingException when status is null for database insertion`() {
         requestDto.status = null
         assertThrows(InvalidForSavingException::class.java) {
-            requestDto.validateForDataBaseInsertion()
+            requestDto.validateDataForDbInsertion()
         }
     }
 

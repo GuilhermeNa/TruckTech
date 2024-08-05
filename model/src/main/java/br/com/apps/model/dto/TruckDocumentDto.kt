@@ -1,7 +1,9 @@
 package br.com.apps.model.dto
 
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.TruckDocument
+import br.com.apps.model.util.toLocalDateTime
 import java.util.Date
 
 /**
@@ -24,7 +26,7 @@ data class TruckDocumentDto(
     val urlImage: String? = null,
     val expeditionDate: Date? = null,
     val expirationDate: Date? = null
-): DtoObjectsInterface {
+): DtoObjectInterface<TruckDocument> {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||
@@ -36,8 +38,21 @@ data class TruckDocumentDto(
         ) throw CorruptedFileException("BankAccountDto data is corrupted: ($this)")
     }
 
-    override fun validateForDataBaseInsertion() {
+    override fun validateDataForDbInsertion() {
         TODO("Not yet implemented")
+    }
+
+    override fun toModel(): TruckDocument {
+        validateDataIntegrity()
+        return TruckDocument(
+            masterUid = this.masterUid!!,
+            id = this.id!!,
+            fleetId = this.fleetId!!,
+            labelId = this.labelId!!,
+            urlImage = this.urlImage!!,
+            expeditionDate = this.expeditionDate?.toLocalDateTime()!!,
+            expirationDate = this.expirationDate?.toLocalDateTime()
+        )
     }
 
 

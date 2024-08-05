@@ -19,7 +19,7 @@ class TravelAidReadImplTest {
     fun `should return travel aid list by driver ID and is not discounted yet`() = runTest {
         coEvery {
             repository.fetchTravelAidByDriverIdAndIsNotDiscountedYet(
-                employeeId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -33,7 +33,7 @@ class TravelAidReadImplTest {
     fun `should return travel aid list by travel ID`() = runTest {
         coEvery {
             repository.fetchTravelAidListByTravelId(
-                travelId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -47,7 +47,7 @@ class TravelAidReadImplTest {
     fun `should return travel aid list by list of travel IDs`() = runTest {
         coEvery {
             repository.fetchTravelAidListByTravelIds(
-                travelIdList = listOf("1", "2", "3"),
+                ids = listOf("1", "2", "3"),
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -61,7 +61,7 @@ class TravelAidReadImplTest {
     fun `should return travel aid list by driver ID`() = runTest {
         coEvery {
             repository.fetchTravelAidListByDriverId(
-                driverId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())

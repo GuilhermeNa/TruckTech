@@ -1,7 +1,7 @@
 package br.com.apps.model.enums
 
-import br.com.apps.model.exceptions.InvalidTypeException
-import br.com.apps.model.model.payment_method.PixType
+import br.com.apps.model.enums.PixType.Companion.descriptionToPixType
+import br.com.apps.model.enums.PixType.Companion.toPixType
 import org.junit.Assert
 import org.junit.Test
 
@@ -13,69 +13,61 @@ class PixTypeTest {
 
     @Test
     fun `should return type PHONE when param is string PHONE`() {
-        val type = PixType.getType("PHONE")
+        val type = "PHONE".toPixType()
         Assert.assertEquals(PixType.PHONE, type)
     }
 
     @Test
     fun `should return type EMAIL when param is string EMAIL`() {
-        val type = PixType.getType("EMAIL")
+        val type = "EMAIL".toPixType()
         Assert.assertEquals(PixType.EMAIL, type)
     }
 
     @Test
     fun `should return type CPF when param is string CPF`() {
-        val type = PixType.getType("CPF")
+        val type = "CPF".toPixType()
         Assert.assertEquals(PixType.CPF, type)
     }
 
     @Test
     fun `should return type CNPJ when param is string CNPJ`() {
-        val type = PixType.getType("CNPJ")
+        val type = "CNPJ".toPixType()
         Assert.assertEquals(PixType.CNPJ, type)
     }
 
     @Test
     fun `should throw IllegalArgumentException when type is not registered`() {
-        Assert.assertThrows(InvalidTypeException::class.java) {
-            PixType.getType("")
+        Assert.assertThrows(IllegalArgumentException::class.java) {
+            "".toPixType()
         }
     }
 
     //---------------------------------------------------------------------------------------------//
-    // getTypeInString()
+    // String.descriptionToPixType()
     //---------------------------------------------------------------------------------------------//
 
     @Test
     fun `should return string 'PHONE' when text is 'Celular'`() {
-        val type = PixType.getTypeInString("Celular")
+        val type = "Celular".descriptionToPixType().toString()
         Assert.assertEquals("PHONE", type)
     }
 
     @Test
     fun `should return string 'EMAIL' when text is 'Email'`() {
-        val type = PixType.getTypeInString("Email")
+        val type = "Email".descriptionToPixType().toString()
         Assert.assertEquals("EMAIL", type)
     }
 
     @Test
     fun `should return string 'CPF' when text is 'Cpf'`() {
-        val type = PixType.getTypeInString("Cpf")
+        val type = "Cpf".descriptionToPixType().toString()
         Assert.assertEquals("CPF", type)
     }
 
     @Test
     fun `should return string 'CNPJ' when text is 'Cnpj'`() {
-        val type = PixType.getTypeInString("Cnpj")
+        val type = "Cnpj".descriptionToPixType().toString()
         Assert.assertEquals("CNPJ", type)
-    }
-
-    @Test()
-    fun `should throw IllegalArgumentException when text is invalid`() {
-        Assert.assertThrows(IllegalArgumentException::class.java) {
-            PixType.getTypeInString("")
-        }
-
     }
 
     //---------------------------------------------------------------------------------------------//

@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.expressions.getDayFormatted
 import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.model.expressions.toCurrencyPtBr
-import br.com.apps.model.model.travel.Expend
+import br.com.apps.model.model.travel.Outlay
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.trucktech.R
@@ -68,7 +68,7 @@ class RecordsItemRecyclerAdapter<T>(
         return when (item) {
             is Freight -> item.id!!
             is Refuel -> item.id!!
-            is Expend -> item.id!!
+            is Outlay -> item.id!!
             else -> throw IllegalArgumentException("Object not supported")
         }
     }
@@ -77,7 +77,7 @@ class RecordsItemRecyclerAdapter<T>(
         when (t) {
             is Freight -> bindFreight(holder, t as Freight)
             is Refuel -> bindFuel(holder, t as Refuel)
-            is Expend -> bindCost(holder, t as Expend)
+            is Outlay -> bindCost(holder, t as Outlay)
         }
     }
 
@@ -123,7 +123,7 @@ class RecordsItemRecyclerAdapter<T>(
         }
     }
 
-    private fun bindCost(holder: ViewHolder, travelCost: Expend) {
+    private fun bindCost(holder: ViewHolder, travelCost: Outlay) {
         holder.apply {
             month.text = travelCost.date.getMonthInPtBrAbbreviated()
             day.text = travelCost.date.getDayFormatted()

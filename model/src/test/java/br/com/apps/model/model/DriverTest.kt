@@ -1,7 +1,7 @@
 package br.com.apps.model.model
 
+import br.com.apps.model.enums.WorkRole
 import br.com.apps.model.model.employee.Driver
-import br.com.apps.model.model.employee.EmployeeType
 import org.junit.Before
 
 class DriverTest {
@@ -15,7 +15,7 @@ class DriverTest {
             id = "2",
             truckId = "3",
             name = " João",
-            type = EmployeeType.DRIVER
+            type = WorkRole.TRUCK_DRIVER
         )
     }
 

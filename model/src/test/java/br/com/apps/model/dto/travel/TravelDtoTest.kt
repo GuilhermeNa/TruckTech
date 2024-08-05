@@ -1,7 +1,7 @@
 package br.com.apps.model.dto.travel
 
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.toDate
+import br.com.apps.model.util.toDate
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -17,17 +17,14 @@ class TravelDtoTest {
             masterUid = "1",
             id = "2",
             truckId = "3",
-            driverId = "4",
+            employeeId = "4",
 
             isFinished = true,
-            considerAverage = true,
+            isClosed = true,
             initialDate = LocalDateTime.of(2022, 1, 1, 12, 0).toDate(),
             finalDate = LocalDateTime.of(2022, 1, 15, 12, 0).toDate(),
             initialOdometerMeasurement = 10.0,
             finalOdometerMeasurement = 50.0,
-            freightsList = null,
-            refuelsList = null,
-            expendsList = null
         )
     }
 
@@ -54,7 +51,7 @@ class TravelDtoTest {
 
     @Test
     fun `should throw CorruptedFileException when driverId is null`() {
-        travelDto.driverId = null
+        travelDto.employeeId = null
         assertThrows(CorruptedFileException::class.java) {
             travelDto.validateDataIntegrity()
         }
@@ -70,7 +67,7 @@ class TravelDtoTest {
 
     @Test
     fun `should throw CorruptedFileException when considerAverage is null`() {
-        travelDto.considerAverage = null
+        travelDto.isClosed = null
         assertThrows(CorruptedFileException::class.java) {
             travelDto.validateDataIntegrity()
         }

@@ -1,7 +1,7 @@
 package br.com.apps.model.model
 
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.request.travel_requests.RequestItemType
+import br.com.apps.model.enums.RequestItemType
+import br.com.apps.model.model.request.RequestItem
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

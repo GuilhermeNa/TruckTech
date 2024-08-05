@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.request.travel_requests.RequestItem
-import br.com.apps.model.model.request.travel_requests.RequestItemType
+import br.com.apps.model.enums.RequestItemType
+import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.model.request.RequestItem
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestPreviewBinding
-import br.com.apps.model.expressions.toCurrencyPtBr
 import java.security.InvalidParameterException
 
 class RequestPreviewRecyclerAdapter(
@@ -55,7 +55,7 @@ class RequestPreviewRecyclerAdapter(
 
             description.text = requestItem.getDescription()
 
-            value.text = requestItem.value?.toCurrencyPtBr()
+            value.text = requestItem.value.toCurrencyPtBr()
 
             val drawable = when(requestItem.type) {
                 RequestItemType.COST -> ContextCompat.getDrawable(context, R.drawable.icon_cost)

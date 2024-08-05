@@ -6,13 +6,13 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.travel.FreightDto
-import br.com.apps.model.exceptions.NullCustomerException
-import br.com.apps.model.exceptions.NullFreightException
+import br.com.apps.model.exceptions.null_objects.NullCustomerException
+import br.com.apps.model.exceptions.null_objects.NullFreightException
 import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.model.model.user.PermissionLevelType
-import br.com.apps.model.toDate
+import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.util.toDate
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
@@ -213,5 +213,5 @@ data class FreightEVMData(
     val driverId: String,
     val freightId: String? = null,
     val commissionPercentual: BigDecimal,
-    val permissionLevel: PermissionLevelType
+    val permissionLevel: AccessLevel
 )

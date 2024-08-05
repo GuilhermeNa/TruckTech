@@ -1,36 +1,59 @@
 package br.com.apps.model.model.travel
 
+import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.exceptions.DateOrderException
 import br.com.apps.model.exceptions.DuplicatedItemsException
 import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.exceptions.OdometerOrderException
+import br.com.apps.model.interfaces.ModelObjectInterface
+import br.com.apps.model.util.toDate
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.security.InvalidParameterException
 import java.time.LocalDateTime
 
+/**
+ * This class encapsulates details of a travel record for a truck, including associated expenses, refuels, freights and aids.
+ *
+ * Notes:
+ * * A travel record is associated with a specific [Truck] and [Employee].
+ * * The travel record can include multiple associated [Freight]s, [Refuel]s, [Outlay]s, and [TravelAid]s.
+ *
+ * @property masterUid Unique identifier for the master record associated with this travel.
+ * @property id Optional unique identifier for the [Travel]. If not provided, it will be generated automatically.
+ * @property truckId Identifier for the [Truck] involved in this travel.
+ * @property employeeId Identifier for the [Employee] responsible for this travel.
+ * @property initialDate Date and time when the travel started.
+ * @property finalDate Optional date and time when the travel ended. If not provided, the travel is ongoing.
+ * @property initialOdometerMeasurement Odometer reading at the start of the travel.
+ * @property finalOdometerMeasurement Optional odometer reading at the end of the travel. If not provided, it is not yet concluded.
+ * @property freights List of [Freight]s associated with this travel. Represents the cargo shipments during the journey.
+ * @property refuels List of [Refuel]s associated with this travel. Represents fuel transactions that occurred during the journey.
+ * @property expends List of [Outlay]s associated with this travel. Represents expenditures incurred during the journey.
+ * @property aids List of [TravelAid]s associated with this travel. Represents any advance payments made for the journey.
+ * @property isClosed Indicates whether the travel record has been closed (true) or not (false). Once closed, it cannot be modified.
+ * @property isFinished Indicates whether the travel has been completed (true) or not (false). Used to determine if all travel activities have concluded.
+ */
 data class Travel(
     val masterUid: String,
     var id: String? = null,
     val truckId: String,
-    val driverId: String,
-
-    @field:JvmField
-    var isFinished: Boolean,
-    var considerAverage: Boolean,
+    val employeeId: String,
 
     var initialDate: LocalDateTime,
     var finalDate: LocalDateTime? = null,
-
     var initialOdometerMeasurement: BigDecimal,
     var finalOdometerMeasurement: BigDecimal? = null,
 
-    var freightsList: List<Freight>? = null,
-    var refuelsList: List<Refuel>? = null,
-    var expendsList: List<Expend>? = null,
-    var aidList: List<TravelAid>? = null
+    var freights: List<Freight>? = null,
+    var refuels: List<Refuel>? = null,
+    var expends: List<Outlay>? = null,
+    var aids: List<TravelAid>? = null,
 
-) {
+    @field:JvmField var isClosed: Boolean,
+    @field:JvmField var isFinished: Boolean
+
+) : ModelObjectInterface<TravelDto> {
 
     /**
      * Retrieves the size of the specified list associated with the travel.
@@ -40,10 +63,10 @@ data class Travel(
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
     fun getListSize(listTag: Int): Int = when (listTag) {
-        FREIGHT -> freightsList?.size ?: 0
-        EXPEND -> expendsList?.size ?: 0
-        REFUEL -> refuelsList?.size ?: 0
-        AID -> aidList?.size ?: 0
+        FREIGHT -> freights?.size ?: 0
+        EXPEND -> expends?.size ?: 0
+        REFUEL -> refuels?.size ?: 0
+        AID -> aids?.size ?: 0
         else -> throw InvalidParameterException("Wrong tag for getListSize: ($listTag) ")
     }
 
@@ -55,10 +78,10 @@ data class Travel(
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
     fun getListOfIdsForList(listTag: Int): List<String> = when (listTag) {
-        FREIGHT -> freightsList?.mapNotNull { it.id } ?: emptyList()
-        EXPEND -> expendsList?.mapNotNull { it.id } ?: emptyList()
-        REFUEL -> refuelsList?.mapNotNull { it.id } ?: emptyList()
-        AID -> aidList?.mapNotNull { it.id } ?: emptyList()
+        FREIGHT -> freights?.mapNotNull { it.id } ?: emptyList()
+        EXPEND -> expends?.mapNotNull { it.id } ?: emptyList()
+        REFUEL -> refuels?.mapNotNull { it.id } ?: emptyList()
+        AID -> aids?.mapNotNull { it.id } ?: emptyList()
         else -> throw InvalidParameterException("Invalid tag for ($listTag)")
     }
 
@@ -68,7 +91,7 @@ data class Travel(
      * @return The total commission value as a BigDecimal.
      */
     fun getCommissionValue(): BigDecimal {
-        return freightsList?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
+        return freights?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
     }
 
     /**
@@ -89,10 +112,10 @@ data class Travel(
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
     fun getListTotalValue(listTag: Int): BigDecimal = when (listTag) {
-        FREIGHT -> freightsList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
-        EXPEND -> expendsList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
-        REFUEL -> refuelsList?.map { it.totalValue }?.sumOf { it } ?: BigDecimal.ZERO
-        AID -> aidList?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
+        FREIGHT -> freights?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
+        EXPEND -> expends?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
+        REFUEL -> refuels?.map { it.totalValue }?.sumOf { it } ?: BigDecimal.ZERO
+        AID -> aids?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
         else -> throw InvalidParameterException("Invalid tag for ($listTag)")
     }
 
@@ -103,7 +126,7 @@ data class Travel(
      */
     fun getLiquidValue(): BigDecimal {
         val freight = getListTotalValue(FREIGHT)
-        val commission = freightsList?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
+        val commission = freights?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
         val refuel = getListTotalValue(REFUEL)
         val expend = getListTotalValue(EXPEND)
         return freight.subtract(refuel).subtract(expend).subtract(commission)
@@ -119,9 +142,9 @@ data class Travel(
         val authenticableItems = getListSize(FREIGHT) + getListSize(EXPEND) + getListSize(REFUEL)
         var authenticated = 0.0
 
-        freightsList?.forEach { if (it.isValid) authenticated++ }
-        refuelsList?.forEach { if (it.isValid) authenticated++ }
-        expendsList?.forEach { if (it.isValid) authenticated++ }
+        freights?.forEach { if (it.isValid) authenticated++ }
+        refuels?.forEach { if (it.isValid) authenticated++ }
+        expends?.forEach { if (it.isValid) authenticated++ }
 
         return authenticated.div(authenticableItems.toDouble()) * 100
     }
@@ -132,7 +155,7 @@ data class Travel(
      * @return True if the travel is ready to be finished, false otherwise.
      */
     fun isReadyToBeFinished(): Boolean {
-        return getTravelAuthenticationPercent() == 100.0 && !freightsList.isNullOrEmpty()
+        return getTravelAuthenticationPercent() == 100.0 && !freights.isNullOrEmpty()
     }
 
     /**
@@ -155,18 +178,18 @@ data class Travel(
      * @throws NullPointerException If there is a failure to load freights.
      */
     fun validateForSaving() {
-        freightsList?.also {
+        freights?.also {
             if (it.isEmpty()) throw EmptyDataException("Nenhuma viagem encontrada")
             it.forEach { f ->
                 if (!f.isValid) throw InvalidParameterException("Frete não validado")
             }
         } ?: throw NullPointerException("Falha ao carregar fretes")
 
-        refuelsList?.forEach { r ->
+        refuels?.forEach { r ->
             if (!r.isValid) throw InvalidParameterException("Abastecimento não validado")
         }
 
-        expendsList?.forEach { e ->
+        expends?.forEach { e ->
             if (!e.isValid) throw InvalidParameterException("Despesa não validada")
         }
 
@@ -177,7 +200,7 @@ data class Travel(
 
     private fun validateDatesOrder() {
         finalDate?.let {
-            if(initialDate.isAfter(finalDate)) throw DateOrderException("Dates in wrong order")
+            if (initialDate.isAfter(finalDate)) throw DateOrderException("Dates in wrong order")
         } ?: throw NullPointerException("Final date is null")
     }
 
@@ -190,7 +213,7 @@ data class Travel(
     }
 
     private fun thereIsDuplicatedItems() {
-        freightsList?.let { freights ->
+        freights?.let { freights ->
             val uniqueIds = mutableSetOf<String>()
 
             freights.mapNotNull { it.id }.forEach { id ->
@@ -202,7 +225,7 @@ data class Travel(
             }
         }
 
-        refuelsList?.let { refuels ->
+        refuels?.let { refuels ->
             val uniqueIds = mutableSetOf<String>()
 
             refuels.mapNotNull { it.id }.forEach { id ->
@@ -215,7 +238,7 @@ data class Travel(
 
         }
 
-        expendsList?.let { expends ->
+        expends?.let { expends ->
             val uniqueIds = mutableSetOf<String>()
 
             expends.mapNotNull { it.id }.forEach { id ->
@@ -228,7 +251,7 @@ data class Travel(
 
         }
 
-        aidList?.let { aids ->
+        aids?.let { aids ->
             val uniqueIds = mutableSetOf<String>()
 
             aids.mapNotNull { it.id }.forEach { id ->
@@ -252,28 +275,28 @@ data class Travel(
         if (isFinished) return false
         if (id == null) return false
 
-        freightsList?.let {
+        freights?.let {
             it.forEach { f ->
                 if (f.isValid) return false
                 if (f.id == null) return false
             }
         }
 
-        refuelsList?.let {
+        refuels?.let {
             it.forEach { r ->
                 if (r.isValid) return false
                 if (r.id == null) return false
             }
         }
 
-        expendsList?.let {
+        expends?.let {
             it.forEach { e ->
                 if (e.isValid) return false
                 if (e.id == null) return false
             }
         }
 
-        aidList?.let {
+        aids?.let {
             if (it.isNotEmpty()) return false
         }
 
@@ -308,7 +331,7 @@ data class Travel(
      * @return The fuel average as a BigDecimal.
      */
     fun getFuelAverage(): BigDecimal {
-        return refuelsList?.let { refuels ->
+        return refuels?.let { refuels ->
             val liters = refuels.sumOf { it.amountLiters }
             val distance = getDifferenceBetweenInitialAndFinalOdometerMeasure()
             distance.divide(liters, 2, RoundingMode.HALF_EVEN)
@@ -321,8 +344,8 @@ data class Travel(
      * @return True if average fuel consumption should be considered, false otherwise.
      */
     fun shouldConsiderAverage(): Boolean {
-        if (refuelsList.isNullOrEmpty()) return false
-        return refuelsList!!.last().isCompleteRefuel
+        if (refuels.isNullOrEmpty()) return false
+        return refuels!!.last().isCompleteRefuel
     }
 
     companion object {
@@ -331,6 +354,19 @@ data class Travel(
         const val REFUEL = 2
         const val AID = 3
     }
+
+    override fun toDto() = TravelDto(
+        masterUid = this.masterUid,
+        id = this.id,
+        truckId = this.truckId,
+        employeeId = this.employeeId,
+        initialDate = this.initialDate.toDate(),
+        finalDate = this.finalDate?.toDate(),
+        initialOdometerMeasurement = this.initialOdometerMeasurement.toDouble(),
+        finalOdometerMeasurement = this.finalOdometerMeasurement?.toDouble(),
+        isFinished = this.isFinished,
+        isClosed = this.isClosed
+    )
 
 }
 
