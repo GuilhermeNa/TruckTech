@@ -19,7 +19,7 @@ import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.repository.util.WriteRequest
-import br.com.apps.usecase.usecase.ExpendUseCase
+import br.com.apps.usecase.usecase.OutlayUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -31,7 +31,7 @@ class ExpendEditorViewModel(
     private val vmData: ExpendEVMData,
     private val expendRepository: OutlayRepository,
     private val labelRepository: LabelRepository,
-    private val useCase: ExpendUseCase
+    private val useCase: OutlayUseCase
 ) : ViewModel() {
 
     private var isEditing: Boolean = vmData.expendId?.let { true } ?: false

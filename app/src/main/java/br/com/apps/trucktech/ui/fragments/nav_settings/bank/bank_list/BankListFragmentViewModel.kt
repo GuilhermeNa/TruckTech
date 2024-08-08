@@ -73,7 +73,7 @@ class BankListFragmentViewModel(
     }
 
     private suspend fun loadAccountsFlow(onComplete: (accounts: List<BankAccount>) -> Unit) {
-        employeeRepository.getEmployeeBankAccounts(employeeId, WorkRole.TRUCK_DRIVER, true)
+        employeeRepository.getEmployeeBankAccounts(employeeId, WorkRole.DRIVER, true)
             .asFlow().collect { response ->
                 when (response) {
                     is Response.Error -> throw response.exception
@@ -100,7 +100,7 @@ class BankListFragmentViewModel(
             employeeId,
             oldMainAccId,
             newMainAccId,
-            WorkRole.TRUCK_DRIVER
+            WorkRole.DRIVER
         )
     }
 

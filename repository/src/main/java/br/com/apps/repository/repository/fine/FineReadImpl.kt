@@ -28,8 +28,10 @@ class FineReadImpl(fireStore: FirebaseFirestore) : FineReadInterface {
 
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFineList() }
-        else listener.onComplete { it.toFineList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFineList() }
+            false -> listener.onComplete { it.toFineList() }
+        }
     }
 
     override suspend fun fetchFineListByFleetId(
@@ -40,8 +42,10 @@ class FineReadImpl(fireStore: FirebaseFirestore) : FineReadInterface {
 
         val listener = collection.whereEqualTo(FLEET_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFineList() }
-        else listener.onComplete { it.toFineList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFineList() }
+            false -> listener.onComplete { it.toFineList() }
+        }
     }
 
     override suspend fun fetchFineById(
@@ -52,8 +56,10 @@ class FineReadImpl(fireStore: FirebaseFirestore) : FineReadInterface {
 
         val listener = collection.document(id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFineObject() }
-        else listener.onComplete { it.toFineObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFineObject() }
+            false -> listener.onComplete { it.toFineObject() }
+        }
     }
 
 }

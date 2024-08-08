@@ -2,12 +2,16 @@ package br.com.apps.model.model.fleet
 
 import br.com.apps.model.dto.fleet.TruckDto
 import br.com.apps.model.enums.FleetCategory
-import br.com.apps.model.interfaces.ModelObjectInterface
+import br.com.apps.model.exceptions.DuplicatedItemsException
 import br.com.apps.model.model.employee.Driver
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.model.util.DUPLICATED_ID
 import java.math.BigDecimal
+
+private const val DUPLICATED_PLATE =
+    "There is already an item with this plate"
 
 /**
  * This class encapsulates details of a truck, including its identifying information, performance metrics, and associated trailers.
@@ -20,44 +24,32 @@ import java.math.BigDecimal
  * @property masterUid Unique identifier for the master record associated with this truck.
  * @property id Optional unique identifier for the [Truck].
  * @property plate License plate number of the truck.
- * @property fleetType Category of the fleet to which the truck belongs. Represents the size or type of the fleet.
+ * @property type Category of the fleet to which the truck belongs. Represents the size or type of the fleet.
  * @property employeeId Identifier for the [Employee] assigned to this truck.
  * @property averageAim The target average performance metric for the truck, such as fuel efficiency.
  * @property performanceAim The target performance metric for the truck, representing the profit percent goal.
  * @property color The color of the truck, used for identification and aesthetic purposes.
  * @property commissionPercentual The percentage of commission associated with the truck,
  * used to define [Freight]'s comission for drivers.
- * @property trailers List of [Trailer]s associated with this truck. Represents the trailers that are attached to or used with the truck.
+ * @property _trailers List of [Trailer]s associated with this truck. Represents the trailers that are attached to or used with the truck.
  */
 data class Truck(
     override val masterUid: String,
     override val id: String,
     override val plate: String,
-    override val fleetType: FleetCategory,
+    override val type: FleetCategory,
+
     val employeeId: String,
     val averageAim: Double,
     val performanceAim: Double,
     val color: String,
     val commissionPercentual: BigDecimal,
-    val trailers: MutableList<Trailer> = mutableListOf()
-) : Fleet(
-    masterUid = masterUid,
-    id = id,
-    plate = plate,
-    fleetType = fleetType
-), ModelObjectInterface<TruckDto> {
+    private val _trailers: MutableList<Trailer> = mutableListOf()
 
-    override fun toDto(): TruckDto = TruckDto(
-        id = id,
-        driverId = employeeId,
-        masterUid = masterUid,
-        averageAim = averageAim,
-        performanceAim = performanceAim,
-        plate = plate,
-        color = color,
-        commissionPercentual = commissionPercentual.toDouble(),
-        fleetType = fleetType.toString()
-    )
+) : Fleet(masterUid = masterUid, id = id, plate = plate, type = type) {
+
+    val trailers: List<Trailer>
+        get() = _trailers
 
     /**
      * Retrieves a list of all fleet IDs associated with the truck, including its own ID
@@ -68,26 +60,35 @@ data class Truck(
     fun getFleetIds(): List<String> {
         val fleetIds = mutableListOf<String>()
         fleetIds.add(id)
-        trailers.forEach { t -> fleetIds.add(t.id) }
+        _trailers.forEach { t -> fleetIds.add(t.id) }
         return fleetIds
     }
 
-    /**
-     * This method appends the specified [trailer] to the internal list of trailers,
-     * allowing you to manage and track multiple trailers associated with this truck.
-     *
-     * @param trailer The [Trailer] object to be added to the list. It cannot be null.
-     *
-     * @throws IllegalArgumentException if the [trailer] is null.
-     */
-    fun addTrailer(trailer: Trailer) = trailers.add(trailer)
+    fun addTrailer(trailer: Trailer) {
+        val existingIds = _trailers.asSequence().map { it.id }.toSet()
+        val existingInstallment = _trailers.asSequence().map { it.plate }.toSet()
 
-    /**
-     * This method clears the internal list of trailers, effectively removing all
-     * trailers associated with this truck. After calling this method, the list will be empty.
-     *
-     * This method does not return any value and does not throw any exception.
-     */
-    fun clearTrailers() = trailers.clear()
+        if (trailer.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+
+        if (trailer.plate in existingInstallment) throw DuplicatedItemsException(DUPLICATED_PLATE)
+
+         _trailers.add(trailer)
+    }
+
+    fun clearTrailers() = _trailers.clear()
+
+    fun contains(trailer: Trailer) = _trailers.contains(trailer)
+
+    override fun toDto(): TruckDto = TruckDto(
+        id = id,
+        employeeId = employeeId,
+        masterUid = masterUid,
+        averageAim = averageAim,
+        performanceAim = performanceAim,
+        plate = plate,
+        color = color,
+        commissionPercentual = commissionPercentual.toDouble(),
+        type = type.toString()
+    )
 
 }

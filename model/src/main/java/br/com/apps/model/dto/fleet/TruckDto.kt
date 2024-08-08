@@ -2,7 +2,6 @@ package br.com.apps.model.dto.fleet
 
 import br.com.apps.model.enums.FleetCategory
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.fleet.Truck
 import java.math.BigDecimal
 
@@ -15,25 +14,26 @@ import java.math.BigDecimal
  * the database.
  */
 data class TruckDto(
-    var id: String? = null,
-    var masterUid: String? = null,
-    var driverId: String? = null,
+    override var masterUid: String? = null,
+    override var id: String? = null,
+    override var plate: String? = null,
+    override var type: String? = null,
 
+    var employeeId: String? = null,
     var averageAim: Double? = null,
     var performanceAim: Double? = null,
-    var plate: String? = null,
-    var color: String? = null,
     var commissionPercentual: Double? = null,
-    var fleetType: String? = null
-) : DtoObjectInterface<Truck> {
+    var color: String? = null
+
+): FleetDto(masterUid = masterUid, id = id, plate = plate, type = type){
 
     override fun validateDataIntegrity() {
         if (id == null ||
             plate == null ||
             color == null ||
-            driverId == null ||
+            employeeId == null ||
             masterUid == null ||
-            fleetType == null ||
+            type == null ||
             averageAim == null ||
             performanceAim == null ||
             commissionPercentual == null
@@ -46,14 +46,14 @@ data class TruckDto(
         validateDataIntegrity()
         return Truck(
             id = id!!,
-            employeeId = driverId!!,
+            employeeId = employeeId!!,
             masterUid = masterUid!!,
             averageAim = averageAim!!,
             performanceAim = performanceAim!!,
-            plate = plate ?: "-",
-            color = color ?: "-",
+            plate = plate!!,
+            color = color!!,
             commissionPercentual = BigDecimal(commissionPercentual!!),
-            fleetType = FleetCategory.valueOf(fleetType!!)
+            type = FleetCategory.valueOf(type!!)
         )
     }
 

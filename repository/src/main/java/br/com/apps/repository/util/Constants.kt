@@ -4,6 +4,8 @@ package br.com.apps.repository.util
 // IDS
 //---------------------------------------------------------------------------------------------//
 
+const val ID = "id"
+
 const val EMPTY_ID = "Empty id"
 
 const val MASTER_UID = "masterUid"
@@ -23,6 +25,8 @@ const val TRUCK_ID = "truckId"
 const val FLEET_ID = "fleetId"
 
 const val EMPLOYEE_ID = "employeeId"
+
+const val WORK_ROLE = "workRole"
 
 const val IS_RECEIVED = "isReceived"
 
@@ -100,6 +104,8 @@ internal const val FIRESTORE_COLLECTION_ADVANCES = "advances"
 
 const val FIRESTORE_COLLECTION_EXPENDS = "expends"
 
+const val FIRESTORE_COLLECTION_EMPLOYEE_BANK_ACCOUNTS = "bank_accounts"
+
 internal const val FIRESTORE_COLLECTION_EMPLOYEE_PAYABLE = "employee_payables"
 
 internal const val FIRESTORE_COLLECTION_EMPLOYEE_RECEIVABLE = "employee_receivables"
@@ -128,11 +134,15 @@ const val FIRESTORE_COLLECTION_DRIVER = "driverEmployee"
 
 internal const val FIRESTORE_COLLECTION_ADMIN = "adminEmployee"
 
+internal const val FIRESTORE_COLLECTION_EMPLOYEE = "employees"
+
 const val FIRESTORE_COLLECTION_BANK = "bankAccount"
 
 internal const val FIRESTORE_COLLECTION_CUSTOMER = "customers"
 
 internal const val FIRESTORE_COLLECTION_COST_HELP = "travel_aids"
+
+internal const val FIRESTORE_COLLECTION_TRANSACTIONS = "transactions"
 
 //---------------------------------------------------------------------------------------------//
 // COMMON

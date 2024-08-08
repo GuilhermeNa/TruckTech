@@ -34,8 +34,10 @@ class FleetReadImpl(fireStore: FirebaseFirestore) : FleetReadInterface {
         val listener = collection.whereEqualTo(MASTER_UID, uid)
             .whereEqualTo(FLEET_TYPE, FleetCategory.TRUCK.toString())
 
-        return@withContext if (flow) listener.onSnapShot { it.toTruckList() }
-        else listener.onComplete { it.toTruckList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTruckList() }
+            false -> listener.onComplete { it.toTruckList() }
+        }
     }
 
     override suspend fun fetchTruckById(
@@ -46,8 +48,10 @@ class FleetReadImpl(fireStore: FirebaseFirestore) : FleetReadInterface {
 
         val listener = collection.document(id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toTruckObject() }
-        else listener.onComplete { it.toTruckObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTruckObject() }
+            false -> listener.onComplete { it.toTruckObject() }
+        }
     }
 
     override suspend fun fetchTruckByDriverId(
@@ -59,8 +63,10 @@ class FleetReadImpl(fireStore: FirebaseFirestore) : FleetReadInterface {
         val listener = collection.whereEqualTo(DRIVER_ID, id)
             .whereEqualTo(FLEET_TYPE, FleetCategory.TRUCK.toString()).limit(1)
 
-        return@withContext if (flow) listener.onSnapShot { it.toTruckList()[0] }
-        else listener.onComplete { it.toTruckList()[0] }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTruckList()[0] }
+            false -> listener.onComplete { it.toTruckList()[0] }
+        }
     }
 
     override suspend fun fetchTrailerListLinkedToTruckById(
@@ -71,8 +77,10 @@ class FleetReadImpl(fireStore: FirebaseFirestore) : FleetReadInterface {
 
         val listener = collection.whereEqualTo(TRUCK_ID, id)
 
-        return@withContext if(flow) listener.onSnapShot { it.toTrailerList() }
-        else listener.onComplete { it.toTrailerList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTrailerList() }
+            false -> listener.onComplete { it.toTrailerList() }
+        }
     }
 
 }

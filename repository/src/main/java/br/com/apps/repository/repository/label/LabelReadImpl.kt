@@ -39,8 +39,10 @@ class LabelReadImpl(fireStore: FirebaseFirestore) : LabelReadInterface {
 
         val listener = userCollection.whereEqualTo(MASTER_UID, masterUid)
 
-        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
-        else listener.onComplete { it.toLabelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toLabelList() }
+            false -> listener.onComplete { it.toLabelList() }
+        }
     }
 
     override suspend fun fetchLabelListByMasterUidAndType(
@@ -54,8 +56,10 @@ class LabelReadImpl(fireStore: FirebaseFirestore) : LabelReadInterface {
         val listener =
             userCollection.whereEqualTo(LABEL_TYPE, type).whereEqualTo(MASTER_UID, masterUid)
 
-        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
-        else listener.onComplete { it.toLabelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toLabelList() }
+            false -> listener.onComplete { it.toLabelList() }
+        }
     }
 
     override suspend fun fetchLabelById(
@@ -67,8 +71,10 @@ class LabelReadImpl(fireStore: FirebaseFirestore) : LabelReadInterface {
 
         val listener = userCollection.document(labelId)
 
-        return@withContext if (flow) listener.onSnapShot { it.toLabelObject() }
-        else listener.onComplete { it.toLabelObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toLabelObject() }
+            false -> listener.onComplete { it.toLabelObject() }
+        }
     }
 
     override suspend fun fetchLabelListByMasterUidAndTypeAndOperational(
@@ -85,8 +91,10 @@ class LabelReadImpl(fireStore: FirebaseFirestore) : LabelReadInterface {
             .whereEqualTo(LABEL_TYPE, type)
             .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
 
-        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
-        else listener.onComplete { it.toLabelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toLabelList() }
+            false -> listener.onComplete { it.toLabelList() }
+        }
     }
 
     override suspend fun fetchDefaultLabelList(
@@ -100,8 +108,10 @@ class LabelReadImpl(fireStore: FirebaseFirestore) : LabelReadInterface {
         val listener = defaultCollection.whereEqualTo(LABEL_TYPE, type)
             .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
 
-        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
-        else listener.onComplete { it.toLabelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toLabelList() }
+            false -> listener.onComplete { it.toLabelList() }
+        }
     }
 
     override suspend fun fetchDefaultExpendLabelList(
@@ -112,8 +122,10 @@ class LabelReadImpl(fireStore: FirebaseFirestore) : LabelReadInterface {
             .whereEqualTo(LABEL_IS_OPERATIONAL, isOperational)
             .whereIn(LABEL_TYPE, listOf("COST", "EXPENSE"))
 
-        return@withContext if (flow) listener.onSnapShot { it.toLabelList() }
-        else listener.onComplete { it.toLabelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toLabelList() }
+            false -> listener.onComplete { it.toLabelList() }
+        }
     }
 
     /**

@@ -1,4 +1,4 @@
-package br.com.apps.model.dto.payroll
+package br.com.apps.model.dto.travel
 
 import br.com.apps.model.exceptions.AccessLevelException
 import br.com.apps.model.exceptions.CorruptedFileException
@@ -51,7 +51,7 @@ data class TravelAidDto(
             employeeId = employeeId!!,
             date = date!!.toLocalDateTime(),
             value = BigDecimal(value!!),
-            isValid = isValid == null
+            isValid = isValid!!
         )
     }
 

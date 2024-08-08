@@ -66,7 +66,7 @@ class BankPreviewViewModel(
         repository.getBankAccountById(
             vmData.employeeId,
             vmData.bankAccountId,
-            WorkRole.TRUCK_DRIVER,
+            WorkRole.DRIVER,
             true
         ).asFlow().collect { response ->
             when (response) {
@@ -85,7 +85,7 @@ class BankPreviewViewModel(
     suspend fun delete() =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                repository.deleteBankAcc(vmData.employeeId, vmData.bankAccountId, WorkRole.TRUCK_DRIVER)
+                repository.deleteBankAcc(vmData.employeeId, vmData.bankAccountId, WorkRole.DRIVER)
                 emit(Response.Success())
             } catch (e: Exception) {
                 emit(Response.Error(e))

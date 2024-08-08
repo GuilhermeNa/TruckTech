@@ -27,21 +27,21 @@ import java.time.LocalDateTime
  * @property totalValue Total monetary value of the fuel purchased.
  * @property isCompleteRefuel Indicates whether the tank was filled to its full capacity during the refuel (true) or not (false).
  * @property isValid Indicates whether the refuel record is valid (true) or not (false). This property
- * must only be set by an Admin user.
+ * must only be set by an Assistant user.
  */
 data class Refuel(
     val masterUid: String,
-    var id: String,
+    val id: String,
     val truckId: String,
     val travelId: String? = null,
-    var date: LocalDateTime,
-    var station: String,
-    var odometerMeasure: BigDecimal,
-    var valuePerLiter: BigDecimal,
-    var amountLiters: BigDecimal,
-    var totalValue: BigDecimal,
-    @field:JvmField var isCompleteRefuel: Boolean,
-    @field:JvmField var isValid: Boolean
+    val date: LocalDateTime,
+    val station: String,
+    val odometerMeasure: BigDecimal,
+    val valuePerLiter: BigDecimal,
+    val amountLiters: BigDecimal,
+    val totalValue: BigDecimal,
+    val isCompleteRefuel: Boolean,
+    val isValid: Boolean
 ) : ModelObjectInterface<RefuelDto> {
 
     override fun toDto() = RefuelDto(

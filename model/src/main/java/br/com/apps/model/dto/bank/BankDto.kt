@@ -20,8 +20,11 @@ class BankDto(
 ) : DtoObjectInterface<Bank> {
 
     override fun validateDataIntegrity() {
-        if ((id == null || name == null || code == null || urlImage == null))
-            throw CorruptedFileException("BankDto data is corrupted: ($this)")
+        if (id == null ||
+            name == null ||
+            code == null ||
+            urlImage == null
+        ) throw CorruptedFileException("BankDto data is corrupted: ($this)")
     }
 
     override fun validateDataForDbInsertion() {}

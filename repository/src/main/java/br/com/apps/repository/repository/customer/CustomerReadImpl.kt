@@ -27,8 +27,10 @@ class CustomerReadImpl(fireStore: FirebaseFirestore) : CustomerReadInterface {
 
         val listener = collection.whereEqualTo(MASTER_UID, uid)
 
-        if (flow) listener.onSnapShot { it.toCustomerList() }
-        else listener.onComplete { it.toCustomerList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toCustomerList() }
+            false -> listener.onComplete { it.toCustomerList() }
+        }
     }
 
     override suspend fun fetchCustomerById(
@@ -39,8 +41,10 @@ class CustomerReadImpl(fireStore: FirebaseFirestore) : CustomerReadInterface {
 
         val listener = collection.document(id)
 
-        if (flow) listener.onSnapShot { it.toCustomerObject() }
-        else listener.onComplete { it.toCustomerObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toCustomerObject() }
+            false -> listener.onComplete { it.toCustomerObject() }
+        }
     }
 
 }

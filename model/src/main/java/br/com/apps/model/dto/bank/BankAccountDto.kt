@@ -1,4 +1,4 @@
-package br.com.apps.model.dto.employee_dto
+package br.com.apps.model.dto.bank
 
 import br.com.apps.model.enums.PixType.Companion.toPixType
 import br.com.apps.model.exceptions.CorruptedFileException

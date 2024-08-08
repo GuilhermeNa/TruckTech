@@ -1,13 +1,17 @@
 package br.com.apps.model.test_cases
 
-import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.dto.finance.TransactionDto
 import br.com.apps.model.dto.finance.payable.EmployeePayableDto
 import br.com.apps.model.dto.finance.receivable.EmployeeReceivableDto
+import br.com.apps.model.dto.fleet.TrailerDto
 import br.com.apps.model.dto.fleet.TruckDto
+import br.com.apps.model.dto.payroll.AdvanceDto
+import br.com.apps.model.dto.payroll.LoanDto
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.OutlayDto
 import br.com.apps.model.dto.travel.RefuelDto
+import br.com.apps.model.dto.travel.TravelAidDto
 import br.com.apps.model.enums.AdvanceType
 import br.com.apps.model.enums.EmployeePayableTicket
 import br.com.apps.model.enums.EmployeeReceivableTicket
@@ -29,6 +33,8 @@ import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Outlay
+import br.com.apps.model.model.travel.Refuel
+import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.model.travel.TravelAid
 import br.com.apps.model.util.toDate
 import java.math.BigDecimal
@@ -78,12 +84,11 @@ fun sampleFreight(): Freight = Freight(
     cargo = "Cargo1",
     origin = "Origin1",
     destiny = "Destiny1",
-    value = BigDecimal("1000.0"),
-    weight = BigDecimal("10000.0"),
+    value = BigDecimal("10000.0"),
+    weight = BigDecimal("35000.0"),
     loadingDate = LocalDateTime.of(2024, 1, 1, 0, 0, 0),
     commissionPercentual = BigDecimal("10.0"),
     isValid = false,
-    customer = sampleCustomer()
 )
 
 fun sampleFreightDto(): FreightDto = FreightDto(
@@ -96,8 +101,8 @@ fun sampleFreightDto(): FreightDto = FreightDto(
     cargo = "Cargo1",
     origin = "Origin1",
     destiny = "Destiny1",
-    value = BigDecimal("1000.0").toDouble(),
-    weight = BigDecimal("10000.0").toDouble(),
+    value = BigDecimal("10000.0").toDouble(),
+    weight = BigDecimal("35000.0").toDouble(),
     loadingDate = LocalDateTime.of(2024, 1, 1, 0, 0, 0).toDate(),
     commissionPercentual = BigDecimal("10.0").toDouble(),
     isValid = false
@@ -122,8 +127,7 @@ fun sampleExpend(): Outlay = Outlay(
     description = "Description1",
     value = BigDecimal("100.0"),
     isPaidByEmployee = false,
-    isValid = true,
-    label = sampleCostLabel()
+    isValid = true
 )
 
 fun sampleCostLabel(): Label = Label(
@@ -163,8 +167,8 @@ fun sampleTruck(): Truck = Truck(
     masterUid = "masterUid1",
     id = "truckId1",
     plate = "ABC1234",
-    fleetType = FleetCategory.TRUCK,
-    employeeId = "driverId1",
+    type = FleetCategory.TRUCK,
+    employeeId = "employeeId1",
     averageAim = 2.5,
     performanceAim = 50.0,
     color = "Color1",
@@ -175,8 +179,8 @@ fun sampleTruckDto(): TruckDto = TruckDto(
     masterUid = "masterUid1",
     id = "truckId1",
     plate = "ABC1234",
-    fleetType = FleetCategory.TRUCK.toString(),
-    driverId = "driverId1",
+    type = FleetCategory.TRUCK.toString(),
+    employeeId = "employeeId1",
     averageAim = 2.5,
     performanceAim = 50.0,
     color = "Color1",
@@ -188,6 +192,14 @@ fun sampleTrailer(): Trailer = Trailer(
     "trailerId1",
     "XYZ5678",
     FleetCategory.FOUR_AXIS,
+    truckId = "truckId1"
+)
+
+fun sampleTrailerDto(): TrailerDto = TrailerDto(
+    masterUid = "masterUid1",
+    id = "trailerId1",
+    plate = "XYZ5678",
+    type = FleetCategory.FOUR_AXIS.name,
     truckId = "truckId1"
 )
 
@@ -222,7 +234,7 @@ fun sampleEmployeePayable(): EmployeePayable = EmployeePayable(
     parentId = "parentId2",
     installments = 10,
     value = BigDecimal("500.00"),
-    generationDate = LocalDateTime.of(2024, 2, 20, 14, 45),
+    generationDate = LocalDateTime.of(2024, 1, 1, 0, 0),
     type = EmployeePayableTicket.COMMISSION,
     _isPaid = false
 )
@@ -234,7 +246,7 @@ fun sampleEmployeePayableDto(): EmployeePayableDto = EmployeePayableDto(
     employeeId = "employeeId1",
     value = 500.00,
     installments = 10,
-    generationDate = LocalDateTime.of(2024, 2, 20, 14, 45).toDate(),
+    generationDate = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
     type = EmployeePayableTicket.COMMISSION.name,
     isPaid = false
 )
@@ -247,10 +259,9 @@ fun sampleOutlay(): Outlay = Outlay(
     travelId = "travelId1",
     labelId = "labelId1",
     company = "Company1",
-    date = LocalDateTime.of(2024, 2, 20, 14, 45),
+    date = LocalDateTime.of(2024, 1, 1, 0, 0),
     description = "Description",
-    value = BigDecimal("100.00"),
-    label = null,
+    value = BigDecimal("500.00"),
     isPaidByEmployee = true,
     isValid = false
 )
@@ -263,10 +274,25 @@ fun sampleOutlayDto(): OutlayDto = OutlayDto(
     travelId = "travelId1",
     labelId = "labelId1",
     company = "Company1",
-    date = LocalDateTime.of(2024, 2, 20, 14, 45).toDate(),
+    date = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
     description = "Description",
-    value = 100.00,
+    value = 500.00,
     isPaidByEmployee = true,
+    isValid = false
+)
+
+fun sampleRefuel(): Refuel = Refuel(
+    masterUid = "masterUid1",
+    id = "refuelId1",
+    truckId = "truckId1",
+    travelId = "travelId1",
+    date = LocalDateTime.of(2024, 1, 1, 0, 0),
+    station = "Station",
+    odometerMeasure = BigDecimal("10.00"),
+    valuePerLiter = BigDecimal("5.00"),
+    amountLiters = BigDecimal("800.00"),
+    totalValue = BigDecimal("4000.00"),
+    isCompleteRefuel = true,
     isValid = false
 )
 
@@ -275,12 +301,12 @@ fun sampleRefuelDto(): RefuelDto = RefuelDto(
     id = "refuelId1",
     truckId = "truckId1",
     travelId = "travelId1",
-    date = LocalDateTime.of(2022, 1, 1, 12, 0).toDate(),
+    date = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
     station = "Station",
-    odometerMeasure = 10.0,
-    valuePerLiter = 4.5,
-    amountLiters = 2.0,
-    totalValue = 9.0,
+    odometerMeasure = 10.00,
+    valuePerLiter = 5.00,
+    amountLiters = 800.00,
+    totalValue = 4000.00,
     isCompleteRefuel = true,
     isValid = false
 )
@@ -288,7 +314,7 @@ fun sampleRefuelDto(): RefuelDto = RefuelDto(
 fun sampleTransaction(): Transaction = Transaction(
     masterUid = "masterUid1",
     id = "transactionId1",
-    parentKey = "parentKey1",
+    parentId = "parentKey1",
     dueDate = LocalDateTime.of(2024, 2, 20, 14, 45),
     number = 1,
     value = BigDecimal("100.00"),
@@ -314,9 +340,17 @@ fun sampleAdvance(): Advance = Advance(
     employeeId = "employeeId1",
     date = LocalDateTime.of(2024, 1, 1, 0, 0),
     value = BigDecimal("100.00"),
-    isPaid = false,
-    isApproved = true,
     type = AdvanceType.COMMISSION
+)
+
+fun sampleAdvanceDto(): AdvanceDto = AdvanceDto(
+    masterUid = "masterUid1",
+    id = "advanceId1",
+    travelId = "travelId1",
+    employeeId = "employeeId1",
+    date = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
+    value = 100.00,
+    type = AdvanceType.COMMISSION.name
 )
 
 fun sampleLoan(): Loan = Loan(
@@ -324,18 +358,47 @@ fun sampleLoan(): Loan = Loan(
     id = "loanId1",
     employeeId = "employeeId1",
     date = LocalDateTime.of(2024, 1, 1, 0, 0),
-    value = BigDecimal("500.00"),
-    installments = 5,
-    installmentsAlreadyPaid = 1,
-    isPaid = false
+    value = BigDecimal("500.00")
+)
+
+fun sampleLoanDto(): LoanDto = LoanDto(
+    masterUid = "masterUid1",
+    id = "loanId1",
+    employeeId = "employeeId1",
+    date = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
+    value = 500.00
 )
 
 fun sampleTravelAid(): TravelAid = TravelAid(
     masterUid = "masterUid1",
-    id = "travelAid1",
+    id = "travelAidId1",
     employeeId = "employeeId1",
     travelId = "travelId1",
     date = LocalDateTime.of(2024, 1, 1, 0, 0),
     value = BigDecimal("100.00"),
     isValid = false
+)
+
+
+fun sampleTravelAidDto(): TravelAidDto = TravelAidDto(
+    masterUid = "masterUid1",
+    id = "travelAidId1",
+    employeeId = "employeeId1",
+    travelId = "travelId1",
+    date = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
+    value = 100.00,
+    isValid = false
+)
+
+fun sampleTravel(): Travel = Travel(
+    masterUid = "masterUid1",
+    id = "travelId1",
+    truckId = "truckId1",
+    employeeId = "employeeId1",
+    initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+    finalDate = null,
+    initialOdometerMeasurement = BigDecimal("100.00"),
+    finalOdometerMeasurement = null,
+    isClosed = false,
+    isFinished = false
 )

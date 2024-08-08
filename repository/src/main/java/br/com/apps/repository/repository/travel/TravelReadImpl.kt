@@ -29,8 +29,10 @@ class TravelReadImpl(fireStore: FirebaseFirestore) : TravelReadInterface {
         val listener =
             collection.whereEqualTo(EMPLOYEE_ID, id).whereEqualTo(IS_FINISHED, true)
 
-        return@withContext if (flow) listener.onSnapShot { it.toTravelList() }
-        else listener.onComplete { it.toTravelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTravelList() }
+            false -> listener.onComplete { it.toTravelList() }
+        }
     }
 
     override suspend fun fetchTravelListByDriverId(
@@ -41,8 +43,10 @@ class TravelReadImpl(fireStore: FirebaseFirestore) : TravelReadInterface {
 
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toTravelList() }
-        else listener.onComplete { it.toTravelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTravelList() }
+            false -> listener.onComplete { it.toTravelList() }
+        }
     }
 
     override suspend fun fetchTravelById(
@@ -53,8 +57,10 @@ class TravelReadImpl(fireStore: FirebaseFirestore) : TravelReadInterface {
 
         val listener = collection.document(id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toTravelObject() }
-        else listener.onComplete { it.toTravelObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTravelObject() }
+            false -> listener.onComplete { it.toTravelObject() }
+        }
     }
 
 }

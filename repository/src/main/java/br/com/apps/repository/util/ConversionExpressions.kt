@@ -4,21 +4,22 @@ import br.com.apps.model.dto.CustomerDto
 import br.com.apps.model.dto.FleetFineDto
 import br.com.apps.model.dto.LabelDto
 import br.com.apps.model.dto.TruckDocumentDto
+import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.dto.bank.BankDto
-import br.com.apps.model.dto.employee_dto.BankAccountDto
-import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
+import br.com.apps.model.dto.employee_dto.DriverDto
+import br.com.apps.model.dto.finance.TransactionDto
 import br.com.apps.model.dto.finance.payable.PayableDto
 import br.com.apps.model.dto.finance.receivable.ReceivableDto
 import br.com.apps.model.dto.fleet.TrailerDto
 import br.com.apps.model.dto.fleet.TruckDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
-import br.com.apps.model.dto.payroll.TravelAidDto
 import br.com.apps.model.dto.request.request.RequestItemDto
 import br.com.apps.model.dto.request.request.TravelRequestDto
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.OutlayDto
 import br.com.apps.model.dto.travel.RefuelDto
+import br.com.apps.model.dto.travel.TravelAidDto
 import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.dto.user_dto.CommonUserDto
 import br.com.apps.model.exceptions.ConversionException
@@ -28,6 +29,7 @@ import br.com.apps.model.model.TruckDocument
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.model.employee.Employee
+import br.com.apps.model.model.finance.Transaction
 import br.com.apps.model.model.finance.payable.Payable
 import br.com.apps.model.model.finance.receivable.Receivable
 import br.com.apps.model.model.fleet.Trailer
@@ -279,7 +281,8 @@ fun QuerySnapshot.toEmployeeList(): List<Employee> {
 }
 
 fun DocumentSnapshot.toEmployeeObject(): Employee {
-    return this.toObject(DriverEmployeeDto::class.java)?.toModel()
+    //TODO( criar os possivels funcionarios aqui)
+    return this.toObject(DriverDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toBankAccountObject: ($this)")
 }
 
@@ -370,3 +373,13 @@ fun DocumentSnapshot.toPayableObject(): Payable {
 // -
 //------------------------------------------------------------------------------------------------//
 
+fun QuerySnapshot.toTransactionList(): List<Transaction> {
+    return this.mapNotNull { document ->
+        document.toTransactionObject()
+    }
+}
+
+fun DocumentSnapshot.toTransactionObject(): Transaction {
+    return this.toObject(TransactionDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toTransactionObject: ($this)")
+}

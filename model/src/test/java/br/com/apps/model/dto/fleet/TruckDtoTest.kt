@@ -14,13 +14,13 @@ class TruckDtoTest {
         truckDto = TruckDto(
             masterUid = "1",
             id = "2",
-            driverId = "3",
+            employeeId = "3",
             averageAim = 2.5,
             performanceAim = 45.0,
             plate = "PLATE01",
             color = "White",
             commissionPercentual = 10.0,
-            fleetType = "TRUCK"
+            type = "TRUCK"
         )
     }
 
@@ -54,7 +54,7 @@ class TruckDtoTest {
 
     @Test
     fun `should throw CorruptedFileException when fleetType is null`() {
-        truckDto.fleetType = null
+        truckDto.type = null
         Assert.assertThrows(CorruptedFileException::class.java) {
             truckDto.validateDataIntegrity()
         }
@@ -62,7 +62,7 @@ class TruckDtoTest {
 
     @Test
     fun `should throw CorruptedFileException when driverId is null`() {
-        truckDto.driverId = null
+        truckDto.employeeId = null
         Assert.assertThrows(CorruptedFileException::class.java) {
             truckDto.validateDataIntegrity()
         }

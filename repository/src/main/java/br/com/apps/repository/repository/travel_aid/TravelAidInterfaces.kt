@@ -41,4 +41,7 @@ interface TravelAidReadInterface {
     suspend fun fetchTravelAidListByDriverId(id: String, flow: Boolean = false)
             : LiveData<Response<List<TravelAid>>>
 
+    suspend fun fetchTravelAidByIds(ids: List<String>, flow: Boolean = false)
+            : LiveData<Response<List<TravelAid>>>
+
 }

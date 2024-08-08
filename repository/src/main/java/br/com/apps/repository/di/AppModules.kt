@@ -6,6 +6,9 @@ import br.com.apps.repository.repository.advance.AdvanceReadImpl
 import br.com.apps.repository.repository.advance.AdvanceRepository
 import br.com.apps.repository.repository.auth.AuthenticationRepository
 import br.com.apps.repository.repository.bank.BankRepository
+import br.com.apps.repository.repository.bank_account.BankAccountReadImpl
+import br.com.apps.repository.repository.bank_account.BankAccountRepository
+import br.com.apps.repository.repository.bank_account.BankAccountWriteImpl
 import br.com.apps.repository.repository.customer.CustomerReadImpl
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.document.DocumentReadImpl
@@ -14,9 +17,6 @@ import br.com.apps.repository.repository.document.DocumentWriteImpl
 import br.com.apps.repository.repository.employee.EmployeeReadImpl
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.repository.employee.EmployeeWriteImpl
-import br.com.apps.repository.repository.outlay.OutlayReadImpl
-import br.com.apps.repository.repository.outlay.OutlayRepository
-import br.com.apps.repository.repository.outlay.OutlayWriteImpl
 import br.com.apps.repository.repository.fine.FineReadImpl
 import br.com.apps.repository.repository.fine.FineRepository
 import br.com.apps.repository.repository.fine.FineWriteImpl
@@ -33,6 +33,9 @@ import br.com.apps.repository.repository.label.LabelWriteImpl
 import br.com.apps.repository.repository.loan.LoanReadImpl
 import br.com.apps.repository.repository.loan.LoanRepository
 import br.com.apps.repository.repository.loan.LoanWriteImpl
+import br.com.apps.repository.repository.outlay.OutlayReadImpl
+import br.com.apps.repository.repository.outlay.OutlayRepository
+import br.com.apps.repository.repository.outlay.OutlayWriteImpl
 import br.com.apps.repository.repository.payable.EmployeePayableReadImpl
 import br.com.apps.repository.repository.payable.EmployeePayableRepository
 import br.com.apps.repository.repository.receivable.EmployeeReceivableReadImpl
@@ -43,6 +46,8 @@ import br.com.apps.repository.repository.refuel.RefuelWriteImpl
 import br.com.apps.repository.repository.request.RequestReadImpl
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.repository.request.RequestWriteImpl
+import br.com.apps.repository.repository.transaction.TransactionReadImpl
+import br.com.apps.repository.repository.transaction.TransactionRepository
 import br.com.apps.repository.repository.travel.TravelReadImpl
 import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.repository.travel.TravelWriteImpl
@@ -79,6 +84,8 @@ val repositoryModules = module {
     single<TravelAidRepository> { TravelAidRepository(get()) }
     single<EmployeeReceivableRepository> { EmployeeReceivableRepository(get()) }
     single<EmployeePayableRepository> { EmployeePayableRepository(get()) }
+    single<BankAccountRepository> { BankAccountRepository(get(), get()) }
+    single<TransactionRepository> { TransactionRepository(get()) }
 }
 
 val writeModules = module {
@@ -93,6 +100,7 @@ val writeModules = module {
     single<TravelWriteImpl> { TravelWriteImpl(get()) }
     single<LabelWriteImpl> { LabelWriteImpl(get()) }
     single<EmployeeWriteImpl> { EmployeeWriteImpl(get()) }
+    single<BankAccountWriteImpl> { BankAccountWriteImpl(get()) }
 }
 
 val readModules = module {
@@ -113,6 +121,8 @@ val readModules = module {
     single<TravelAidReadImpl> { TravelAidReadImpl(get()) }
     single<EmployeeReceivableReadImpl> { EmployeeReceivableReadImpl(get()) }
     single<EmployeePayableReadImpl> { EmployeePayableReadImpl(get()) }
+    single<BankAccountReadImpl> { BankAccountReadImpl(get()) }
+    single<TransactionReadImpl> { TransactionReadImpl(get()) }
 }
 
 val fireBaseModules = module {

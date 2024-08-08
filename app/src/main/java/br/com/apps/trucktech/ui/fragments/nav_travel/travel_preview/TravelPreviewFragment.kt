@@ -339,8 +339,8 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
 
             //EXPENDS
             boxExpend.apply {
-                amountField.text = t.getListSize(Travel.EXPEND).toString()
-                valueField.text = t.getListTotalValue(Travel.EXPEND).toCurrencyPtBr()
+                amountField.text = t.getListSize(Travel.OUTLAY).toString()
+                valueField.text = t.getListTotalValue(Travel.OUTLAY).toCurrencyPtBr()
             }
 
         }

@@ -64,7 +64,7 @@ data class ReceivableFData(
 
     private fun calculateExpendValue(): BigDecimal {
         return travels
-            .mapNotNull { it.expends }
+            .mapNotNull { it.outlays }
             .flatten()
             .filter { it.isPaidByEmployee && !it.isAlreadyRefunded }
             .sumOf { it.value }

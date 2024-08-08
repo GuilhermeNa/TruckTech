@@ -28,8 +28,10 @@ class DocumentReadImpl(fireStore: FirebaseFirestore) : DocumentReadInterface {
 
         val listener = collection.document(id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toDocumentObject() }
-        else listener.onComplete { it.toDocumentObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toDocumentObject() }
+            false -> listener.onComplete { it.toDocumentObject() }
+        }
     }
 
     override suspend fun fetchDocumentListByFleetId(
@@ -40,8 +42,10 @@ class DocumentReadImpl(fireStore: FirebaseFirestore) : DocumentReadInterface {
 
         val listener = collection.whereEqualTo(FLEET_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toDocumentList() }
-        else listener.onComplete { it.toDocumentList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toDocumentList() }
+            false -> listener.onComplete { it.toDocumentList() }
+        }
     }
 
     override suspend fun fetchDocumentListByFleetIdList(
@@ -52,8 +56,10 @@ class DocumentReadImpl(fireStore: FirebaseFirestore) : DocumentReadInterface {
 
         val listener = collection.whereIn(FLEET_ID, ids)
 
-        return@withContext if (flow) listener.onSnapShot { it.toDocumentList() }
-        else listener.onComplete { it.toDocumentList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toDocumentList() }
+            false -> listener.onComplete { it.toDocumentList() }
+        }
     }
 
 }

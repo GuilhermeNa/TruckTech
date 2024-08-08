@@ -38,9 +38,9 @@ import java.time.LocalDateTime
  * @property loadingDate Date and time when the cargo was loaded for transport.
  * @property commissionPercentual Percentage of commission to be paid to the driver based on the [value].
  * @property isValid Indicates whether the freight record is valid (true) or not (false). This property
- * must only be set by a Admin user.
+ * must only be set by a Assistant user.
  * @property isCommissionPaid Indicates whether the commission for this freight has been paid (true) or not (false).
- * @property customer Optional [Customer] object containing additional details about the customer associated with this freight.
+ * @property _customer Optional [Customer] object containing additional details about the customer associated with this freight.
  */
 data class Freight(
     val masterUid: String,
@@ -48,17 +48,20 @@ data class Freight(
     val truckId: String,
     val travelId: String,
     val employeeId: String,
-    var customerId: String,
-    var cargo: String,
-    var origin: String,
-    var destiny: String,
-    var value: BigDecimal,
-    var weight: BigDecimal,
-    var loadingDate: LocalDateTime,
-    var commissionPercentual: BigDecimal,
-    var customer: Customer? = null,
-    @field:JvmField var isValid: Boolean
+    val customerId: String,
+    val cargo: String,
+    val origin: String,
+    val destiny: String,
+    val value: BigDecimal,
+    val weight: BigDecimal,
+    val loadingDate: LocalDateTime,
+    val commissionPercentual: BigDecimal,
+    val isValid: Boolean,
+    private var _customer: Customer? = null
 ) : ModelObjectInterface<FreightDto> {
+
+    val customer: Customer?
+        get() = _customer
 
     companion object {
 
@@ -90,7 +93,7 @@ data class Freight(
     }
 
     /**
-     * Sets the [customer] property of this document based on the provided list of [Customer]'s.
+     * Sets the [_customer] property of this document based on the provided list of [Customer]'s.
      * @param customers A list of customers objects to search for the customer with the matching ID.
      * @throws NullCustomerException If no customer in the list has an ID that matches the [customerId]
      * of this document.
@@ -98,8 +101,12 @@ data class Freight(
     fun setCustomerById(customers: List<Customer>) {
         if (customers.isEmpty()) throw EmptyDataException("Customer list cannot be empty")
 
-        customer = customers.firstOrNull { it.id == customerId }
+        _customer = customers.firstOrNull { it.id == customerId }
             ?: throw NullCustomerException("Customer not found")
+    }
+
+    fun setCustomer(customer: Customer) {
+        _customer = customer
     }
 
     /**
@@ -107,7 +114,7 @@ data class Freight(
      */
     fun getCustomerName(): String {
         return try {
-            customer!!.name
+            _customer!!.name
         } catch (e: Exception) {
             e.printStackTrace()
             ERROR_STRING
@@ -119,7 +126,7 @@ data class Freight(
      */
     fun getCustomerCnpj(): String {
         return try {
-            customer!!.cnpj
+            _customer!!.cnpj
         } catch (e: Exception) {
             e.printStackTrace()
             ERROR_STRING

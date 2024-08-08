@@ -1,106 +1,129 @@
 package br.com.apps.repository.repository.employee
 
-import br.com.apps.model.dto.employee_dto.AdminEmployeeDto
-import br.com.apps.model.dto.employee_dto.BankAccountDto
-import br.com.apps.model.dto.employee_dto.DriverEmployeeDto
 import br.com.apps.model.dto.employee_dto.EmployeeDto
-import br.com.apps.model.enums.WorkRole
-import br.com.apps.repository.util.FIRESTORE_COLLECTION_ADMIN
-import br.com.apps.repository.util.FIRESTORE_COLLECTION_BANK
-import br.com.apps.repository.util.FIRESTORE_COLLECTION_DRIVER
-import br.com.apps.repository.util.MAIN_ACCOUNT
-import com.google.firebase.firestore.CollectionReference
+import br.com.apps.model.exceptions.EmptyIdException
+import br.com.apps.repository.util.EMPTY_ID
+import br.com.apps.repository.util.FIRESTORE_COLLECTION_EMPLOYEE
+import br.com.apps.repository.util.validateId
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
-import java.security.InvalidParameterException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class EmployeeWriteImpl(fireStore: FirebaseFirestore) : EmployeeWriteInterface {
 
-    private val collectionDriver = fireStore.collection(FIRESTORE_COLLECTION_DRIVER)
-    private val collectionAdmin = fireStore.collection(FIRESTORE_COLLECTION_ADMIN)
+    private val collection = fireStore.collection(FIRESTORE_COLLECTION_EMPLOYEE)
 
-    override suspend fun save(dto: EmployeeDto): String {
-        val collection = when (dto) {
-            is DriverEmployeeDto -> getCollectionReference(WorkRole.TRUCK_DRIVER)
-            is AdminEmployeeDto -> getCollectionReference(WorkRole.ADMIN)
-            else -> throw InvalidParameterException()
+    override suspend fun save(dto: EmployeeDto): String = withContext(Dispatchers.IO) {
+        return@withContext when (dto.id) {
+            null -> create(dto)
+            else -> update(dto)
         }
-
-        return if (dto.id == null) create(dto, collection)
-        else update(dto, collection)
     }
 
-    private suspend fun create(dto: EmployeeDto, collection: CollectionReference): String {
+    private fun create(dto: EmployeeDto): String {
         val doc = collection.document()
         dto.id = doc.id
-        doc.set(dto).await()
+        doc.set(dto)
         return doc.id
     }
 
-    private suspend fun update(dto: EmployeeDto, collection: CollectionReference): String {
+    private fun update(dto: EmployeeDto): String {
+        dto.id!!.validateId()?.let { throw EmptyIdException(EMPTY_ID) }
         val doc = collection.document(dto.id!!)
-        doc.set(dto).await()
+        doc.set(dto)
         return dto.id!!
     }
 
-    override suspend fun delete(id: String, type: WorkRole) {
-        val collection = getCollectionReference(type)
-        collection.document(id).delete().await()
+    override suspend fun delete(id: String) {
+        withContext(Dispatchers.IO) {
+            id.validateId()?.let { throw EmptyIdException(EMPTY_ID) }
+            collection.document(id).delete()
+        }
     }
 
-    override suspend fun deleteBankAcc(employeeId: String, bankId: String, type: WorkRole) {
-        val collection = getCollectionReference(type)
-        collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK).document(bankId).delete()
-    }
+    /*
+        override suspend fun save(dto: EmployeeDto): String {
+            val collection = when (dto) {
+                is DriverDto -> getCollectionReference(WorkRole.DRIVER)
+                is AssistantDto -> getCollectionReference(WorkRole.ASSISTANT)
+                else -> throw InvalidParameterException()
+            }
 
-    override suspend fun saveBankAccount(bankAccDto: BankAccountDto, type: WorkRole) {
-        val collection = getCollectionReference(type)
-
-        if (bankAccDto.id == null) {
-            createBankAcc(bankAccDto, collection)
-        } else {
-            updateBankAcc(bankAccDto, collection)
+            return if (dto.id == null) create(dto, collection)
+            else update(dto, collection)
         }
 
-    }
+        private suspend fun create(dto: EmployeeDto, collection: CollectionReference): String {
+            val doc = collection.document()
+            dto.id = doc.id
+            doc.set(dto).await()
+            return doc.id
+        }
 
-    private fun createBankAcc(dto: BankAccountDto, collection: CollectionReference) {
-        val document = collection.document(dto.employeeId!!)
-            .collection(FIRESTORE_COLLECTION_BANK).document()
-        dto.id = document.id
-        document.set(dto)
-    }
+        private suspend fun update(dto: EmployeeDto, collection: CollectionReference): String {
+            val doc = collection.document(dto.id!!)
+            doc.set(dto).await()
+            return dto.id!!
+        }
 
-    private fun updateBankAcc(dto: BankAccountDto, collection: CollectionReference) {
-        val document = collection.document(dto.employeeId!!)
-                .collection(FIRESTORE_COLLECTION_BANK).document(dto.id!!)
-        document.set(dto)
-    }
+        override suspend fun delete(id: String, type: WorkRole) {
+            val collection = getCollectionReference(type)
+            collection.document(id).delete().await()
+        }
 
-    override suspend fun updateMainAccount(
-        employeeId: String,
-        oldMainAccId: String?,
-        newMainAccId: String,
-        type: WorkRole
-    ) {
-        val collection = getCollectionReference(type)
+        override suspend fun deleteBankAcc(employeeId: String, bankId: String, type: WorkRole) {
+            val collection = getCollectionReference(type)
+            collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK).document(bankId).delete()
+        }
 
-        oldMainAccId?.let {
+        override suspend fun saveBankAccount(bankAccDto: BankAccountDto, type: WorkRole) {
+            val collection = getCollectionReference(type)
+
+            if (bankAccDto.id == null) {
+                createBankAcc(bankAccDto, collection)
+            } else {
+                updateBankAcc(bankAccDto, collection)
+            }
+
+        }
+
+        private fun createBankAcc(dto: BankAccountDto, collection: CollectionReference) {
+            val document = collection.document(dto.employeeId!!)
+                .collection(FIRESTORE_COLLECTION_BANK).document()
+            dto.id = document.id
+            document.set(dto)
+        }
+
+        private fun updateBankAcc(dto: BankAccountDto, collection: CollectionReference) {
+            val document = collection.document(dto.employeeId!!)
+                    .collection(FIRESTORE_COLLECTION_BANK).document(dto.id!!)
+            document.set(dto)
+        }
+
+        override suspend fun updateMainAccount(
+            employeeId: String,
+            oldMainAccId: String?,
+            newMainAccId: String,
+            type: WorkRole
+        ) {
+            val collection = getCollectionReference(type)
+
+            oldMainAccId?.let {
+                collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK)
+                    .document(it).update(MAIN_ACCOUNT, false)
+            }
+
             collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK)
-                .document(it).update(MAIN_ACCOUNT, false)
+                .document(newMainAccId).update(MAIN_ACCOUNT, true)
+
         }
 
-        collection.document(employeeId).collection(FIRESTORE_COLLECTION_BANK)
-            .document(newMainAccId).update(MAIN_ACCOUNT, true)
-
-    }
-
-    private fun getCollectionReference(type: WorkRole): CollectionReference {
-        val collection = when (type) {
-            WorkRole.TRUCK_DRIVER -> collectionDriver
-            WorkRole.ADMIN -> collectionAdmin
-        }
-        return collection
-    }
+        private fun getCollectionReference(type: WorkRole): CollectionReference {
+            val collection = when (type) {
+                WorkRole.DRIVER -> collectionDriver
+                WorkRole.ASSISTANT -> collectionAdmin
+            }
+            return collection
+        }*/
 
 }

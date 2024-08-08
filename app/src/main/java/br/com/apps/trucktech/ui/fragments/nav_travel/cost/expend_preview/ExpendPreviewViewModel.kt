@@ -12,13 +12,13 @@ import br.com.apps.repository.repository.outlay.OutlayRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.repository.util.WriteRequest
-import br.com.apps.usecase.usecase.ExpendUseCase
+import br.com.apps.usecase.usecase.OutlayUseCase
 import kotlinx.coroutines.launch
 
 class  ExpendPreviewViewModel(
     private val vmData: ExpendPreviewVmData,
     private val repository: OutlayRepository,
-    private val useCase: ExpendUseCase
+    private val useCase: OutlayUseCase
 ) : ViewModel() {
 
     /**

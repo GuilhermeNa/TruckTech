@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.model.travel.TravelAid
 import br.com.apps.repository.util.EMPLOYEE_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_COST_HELP
+import br.com.apps.repository.util.ID
 import br.com.apps.repository.util.IS_PAID
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TRAVEL_ID
@@ -30,8 +31,10 @@ class TravelAidReadImpl(fireStore: FirebaseFirestore) : TravelAidReadInterface {
         val listener = collection.whereEqualTo(TRAVEL_ID, id)
             .whereEqualTo(IS_PAID, false)
 
-        return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
-        else listener.onComplete { it.toTravelAidList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTravelAidList() }
+            false -> listener.onComplete { it.toTravelAidList() }
+        }
     }
 
     override suspend fun fetchTravelAidListByTravelIds(
@@ -42,8 +45,10 @@ class TravelAidReadImpl(fireStore: FirebaseFirestore) : TravelAidReadInterface {
 
         val listener = collection.whereIn(TRAVEL_ID, ids)
 
-        return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
-        else listener.onComplete { it.toTravelAidList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTravelAidList() }
+            false -> listener.onComplete { it.toTravelAidList() }
+        }
     }
 
     override suspend fun fetchTravelAidListByDriverId(
@@ -54,8 +59,24 @@ class TravelAidReadImpl(fireStore: FirebaseFirestore) : TravelAidReadInterface {
 
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toTravelAidList() }
-        else listener.onComplete { it.toTravelAidList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTravelAidList() }
+            false -> listener.onComplete { it.toTravelAidList() }
+        }
+    }
+
+    override suspend fun fetchTravelAidByIds(
+        ids: List<String>,
+        flow: Boolean
+    ): LiveData<Response<List<TravelAid>>> = withContext(Dispatchers.IO){
+        ids.validateIds()?.let { error -> MutableLiveData(error) }
+
+        val listener = collection.whereIn(ID, ids)
+
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toTravelAidList() }
+            false -> listener.onComplete { it.toTravelAidList() }
+        }
     }
 
 }

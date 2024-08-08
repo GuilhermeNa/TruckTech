@@ -11,4 +11,7 @@ class TravelAidRepository(private val read: TravelAidReadImpl) : TravelAidInterf
     override suspend fun fetchTravelAidListByDriverId(id: String, flow: Boolean) =
         read.fetchTravelAidListByDriverId(id, flow)
 
+    override suspend fun fetchTravelAidByIds(ids: List<String>, flow: Boolean) =
+        read.fetchTravelAidByIds(ids, flow)
+
 }

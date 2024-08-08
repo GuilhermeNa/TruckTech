@@ -33,8 +33,10 @@ class RequestReadImpl(private val fireStore: FirebaseFirestore) : RequestReadInt
 
         val listener = collection.whereEqualTo(DRIVER_ID, driverId)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRequestList() }
-        else listener.onComplete { it.toRequestList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRequestList() }
+            false -> listener.onComplete { it.toRequestList() }
+        }
     }
 
     override suspend fun fetchItemListByRequests(
@@ -47,8 +49,10 @@ class RequestReadImpl(private val fireStore: FirebaseFirestore) : RequestReadInt
         val listener = fireStore.collectionGroup(FIRESTORE_COLLECTION_ITEMS)
             .whereIn(REQUEST_ID, idList)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRequestItemList() }
-        else listener.onComplete { it.toRequestItemList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRequestItemList() }
+            false -> listener.onComplete { it.toRequestItemList() }
+        }
     }
 
     override suspend fun fetchRequestById(
@@ -60,8 +64,10 @@ class RequestReadImpl(private val fireStore: FirebaseFirestore) : RequestReadInt
 
         val listener = collection.document(requestId)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRequestObject() }
-        else listener.onComplete { it.toRequestObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRequestObject() }
+            false -> listener.onComplete { it.toRequestObject() }
+        }
     }
 
 
@@ -74,8 +80,10 @@ class RequestReadImpl(private val fireStore: FirebaseFirestore) : RequestReadInt
 
         val listener = collection.document(requestId).collection(FIRESTORE_COLLECTION_ITEMS)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRequestItemList() }
-        else listener.onComplete { it.toRequestItemList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRequestItemList() }
+            false -> listener.onComplete { it.toRequestItemList() }
+        }
     }
 
     override suspend fun fetchItemById(
@@ -89,8 +97,10 @@ class RequestReadImpl(private val fireStore: FirebaseFirestore) : RequestReadInt
         val listener = collection.document(requestId)
             .collection(FIRESTORE_COLLECTION_ITEMS).document(itemId)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRequestItemObject() }
-        else listener.onComplete { it.toRequestItemObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRequestItemObject() }
+            false -> listener.onComplete { it.toRequestItemObject() }
+        }
     }
 
 }

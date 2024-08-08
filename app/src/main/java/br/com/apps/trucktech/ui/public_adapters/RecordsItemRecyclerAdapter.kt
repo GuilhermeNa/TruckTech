@@ -85,7 +85,7 @@ class RecordsItemRecyclerAdapter<T>(
         holder.apply {
             month.text = freight.loadingDate?.getMonthInPtBrAbbreviated()
             day.text = freight.loadingDate?.getDayFormatted()
-            title.text = freight.customer?.name
+            title.text = freight._customer?.name
             description.text = "Voce carregou para ${freight.destiny}"
             value.text = freight.value?.toCurrencyPtBr()
             isValidImg.visibility = if(freight.isValid) VISIBLE else GONE

@@ -26,7 +26,6 @@ data class EmployeeReceivable(
     override val value: BigDecimal,
     override val generationDate: LocalDateTime,
     override val installments: Int,
-    override val transactions: MutableList<Transaction> = mutableListOf(),
 
     val employeeId: String,
     val type: EmployeeReceivableTicket,
@@ -34,9 +33,29 @@ data class EmployeeReceivable(
 
 ) : Receivable(
     masterUid = masterUid, id = id, parentId = parentId, value = value,
-    generationDate = generationDate, transactions = transactions,
-    _isReceived = _isReceived, installments = installments
+    generationDate = generationDate, _isReceived = _isReceived, installments = installments
 ) {
+
+    companion object {
+
+        /**
+         * Extension function for list of [EmployeeReceivable]'s to merge with a list of [Transaction]'s.
+         *
+         * Each receivable in the list will have its transactions updated with
+         * the corresponding from the transactions list.
+         *
+         * @param transactions A list of transaction objects.
+         *
+         * @return A list of receivables with valid transactions.
+         */
+        fun List<EmployeeReceivable>.merge(transactions: List<Transaction>) {
+            this.forEach { receivable ->
+                val items = transactions.filter { it.parentId == receivable.id }
+                receivable.addAllTransactions(items)
+            }
+        }
+
+    }
 
     override fun toDto() = EmployeeReceivableDto(
         masterUid = masterUid,

@@ -25,6 +25,74 @@ class FinancialRecordTest {
     }
 
     //----------------------------------------------------------------------------------------------
+    // addAllTransactions()
+    //----------------------------------------------------------------------------------------------
+
+    @Test
+    fun `should add all transactions when the _data is empty`() {
+        val list = listOf(
+            transaction,
+            transaction.copy(id = "transactionId2")
+        )
+        payment.addAllTransactions(list)
+
+        val expected = 2
+        val actual = payment.transactionsSize()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should filter list with repeated ids`() {
+        val list = listOf(
+            transaction,
+            transaction.copy(number = 2)
+        )
+        payment.addAllTransactions(list)
+
+        val expected = 1
+        val actual = payment.transactionsSize()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should replace the item when trying to add a item that already exists`() {
+        payment.addTransaction(sampleTransaction())
+        val list = listOf(
+            transaction.copy(number = 2, id = "transactionId2"),
+            transaction.copy(number = 3, id = "transactionId1")
+        )
+
+        payment.addAllTransactions(list)
+
+        val expected = 2
+        val actual = payment.transactionsSize()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should add items when the list is not empty`() {
+        payment.addTransaction(sampleTransaction())
+        val list = listOf(
+            transaction.copy(number = 2, id = "transactionId2"),
+            transaction.copy(number = 3, id = "transactionId1")
+        )
+
+        payment.addAllTransactions(list)
+
+        val expected = 2
+        val actual = payment.transactionsSize()
+        assertEquals(expected, actual)
+
+        val expectedB = 3
+        val actualB = payment.geTransactions().first { it.id == "transactionId1" }.number
+        assertEquals(expectedB, actualB)
+
+    }
+
+    //----------------------------------------------------------------------------------------------
     // addTransaction()
     //----------------------------------------------------------------------------------------------
 

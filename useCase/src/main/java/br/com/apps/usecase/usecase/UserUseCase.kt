@@ -33,8 +33,8 @@ class UserUseCase(private val repository: UserRepository) {
      */
     fun getById(uid: String, type: WorkRole): LiveData<User> {
         return when(type) {
-            WorkRole.ADMIN,
-            WorkRole.TRUCK_DRIVER -> repository.getCommonUser(uid)
+            WorkRole.ASSISTANT,
+            WorkRole.DRIVER -> repository.getCommonUser(uid)
             else -> throw IllegalArgumentException("Not type for Employee")
         }
     }

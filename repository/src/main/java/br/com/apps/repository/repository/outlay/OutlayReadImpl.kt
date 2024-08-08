@@ -32,8 +32,10 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
 
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toExpendList() }
+            false -> listener.onComplete { it.toExpendList() }
+        }
     }
 
     override suspend fun fetchOutlayListByDriverIdsAndRefundableStatus(
@@ -48,8 +50,10 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
             .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
             .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
-        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toExpendList() }
+            false -> listener.onComplete { it.toExpendList() }
+        }
     }
 
     override suspend fun fetchOutlayListByDriverIdAndRefundableStatus(
@@ -64,8 +68,10 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
             .whereEqualTo(PAID_BY_EMPLOYEE, paidByEmployee)
             .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
-        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toExpendList() }
+            false -> listener.onComplete { it.toExpendList() }
+        }
     }
 
     override suspend fun fetchOutlayListByTravelId(
@@ -76,8 +82,10 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
 
         val listener = collection.whereEqualTo(TRAVEL_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toExpendList() }
+            false -> listener.onComplete { it.toExpendList() }
+        }
     }
 
     override suspend fun fetchOutlayListByTravelIds(
@@ -88,8 +96,10 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
 
         val listener = collection.whereIn(TRAVEL_ID, ids)
 
-        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toExpendList() }
+            false -> listener.onComplete { it.toExpendList() }
+        }
     }
 
     override suspend fun fetchOutlayById(
@@ -100,8 +110,10 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
 
         val listener = collection.document(id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toExpendObject() }
-        else listener.onComplete { it.toExpendObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toExpendObject() }
+            false -> listener.onComplete { it.toExpendObject() }
+        }
     }
 
     override suspend fun fetchOutlayListByDriverIdAndIsNotRefundYet(
@@ -115,8 +127,10 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
             .whereEqualTo(PAID_BY_EMPLOYEE, true)
             .whereEqualTo(ALREADY_REFUNDED, false)
 
-        return@withContext if (flow) listener.onSnapShot { it.toExpendList() }
-        else listener.onComplete { it.toExpendList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toExpendList() }
+            false -> listener.onComplete { it.toExpendList() }
+        }
     }
 
 }

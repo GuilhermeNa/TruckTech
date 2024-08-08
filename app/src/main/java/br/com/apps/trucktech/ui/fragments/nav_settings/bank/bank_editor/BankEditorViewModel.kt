@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.enums.WorkRole
 import br.com.apps.model.enums.PixType.Companion.getPixTypeDescriptions
 import br.com.apps.model.exceptions.null_objects.NullBankAccountException
@@ -67,7 +67,7 @@ class BankEditorViewModel(
         val response = employeeRepository.getBankAccountById(
             vmData.employeeId,
             bankAccId,
-            WorkRole.TRUCK_DRIVER
+            WorkRole.DRIVER
         ).asFlow().first()
         return when (response) {
             is Response.Error -> throw response.exception
@@ -103,7 +103,7 @@ class BankEditorViewModel(
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
                 val writeReq = WriteRequest(data = generateDto(viewDto))
-                employeeUseCase.saveBankAccount(writeReq, WorkRole.TRUCK_DRIVER)
+                employeeUseCase.saveBankAccount(writeReq, WorkRole.DRIVER)
                 emit(Response.Success())
 
             } catch (e: Exception) {

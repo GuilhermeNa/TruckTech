@@ -253,7 +253,7 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
 
     private fun bind(freight: Freight) {
         binding.apply {
-            fragFreightEditorCustomerAc.setText(freight.customer?.name)
+            fragFreightEditorCustomerAc.setText(freight._customer?.name)
             fragFreightEditorOrigin.setText(freight.origin)
             fragFreightEditorDestiny.setText(freight.destiny)
             fragFreightEditorCargo.setText(freight.cargo)

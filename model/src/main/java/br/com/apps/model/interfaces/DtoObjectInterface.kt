@@ -32,6 +32,4 @@ interface DtoObjectInterface<T> {
      */
     fun toModel(): T
 
-
-
 }

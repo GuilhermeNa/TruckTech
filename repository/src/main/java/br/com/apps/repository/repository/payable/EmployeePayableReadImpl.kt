@@ -31,8 +31,10 @@ class EmployeePayableReadImpl(fireStore: FirebaseFirestore): EmployeePayableRead
 
         val listener = collection.whereEqualTo(PARENT_ID, id).whereEqualTo(TYPE, type.name)
 
-        return@withContext if(flow) listener.onSnapShot { it.toPayableList() }
-        else listener.onComplete { it.toPayableList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toPayableList() }
+            false -> listener.onComplete { it.toPayableList() }
+        }
     }
 
     override suspend fun fetchPayablesByEmployeeIdAndStatus(
@@ -44,8 +46,10 @@ class EmployeePayableReadImpl(fireStore: FirebaseFirestore): EmployeePayableRead
 
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id).whereEqualTo(IS_PAID, isPaid)
 
-        return@withContext if(flow) listener.onSnapShot { it.toPayableList() }
-        else listener.onComplete { it.toPayableList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toPayableList() }
+            false -> listener.onComplete { it.toPayableList() }
+        }
     }
 
 

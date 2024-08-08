@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.enums.PixType
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount

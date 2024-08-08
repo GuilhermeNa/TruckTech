@@ -19,7 +19,7 @@ class AdvanceReadImplTest {
     fun `should return an advance list when search for employee id and payment status`() = runTest {
         coEvery {
             repository.fetchAdvanceListByEmployeeIdAndPaymentStatus(
-                employeeId = "1",
+                id = "1",
                 isPaid = true,
                 flow = false
             )
@@ -34,7 +34,7 @@ class AdvanceReadImplTest {
     fun `should return an advance list when search for employee id list and payment status`() = runTest {
         coEvery {
             repository.fetchAdvanceListByEmployeeIdsAndPaymentStatus(
-                employeeIdList = listOf("1", "2"),
+                ids = listOf("1", "2"),
                 isPaid = true,
                 flow = false
             )

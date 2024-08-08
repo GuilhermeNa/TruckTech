@@ -2,7 +2,7 @@ package br.com.apps.model.dto.fleet
 
 import br.com.apps.model.enums.FleetCategory
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.interfaces.DtoObjectInterface
+import br.com.apps.model.exceptions.InvalidForSavingException
 import br.com.apps.model.model.fleet.Trailer
 
 /**
@@ -14,24 +14,28 @@ import br.com.apps.model.model.fleet.Trailer
  * the database.
  */
 data class TrailerDto(
-    var masterUid: String? = null,
-    var id: String? = null,
-    var plate: String? = null,
-    var fleetType: String? = null,
-    var truckId: String? = null,
-) : DtoObjectInterface<Trailer> {
+    override var masterUid: String? = null,
+    override var id: String? = null,
+    override var plate: String? = null,
+    override var type: String? = null,
+
+    var truckId: String? = null
+
+): FleetDto(masterUid = masterUid, id = id, plate = plate, type = type){
 
     override fun validateDataIntegrity() {
         if (id == null ||
             plate == null ||
-            truckId == null ||
-            fleetType == null ||
+            type == null ||
             masterUid == null
         ) throw CorruptedFileException("TrailerDto data is corrupted: ($this)")
     }
 
     override fun validateDataForDbInsertion() {
-
+        if (plate == null ||
+            type == null ||
+            masterUid == null
+        ) throw InvalidForSavingException("TrailerDto data is invalid: ($this)")
     }
 
     override fun toModel(): Trailer {
@@ -40,7 +44,7 @@ data class TrailerDto(
             masterUid = masterUid!!,
             id = id!!,
             plate = plate!!,
-            fleetType = FleetCategory.valueOf(fleetType!!),
+            type = FleetCategory.valueOf(type!!),
             truckId = truckId
         )
     }

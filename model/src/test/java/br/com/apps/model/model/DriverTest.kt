@@ -15,7 +15,7 @@ class DriverTest {
             id = "2",
             truckId = "3",
             name = " João",
-            type = WorkRole.TRUCK_DRIVER
+            type = WorkRole.DRIVER
         )
     }
 

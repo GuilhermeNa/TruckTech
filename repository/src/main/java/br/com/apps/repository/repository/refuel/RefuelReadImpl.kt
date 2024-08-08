@@ -31,8 +31,10 @@ class RefuelReadImpl(fireStore: FirebaseFirestore) : RefuelReadInterface {
 
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
-        else listener.onComplete { it.toRefuelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRefuelList() }
+            false -> listener.onComplete { it.toRefuelList() }
+        }
     }
 
     override suspend fun fetchRefuelListByTravelId(
@@ -44,8 +46,10 @@ class RefuelReadImpl(fireStore: FirebaseFirestore) : RefuelReadInterface {
         val listener = collection.whereEqualTo(TRAVEL_ID, id)
             .orderBy(ODOMETER_MEASURE, Query.Direction.ASCENDING)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
-        else listener.onComplete { it.toRefuelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRefuelList() }
+            false -> listener.onComplete { it.toRefuelList() }
+        }
     }
 
     override suspend fun fetchRefuelListByTravelIds(
@@ -56,8 +60,10 @@ class RefuelReadImpl(fireStore: FirebaseFirestore) : RefuelReadInterface {
 
         val listener = collection.whereIn(TRAVEL_ID, ids)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRefuelList() }
-        else listener.onComplete { it.toRefuelList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRefuelList() }
+            false -> listener.onComplete { it.toRefuelList() }
+        }
     }
 
     override suspend fun fetchRefuelById(
@@ -68,8 +74,10 @@ class RefuelReadImpl(fireStore: FirebaseFirestore) : RefuelReadInterface {
 
         val listener = collection.document(id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toRefuelObject() }
-        else listener.onComplete { it.toRefuelObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toRefuelObject() }
+            false -> listener.onComplete { it.toRefuelObject() }
+        }
     }
 
 }

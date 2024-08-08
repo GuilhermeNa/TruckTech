@@ -1,7 +1,7 @@
 package br.com.apps.trucktech.screens.bank
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.repository.employee.EmployeeReadImpl
 import br.com.apps.repository.repository.employee.EmployeeRepository

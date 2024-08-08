@@ -36,39 +36,27 @@ import java.time.LocalDateTime
  * @property value Monetary value of the expenditure.
  * @property isPaidByEmployee Indicates whether the expenditure was paid by the employee (true) or not (false).
  * @property isValid Indicates whether the expenditure record is valid (true) or not (false). This property
- * must only be set by an Admin user.
+ * must only be set by an Assistant user.
  * @property label Optional object containing additional details related to the expenditure.
  */
 data class Outlay(
     val masterUid: String,
-    var id: String,
+    val id: String,
     val truckId: String,
     val employeeId: String,
     val travelId: String,
-    var labelId: String,
-    var company: String,
-    var date: LocalDateTime,
-    var description: String,
-    var value: BigDecimal,
-    var label: Label? = null,
-    @field:JvmField var isPaidByEmployee: Boolean,
-    @field:JvmField var isValid: Boolean,
+    val labelId: String,
+    val company: String,
+    val date: LocalDateTime,
+    val description: String,
+    val value: BigDecimal,
+    val isPaidByEmployee: Boolean,
+    val isValid: Boolean,
+    private var _label: Label? = null,
 ) : LabelInterface, ModelObjectInterface<OutlayDto> {
 
-    override fun setLabelById(labels: List<Label>) {
-        if (labels.isEmpty()) throw EmptyDataException("Label list cannot be empty")
-
-        label = labels.firstOrNull { it.id == labelId }
-            ?: throw NullLabelException("Label not found")
-    }
-
-    override fun getLabelName(): String {
-        return try {
-            label!!.name
-        } catch (e: Exception) {
-            ERROR_STRING
-        }
-    }
+    val label: Label?
+        get() = _label
 
     companion object {
 
@@ -86,6 +74,21 @@ data class Outlay(
             this.forEach { it.setLabelById(labels) }
         }
 
+    }
+
+    override fun setLabelById(labels: List<Label>) {
+        if (labels.isEmpty()) throw EmptyDataException("Label list cannot be empty")
+
+        _label = labels.firstOrNull { it.id == labelId }
+            ?: throw NullLabelException("Label not found")
+    }
+
+    override fun getLabelName(): String {
+        return try {
+            label!!.name
+        } catch (e: Exception) {
+            ERROR_STRING
+        }
     }
 
     override fun toDto() = OutlayDto(

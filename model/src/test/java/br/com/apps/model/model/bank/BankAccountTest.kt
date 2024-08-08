@@ -1,9 +1,8 @@
-package br.com.apps.model.model
+package br.com.apps.model.model.bank
 
 import br.com.apps.model.enums.PixType
 import br.com.apps.model.exceptions.InvalidTypeException
 import br.com.apps.model.exceptions.null_objects.NullBankException
-import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.test_cases.sampleBank
 import br.com.apps.model.test_cases.sampleBankAccount
 import br.com.apps.model.util.ERROR_INT

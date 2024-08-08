@@ -1,10 +1,13 @@
-package br.com.apps.model.model
+package br.com.apps.model.model.truck
 
+import br.com.apps.model.exceptions.DuplicatedItemsException
 import br.com.apps.model.model.fleet.Trailer
 import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.test_cases.sampleTrailer
 import br.com.apps.model.test_cases.sampleTruck
+import br.com.apps.model.test_cases.sampleTruckDto
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
@@ -46,22 +49,62 @@ class TruckTest {
     }
 
     //---------------------------------------------------------------------------------------------//
+    // addTrailer()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add trailers to the list`() {
+        val trailerA = sampleTrailer()
+        val trailerB = sampleTrailer().copy(id = "trailerId2", plate = "ABCDEFG")
+        val expected = listOf(trailerA, trailerB)
+
+        truck.addTrailer(trailerA)
+        truck.addTrailer(trailerB)
+
+        assertEquals(expected, truck.trailers)
+    }
+
+    @Test
+    fun `should throw DuplicatedItemsException when adding trailers with an id already existing`() {
+        val trailerA = sampleTrailer()
+        val trailerB = sampleTrailer().copy(plate = "ABCDEFG")
+
+        assertThrows(DuplicatedItemsException::class.java) {
+            truck.addTrailer(trailerA)
+            truck.addTrailer(trailerB)
+        }
+
+    }
+
+    @Test
+    fun `should throw DuplicatedItemsException when adding trailers with an plate already existing`() {
+        val trailerA = sampleTrailer()
+        val trailerB = sampleTrailer().copy(id = "trailerId2")
+
+        assertThrows(DuplicatedItemsException::class.java) {
+            truck.addTrailer(trailerA)
+            truck.addTrailer(trailerB)
+        }
+    }
+
+    @Test
+    fun `should not edit truck list when access trailer val`() {
+        truck.trailers.toMutableList().add(sampleTrailer())
+
+        assertEquals(0, truck.trailers.size)
+    }
+
+    //---------------------------------------------------------------------------------------------//
     // toDto()
     //---------------------------------------------------------------------------------------------//
 
     @Test
     fun `should return a dto representing this model`() {
+        val expected = sampleTruckDto()
+
         val dto = truck.toDto()
 
-        assertEquals(truck.masterUid, dto.masterUid)
-        assertEquals(truck.id, dto.id)
-        assertEquals(truck.employeeId, dto.driverId)
-        assertEquals(truck.averageAim, dto.averageAim)
-        assertEquals(truck.performanceAim, dto.performanceAim)
-        assertEquals(truck.plate, dto.plate)
-        assertEquals(truck.color, dto.color)
-        assertEquals(truck.commissionPercentual.toDouble(), dto.commissionPercentual)
-        assertEquals(truck.fleetType.name, dto.fleetType)
+        assertEquals(expected, dto)
     }
 
 }

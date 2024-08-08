@@ -1,17 +1,18 @@
 package br.com.apps.usecase.di
 
 import br.com.apps.usecase.usecase.AuthenticationUseCase
+import br.com.apps.usecase.usecase.BankAccountUseCase
 import br.com.apps.usecase.usecase.CostUseCase
 import br.com.apps.usecase.usecase.CustomerUseCase
 import br.com.apps.usecase.usecase.DocumentUseCase
 import br.com.apps.usecase.usecase.EmployeeUseCase
-import br.com.apps.usecase.usecase.ExpendUseCase
 import br.com.apps.usecase.usecase.FineUseCase
 import br.com.apps.usecase.usecase.FleetUseCase
 import br.com.apps.usecase.usecase.FreightUseCase
 import br.com.apps.usecase.usecase.IncomeUseCase
 import br.com.apps.usecase.usecase.LabelUseCase
 import br.com.apps.usecase.usecase.OrderUseCase
+import br.com.apps.usecase.usecase.OutlayUseCase
 import br.com.apps.usecase.usecase.RefuelUseCase
 import br.com.apps.usecase.usecase.RequestUseCase
 import br.com.apps.usecase.usecase.StorageUseCase
@@ -25,7 +26,7 @@ val useCaseModules = module {
     single<CostUseCase> { CostUseCase() }
     single<DocumentUseCase> { DocumentUseCase(get()) }
     single<EmployeeUseCase> { EmployeeUseCase(get(), get()) }
-    single<ExpendUseCase> { ExpendUseCase(get(), get()) }
+    single<OutlayUseCase> { OutlayUseCase(get()) }
     single<FineUseCase> { FineUseCase(get()) }
     single<FleetUseCase> { FleetUseCase(get()) }
     single<FreightUseCase> { FreightUseCase(get()) }
@@ -41,4 +42,5 @@ val useCaseModules = module {
     single<RefuelUseCase> { RefuelUseCase(get()) }
     single<CustomerUseCase> { CustomerUseCase(get()) }
     single<TravelAidUseCase> { TravelAidUseCase(get()) }
+    single<BankAccountUseCase> { BankAccountUseCase(get()) }
 }

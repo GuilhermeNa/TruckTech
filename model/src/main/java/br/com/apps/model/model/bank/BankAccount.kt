@@ -1,6 +1,6 @@
 package br.com.apps.model.model.bank
 
-import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.enums.PixType
 import br.com.apps.model.exceptions.InvalidTypeException
 import br.com.apps.model.exceptions.null_objects.NullBankException

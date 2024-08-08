@@ -1,6 +1,6 @@
 package br.com.apps.model.dto
 
-import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.exceptions.CorruptedFileException
 import org.junit.Assert.assertThrows
 import org.junit.Before

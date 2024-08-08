@@ -22,11 +22,11 @@ class EmployeePayableTest {
 
     @Test
     fun `should return a dto object with correspondent data`() {
-        val expectedDto = sampleEmployeePayableDto()
+        val expected = sampleEmployeePayableDto()
 
         val dto = payable.toDto()
 
-        assertEquals(expectedDto, dto)
+        assertEquals(expected, dto)
     }
 
 

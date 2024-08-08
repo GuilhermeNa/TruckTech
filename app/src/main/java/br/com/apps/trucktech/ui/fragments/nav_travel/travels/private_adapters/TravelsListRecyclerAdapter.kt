@@ -111,8 +111,8 @@ class TravelsListRecyclerAdapter(
                 else "-"
 
             expendNumber.text =
-                if (travel.getListSize(Travel.EXPEND) > 0)
-                    travel.getListSize(Travel.EXPEND).toString()
+                if (travel.getListSize(Travel.OUTLAY) > 0)
+                    travel.getListSize(Travel.OUTLAY).toString()
                 else "-"
 
             validImage.visibility = if(travel.isFinished) VISIBLE else GONE

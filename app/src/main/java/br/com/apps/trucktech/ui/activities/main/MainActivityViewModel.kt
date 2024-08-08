@@ -4,17 +4,30 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.enums.EmployeeReceivableTicket
 import br.com.apps.model.enums.WorkRole
 import br.com.apps.model.exceptions.UserNotFoundException
+import br.com.apps.model.exceptions.null_objects.NullAdvanceException
+import br.com.apps.model.exceptions.null_objects.NullLoanException
+import br.com.apps.model.exceptions.null_objects.NullReceivableException
+import br.com.apps.model.exceptions.null_objects.NullTransactionException
+import br.com.apps.model.exceptions.null_objects.NullTravelAidException
 import br.com.apps.model.model.FleetFine
+import br.com.apps.model.model.finance.Transaction
+import br.com.apps.model.model.finance.receivable.EmployeeReceivable
+import br.com.apps.model.model.finance.receivable.EmployeeReceivable.Companion.merge
 import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.model.payroll.Advance
+import br.com.apps.model.model.payroll.Advance.Companion.merge
 import br.com.apps.model.model.payroll.Loan
+import br.com.apps.model.model.payroll.Loan.Companion.merge
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Outlay
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.model.model.travel.Travel.Companion.merge
 import br.com.apps.model.model.travel.TravelAid
+import br.com.apps.model.model.travel.TravelAid.Companion.merge
 import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.model.model.user.CommonUser
 import br.com.apps.repository.repository.advance.AdvanceRepository
@@ -26,17 +39,16 @@ import br.com.apps.repository.repository.loan.LoanRepository
 import br.com.apps.repository.repository.payable.EmployeePayableRepository
 import br.com.apps.repository.repository.receivable.EmployeeReceivableRepository
 import br.com.apps.repository.repository.refuel.RefuelRepository
+import br.com.apps.repository.repository.transaction.TransactionRepository
 import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.repository.travel_aid.TravelAidRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.extractResponse
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.FleetUseCase
-import br.com.apps.usecase.usecase.TravelUseCase
 import br.com.apps.usecase.usecase.UserUseCase
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -46,17 +58,17 @@ class MainActivityViewModel(
     private val userUseCase: UserUseCase,
     private val truckUseCase: FleetUseCase,
     private val authRepository: AuthenticationRepository,
-    private val advanceRepository: AdvanceRepository,
-    private val loanRepository: LoanRepository,
+    private val advanceRepo: AdvanceRepository,
+    private val loanRepo: LoanRepository,
     private val fineRepository: FineRepository,
     private val travelRepository: TravelRepository,
     private val refuelRepository: RefuelRepository,
     private val freightRepository: FreightRepository,
     private val outlayRepository: OutlayRepository,
-    private val aidRepository: TravelAidRepository,
-    private val travelUseCase: TravelUseCase,
+    private val aidRepo: TravelAidRepository,
     private val receivableRepo: EmployeeReceivableRepository,
-    private val payableRepo: EmployeePayableRepository
+    private val payableRepo: EmployeePayableRepository,
+    private val transactionRepo: TransactionRepository
 ) : ViewModel() {
 
     private val _cachedTravels = MutableLiveData<List<Travel>>()
@@ -148,12 +160,13 @@ class MainActivityViewModel(
     }
 
     private suspend fun fetchUser(userId: String): CommonUser {
-        val response = userUseCase.getById(userId, WorkRole.TRUCK_DRIVER).asFlow().first()
+        val response = userUseCase.getById(userId, WorkRole.DRIVER).asFlow().first()
         return response as CommonUser
     }
 
     private suspend fun fetchTruck(driverId: String): Truck {
-        val response = truckUseCase.fetchTruckByDriverId(driverId).asFlow().first()
+        val response = truckUseCase.fetchTruckByDriverId(driverId)
+            .asFlow().first()
         return when (response) {
             is Response.Error -> throw UserNotFoundException()
             is Response.Success -> response.data ?: throw UserNotFoundException()
@@ -169,7 +182,7 @@ class MainActivityViewModel(
             LoggedUser(
                 masterUid = truck.masterUid,
                 driverId = truck.employeeId,
-                truckId = truck.id!!,
+                truckId = truck.id,
                 uid = user.uid,
                 truck = truck,
                 orderCode = user.orderCode,
@@ -186,28 +199,100 @@ class MainActivityViewModel(
     }
 
     private suspend fun fetchEmployeeReceivablesFlow(employeeId: String) {
-        receivableRepo.fetchReceivableByEmployeeIdAndStatus(
-            id = employeeId, isReceived = false, flow = true
-        ).asFlow().collect {
 
-
+        suspend fun fetchTransactions(receivables: List<EmployeeReceivable>): List<Transaction> {
+            val recIds = receivables.map { it.id }
+            val response = transactionRepo.fetchTransactionsByParentIds(recIds)
+                .asFlow().first()
+            return when (response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data ?: throw NullTransactionException()
+            }
         }
 
-        val outFlow = outlayRepository.fetch()
+        suspend fun fetchLoans(receivables: List<EmployeeReceivable>): List<Loan> {
+            val loanIds =
+                receivables.filter { it.type == EmployeeReceivableTicket.LOAN }.map { it.id }
+
+            val response = loanRepo.fetchLoanByIds(loanIds)
+                .asFlow().first()
+
+            return when (response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data ?: throw NullLoanException()
+            }
+        }
+
+        suspend fun fetchAdvances(receivables: List<EmployeeReceivable>): List<Advance> {
+            val advanceIds =
+                receivables.filter { it.type == EmployeeReceivableTicket.ADVANCE }.map { it.id }
+
+            val response = advanceRepo.fetchAdvanceByIds(advanceIds)
+                .asFlow().first()
+
+            return when (response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data ?: throw NullAdvanceException()
+            }
+        }
+
+        suspend fun fetchAids(receivables: List<EmployeeReceivable>): List<TravelAid> {
+            val aidIds =
+                receivables.filter { it.type == EmployeeReceivableTicket.TRAVEL_AID }.map { it.id }
+
+            val response = aidRepo.fetchTravelAidByIds(aidIds)
+                .asFlow().first()
+
+            return when (response) {
+                is Response.Error -> throw response.exception
+                is Response.Success -> response.data ?: throw NullTravelAidException()
+            }
+        }
+
+        receivableRepo.fetchReceivableByEmployeeIdAndStatus(
+            id = employeeId, isReceived = false, flow = true
+        ).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> throw response.exception
+
+                is Response.Success -> response.data?.let { receivables ->
+                    receivables as List<EmployeeReceivable>
+                    val transactions = fetchTransactions(receivables)
+                    val loans = fetchLoans(receivables)
+                    val advances = fetchAdvances(receivables)
+                    val aids = fetchAids(receivables)
+
+                    receivables.merge(transactions)
+                    loans.merge(receivables)
+                    advances.merge(receivables)
+                    aids.merge(receivables)
+
+                } ?: throw NullReceivableException()
 
 
+            }
+        }
     }
 
     private suspend fun fetchEmployeePayablesFlow(employeeId: String) {
         payableRepo.fetchPayablesByEmployeeIdAndStatus(
             id = employeeId, isPaid = false, flow = true
-        ).asFlow().collect {
+        ).asFlow().collect { response ->
+            when (response) {
+                is Response.Error -> throw response.exception
+
+                is Response.Success -> {
+                    tran
+
+                }
+            }
+
 
         }
     }
 
     private suspend fun fetchAdvancesFlow(driverId: String) {
-        advanceRepository.fetchAdvanceListByEmployeeIdAndPaymentStatus(
+        advanceRepo.fetchAdvanceListByEmployeeIdAndPaymentStatus(
             employeeId = driverId, isPaid = false, flow = true
         ).asFlow().collect { response ->
             when (response) {
@@ -221,7 +306,7 @@ class MainActivityViewModel(
     }
 
     private suspend fun fetchLoansFlow(driverId: String) {
-        loanRepository.fetchLoanListByEmployeeIdAndPaymentStatus(
+        loanRepo.fetchLoanListByEmployeeIdAndPaymentStatus(
             employeeId = driverId, isPaid = false, flow = true
         ).asFlow().collect { response ->
             when (response) {
@@ -254,8 +339,9 @@ class MainActivityViewModel(
             val travelFLow = travelRepository.fetchTravelListByDriverId(driverId, flow = true)
                 .asFlow()
 
-            val freightFlow = freightRepository.fetchFreightListByDriverId(driverId, flow = true)
-                .asFlow()
+            val freightFlow =
+                freightRepository.fetchFreightListByDriverId(driverId, flow = true)
+                    .asFlow()
 
             val refuelFlow = refuelRepository.fetchRefuelListByDriverId(driverId, flow = true)
                 .asFlow()
@@ -263,7 +349,7 @@ class MainActivityViewModel(
             val expendFlow = outlayRepository.fetchOutlayListByDriverId(driverId, flow = true)
                 .asFlow()
 
-            val aidFLow = aidRepository.fetchTravelAidListByDriverId(driverId, flow = true)
+            val aidFLow = aidRepo.fetchTravelAidListByDriverId(driverId, flow = true)
                 .asFlow()
 
             val combinedFlow = combineFlows(
@@ -291,15 +377,13 @@ class MainActivityViewModel(
                     is Response.Success -> aidResp.data ?: throw NullPointerException()
                 }
 
-                travelUseCase.mergeTravelData(
-                    travelList = travels,
-                    refuelList = refuels,
-                    freightList = freights,
-                    outlayList = expends,
-                    aidList = aids
+                travels.merge(
+                    nRefuels = refuels, nFreights = freights,
+                    nOutlays = expends, nAids = aids
                 )
 
                 travels
+
             }
 
             combinedFlow.collect { travels ->

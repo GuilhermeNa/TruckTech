@@ -33,30 +33,26 @@ class FinancialRecordFactoryTest {
 
     @Test
     fun `should create a EmployeePayableDto from an outlay`() {
-        val expectedPayable = sampleEmployeePayableDto()
+        val expected = sampleEmployeePayableDto()
             .copy(
                 id = null,
                 parentId = "outlayId1",
                 installments = 1,
-                value = 100.00,
-                generationDate = LocalDateTime.of(2024, 2, 20, 14, 45).toDate(),
+                value = 500.00,
+                generationDate = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
                 type = EmployeePayableTicket.OUTLAY.name,
                 isPaid = false
             )
 
-        val outlay = sampleOutlay()
-
-        val pair = factory.create(
+        val actual = factory.create(
             FinancialRecordsParams(
-                data = outlay,
+                data = sampleOutlay(),
                 installments = 1,
                 firstDueDate = LocalDateTime.now().plusDays(10)
             )
-        )
+        ).first
 
-        val first = pair.first
-
-        assertEquals(expectedPayable, first)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -68,7 +64,7 @@ class FinancialRecordFactoryTest {
                 parentId = null,
                 dueDate = LocalDateTime.of(2024, 2, 20, 14, 45).plusDays(10).toDate(),
                 number = 1,
-                value = 100.00,
+                value = 500.00,
                 type = TransactionType.PAYABLE.name,
                 isPaid = false
             )
@@ -98,7 +94,7 @@ class FinancialRecordFactoryTest {
                 parentId = null,
                 dueDate = LocalDateTime.of(2024, 1, 1, 0, 0, 0).plusDays(10).toDate(),
                 number = 1,
-                value = 100.00,
+                value = 500.00,
                 type = TransactionType.PAYABLE.name,
                 isPaid = false
             )
@@ -129,7 +125,7 @@ class FinancialRecordFactoryTest {
             id = null,
             parentId = "freightId1",
             installments = 1,
-            value = 100.00,
+            value = 1000.00,
             generationDate = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
             type = EmployeePayableTicket.COMMISSION.name,
             isPaid = false
@@ -159,7 +155,7 @@ class FinancialRecordFactoryTest {
                 parentId = null,
                 dueDate = LocalDateTime.of(2024, 1, 1, 0, 0).plusDays(10).toDate(),
                 number = 1,
-                value = 100.00,
+                value = 1000.00,
                 type = TransactionType.PAYABLE.name,
                 isPaid = false
             )
@@ -190,7 +186,7 @@ class FinancialRecordFactoryTest {
                 parentId = null,
                 dueDate = LocalDateTime.of(2024, 1, 1, 0, 0).plusDays(10).toDate(),
                 number = 1,
-                value = 100.00,
+                value = 1000.00,
                 type = TransactionType.PAYABLE.name,
                 isPaid = false
             )
@@ -443,7 +439,7 @@ class FinancialRecordFactoryTest {
     fun `should create a EmployeeReceivableDto from an travel aid`() {
         val expected = sampleEmployeeReceivableDto().copy(
             id = null,
-            parentId = "travelAid1",
+            parentId = "travelAidId1",
             installments = 1,
             value = 100.00,
             generationDate = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),

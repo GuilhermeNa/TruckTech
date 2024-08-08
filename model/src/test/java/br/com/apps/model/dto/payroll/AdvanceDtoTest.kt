@@ -1,10 +1,13 @@
 package br.com.apps.model.dto.payroll
 
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.test_cases.sampleAdvance
+import br.com.apps.model.test_cases.sampleAdvanceDto
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import java.util.Date
 
 class AdvanceDtoTest {
 
@@ -12,17 +15,7 @@ class AdvanceDtoTest {
 
     @Before
     fun setup() {
-        advanceDto = AdvanceDto(
-            masterUid = "1",
-            id = "2",
-            travelId = "3",
-            employeeId = "4",
-            date = Date(),
-            value = 10.0,
-            isPaid = true,
-            isApproved = true,
-            type = "COMMISSION"
-        )
+        advanceDto = sampleAdvanceDto()
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -70,27 +63,68 @@ class AdvanceDtoTest {
     }
 
     @Test
-    fun `should throw CorruptedFileException when isPaid is null`() {
-        advanceDto.isPaid = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
-            advanceDto.validateDataIntegrity()
-        }
-    }
-
-    @Test
-    fun `should throw CorruptedFileException when isApproved is null`() {
-        advanceDto.isApproved = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
-            advanceDto.validateDataIntegrity()
-        }
-    }
-
-    @Test
     fun `should throw CorruptedFileException when type is null`() {
         advanceDto.type = null
         Assert.assertThrows(CorruptedFileException::class.java) {
             advanceDto.validateDataIntegrity()
         }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // InvalidForSavingException()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should throw InvalidForSavingException when masterUid is null`() {
+        advanceDto.masterUid = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            advanceDto.validateDataForDbInsertion()
+        }
+    }
+
+    @Test
+    fun `should throw InvalidForSavingException when employeeId is null`() {
+        advanceDto.employeeId = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            advanceDto.validateDataForDbInsertion()
+        }
+    }
+
+    @Test
+    fun `should throw InvalidForSavingException when date is null`() {
+        advanceDto.date = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            advanceDto.validateDataForDbInsertion()
+        }
+    }
+
+    @Test
+    fun `should throw InvalidForSavingException when value is null`() {
+        advanceDto.value = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            advanceDto.validateDataForDbInsertion()
+        }
+    }
+
+    @Test
+    fun `should throw InvalidForSavingException when type is null`() {
+        advanceDto.type = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            advanceDto.validateDataForDbInsertion()
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // toModel()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should return a advance model when call toModel`() {
+        val expected = sampleAdvance()
+
+        val model = advanceDto.toModel()
+
+        assertEquals(expected, model)
     }
 
 }

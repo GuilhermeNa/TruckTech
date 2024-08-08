@@ -6,6 +6,7 @@ import br.com.apps.model.exceptions.DuplicatedItemsException
 import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.exceptions.OdometerOrderException
 import br.com.apps.model.interfaces.ModelObjectInterface
+import br.com.apps.model.util.DUPLICATED_ID
 import br.com.apps.model.util.toDate
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -29,31 +30,92 @@ import java.time.LocalDateTime
  * @property finalOdometerMeasurement Optional odometer reading at the end of the travel. If not provided, it is not yet concluded.
  * @property freights List of [Freight]s associated with this travel. Represents the cargo shipments during the journey.
  * @property refuels List of [Refuel]s associated with this travel. Represents fuel transactions that occurred during the journey.
- * @property expends List of [Outlay]s associated with this travel. Represents expenditures incurred during the journey.
+ * @property outlays List of [Outlay]s associated with this travel. Represents expenditures incurred during the journey.
  * @property aids List of [TravelAid]s associated with this travel. Represents any advance payments made for the journey.
- * @property isClosed Indicates whether the travel record has been closed (true) or not (false). Once closed, it cannot be modified.
+ * @property isClosed Indicates whether the travel has complete refuels and should be considered to travel average.
  * @property isFinished Indicates whether the travel has been completed (true) or not (false). Used to determine if all travel activities have concluded.
  */
 data class Travel(
     val masterUid: String,
-    var id: String? = null,
+    val id: String? = null,
     val truckId: String,
     val employeeId: String,
-
-    var initialDate: LocalDateTime,
-    var finalDate: LocalDateTime? = null,
-    var initialOdometerMeasurement: BigDecimal,
-    var finalOdometerMeasurement: BigDecimal? = null,
-
-    var freights: List<Freight>? = null,
-    var refuels: List<Refuel>? = null,
-    var expends: List<Outlay>? = null,
-    var aids: List<TravelAid>? = null,
-
-    @field:JvmField var isClosed: Boolean,
-    @field:JvmField var isFinished: Boolean
-
+    val initialDate: LocalDateTime,
+    val finalDate: LocalDateTime? = null,
+    val initialOdometerMeasurement: BigDecimal,
+    val finalOdometerMeasurement: BigDecimal? = null,
+    val isClosed: Boolean,
+    val isFinished: Boolean,
+    private val _freights: MutableList<Freight> = mutableListOf(),
+    private val _refuels: MutableList<Refuel> = mutableListOf(),
+    private val _outlays: MutableList<Outlay> = mutableListOf(),
+    private val _aids: MutableList<TravelAid> = mutableListOf()
 ) : ModelObjectInterface<TravelDto> {
+
+    val freights: List<Freight>
+        get() = _freights
+
+    val refuels: List<Refuel>
+        get() = _refuels
+
+    val outlays: List<Outlay>
+        get() = _outlays
+
+    val aids: List<TravelAid>
+        get() = _aids
+
+    companion object {
+        const val FREIGHT = 0
+        const val OUTLAY = 1
+        const val REFUEL = 2
+        const val AID = 3
+
+        fun List<Travel>.merge(
+            nFreights: List<Freight>? = null, nRefuels: List<Refuel>? = null,
+            nOutlays: List<Outlay>? = null, nAids: List<TravelAid>? = null
+        ) {
+            this.forEach { t ->
+                nFreights?.let { freights ->
+                    freights.filter { it.travelId == t.id }.let { t.addAllFreights(it) }
+                }
+                nRefuels?.let { refuels ->
+                    refuels.filter { it.travelId == t.id }.let { t.addAllRefuels(it) }
+                }
+                nOutlays?.let { outlays ->
+                    outlays.filter { it.travelId == t.id }.let { t.addAllOutlays(it) }
+                }
+                nAids?.let { aids ->
+                    aids.filter { it.travelId == t.id }.let { t.addAllAids(it) }
+                }
+            }
+        }
+
+    }
+
+    fun addAllFreights(freights: List<Freight>) {
+        val existingIds = _freights.asSequence().map { it.id }.toSet()
+        val newFreights = freights.distinctBy { it.id }.filter { it.id !in existingIds }
+        _freights.addAll(newFreights)
+    }
+
+    fun addAllRefuels(refuels: List<Refuel>) {
+        val existingIds = _refuels.asSequence().map { it.id }.toSet()
+        val newRefuels = refuels.distinctBy { it.id }.filter { it.id !in existingIds }
+        _refuels.addAll(newRefuels)
+    }
+
+    fun addAllOutlays(outlays: List<Outlay>) {
+        val existingIds = _outlays.asSequence().map { it.id }.toSet()
+        val newOutlays = outlays.distinctBy { it.id }.filter { it.id !in existingIds }
+        _outlays.addAll(newOutlays)
+    }
+
+    fun addAllAids(aids: List<TravelAid>) {
+        val existingIds = _aids.asSequence().map { it.id }.toSet()
+        val newAids = aids.distinctBy { it.id }.filter { it.id !in existingIds }
+        _aids.addAll(newAids)
+    }
+
 
     /**
      * Retrieves the size of the specified list associated with the travel.
@@ -63,10 +125,10 @@ data class Travel(
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
     fun getListSize(listTag: Int): Int = when (listTag) {
-        FREIGHT -> freights?.size ?: 0
-        EXPEND -> expends?.size ?: 0
-        REFUEL -> refuels?.size ?: 0
-        AID -> aids?.size ?: 0
+        FREIGHT -> _freights.size
+        OUTLAY -> _outlays.size
+        REFUEL -> _refuels.size
+        AID -> _aids.size
         else -> throw InvalidParameterException("Wrong tag for getListSize: ($listTag) ")
     }
 
@@ -78,10 +140,10 @@ data class Travel(
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
     fun getListOfIdsForList(listTag: Int): List<String> = when (listTag) {
-        FREIGHT -> freights?.mapNotNull { it.id } ?: emptyList()
-        EXPEND -> expends?.mapNotNull { it.id } ?: emptyList()
-        REFUEL -> refuels?.mapNotNull { it.id } ?: emptyList()
-        AID -> aids?.mapNotNull { it.id } ?: emptyList()
+        FREIGHT -> _freights.map { it.id }
+        OUTLAY -> _outlays.map { it.id }
+        REFUEL -> _refuels.map { it.id }
+        AID -> _aids.map { it.id }
         else -> throw InvalidParameterException("Invalid tag for ($listTag)")
     }
 
@@ -91,7 +153,7 @@ data class Travel(
      * @return The total commission value as a BigDecimal.
      */
     fun getCommissionValue(): BigDecimal {
-        return freights?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
+        return _freights.sumOf { it.getCommissionValue() }
     }
 
     /**
@@ -100,9 +162,7 @@ data class Travel(
      * @return The difference between the initial and final odometer measurements as a BigDecimal.
      */
     fun getDifferenceBetweenInitialAndFinalOdometerMeasure(): BigDecimal =
-        finalOdometerMeasurement?.let {
-            finalOdometerMeasurement!!.subtract(initialOdometerMeasurement)
-        } ?: BigDecimal.ZERO
+        finalOdometerMeasurement?.subtract(initialOdometerMeasurement) ?: BigDecimal.ZERO
 
     /**
      * Calculates and returns the total value for the specified list type associated with the travel.
@@ -111,12 +171,15 @@ data class Travel(
      * @return The total value for the specified list type as a BigDecimal.
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
-    fun getListTotalValue(listTag: Int): BigDecimal = when (listTag) {
-        FREIGHT -> freights?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
-        EXPEND -> expends?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
-        REFUEL -> refuels?.map { it.totalValue }?.sumOf { it } ?: BigDecimal.ZERO
-        AID -> aids?.map { it.value }?.sumOf { it } ?: BigDecimal.ZERO
-        else -> throw InvalidParameterException("Invalid tag for ($listTag)")
+    fun getListTotalValue(listTag: Int): BigDecimal {
+        val value = when (listTag) {
+            FREIGHT -> _freights.map { it.value }.sumOf { it }
+            OUTLAY -> _outlays.map { it.value }.sumOf { it }
+            REFUEL -> _refuels.map { it.totalValue }.sumOf { it }
+            AID -> _aids.map { it.value }.sumOf { it }
+            else -> throw InvalidParameterException("Invalid tag for ($listTag)")
+        }
+        return value.setScale(2)
     }
 
     /**
@@ -126,9 +189,9 @@ data class Travel(
      */
     fun getLiquidValue(): BigDecimal {
         val freight = getListTotalValue(FREIGHT)
-        val commission = freights?.sumOf { it.getCommissionValue() } ?: BigDecimal.ZERO
+        val commission = _freights.sumOf { it.getCommissionValue() }
         val refuel = getListTotalValue(REFUEL)
-        val expend = getListTotalValue(EXPEND)
+        val expend = getListTotalValue(OUTLAY)
         return freight.subtract(refuel).subtract(expend).subtract(commission)
             .setScale(2, RoundingMode.HALF_EVEN)
     }
@@ -139,12 +202,12 @@ data class Travel(
      * @return The travel authentication percentage as a Double.
      */
     fun getTravelAuthenticationPercent(): Double {
-        val authenticableItems = getListSize(FREIGHT) + getListSize(EXPEND) + getListSize(REFUEL)
+        val authenticableItems = getListSize(FREIGHT) + getListSize(OUTLAY) + getListSize(REFUEL)
         var authenticated = 0.0
 
-        freights?.forEach { if (it.isValid) authenticated++ }
-        refuels?.forEach { if (it.isValid) authenticated++ }
-        expends?.forEach { if (it.isValid) authenticated++ }
+        _freights.forEach { if (it.isValid) authenticated++ }
+        _refuels.forEach { if (it.isValid) authenticated++ }
+        _outlays.forEach { if (it.isValid) authenticated++ }
 
         return authenticated.div(authenticableItems.toDouble()) * 100
     }
@@ -155,7 +218,7 @@ data class Travel(
      * @return True if the travel is ready to be finished, false otherwise.
      */
     fun isReadyToBeFinished(): Boolean {
-        return getTravelAuthenticationPercent() == 100.0 && !freights.isNullOrEmpty()
+        return getTravelAuthenticationPercent() == 100.0 && _freights.isNotEmpty()
     }
 
     /**
@@ -164,7 +227,7 @@ data class Travel(
      * @return True if the travel is empty, false otherwise.
      */
     fun isEmptyTravel(): Boolean {
-        return getListSize(FREIGHT) + getListSize(EXPEND) + getListSize(REFUEL) + getListSize(AID) == 0
+        return getListSize(FREIGHT) + getListSize(OUTLAY) + getListSize(REFUEL) + getListSize(AID) == 0
     }
 
     /**
@@ -178,18 +241,18 @@ data class Travel(
      * @throws NullPointerException If there is a failure to load freights.
      */
     fun validateForSaving() {
-        freights?.also {
+        _freights.also {
             if (it.isEmpty()) throw EmptyDataException("Nenhuma viagem encontrada")
             it.forEach { f ->
                 if (!f.isValid) throw InvalidParameterException("Frete não validado")
             }
-        } ?: throw NullPointerException("Falha ao carregar fretes")
+        }
 
-        refuels?.forEach { r ->
+        _refuels.forEach { r ->
             if (!r.isValid) throw InvalidParameterException("Abastecimento não validado")
         }
 
-        expends?.forEach { e ->
+        _outlays.forEach { e ->
             if (!e.isValid) throw InvalidParameterException("Despesa não validada")
         }
 
@@ -213,10 +276,10 @@ data class Travel(
     }
 
     private fun thereIsDuplicatedItems() {
-        freights?.let { freights ->
+        _freights.let { freights ->
             val uniqueIds = mutableSetOf<String>()
 
-            freights.mapNotNull { it.id }.forEach { id ->
+            freights.map { it.id }.forEach { id ->
                 if (uniqueIds.contains(id)) {
                     throw DuplicatedItemsException("There is duplicated itens for travel freight list")
                 } else {
@@ -225,10 +288,10 @@ data class Travel(
             }
         }
 
-        refuels?.let { refuels ->
+        _refuels.let { refuels ->
             val uniqueIds = mutableSetOf<String>()
 
-            refuels.mapNotNull { it.id }.forEach { id ->
+            refuels.map { it.id }.forEach { id ->
                 if (uniqueIds.contains(id)) {
                     throw DuplicatedItemsException("There is duplicated itens for travel refuel list")
                 } else {
@@ -238,10 +301,10 @@ data class Travel(
 
         }
 
-        expends?.let { expends ->
+        _outlays.let { expends ->
             val uniqueIds = mutableSetOf<String>()
 
-            expends.mapNotNull { it.id }.forEach { id ->
+            expends.map { it.id }.forEach { id ->
                 if (uniqueIds.contains(id)) {
                     throw DuplicatedItemsException("There is duplicated itens for travel expend list")
                 } else {
@@ -251,10 +314,10 @@ data class Travel(
 
         }
 
-        aids?.let { aids ->
+        _aids.let { aids ->
             val uniqueIds = mutableSetOf<String>()
 
-            aids.mapNotNull { it.id }.forEach { id ->
+            aids.map { it.id }.forEach { id ->
                 if (uniqueIds.contains(id)) {
                     throw DuplicatedItemsException("There is duplicated itens for travel aid list")
                 } else {
@@ -275,30 +338,13 @@ data class Travel(
         if (isFinished) return false
         if (id == null) return false
 
-        freights?.let {
-            it.forEach { f ->
-                if (f.isValid) return false
-                if (f.id == null) return false
-            }
-        }
+        _freights.let { it.forEach { f -> if (f.isValid) return false } }
 
-        refuels?.let {
-            it.forEach { r ->
-                if (r.isValid) return false
-                if (r.id == null) return false
-            }
-        }
+        _refuels.let { it.forEach { r -> if (r.isValid) return false } }
 
-        expends?.let {
-            it.forEach { e ->
-                if (e.isValid) return false
-                if (e.id == null) return false
-            }
-        }
+        _outlays.let { it.forEach { e -> if (e.isValid) return false } }
 
-        aids?.let {
-            if (it.isNotEmpty()) return false
-        }
+        _aids.let { it.forEach { a -> if (a.isValid) return false } }
 
         return true
     }
@@ -309,19 +355,26 @@ data class Travel(
      * @return The profit percentage as a BigDecimal.
      */
     fun getProfitPercent(): BigDecimal {
-        val profit = getListTotalValue(FREIGHT)
-        val waste =
-            getListTotalValue(REFUEL) +
-                    getListTotalValue(EXPEND) +
+        fun calcWaste(): BigDecimal {
+            val value = getListTotalValue(REFUEL) +
+                    getListTotalValue(OUTLAY) +
                     getCommissionValue()
+            return value.setScale(2)
+        }
 
-        return if (profit != BigDecimal.ZERO && waste != BigDecimal.ZERO)
-            waste
-                .divide(profit, 2, RoundingMode.HALF_EVEN)
+        val profit = getListTotalValue(FREIGHT)
+        val waste = calcWaste()
+
+        return when {
+            profit == BigDecimal.ZERO.setScale(2) -> BigDecimal.ZERO.setScale(2)
+
+            waste == BigDecimal.ZERO.setScale(2) -> BigDecimal("100.00")
+
+            else -> waste.divide(profit, 2, RoundingMode.HALF_EVEN)
                 .subtract(BigDecimal(1.0))
                 .multiply(BigDecimal(100.0))
                 .abs()
-        else BigDecimal.ZERO
+        }
 
     }
 
@@ -331,7 +384,7 @@ data class Travel(
      * @return The fuel average as a BigDecimal.
      */
     fun getFuelAverage(): BigDecimal {
-        return refuels?.let { refuels ->
+        return _refuels.let { refuels ->
             val liters = refuels.sumOf { it.amountLiters }
             val distance = getDifferenceBetweenInitialAndFinalOdometerMeasure()
             distance.divide(liters, 2, RoundingMode.HALF_EVEN)
@@ -344,16 +397,34 @@ data class Travel(
      * @return True if average fuel consumption should be considered, false otherwise.
      */
     fun shouldConsiderAverage(): Boolean {
-        if (refuels.isNullOrEmpty()) return false
-        return refuels!!.last().isCompleteRefuel
+        if (_refuels.isEmpty()) return false
+        return _refuels.last().isCompleteRefuel
     }
 
-    companion object {
-        const val FREIGHT = 0
-        const val EXPEND = 1
-        const val REFUEL = 2
-        const val AID = 3
+    fun addFreight(freight: Freight) {
+        val existingIds = _freights.asSequence().map { it.id }.toSet()
+        if (freight.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+        _freights.add(freight)
     }
+
+    fun addRefuel(refuel: Refuel) {
+        val existingIds = _refuels.asSequence().map { it.id }.toSet()
+        if (refuel.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+        _refuels.add(refuel)
+    }
+
+    fun addOutlay(outlay: Outlay) {
+        val existingIds = _outlays.asSequence().map { it.id }.toSet()
+        if (outlay.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+        _outlays.add(outlay)
+    }
+
+    fun addAid(aid: TravelAid) {
+        val existingIds = _aids.asSequence().map { it.id }.toSet()
+        if (aid.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+        _aids.add(aid)
+    }
+
 
     override fun toDto() = TravelDto(
         masterUid = this.masterUid,

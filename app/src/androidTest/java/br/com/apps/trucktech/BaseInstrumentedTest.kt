@@ -18,7 +18,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import br.com.apps.model.dto.bank.BankDto
-import br.com.apps.model.dto.employee_dto.BankAccountDto
+import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.dto.travel.TravelDto
 import br.com.apps.model.util.toDate
 import br.com.apps.trucktech.BaseInstrumentedTest.Companion.T_BANK_ID

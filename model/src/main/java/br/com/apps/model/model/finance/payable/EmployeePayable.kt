@@ -3,7 +3,6 @@ package br.com.apps.model.model.finance.payable
 import br.com.apps.model.dto.finance.payable.EmployeePayableDto
 import br.com.apps.model.enums.EmployeePayableTicket
 import br.com.apps.model.model.employee.Employee
-import br.com.apps.model.model.finance.Transaction
 import br.com.apps.model.util.toDate
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -26,7 +25,6 @@ data class EmployeePayable(
     override val value: BigDecimal,
     override val generationDate: LocalDateTime,
     override val installments: Int,
-    override val transactions: MutableList<Transaction> = mutableListOf(),
 
     val employeeId: String,
     val type: EmployeePayableTicket,
@@ -34,8 +32,7 @@ data class EmployeePayable(
 
 ): Payable(
     masterUid = masterUid, id = id, parentId = parentId, value = value,
-    generationDate = generationDate, transactions = transactions,
-    _isPaid = _isPaid, installments = installments
+    generationDate = generationDate, _isPaid = _isPaid, installments = installments
 ) {
 
     override fun toDto() = EmployeePayableDto(

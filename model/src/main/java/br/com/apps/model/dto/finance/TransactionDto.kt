@@ -56,7 +56,7 @@ data class TransactionDto(
         return Transaction(
             masterUid = masterUid!!,
             id = id!!,
-            parentKey = parentId!!,
+            parentId = parentId!!,
             dueDate = dueDate!!.toLocalDateTime(),
             number = number!!,
             value = BigDecimal(value!!).setScale(2),

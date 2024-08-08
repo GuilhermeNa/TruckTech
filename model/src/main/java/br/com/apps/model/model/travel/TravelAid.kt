@@ -1,9 +1,13 @@
 package br.com.apps.model.model.travel
 
-import br.com.apps.model.dto.payroll.TravelAidDto
+import br.com.apps.model.dto.travel.TravelAidDto
+import br.com.apps.model.enums.EmployeeReceivableTicket
+import br.com.apps.model.exceptions.InvalidIdException
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.employee.Employee
+import br.com.apps.model.model.finance.receivable.EmployeeReceivable
 import br.com.apps.model.util.toDate
+import java.lang.invoke.WrongMethodTypeException
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -24,13 +28,60 @@ import java.time.LocalDateTime
  */
 data class TravelAid(
     val masterUid: String,
-    var id: String,
+    val id: String,
     val employeeId: String,
     val travelId: String,
     val date: LocalDateTime,
-    var value: BigDecimal,
-    @field:JvmField val isValid: Boolean,
+    val value: BigDecimal,
+    val isValid: Boolean,
 ) : ModelObjectInterface<TravelAidDto> {
+
+    private var _receivable: EmployeeReceivable? = null
+    val receivable get() = _receivable
+
+    companion object {
+        /**
+         * Extension function for list of [TravelAid]'s to merge with a list of [EmployeeReceivable]'s.
+         *
+         * Each aid in the list will have its receivable updated with
+         * the corresponding from the list.
+         *
+         * @param receivables A list of receivable objects.
+         */
+        fun List<TravelAid>.merge(receivables: List<EmployeeReceivable>) {
+            forEach {
+                it.setReceivableById(receivables)
+            }
+        }
+    }
+
+    private fun setReceivableById(receivables: List<EmployeeReceivable>) {
+        receivables.firstOrNull {
+            it.parentId == id
+        }?.let {
+            setReceivable(it)
+        }
+    }
+
+    /**
+     * Sets the receivable for the current aid.
+     *
+     * @param receivable The `EmployeeReceivable` object to be assigned to the current advance.
+     *
+     * @throws InvalidIdException If the `parentId` of the provided `EmployeeReceivable` does not match the `id` of the current aid.
+     */
+    fun setReceivable(receivable: EmployeeReceivable) {
+        if (receivable.parentId != id) {
+            throw InvalidIdException("Wrong receivable id (${receivable.parentId}) for aid id ($id)")
+
+        } else if (receivable.type != EmployeeReceivableTicket.TRAVEL_AID) {
+            throw WrongMethodTypeException("Wrong type: expecting (${EmployeeReceivableTicket.TRAVEL_AID.name}) and received (${receivable.type.name})")
+
+        } else {
+            _receivable = receivable
+
+        }
+    }
 
     override fun toDto() = TravelAidDto(
         masterUid = masterUid,

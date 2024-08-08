@@ -2,7 +2,6 @@ package br.com.apps.model.model.finance.receivable
 
 import br.com.apps.model.dto.finance.receivable.ReceivableDto
 import br.com.apps.model.model.finance.FinancialRecord
-import br.com.apps.model.model.finance.Transaction
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -21,14 +20,12 @@ abstract class Receivable(
     override val value: BigDecimal,
     override val generationDate: LocalDateTime,
     override val installments: Int,
-    override val transactions: MutableList<Transaction> = mutableListOf(),
 
     private var _isReceived: Boolean
 
 ) : FinancialRecord(
     masterUid = masterUid, id = id, parentId = parentId, value = value,
-    generationDate = generationDate, transactions = transactions,
-    installments = installments
+    generationDate = generationDate, installments = installments
 ) {
 
     val isReceived: Boolean

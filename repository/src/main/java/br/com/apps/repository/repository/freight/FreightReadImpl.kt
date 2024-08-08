@@ -31,8 +31,10 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
 
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFreightList() }
+            false -> listener.onComplete { it.toFreightList() }
+        }
     }
 
     override suspend fun fetchFreightListByDriverIdsAndPaymentStatus(
@@ -45,8 +47,10 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
         val listener =
             collection.whereIn(EMPLOYEE_ID, ids).whereEqualTo(IS_COMMISSION_PAID, isPaid)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFreightList() }
+            false -> listener.onComplete { it.toFreightList() }
+        }
     }
 
     override suspend fun fetchFreightListByDriverIdAndPaymentStatus(
@@ -60,8 +64,10 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
             .whereEqualTo(EMPLOYEE_ID, id)
             .whereEqualTo(IS_COMMISSION_PAID, isPaid)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFreightList() }
+            false -> listener.onComplete { it.toFreightList() }
+        }
     }
 
     override suspend fun fetchFreightListByTravelId(
@@ -72,8 +78,10 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
 
         val listener = collection.whereEqualTo(TRAVEL_ID, id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFreightList() }
+            false -> listener.onComplete { it.toFreightList() }
+        }
     }
 
     override suspend fun fetchFreightListByTravelIds(
@@ -84,8 +92,10 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
 
         val listener = collection.whereIn(TRAVEL_ID, ids)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFreightList() }
+            false -> listener.onComplete { it.toFreightList() }
+        }
     }
 
     override suspend fun fetchFreightById(
@@ -96,8 +106,10 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
 
         val listener = collection.document(id)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFreightObject() }
-        else listener.onComplete { it.toFreightObject() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFreightObject() }
+            false -> listener.onComplete { it.toFreightObject() }
+        }
     }
 
     override suspend fun fetchFreightListByDriverIdAndIsNotPaidYet(
@@ -111,8 +123,10 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
             .whereEqualTo(IS_VALID, true)
             .whereEqualTo(IS_COMMISSION_PAID, false)
 
-        return@withContext if (flow) listener.onSnapShot { it.toFreightList() }
-        else listener.onComplete { it.toFreightList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFreightList() }
+            false -> listener.onComplete { it.toFreightList() }
+        }
     }
 
 }

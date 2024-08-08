@@ -1,10 +1,12 @@
 package br.com.apps.model.dto.payroll
 
 import br.com.apps.model.exceptions.CorruptedFileException
+import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.test_cases.sampleLoan
+import br.com.apps.model.test_cases.sampleLoanDto
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import java.util.Date
 
 class LoanDtoTest {
 
@@ -12,16 +14,7 @@ class LoanDtoTest {
 
     @Before
     fun setup() {
-        loanDto = LoanDto(
-            masterUid = "1",
-            id = "2",
-            employeeId = "3",
-            date = Date(),
-            value = 1000.0,
-            installments = 2,
-            installmentsAlreadyPaid = 0,
-            isPaid = false
-        )
+        loanDto = sampleLoanDto()
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -68,28 +61,53 @@ class LoanDtoTest {
         }
     }
 
+    //---------------------------------------------------------------------------------------------//
+    // validateDataForDbInsertion()
+    //---------------------------------------------------------------------------------------------//
+
     @Test
-    fun `should throw CorruptedFileException when installments is null`() {
-        loanDto.installments = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
-            loanDto.validateDataIntegrity()
+    fun `should throw InvalidForSavingException when masterUid is null`() {
+        loanDto.masterUid = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            loanDto.validateDataForDbInsertion()
         }
     }
 
     @Test
-    fun `should throw CorruptedFileException when installmentsAlreadyPaid is null`() {
-        loanDto.installmentsAlreadyPaid = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
-            loanDto.validateDataIntegrity()
+    fun `should throw InvalidForSavingException when employeeId is null`() {
+        loanDto.employeeId = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            loanDto.validateDataForDbInsertion()
         }
     }
 
     @Test
-    fun `should throw CorruptedFileException when isPaid is null`() {
-        loanDto.isPaid = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
-            loanDto.validateDataIntegrity()
+    fun `should throw InvalidForSavingException when date is null`() {
+        loanDto.date = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            loanDto.validateDataForDbInsertion()
         }
+    }
+
+    @Test
+    fun `should throw InvalidForSavingException when value is null`() {
+        loanDto.value = null
+        Assert.assertThrows(InvalidForSavingException::class.java) {
+            loanDto.validateDataForDbInsertion()
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // toModel()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should return an model object when call toModel`() {
+        val expected = sampleLoan()
+
+        val model = loanDto.toModel()
+
+        Assert.assertEquals(expected, model)
     }
 
 }

@@ -1,4 +1,4 @@
-package br.com.apps.model.dto.payroll
+package br.com.apps.model.dto.travel
 
 import br.com.apps.model.exceptions.CorruptedFileException
 import org.junit.Assert

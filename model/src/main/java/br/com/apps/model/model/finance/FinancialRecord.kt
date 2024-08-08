@@ -6,13 +6,13 @@ import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.exceptions.EmptyIdException
 import br.com.apps.model.exceptions.FinancialRecordException
 import br.com.apps.model.interfaces.ModelObjectInterface
+import br.com.apps.model.util.DUPLICATED_ID
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 private const val EMPTY_LIST = "Transaction list is empty"
 private const val TRANSACTION_UNPAID =
     "There is at least one Transactions unpaid and this record cannot be set as paid/ received"
-private const val DUPLICATED_ID = "There is already an item with this Id"
 private const val DUPLICATED_INSTALLMENT_NUMBER =
     "There is already an item with this installment number"
 
@@ -30,7 +30,7 @@ private const val DUPLICATED_INSTALLMENT_NUMBER =
  * @property value Monetary value associated with this record.
  * @property generationDate Date and time when this record was created or generated.
  * @property installments Number of installments for this record, if applicable.
- * @property transactions List of [Transaction]s associated with this record.
+ * @property _transactions List of [Transaction]s associated with this record.
  */
 abstract class FinancialRecord(
     open val masterUid: String,
@@ -39,12 +39,13 @@ abstract class FinancialRecord(
     open val value: BigDecimal,
     open val generationDate: LocalDateTime,
     open val installments: Int,
-    protected open val transactions: MutableList<Transaction> = mutableListOf()
 ) : ModelObjectInterface<FinancialRecordDto> {
 
+    private val _transactions: MutableList<Transaction> = mutableListOf()
+
     fun addTransaction(item: Transaction) {
-        val existingIds = transactions.asSequence().map { it.id }.toSet()
-        val existingInstallment = transactions.asSequence().map { it.number }.toSet()
+        val existingIds = _transactions.asSequence().map { it.id }.toSet()
+        val existingInstallment = _transactions.asSequence().map { it.number }.toSet()
 
         if (item.id in existingIds)
             throw DuplicatedItemsException(DUPLICATED_ID)
@@ -52,25 +53,54 @@ abstract class FinancialRecord(
         if (item.number in existingInstallment)
             throw DuplicatedItemsException(DUPLICATED_INSTALLMENT_NUMBER)
 
-        transactions.add(item)
+        _transactions.add(item)
     }
 
-    fun clearTransactions() = transactions.clear()
+    /**
+     * Adds a list of transactions to the existing collection of transactions.
+     *
+     * **Notes:**
+     *   - **If ID Does Not Exist**: If the transaction ID is not already present in the existing transactions, the transaction is added to the existing collection.
+     *   - **If ID Exists**: If the transaction ID already exists in the list, the transaction is updated with the new transaction data.
+     *
+     * @param transactions A list of transactions to be added or updated in the existing collection.
+     *
+     * @throws DuplicatedItemsException If there is an attempt to add a transaction with a duplicate installment number.
+     */
+    fun addAllTransactions(transactions: List<Transaction>) {
+        val existingIds = _transactions.asSequence().map { it.id }.toSet()
+        val newItems = transactions.distinctBy { it.id }
+
+        newItems.forEach { item ->
+            when (existingIds.contains(item.id)) {
+                false -> _transactions.add(item)
+
+                true -> {
+                    val itemToReplace = _transactions.first { it.id == item.id }
+                    val pos = _transactions.indexOf(itemToReplace)
+                    _transactions[pos] = item
+                }
+            }
+        }
+
+    }
+
+    fun clearTransactions() = _transactions.clear()
 
     fun removeItem(id: String) {
         if (id.isBlank()) throw EmptyIdException("Id cannot be blank")
-        transactions.removeIf { it.id == id }
+        _transactions.removeIf { it.id == id }
     }
 
-    fun geTransactions() = transactions.sortedBy { it.number }
+    fun geTransactions() = _transactions.sortedBy { it.number }
 
-    fun contains(item: Transaction) = transactions.contains(item)
+    fun contains(item: Transaction) = _transactions.contains(item)
 
-    fun transactionsSize() = transactions.size
+    fun transactionsSize() = _transactions.size
 
     fun validateTransactionsPayment() {
-        if (transactions.isEmpty()) throw EmptyDataException(EMPTY_LIST)
-        transactions.forEach {
+        if (_transactions.isEmpty()) throw EmptyDataException(EMPTY_LIST)
+        _transactions.forEach {
             if (!it.isPaid) throw FinancialRecordException(TRANSACTION_UNPAID)
         }
     }

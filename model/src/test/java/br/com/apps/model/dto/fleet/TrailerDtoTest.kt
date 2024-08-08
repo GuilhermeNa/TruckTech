@@ -1,7 +1,8 @@
 package br.com.apps.model.dto.fleet
 
 import br.com.apps.model.exceptions.CorruptedFileException
-import org.junit.Assert
+import br.com.apps.model.exceptions.InvalidForSavingException
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
@@ -15,7 +16,7 @@ class TrailerDtoTest {
             masterUid = "1",
             id = "2",
             plate = "PLATE01",
-            fleetType = "FOUR_AXIS",
+            type = "FOUR_AXIS",
             truckId = "3"
         )
     }
@@ -27,7 +28,7 @@ class TrailerDtoTest {
     @Test
     fun `should throw CorruptedFileException when masterUid is null`() {
         trailerDto.masterUid = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
+        assertThrows(CorruptedFileException::class.java) {
             trailerDto.validateDataIntegrity()
         }
     }
@@ -35,7 +36,7 @@ class TrailerDtoTest {
     @Test
     fun `should throw CorruptedFileException when id is null`() {
         trailerDto.id = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
+        assertThrows(CorruptedFileException::class.java) {
             trailerDto.validateDataIntegrity()
         }
     }
@@ -43,24 +44,44 @@ class TrailerDtoTest {
     @Test
     fun `should throw CorruptedFileException when plate is null`() {
         trailerDto.plate = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
+        assertThrows(CorruptedFileException::class.java) {
             trailerDto.validateDataIntegrity()
         }
     }
 
     @Test
-    fun `should throw CorruptedFileException when truckId is null`() {
-        trailerDto.truckId = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
+    fun `should throw CorruptedFileException when type is null`() {
+        trailerDto.type = null
+        assertThrows(CorruptedFileException::class.java) {
             trailerDto.validateDataIntegrity()
         }
     }
 
+    //---------------------------------------------------------------------------------------------//
+    // isReadyForDataBaseInsertion()
+    //---------------------------------------------------------------------------------------------//
+
     @Test
-    fun `should throw CorruptedFileException when fleetType is null`() {
-        trailerDto.fleetType = null
-        Assert.assertThrows(CorruptedFileException::class.java) {
-            trailerDto.validateDataIntegrity()
+    fun `should throw InvalidForSavingException when masterUid is null for dataBase insertion`() {
+        trailerDto.masterUid = null
+        assertThrows(InvalidForSavingException::class.java) {
+            trailerDto.validateDataForDbInsertion()
+        }
+    }
+
+    @Test
+    fun `should throw InvalidForSavingException when plate is null for dataBase insertion`() {
+        trailerDto.plate = null
+        assertThrows(InvalidForSavingException::class.java) {
+            trailerDto.validateDataForDbInsertion()
+        }
+    }
+
+    @Test
+    fun `should throw InvalidForSavingException when type is null for dataBase insertion`() {
+        trailerDto.type = null
+        assertThrows(InvalidForSavingException::class.java) {
+            trailerDto.validateDataForDbInsertion()
         }
     }
 

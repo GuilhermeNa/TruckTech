@@ -20,7 +20,7 @@ import java.time.LocalDateTime
  *
  * @property masterUid Unique identifier for the master record associated with this transaction.
  * @property id Unique identifier for the [Transaction].
- * @property parentKey Identifier for the [FinancialRecord] associated with this transaction (if applicable).
+ * @property parentId Identifier for the [FinancialRecord] associated with this transaction (if applicable).
  * @property dueDate Date and time when the transaction is due.
  * @property number number of the installment sequentially.
  * @property value Monetary value of the transaction.
@@ -30,7 +30,7 @@ import java.time.LocalDateTime
 data class Transaction(
     val masterUid: String,
     val id: String,
-    val parentKey: String,
+    val parentId: String,
     val dueDate: LocalDateTime,
     val number: Int,
     val value: BigDecimal,
@@ -56,7 +56,7 @@ data class Transaction(
     override fun toDto() = TransactionDto(
         masterUid = masterUid,
         id = id,
-        parentId = parentKey,
+        parentId = parentId,
         dueDate = dueDate.toDate(),
         number = number,
         value = value.toDouble(),

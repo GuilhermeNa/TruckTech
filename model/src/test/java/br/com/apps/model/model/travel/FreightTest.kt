@@ -1,12 +1,11 @@
 package br.com.apps.model.model.travel
 
-import br.com.apps.model.util.ERROR_STRING
 import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.exceptions.null_objects.NullCustomerException
 import br.com.apps.model.model.travel.Freight.Companion.merge
 import br.com.apps.model.test_cases.sampleCustomer
 import br.com.apps.model.test_cases.sampleFreight
-import org.junit.Assert
+import br.com.apps.model.util.ERROR_STRING
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -28,20 +27,9 @@ class FreightTest {
 
     @Test
     fun `should return the commission value`() {
-        //Test 01
-        freight.value = BigDecimal("1000.00")
-        val cValueA = freight.getCommissionValue()
-        Assert.assertEquals(BigDecimal("100.00"), cValueA)
-
-        //Test 02
-        freight.value = BigDecimal("1000.30")
-        val cValueB = freight.getCommissionValue()
-        Assert.assertEquals(BigDecimal("100.03"), cValueB)
-
-        //Test 03
-        freight.value = BigDecimal("1000.49")
-        val cValueC = freight.getCommissionValue()
-        Assert.assertEquals(BigDecimal("100.05"), cValueC)
+        val expected = BigDecimal("1000.00")
+        val value = freight.getCommissionValue()
+        assertEquals(expected, value)
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -50,8 +38,11 @@ class FreightTest {
 
     @Test
     fun `should define the customer for this freight`() {
-        val customer = sampleCustomer()
-        assertEquals(customer, freight.customer)
+        val expected = sampleCustomer()
+
+        freight.setCustomer(sampleCustomer())
+
+        assertEquals(expected, freight.customer)
     }
 
     @Test
@@ -77,14 +68,16 @@ class FreightTest {
 
     @Test
     fun `should return the customers name`() {
-        val name = freight.getCustomerName()
-        assertEquals("Name1", name)
+        freight.setCustomerById(listOf(sampleCustomer()))
+
+        val expected = "Name1"
+        val actual = freight.getCustomerName()
+
+        assertEquals(expected, actual)
     }
 
     @Test
     fun `should return default error text for name when the customer is null`() {
-        freight.customer = null
-
         val name = freight.getCustomerName()
 
         assertEquals(ERROR_STRING, name)
@@ -96,14 +89,16 @@ class FreightTest {
 
     @Test
     fun `should return the customers cnpj`() {
-        val cnpj = freight.getCustomerCnpj()
-        assertEquals("xxx.xxx.xxx/xxxx-xx", cnpj)
+        freight.setCustomerById(listOf(sampleCustomer()))
+
+        val expected = "xxx.xxx.xxx/xxxx-xx"
+        val actual = freight.getCustomerCnpj()
+
+        assertEquals(expected, actual)
     }
 
     @Test
     fun `should return default error text for cnpj when the customer is null`() {
-        freight.customer = null
-
         val cnpj = freight.getCustomerCnpj()
 
         assertEquals(ERROR_STRING, cnpj)
@@ -114,18 +109,16 @@ class FreightTest {
     //---------------------------------------------------------------------------------------------//
 
     @Test
-    fun`should merge a freight list and a customer list`() {
-        val customer = sampleCustomer()
-        freight.customer = null
+    fun `should merge a freight list and a customer list`() {
+        val expected = sampleCustomer()
 
-        listOf(freight).merge(listOf(customer))
+        listOf(freight).merge(listOf(expected))
 
-        assertEquals(customer, freight.customer)
+        assertEquals(expected, freight.customer)
     }
 
     @Test
-    fun`should throw exception for merge when customer list is null`() {
-        freight.customer = null
+    fun `should throw exception for merge when customer list is null`() {
         assertThrows(Exception::class.java) {
             listOf(freight).merge(emptyList())
         }

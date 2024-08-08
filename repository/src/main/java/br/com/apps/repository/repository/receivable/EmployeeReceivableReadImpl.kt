@@ -31,8 +31,10 @@ class EmployeeReceivableReadImpl(fireStore: FirebaseFirestore) : EmployeeReceiva
 
         val listener = collection.whereEqualTo(PARENT_ID, id).whereEqualTo(TYPE, type.name)
 
-        return@withContext if(flow) listener.onSnapShot { it.toReceivableList() }
-        else listener.onComplete { it.toReceivableList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toReceivableList() }
+            false -> listener.onComplete { it.toReceivableList() }
+        }
     }
 
     override suspend fun fetchReceivableByEmployeeIdAndStatus(
@@ -44,8 +46,10 @@ class EmployeeReceivableReadImpl(fireStore: FirebaseFirestore) : EmployeeReceiva
 
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id).whereEqualTo(IS_RECEIVED, isReceived)
 
-        return@withContext if(flow) listener.onSnapShot { it.toReceivableList() }
-        else listener.onComplete { it.toReceivableList() }
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toReceivableList() }
+            false -> listener.onComplete { it.toReceivableList() }
+        }
     }
 
 }
