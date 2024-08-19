@@ -150,5 +150,7 @@
     <string name="finish">Finalizar</string>
     <string name="view">Visualizar</string>
     <string name="add_image">Adicionar imagem</string>
+    <string name="sign">R$</string>
+    <string name="back">Voltar</string>
 
 </resources>

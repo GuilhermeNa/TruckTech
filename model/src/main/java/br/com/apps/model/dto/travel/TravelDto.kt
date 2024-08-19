@@ -1,12 +1,12 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.exceptions.AccessLevelException
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.interfaces.AccessPermissionInterface
 import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.model.util.ACCESS_DENIED
 import br.com.apps.model.util.toLocalDateTime
 import java.util.Date
@@ -26,8 +26,8 @@ data class TravelDto(
     var employeeId: String? = null,
     var initialDate: Date? = null,
     var finalDate: Date? = null,
-    val initialOdometerMeasurement: Double? = null,
-    val finalOdometerMeasurement: Double? = null,
+    val initialOdometer: Double? = null,
+    val finalOdometer: Double? = null,
     @field:JvmField var isClosed: Boolean? = null,
     @field:JvmField var isFinished: Boolean? = null,
 ) : DtoObjectInterface<Travel>, AccessPermissionInterface {
@@ -40,7 +40,7 @@ data class TravelDto(
             isFinished == null ||
             isClosed == null ||
             initialDate == null ||
-            initialOdometerMeasurement == null
+            initialOdometer == null
         ) throw CorruptedFileException("TravelDto data is corrupted: ($this)")
     }
 
@@ -52,8 +52,8 @@ data class TravelDto(
             isClosed == null ||
             initialDate == null ||
             finalDate == null ||
-            initialOdometerMeasurement == null ||
-            finalOdometerMeasurement == null
+            initialOdometer == null ||
+            finalOdometer == null
         ) throw InvalidForSavingException("TravelDto data is invalid: ($this)")
     }
 
@@ -66,8 +66,8 @@ data class TravelDto(
             employeeId = this.employeeId!!,
             initialDate = this.initialDate!!.toLocalDateTime(),
             finalDate = this.finalDate?.toLocalDateTime(),
-            initialOdometerMeasurement = this.initialOdometerMeasurement!!.toBigDecimal(),
-            finalOdometerMeasurement = this.finalOdometerMeasurement?.toBigDecimal(),
+            initialOdometer = this.initialOdometer!!.toBigDecimal(),
+            finalOdometer = this.finalOdometer?.toBigDecimal(),
             isFinished = this.isFinished!!,
             isClosed = this.isClosed!!
         )

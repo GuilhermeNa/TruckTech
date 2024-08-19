@@ -3,9 +3,10 @@ package br.com.apps.repository.util
 import br.com.apps.model.dto.CustomerDto
 import br.com.apps.model.dto.FleetFineDto
 import br.com.apps.model.dto.LabelDto
-import br.com.apps.model.dto.TruckDocumentDto
+import br.com.apps.model.dto.UserDto
 import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.dto.bank.BankDto
+import br.com.apps.model.dto.document.TruckDocumentDto
 import br.com.apps.model.dto.employee_dto.DriverDto
 import br.com.apps.model.dto.finance.TransactionDto
 import br.com.apps.model.dto.finance.payable.PayableDto
@@ -14,20 +15,20 @@ import br.com.apps.model.dto.fleet.TrailerDto
 import br.com.apps.model.dto.fleet.TruckDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
-import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.dto.request.request.TravelRequestDto
+import br.com.apps.model.dto.request.ItemDto
+import br.com.apps.model.dto.request.RequestDto
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.OutlayDto
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.dto.travel.TravelAidDto
 import br.com.apps.model.dto.travel.TravelDto
-import br.com.apps.model.dto.user_dto.CommonUserDto
 import br.com.apps.model.exceptions.ConversionException
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.FleetFine
-import br.com.apps.model.model.TruckDocument
+import br.com.apps.model.model.User
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
+import br.com.apps.model.model.document.TruckDocument
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.finance.Transaction
 import br.com.apps.model.model.finance.payable.Payable
@@ -37,14 +38,13 @@ import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
-import br.com.apps.model.model.request.PaymentRequest
-import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.request.Item
+import br.com.apps.model.model.request.Request
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Outlay
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.model.travel.TravelAid
-import br.com.apps.model.model.user.CommonUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 
@@ -108,7 +108,7 @@ fun DocumentSnapshot.toRefuelObject(): Refuel {
 // -
 //------------------------------------------------------------------------------------------------//
 
-fun QuerySnapshot.toExpendList(): List<Outlay> {
+fun QuerySnapshot.toOutlayList(): List<Outlay> {
     return this.mapNotNull { expendDocument ->
         expendDocument.toExpendObject()
     }
@@ -183,31 +183,15 @@ fun DocumentSnapshot.toLoanObject(): Loan {
 // -
 //------------------------------------------------------------------------------------------------//
 
-fun QuerySnapshot.toRequestList(): List<PaymentRequest> {
-    this.isEmpty
+fun QuerySnapshot.toRequestList(): List<Request> {
     return this.mapNotNull { requestDocument ->
         requestDocument.toRequestObject()
     }
 }
 
-fun DocumentSnapshot.toRequestObject(): PaymentRequest {
-    return this.toObject(TravelRequestDto::class.java)?.toModel()
+fun DocumentSnapshot.toRequestObject(): Request {
+    return this.toObject(RequestDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toRequestObject: ($this)")
-}
-
-//------------------------------------------------------------------------------------------------//
-// -
-//------------------------------------------------------------------------------------------------//
-
-fun QuerySnapshot.toRequestItemList(): List<RequestItem> {
-    return this.mapNotNull { requestItemDocument ->
-        requestItemDocument.toRequestItemObject()
-    }
-}
-
-fun DocumentSnapshot.toRequestItemObject(): RequestItem {
-    return this.toObject(RequestItemDto::class.java)?.toModel()
-        ?: throw ConversionException("ConversionExpression, toRequestItemObject: ($this)")
 }
 
 //------------------------------------------------------------------------------------------------//
@@ -305,8 +289,9 @@ fun DocumentSnapshot.toCustomerObject(): Customer {
 // -
 //------------------------------------------------------------------------------------------------//
 
-fun DocumentSnapshot.toCommonUserObject(): CommonUser {
-    return this.toObject(CommonUserDto::class.java)?.toModel() as CommonUser
+fun DocumentSnapshot.toUserObject(): User {
+    return this.toObject(UserDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toUserObject: ($this)")
 }
 
 //------------------------------------------------------------------------------------------------//
@@ -382,4 +367,19 @@ fun QuerySnapshot.toTransactionList(): List<Transaction> {
 fun DocumentSnapshot.toTransactionObject(): Transaction {
     return this.toObject(TransactionDto::class.java)?.toModel()
         ?: throw ConversionException("ConversionExpression, toTransactionObject: ($this)")
+}
+
+//------------------------------------------------------------------------------------------------//
+// -
+//------------------------------------------------------------------------------------------------//
+
+fun QuerySnapshot.toItemList(): List<Item> {
+    return this.mapNotNull { document ->
+        document.toItemObject()
+    }
+}
+
+fun DocumentSnapshot.toItemObject(): Item {
+    return this.toObject(ItemDto::class.java)?.toModel()
+        ?: throw ConversionException("ConversionExpression, toItemObject: ($this)")
 }

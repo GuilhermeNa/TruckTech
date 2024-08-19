@@ -1,6 +1,6 @@
 package br.com.apps.repository.util
 
-import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.enums.AccessLevel
 
 /**
  * Represents a request to write data of type T, along with the required permission level.

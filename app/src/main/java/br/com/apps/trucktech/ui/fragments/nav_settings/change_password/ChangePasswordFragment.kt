@@ -36,15 +36,6 @@ class ChangePasswordFragment : BaseFragmentWithToolbar() {
 
     private val viewModel: ChangePasswordFragmentViewModel by viewModel()
 
-
-    //---------------------------------------------------------------------------------------------//
-    // ON CREATE
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     //---------------------------------------------------------------------------------------------//
     // ON CREATE VIEW
     //---------------------------------------------------------------------------------------------//

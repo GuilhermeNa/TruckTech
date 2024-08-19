@@ -5,24 +5,21 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.travel.Outlay
-import br.com.apps.model.model.travel.Freight
-import br.com.apps.trucktech.R
-import br.com.apps.trucktech.databinding.ItemToReceiveBinding
 import br.com.apps.model.expressions.getDayFormatted
 import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.model.travel.Freight
+import br.com.apps.model.model.travel.Outlay
+import br.com.apps.trucktech.R
+import br.com.apps.trucktech.databinding.ItemToReceiveBinding
 
 private const val VALUE_TEXT_FREIGHT = "Minha comissão:"
 
 private const val VALUE_TEXT_EXPEND = "Meu reembolso:"
 
-class ToReceiveRecyclerAdapter<T>(
-    private val context: Context,
-    dataSet: List<T>
-) : RecyclerView.Adapter<ToReceiveRecyclerAdapter<T>.ViewHolder>() {
+class ToReceiveRecyclerAdapter<T>(private val context: Context) : RecyclerView.Adapter<ToReceiveRecyclerAdapter<T>.ViewHolder>() {
 
-    private val dataSet = dataSet.toMutableList()
+    private val dataSet = mutableListOf<T>()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER

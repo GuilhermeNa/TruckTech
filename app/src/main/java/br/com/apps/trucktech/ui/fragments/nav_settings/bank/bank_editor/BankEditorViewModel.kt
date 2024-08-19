@@ -6,7 +6,6 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.bank.BankAccountDto
-import br.com.apps.model.enums.WorkRole
 import br.com.apps.model.enums.PixType.Companion.getPixTypeDescriptions
 import br.com.apps.model.exceptions.null_objects.NullBankAccountException
 import br.com.apps.model.exceptions.null_objects.NullBankException
@@ -15,18 +14,18 @@ import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.util.toDate
 import br.com.apps.repository.repository.bank.BankRepository
-import br.com.apps.repository.repository.employee.EmployeeRepository
+import br.com.apps.repository.repository.bank_account.BankAccountRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
-import br.com.apps.usecase.usecase.EmployeeUseCase
+import br.com.apps.usecase.usecase.BankAccountUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 class BankEditorViewModel(
     private val vmData: BankEVmData,
-    private val employeeUseCase: EmployeeUseCase,
-    private val employeeRepository: EmployeeRepository,
+    private val bankAccRepo: BankAccountRepository,
+    private val bankAccUseCase: BankAccountUseCase,
     private val bankRepository: BankRepository
 ) : ViewModel() {
 
@@ -55,7 +54,8 @@ class BankEditorViewModel(
     }
 
     private suspend fun loadBanks(): List<Bank> {
-        val response = bankRepository.fetchBankList().asFlow().first()
+        val response = bankRepository.fetchBankList()
+            .asFlow().first()
         return when (response) {
             is Response.Error -> throw response.exception
             is Response.Success -> response.data
@@ -64,11 +64,9 @@ class BankEditorViewModel(
     }
 
     private suspend fun loadBankAccount(bankAccId: String): BankAccount {
-        val response = employeeRepository.getBankAccountById(
-            vmData.employeeId,
-            bankAccId,
-            WorkRole.DRIVER
-        ).asFlow().first()
+        val response = bankAccRepo.fetchBankAccById(bankAccId)
+            .asFlow().first()
+
         return when (response) {
             is Response.Error -> throw response.exception
             is Response.Success -> response.data
@@ -102,8 +100,7 @@ class BankEditorViewModel(
     fun save(viewDto: BankAccountDto) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
             try {
-                val writeReq = WriteRequest(data = generateDto(viewDto))
-                employeeUseCase.saveBankAccount(writeReq, WorkRole.DRIVER)
+                bankAccUseCase.save(WriteRequest(data = generateDto(viewDto)))
                 emit(Response.Success())
 
             } catch (e: Exception) {

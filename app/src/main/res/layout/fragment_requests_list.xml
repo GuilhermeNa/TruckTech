@@ -30,22 +30,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                android:id="@+id/swipe_refresh"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_requests_list_recycler"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/fragment_requests_list_recycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    android:paddingBottom="80dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/item_request" />
-
-            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="80dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_request" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fragment_requests_list_fab"
@@ -53,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:contentDescription="@string/add_a_new_order"
-                android:src="@drawable/icon_order"
+                android:src="@drawable/icon_add"
                 app:layout_anchor="@id/fragment_requests_list_recycler"
                 app:layout_anchorGravity="bottom|right|end"
                 app:layout_behavior=".ui.behaviors.ScrollAwareFab" />

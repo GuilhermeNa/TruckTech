@@ -5,12 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.enums.FleetCategory
 import br.com.apps.model.model.fleet.Trailer
 import br.com.apps.model.model.fleet.Truck
-import br.com.apps.repository.util.DRIVER_ID
+import br.com.apps.repository.util.EMPLOYEE_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_TRUCKS
-import br.com.apps.repository.util.FLEET_TYPE
 import br.com.apps.repository.util.MASTER_UID
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TRUCK_ID
+import br.com.apps.repository.util.TYPE
 import br.com.apps.repository.util.onComplete
 import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toTrailerList
@@ -32,7 +32,7 @@ class FleetReadImpl(fireStore: FirebaseFirestore) : FleetReadInterface {
         uid.validateId()?.let { error -> return@withContext MutableLiveData(error) }
 
         val listener = collection.whereEqualTo(MASTER_UID, uid)
-            .whereEqualTo(FLEET_TYPE, FleetCategory.TRUCK.toString())
+            .whereEqualTo(TYPE, FleetCategory.TRUCK.name)
 
         return@withContext when (flow) {
             true -> listener.onSnapShot { it.toTruckList() }
@@ -60,8 +60,8 @@ class FleetReadImpl(fireStore: FirebaseFirestore) : FleetReadInterface {
     ): LiveData<Response<Truck>> = withContext(Dispatchers.IO) {
         id.validateId()?.let { error -> return@withContext MutableLiveData(error) }
 
-        val listener = collection.whereEqualTo(DRIVER_ID, id)
-            .whereEqualTo(FLEET_TYPE, FleetCategory.TRUCK.toString()).limit(1)
+        val listener = collection.whereEqualTo(EMPLOYEE_ID, id)
+            .whereEqualTo(TYPE, FleetCategory.TRUCK.name).limit(1)
 
         return@withContext when (flow) {
             true -> listener.onSnapShot { it.toTruckList()[0] }

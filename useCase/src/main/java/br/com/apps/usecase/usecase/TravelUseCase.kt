@@ -3,8 +3,8 @@ package br.com.apps.usecase.usecase
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.dto.travel.TravelDto
+import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.repository.outlay.OutlayRepository
 import br.com.apps.repository.repository.refuel.RefuelRepository
@@ -49,8 +49,8 @@ class TravelUseCase(
         return if (travels.size == 1)
             travels[0].getFuelAverage()
         else {
-            val initialOdometer = travels.last().initialOdometerMeasurement
-            val finalOdometer = travels.first().finalOdometerMeasurement
+            val initialOdometer = travels.last().initialOdometer
+            val finalOdometer = travels.first().finalOdometer
             val liters = travels.flatMap { it.refuels!! }.sumOf { it.amountLiters }
 
             val distance = finalOdometer?.subtract(initialOdometer)
@@ -108,9 +108,9 @@ class TravelUseCase(
     suspend fun deleteTravel(travel: Travel) {
         coroutineScope {
             if (!travel.isDeletable()) throw InvalidParameterException("This travel cannot be deleted")
-            travel.freights?.forEach { it.id?.let { id -> freightRepository.delete(id) } }
-            travel.refuels?.forEach { it.id?.let { id -> refuelRepository.delete(id) } }
-            travel.outlays?.forEach { it.id?.let { id -> expendRepository.delete(id) } }
+            travel.freights.forEach { it.id.let { id -> freightRepository.delete(id) } }
+            travel.refuels.forEach { it.id.let { id -> refuelRepository.delete(id) } }
+            travel.outlays.forEach { it.id.let { id -> expendRepository.delete(id) } }
             repository.delete(travel.id!!)
         }
 

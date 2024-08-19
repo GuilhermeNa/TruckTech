@@ -1,10 +1,8 @@
 package br.com.apps.model.model.travel
 
 import br.com.apps.model.dto.travel.TravelDto
-import br.com.apps.model.exceptions.DateOrderException
 import br.com.apps.model.exceptions.DuplicatedItemsException
-import br.com.apps.model.exceptions.EmptyDataException
-import br.com.apps.model.exceptions.OdometerOrderException
+import br.com.apps.model.exceptions.invalid.InvalidDateException
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.util.DUPLICATED_ID
 import br.com.apps.model.util.toDate
@@ -26,8 +24,8 @@ import java.time.LocalDateTime
  * @property employeeId Identifier for the [Employee] responsible for this travel.
  * @property initialDate Date and time when the travel started.
  * @property finalDate Optional date and time when the travel ended. If not provided, the travel is ongoing.
- * @property initialOdometerMeasurement Odometer reading at the start of the travel.
- * @property finalOdometerMeasurement Optional odometer reading at the end of the travel. If not provided, it is not yet concluded.
+ * @property initialOdometer Odometer reading at the start of the travel.
+ * @property finalOdometer Optional odometer reading at the end of the travel. If not provided, it is not yet concluded.
  * @property freights List of [Freight]s associated with this travel. Represents the cargo shipments during the journey.
  * @property refuels List of [Refuel]s associated with this travel. Represents fuel transactions that occurred during the journey.
  * @property outlays List of [Outlay]s associated with this travel. Represents expenditures incurred during the journey.
@@ -42,27 +40,23 @@ data class Travel(
     val employeeId: String,
     val initialDate: LocalDateTime,
     val finalDate: LocalDateTime? = null,
-    val initialOdometerMeasurement: BigDecimal,
-    val finalOdometerMeasurement: BigDecimal? = null,
+    val initialOdometer: BigDecimal,
+    val finalOdometer: BigDecimal? = null,
     val isClosed: Boolean,
-    val isFinished: Boolean,
-    private val _freights: MutableList<Freight> = mutableListOf(),
-    private val _refuels: MutableList<Refuel> = mutableListOf(),
-    private val _outlays: MutableList<Outlay> = mutableListOf(),
-    private val _aids: MutableList<TravelAid> = mutableListOf()
+    val isFinished: Boolean
 ) : ModelObjectInterface<TravelDto> {
 
-    val freights: List<Freight>
-        get() = _freights
+    private val _freights: MutableList<Freight> = mutableListOf()
+    val freights: List<Freight> get() = _freights.sortedBy { it.loadingDate }
 
-    val refuels: List<Refuel>
-        get() = _refuels
+    private val _refuels: MutableList<Refuel> = mutableListOf()
+    val refuels: List<Refuel> get() = _refuels.sortedBy { it.odometerMeasure }
 
-    val outlays: List<Outlay>
-        get() = _outlays
+    private val _outlays: MutableList<Outlay> = mutableListOf()
+    val outlays: List<Outlay> get() = _outlays.sortedBy { it.date }
 
-    val aids: List<TravelAid>
-        get() = _aids
+    private val _aids: MutableList<TravelAid> = mutableListOf()
+    val aids: List<TravelAid> get() = _aids.sortedBy { it.date }
 
     companion object {
         const val FREIGHT = 0
@@ -90,32 +84,96 @@ data class Travel(
             }
         }
 
+        fun List<Travel>.getProfitPercent(): BigDecimal {
+            val total = this.sumOf { it.getProfitPercent() }
+            return total.divide(BigDecimal(this.size), 2, RoundingMode.HALF_EVEN)
+        }
+
     }
 
-    fun addAllFreights(freights: List<Freight>) {
+    fun addFreight(freight: Freight) {
         val existingIds = _freights.asSequence().map { it.id }.toSet()
-        val newFreights = freights.distinctBy { it.id }.filter { it.id !in existingIds }
-        _freights.addAll(newFreights)
+
+        if (freight.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+        if (freight.loadingDate < initialDate) throw InvalidDateException("It is not possible to enter a freight with a date prior to the start of the trip")
+        finalDate?.let {
+            if (freight.loadingDate > it) throw InvalidDateException("It is not possible to enter a freight with a date after to the end of the trip")
+        }
+
+        _freights.add(freight)
     }
 
-    fun addAllRefuels(refuels: List<Refuel>) {
+    fun addRefuel(refuel: Refuel) {
         val existingIds = _refuels.asSequence().map { it.id }.toSet()
-        val newRefuels = refuels.distinctBy { it.id }.filter { it.id !in existingIds }
-        _refuels.addAll(newRefuels)
+
+        if (refuel.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+        if (refuel.date < initialDate) throw InvalidDateException("It is not possible to enter a refuel with a date prior to the start of the trip")
+        finalDate?.let {
+            if (refuel.date > it) throw InvalidDateException("It is not possible to enter a refuel with a date after to the end of the trip")
+        }
+
+        _refuels.add(refuel)
     }
 
-    fun addAllOutlays(outlays: List<Outlay>) {
+    fun addOutlay(outlay: Outlay) {
         val existingIds = _outlays.asSequence().map { it.id }.toSet()
-        val newOutlays = outlays.distinctBy { it.id }.filter { it.id !in existingIds }
-        _outlays.addAll(newOutlays)
+
+        if (outlay.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+        if (outlay.date < initialDate) throw InvalidDateException("It is not possible to enter a outlay with a date prior to the start of the trip")
+        finalDate?.let {
+            if (outlay.date > it) throw InvalidDateException("It is not possible to enter a outlay with a date after to the end of the trip")
+        }
+
+        _outlays.add(outlay)
     }
 
-    fun addAllAids(aids: List<TravelAid>) {
+    fun addAid(aid: TravelAid) {
         val existingIds = _aids.asSequence().map { it.id }.toSet()
-        val newAids = aids.distinctBy { it.id }.filter { it.id !in existingIds }
-        _aids.addAll(newAids)
+
+        if (aid.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
+        if (aid.date < initialDate) throw InvalidDateException("It is not possible to enter a aid with a date prior to the start of the trip")
+        finalDate?.let {
+            if (aid.date > it) throw InvalidDateException("It is not possible to enter a aid with a date after to the end of the trip")
+        }
+
+        _aids.add(aid)
     }
 
+    /**
+     * Clear the previous list of freights if is already populated and add new freights.
+     */
+    fun addAllFreights(freights: List<Freight>) {
+        _freights.clear()
+        val items = freights.distinctBy { it.id }
+        _freights.addAll(items)
+    }
+
+    /**
+     * Clear the previous list of refuels if is already populated and add new refuels.
+     */
+    fun addAllRefuels(refuels: List<Refuel>) {
+        _refuels.clear()
+        val items = refuels.distinctBy { it.id }
+        _refuels.addAll(items)
+    }
+
+    /**
+     * Clear the previous list of outlays if is already populated and add new outlays.
+     */
+    fun addAllOutlays(outlays: List<Outlay>) {
+        _outlays.clear()
+        val items = outlays.distinctBy { it.id }
+        _outlays.addAll(items)
+    }
+
+    /**
+     * Clear the previous list of aids if is already populated and add new aids.
+     */
+    fun addAllAids(aids: List<TravelAid>) {
+        _aids.clear()
+        val items = aids.distinctBy { it.id }
+        _aids.addAll(items)
+    }
 
     /**
      * Retrieves the size of the specified list associated with the travel.
@@ -124,7 +182,7 @@ data class Travel(
      * @return The size of the specified list.
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
-    fun getListSize(listTag: Int): Int = when (listTag) {
+    fun getSizeOf(listTag: Int): Int = when (listTag) {
         FREIGHT -> _freights.size
         OUTLAY -> _outlays.size
         REFUEL -> _refuels.size
@@ -139,7 +197,7 @@ data class Travel(
      * @return The list of identifiers associated with the specified list type.
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
-    fun getListOfIdsForList(listTag: Int): List<String> = when (listTag) {
+    fun getIdsOf(listTag: Int): List<String> = when (listTag) {
         FREIGHT -> _freights.map { it.id }
         OUTLAY -> _outlays.map { it.id }
         REFUEL -> _refuels.map { it.id }
@@ -152,7 +210,7 @@ data class Travel(
      *
      * @return The total commission value as a BigDecimal.
      */
-    fun getCommissionValue(): BigDecimal {
+    fun getCommission(): BigDecimal {
         return _freights.sumOf { it.getCommissionValue() }
     }
 
@@ -161,8 +219,8 @@ data class Travel(
      *
      * @return The difference between the initial and final odometer measurements as a BigDecimal.
      */
-    fun getDifferenceBetweenInitialAndFinalOdometerMeasure(): BigDecimal =
-        finalOdometerMeasurement?.subtract(initialOdometerMeasurement) ?: BigDecimal.ZERO
+    fun getTraveledDistance(): BigDecimal =
+        finalOdometer?.subtract(initialOdometer) ?: BigDecimal.ZERO
 
     /**
      * Calculates and returns the total value for the specified list type associated with the travel.
@@ -171,7 +229,7 @@ data class Travel(
      * @return The total value for the specified list type as a BigDecimal.
      * @throws InvalidParameterException If an invalid list tag is provided.
      */
-    fun getListTotalValue(listTag: Int): BigDecimal {
+    fun getValueOf(listTag: Int): BigDecimal {
         val value = when (listTag) {
             FREIGHT -> _freights.map { it.value }.sumOf { it }
             OUTLAY -> _outlays.map { it.value }.sumOf { it }
@@ -188,10 +246,10 @@ data class Travel(
      * @return The liquid value as a BigDecimal.
      */
     fun getLiquidValue(): BigDecimal {
-        val freight = getListTotalValue(FREIGHT)
+        val freight = getValueOf(FREIGHT)
         val commission = _freights.sumOf { it.getCommissionValue() }
-        val refuel = getListTotalValue(REFUEL)
-        val expend = getListTotalValue(OUTLAY)
+        val refuel = getValueOf(REFUEL)
+        val expend = getValueOf(OUTLAY)
         return freight.subtract(refuel).subtract(expend).subtract(commission)
             .setScale(2, RoundingMode.HALF_EVEN)
     }
@@ -201,8 +259,9 @@ data class Travel(
      *
      * @return The travel authentication percentage as a Double.
      */
-    fun getTravelAuthenticationPercent(): Double {
-        val authenticableItems = getListSize(FREIGHT) + getListSize(OUTLAY) + getListSize(REFUEL)
+    fun getAuthPercent(): Double {
+        val authenticableItems =
+            getSizeOf(FREIGHT) + getSizeOf(OUTLAY) + getSizeOf(REFUEL) + getSizeOf(AID)
         var authenticated = 0.0
 
         _freights.forEach { if (it.isValid) authenticated++ }
@@ -213,120 +272,36 @@ data class Travel(
     }
 
     /**
-     * Checks if the travel is ready to be finished. It happen when the travel is 100 validated.
-     *
-     * @return True if the travel is ready to be finished, false otherwise.
-     */
-    fun isReadyToBeFinished(): Boolean {
-        return getTravelAuthenticationPercent() == 100.0 && _freights.isNotEmpty()
-    }
-
-    /**
      * Checks if the travel is empty (no freights, expenses, refuels, or aids).
      *
      * @return True if the travel is empty, false otherwise.
      */
-    fun isEmptyTravel(): Boolean {
-        return getListSize(FREIGHT) + getListSize(OUTLAY) + getListSize(REFUEL) + getListSize(AID) == 0
+    fun isEmpty(): Boolean {
+        return getSizeOf(FREIGHT) + getSizeOf(OUTLAY) + getSizeOf(REFUEL) + getSizeOf(AID) == 0
     }
 
     /**
-     * Validates the travel data for saving by checking if all required data is present and valid.
+     * Checks if the travel is ready to be finished. It happen when the travel is 100 validated.
      *
-     * @throws EmptyDataException If no freights are found in the travel.
-     * @throws InvalidParameterException If any freight, refuel, or expense is not valid.
-     * @throws DateOrderException If the dates are in incorrect order.
-     * @throws DuplicatedItemsException If there are duplicated items in any list.
-     * @throws OdometerOrderException If the odometer measurements are in incorrect order.
-     * @throws NullPointerException If there is a failure to load freights.
+     * @return True if the travel is ready to be finished, false otherwise.
      */
-    fun validateForSaving() {
-        _freights.also {
-            if (it.isEmpty()) throw EmptyDataException("Nenhuma viagem encontrada")
-            it.forEach { f ->
-                if (!f.isValid) throw InvalidParameterException("Frete não validado")
-            }
+    fun isReadyToFinalize(): Boolean {
+        _freights.run {
+            if (isEmpty()) return false
+            else if (any { !it.isValid }) return false
         }
-
-        _refuels.forEach { r ->
-            if (!r.isValid) throw InvalidParameterException("Abastecimento não validado")
+        _outlays.run {
+            if(isEmpty()) return false
+            else if (any { !it.isValid }) return false
         }
-
-        _outlays.forEach { e ->
-            if (!e.isValid) throw InvalidParameterException("Despesa não validada")
+        _refuels.run {
+            if (isEmpty()) return false
+            else if (any { !it.isValid }) return false
         }
-
-        validateDatesOrder()
-        thereIsDuplicatedItems()
-        validateOdometerMeasures()
-    }
-
-    private fun validateDatesOrder() {
-        finalDate?.let {
-            if (initialDate.isAfter(finalDate)) throw DateOrderException("Dates in wrong order")
-        } ?: throw NullPointerException("Final date is null")
-    }
-
-    private fun validateOdometerMeasures() {
-        finalOdometerMeasurement?.let {
-            if (initialOdometerMeasurement >
-                finalOdometerMeasurement
-            ) throw OdometerOrderException("Incorrect odometer measure: final cannot be higher than initial measure")
+        _aids.run {
+            if (any { !it.isValid }) return false
         }
-    }
-
-    private fun thereIsDuplicatedItems() {
-        _freights.let { freights ->
-            val uniqueIds = mutableSetOf<String>()
-
-            freights.map { it.id }.forEach { id ->
-                if (uniqueIds.contains(id)) {
-                    throw DuplicatedItemsException("There is duplicated itens for travel freight list")
-                } else {
-                    uniqueIds.add(id)
-                }
-            }
-        }
-
-        _refuels.let { refuels ->
-            val uniqueIds = mutableSetOf<String>()
-
-            refuels.map { it.id }.forEach { id ->
-                if (uniqueIds.contains(id)) {
-                    throw DuplicatedItemsException("There is duplicated itens for travel refuel list")
-                } else {
-                    uniqueIds.add(id)
-                }
-            }
-
-        }
-
-        _outlays.let { expends ->
-            val uniqueIds = mutableSetOf<String>()
-
-            expends.map { it.id }.forEach { id ->
-                if (uniqueIds.contains(id)) {
-                    throw DuplicatedItemsException("There is duplicated itens for travel expend list")
-                } else {
-                    uniqueIds.add(id)
-                }
-            }
-
-        }
-
-        _aids.let { aids ->
-            val uniqueIds = mutableSetOf<String>()
-
-            aids.map { it.id }.forEach { id ->
-                if (uniqueIds.contains(id)) {
-                    throw DuplicatedItemsException("There is duplicated itens for travel aid list")
-                } else {
-                    uniqueIds.add(id)
-                }
-            }
-
-        }
-
+        return true
     }
 
     /**
@@ -356,13 +331,13 @@ data class Travel(
      */
     fun getProfitPercent(): BigDecimal {
         fun calcWaste(): BigDecimal {
-            val value = getListTotalValue(REFUEL) +
-                    getListTotalValue(OUTLAY) +
-                    getCommissionValue()
+            val value = getValueOf(REFUEL) +
+                    getValueOf(OUTLAY) +
+                    getCommission()
             return value.setScale(2)
         }
 
-        val profit = getListTotalValue(FREIGHT)
+        val profit = getValueOf(FREIGHT)
         val waste = calcWaste()
 
         return when {
@@ -386,7 +361,7 @@ data class Travel(
     fun getFuelAverage(): BigDecimal {
         return _refuels.let { refuels ->
             val liters = refuels.sumOf { it.amountLiters }
-            val distance = getDifferenceBetweenInitialAndFinalOdometerMeasure()
+            val distance = getTraveledDistance()
             distance.divide(liters, 2, RoundingMode.HALF_EVEN)
         } ?: BigDecimal.ZERO
     }
@@ -401,31 +376,6 @@ data class Travel(
         return _refuels.last().isCompleteRefuel
     }
 
-    fun addFreight(freight: Freight) {
-        val existingIds = _freights.asSequence().map { it.id }.toSet()
-        if (freight.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
-        _freights.add(freight)
-    }
-
-    fun addRefuel(refuel: Refuel) {
-        val existingIds = _refuels.asSequence().map { it.id }.toSet()
-        if (refuel.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
-        _refuels.add(refuel)
-    }
-
-    fun addOutlay(outlay: Outlay) {
-        val existingIds = _outlays.asSequence().map { it.id }.toSet()
-        if (outlay.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
-        _outlays.add(outlay)
-    }
-
-    fun addAid(aid: TravelAid) {
-        val existingIds = _aids.asSequence().map { it.id }.toSet()
-        if (aid.id in existingIds) throw DuplicatedItemsException(DUPLICATED_ID)
-        _aids.add(aid)
-    }
-
-
     override fun toDto() = TravelDto(
         masterUid = this.masterUid,
         id = this.id,
@@ -433,18 +383,10 @@ data class Travel(
         employeeId = this.employeeId,
         initialDate = this.initialDate.toDate(),
         finalDate = this.finalDate?.toDate(),
-        initialOdometerMeasurement = this.initialOdometerMeasurement.toDouble(),
-        finalOdometerMeasurement = this.finalOdometerMeasurement?.toDouble(),
+        initialOdometer = this.initialOdometer.toDouble(),
+        finalOdometer = this.finalOdometer?.toDouble(),
         isFinished = this.isFinished,
         isClosed = this.isClosed
     )
 
 }
-
-data class PerformanceItem(
-    val title: String,
-    val meta: String,
-    val hit: String,
-    val percent: String,
-    var progressBar: Int
-)

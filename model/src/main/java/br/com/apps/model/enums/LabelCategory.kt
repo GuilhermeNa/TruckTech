@@ -1,7 +1,9 @@
 package br.com.apps.model.enums
 
 enum class LabelCategory {
-    DOCUMENT,
+    TRUCK_DOCUMENT,
+    ENTERPRISE_DOCUMENT,
+    EMPLOYEE_DOCUMENT,
 
     INCOME,
 
@@ -12,4 +14,3 @@ enum class LabelCategory {
 
 }
 
-// OutLay = COST & EXPENSE

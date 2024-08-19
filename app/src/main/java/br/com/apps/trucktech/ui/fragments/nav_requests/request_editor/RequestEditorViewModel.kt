@@ -5,23 +5,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.dto.request.request.TravelRequestDto
-import br.com.apps.model.model.request.PaymentRequest
-import br.com.apps.model.model.request.RequestItem
-import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.dto.request.RequestDto
+import br.com.apps.model.enums.AccessLevel
+import br.com.apps.model.exceptions.null_objects.NullItemException
+import br.com.apps.model.exceptions.null_objects.NullRequestException
+import br.com.apps.model.model.request.Item
+import br.com.apps.model.model.request.Request
 import br.com.apps.repository.repository.StorageRepository
+import br.com.apps.repository.repository.item.ItemRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.usecase.usecase.RequestUseCase
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class RequestEditorViewModel(
     private val vmData: RequestEditorVmData,
-    private val repository: RequestRepository,
+    private val requestRepo: RequestRepository,
+    private val itemRepo: ItemRepository,
     private val useCase: RequestUseCase,
     private val storage: StorageRepository
 ) : ViewModel() {
@@ -33,7 +36,7 @@ class RequestEditorViewModel(
      * LiveData holding the response data of type [Response] with a [PaymentRequest]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<Response<PaymentRequest>>()
+    private val _data = MutableLiveData<Response<Request>>()
     val data get() = _data
 
     /**
@@ -47,67 +50,54 @@ class RequestEditorViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        loadData { request, items ->
-            request.itemsList = items.toMutableList()
-            sendResponse(request)
-        }
+        /* loadData { request, items ->
+             request.addAll(items)
+             sendResponse(request)
+         }*/
+        loadData()
     }
 
-    fun loadData(complete: (request: PaymentRequest, items: List<RequestItem>) -> Unit) {
+    private fun loadData() {
         viewModelScope.launch {
-            val request = loadRequest()
-            loadItems { items -> complete(request, items) }
-        }
-    }
 
-    private suspend fun loadRequest(): PaymentRequest {
-        val deferred = CompletableDeferred<PaymentRequest>()
-
-        repository.fetchRequestById(vmData.requestId).asFlow().first { response ->
-            when (response) {
-                is Response.Error -> _data.value = response
-                is Response.Success -> {
-                    if (response.data != null) deferred.complete(response.data!!)
-                    else _data.value = Response.Error(NullPointerException())
+            combine(
+                requestRepo.fetchRequestById(vmData.requestId, true).asFlow(),
+                itemRepo.fetchItemsByParentId(vmData.requestId, true).asFlow()
+            ) { requestResponse, itemResponse ->
+                val request = when (requestResponse) {
+                    is Response.Error -> throw requestResponse.exception
+                    is Response.Success -> requestResponse.data ?: throw NullRequestException()
                 }
-            }
-            true
-        }
-
-        return deferred.await()
-    }
-
-    private suspend fun loadItems(complete: (List<RequestItem>) -> Unit) {
-        repository.fetchItemListByRequestId(vmData.requestId, true).asFlow().collect { response ->
-            when (response) {
-                is Response.Error -> _data.value = response
-                is Response.Success -> {
-                    if (response.data != null) complete(response.data!!)
-                    else _data.value = Response.Error(NullPointerException())
+                val items = when (itemResponse) {
+                    is Response.Error -> throw itemResponse.exception
+                    is Response.Success -> itemResponse.data ?: throw NullItemException()
                 }
+
+                request.addAll(items)
+                sendResponse(request)
+
             }
         }
-
     }
 
-    private fun sendResponse(request: PaymentRequest) {
+    private fun sendResponse(request: Request) {
         if (_urlImage.value == null) {
-            request.encodedImage?.let { _urlImage.value = it }
+            request.urlImage?.let { _urlImage.value = it }
         }
         _data.value = Response.Success(request)
     }
 
-    fun deleteItem(item: RequestItem) =
+    fun deleteItem(item: Item) =
         liveData<Response<Unit>>(viewModelScope.coroutineContext) {
-            try {
-                val dto = getRequestDto()
-                useCase.deleteItem(vmData.permission, dto, item)
-                emit(Response.Success())
+            /*      try {
+                      val dto = getRequestDto()
+                      useCase.deleteItem(vmData.permission, dto, item)
+                      emit(Response.Success())
 
-            } catch (e: Exception) {
-                e.printStackTrace()
-                emit(Response.Error(e))
-            }
+                  } catch (e: Exception) {
+                      e.printStackTrace()
+                      emit(Response.Error(e))
+                  }*/
         }
 
     /**
@@ -136,12 +126,12 @@ class RequestEditorViewModel(
 
         GlobalScope.launch {
             val url = storage.postImage(ba, "requests/${dto.id}.jpeg")
-            repository.updateRequestImageUrl(dto.id!!, url)
+            requestRepo.updateUrlImage(dto.id!!, url)
         }
 
     }
 
-    private fun getRequestDto(): TravelRequestDto {
+    private fun getRequestDto(): RequestDto {
         return (data.value as Response.Success).data!!.toDto()
     }
 

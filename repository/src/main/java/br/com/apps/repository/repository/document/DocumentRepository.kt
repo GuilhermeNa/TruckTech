@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.document
 
-import br.com.apps.model.dto.TruckDocumentDto
+import br.com.apps.model.dto.document.TruckDocumentDto
 
 
 class DocumentRepository(

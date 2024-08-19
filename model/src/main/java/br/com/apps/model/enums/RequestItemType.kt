@@ -1,6 +1,6 @@
 package br.com.apps.model.enums
 
-import br.com.apps.model.exceptions.InvalidTypeException
+import br.com.apps.model.exceptions.invalid.InvalidTypeException
 
 enum class RequestItemType(val description: String) {
     REFUEL("REFUEL"),

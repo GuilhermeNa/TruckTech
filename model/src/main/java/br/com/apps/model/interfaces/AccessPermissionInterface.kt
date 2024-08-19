@@ -1,6 +1,6 @@
 package br.com.apps.model.interfaces
 
-import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.enums.AccessLevel
 
 /**
  * Interface for managing and validating access permissions.

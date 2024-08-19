@@ -41,7 +41,7 @@ class CameraActivity : AppCompatActivity() {
 
     private val galleryActivityResultLauncher =
         registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) processGalleryResult(result)
             else finish()

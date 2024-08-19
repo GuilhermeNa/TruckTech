@@ -1,6 +1,6 @@
 package br.com.apps.model.enums
 
-import br.com.apps.model.exceptions.InvalidTypeException
+import br.com.apps.model.exceptions.invalid.InvalidTypeException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test

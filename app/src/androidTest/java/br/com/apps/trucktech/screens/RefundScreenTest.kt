@@ -69,7 +69,7 @@ class RefundScreenTest: BaseInstrumentedTest() {
             isFinished = false,
             isClosed = false,
             initialDate = LocalDateTime.of(2024, 6, 1, 1, 10).toDate(),
-            initialOdometerMeasurement = 10000.0,
+            initialOdometer = 10000.0,
         )
 
         val expend = OutlayDto(
@@ -83,7 +83,6 @@ class RefundScreenTest: BaseInstrumentedTest() {
             description = "Troca de pneus",
             value = 150.0,
             isPaidByEmployee = true,
-            isAlreadyRefunded = false,
             isValid = true
         )
 

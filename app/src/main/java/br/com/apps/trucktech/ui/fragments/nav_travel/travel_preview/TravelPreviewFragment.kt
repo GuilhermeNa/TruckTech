@@ -11,6 +11,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import br.com.apps.model.expressions.getCompleteDateInPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.expressions.toNumberDecimalPtBr
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.UNKNOWN_EXCEPTION
@@ -18,12 +21,9 @@ import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentTravelPreviewBinding
 import br.com.apps.trucktech.expressions.getColorById
 import br.com.apps.trucktech.expressions.getColorStateListById
-import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
-import br.com.apps.model.expressions.toCurrencyPtBr
-import br.com.apps.model.expressions.toNumberDecimalPtBr
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -298,13 +298,13 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
             //ODOMETER
             boxOdometer.apply {
                 boxTravelPreviewInitialMeasure.text =
-                    t.initialOdometerMeasurement.toNumberDecimalPtBr() + " - km"
+                    t.initialOdometer.toNumberDecimalPtBr() + " - km"
                 boxTravelPreviewFinalMeasure.apply {
                     visibility =
-                        if (t.finalOdometerMeasurement == null) {
+                        if (t.finalOdometer == null) {
                             GONE
                         } else {
-                            text = t.finalOdometerMeasurement!!.toNumberDecimalPtBr() + " - km"
+                            text = t.finalOdometer!!.toNumberDecimalPtBr() + " - km"
                             VISIBLE
                         }
                 }
@@ -312,7 +312,7 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
 
             //HEADER
             boxHeader.apply {
-                val percent = t.getTravelAuthenticationPercent().toInt()
+                val percent = t.getAuthPercent().toInt()
                 balance.text = t.getLiquidValue().toCurrencyPtBr()
                 progressBar.progress = percent
                 progressValue.text = "$percent% completo"
@@ -320,27 +320,27 @@ class TravelPreviewFragment : BaseFragmentWithToolbar() {
 
             //AIDS
             boxAid.apply {
-                amountField.text = t.getListSize(Travel.AID).toString()
-                valueField.text = t.getListTotalValue(Travel.AID).toCurrencyPtBr()
+                amountField.text = t.getSizeOf(Travel.AID).toString()
+                valueField.text = t.getValueOf(Travel.AID).toCurrencyPtBr()
             }
 
             //FREIGHTS
             boxFreight.apply {
-                amountField.text = t.getListSize(Travel.FREIGHT).toString()
-                valueField.text = t.getListTotalValue(Travel.FREIGHT).toCurrencyPtBr()
-                commissionField.text = t.getCommissionValue().toCurrencyPtBr()
+                amountField.text = t.getSizeOf(Travel.FREIGHT).toString()
+                valueField.text = t.getValueOf(Travel.FREIGHT).toCurrencyPtBr()
+                commissionField.text = t.getCommission().toCurrencyPtBr()
             }
 
             //REFUELS
             boxRefuel.apply {
-                amountField.text = t.getListSize(Travel.REFUEL).toString()
-                valueField.text = t.getListTotalValue(Travel.REFUEL).toCurrencyPtBr()
+                amountField.text = t.getSizeOf(Travel.REFUEL).toString()
+                valueField.text = t.getValueOf(Travel.REFUEL).toCurrencyPtBr()
             }
 
             //EXPENDS
             boxExpend.apply {
-                amountField.text = t.getListSize(Travel.OUTLAY).toString()
-                valueField.text = t.getListTotalValue(Travel.OUTLAY).toCurrencyPtBr()
+                amountField.text = t.getSizeOf(Travel.OUTLAY).toString()
+                valueField.text = t.getValueOf(Travel.OUTLAY).toCurrencyPtBr()
             }
 
         }

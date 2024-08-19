@@ -5,17 +5,15 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.payroll.Loan
-import br.com.apps.trucktech.databinding.ItemLoanBinding
 import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.model.payroll.Loan
+import br.com.apps.trucktech.databinding.ItemLoanBinding
 
-class LoanRecyclerAdapter(
-    private val context: Context,
-    dataSet: List<Loan>
-) : RecyclerView.Adapter<LoanRecyclerAdapter.ViewHolder>() {
+class LoanRecyclerAdapter(private val context: Context) :
+    RecyclerView.Adapter<LoanRecyclerAdapter.ViewHolder>() {
 
-    private val dataSet = dataSet.toMutableList()
+    private val dataSet = mutableListOf<Loan>()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER
@@ -55,36 +53,33 @@ class LoanRecyclerAdapter(
 
     private fun bind(holder: ViewHolder, loan: Loan) {
         holder.apply {
-            date.text = loan.date?.getMonthAndYearInPtBr()
-            total.text = loan.value?.toCurrencyPtBr()
-            installmentValue.text = loan.getInstallmentValue().toCurrencyPtBr()
+            date.text = loan.date.getMonthAndYearInPtBr()
+            total.text = loan.value.toCurrencyPtBr()
+            installmentValue.text = loan.getInstallmentAverageValue()?.toCurrencyPtBr() ?: "-"
             paid.text = getProgressBarText(loan)
             progressBar.progress = getProgressBarPercent(loan)
         }
     }
 
     private fun getProgressBarText(loan: Loan): String {
-        return if (loan.installments != null &&
-            loan.installmentsAlreadyPaid != null
-        ) {
-            "${loan.installmentsAlreadyPaid}/${loan.installments}"
-        } else {
+        return try {
+            val size = loan.transactionsSize()
+            val paid = loan.alreadyPaidTransactions()
+            "${paid}/${size}"
+        } catch (e: Exception) {
             "-/-"
         }
     }
 
     private fun getProgressBarPercent(loan: Loan): Int {
-        return if (loan.installments != null &&
-            loan.installmentsAlreadyPaid != null
-        ) {
-            val x = loan.installmentsAlreadyPaid!!.toDouble()
-            val y = loan.installments!!.toDouble()
-            val z = (x/y)*100
+        return loan.receivable?.run {
+            val x = getProcessedTransactionsSize().toDouble()
+            val y = installments
+            val z = (x / y) * 100
             z.toInt()
-            
-        } else {
-            0
-        }
+
+        } ?: 0
+
     }
 
     @SuppressLint("NotifyDataSetChanged")

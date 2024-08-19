@@ -5,17 +5,14 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.payroll.Advance
-import br.com.apps.trucktech.databinding.ItemAdvanceBinding
 import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.model.payroll.Advance
+import br.com.apps.trucktech.databinding.ItemAdvanceBinding
 
-class AdvanceRecyclerAdapter(
-    private val context: Context,
-    dataSet: List<Advance>
-    ) : RecyclerView.Adapter<AdvanceRecyclerAdapter.ViewHolder>() {
+class AdvanceRecyclerAdapter(private val context: Context): RecyclerView.Adapter<AdvanceRecyclerAdapter.ViewHolder>() {
 
-    private val dataSet = dataSet.toMutableList()
+    private val dataSet = mutableListOf<Advance>()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER
@@ -49,8 +46,8 @@ class AdvanceRecyclerAdapter(
 
     fun bind(holder: ViewHolder, advance: Advance) {
         holder.apply {
-            date.text = advance.date?.getMonthAndYearInPtBr()
-            value.text = advance.value?.toCurrencyPtBr()
+            date.text = advance.date.getMonthAndYearInPtBr()
+            value.text = advance.value.toCurrencyPtBr()
         }
     }
 

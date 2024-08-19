@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.expressions.getDayFormatted
 import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
-import br.com.apps.model.model.TruckDocument
+import br.com.apps.model.model.document.TruckDocument
 import br.com.apps.trucktech.databinding.ItemDocumentBinding
 
 class DocumentsListFragmentAdapter(

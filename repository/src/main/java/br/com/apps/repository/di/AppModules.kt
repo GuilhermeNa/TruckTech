@@ -1,7 +1,6 @@
 package br.com.apps.repository.di
 
 import br.com.apps.repository.repository.StorageRepository
-import br.com.apps.repository.repository.UserRepository
 import br.com.apps.repository.repository.advance.AdvanceReadImpl
 import br.com.apps.repository.repository.advance.AdvanceRepository
 import br.com.apps.repository.repository.auth.AuthenticationRepository
@@ -27,6 +26,9 @@ import br.com.apps.repository.repository.freight.FreightReadImpl
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.repository.freight.FreightWriteImpl
 import br.com.apps.repository.repository.income.IncomeRepository
+import br.com.apps.repository.repository.item.ItemReadImpl
+import br.com.apps.repository.repository.item.ItemRepository
+import br.com.apps.repository.repository.item.ItemWriteImpl
 import br.com.apps.repository.repository.label.LabelReadImpl
 import br.com.apps.repository.repository.label.LabelRepository
 import br.com.apps.repository.repository.label.LabelWriteImpl
@@ -53,6 +55,8 @@ import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.repository.travel.TravelWriteImpl
 import br.com.apps.repository.repository.travel_aid.TravelAidReadImpl
 import br.com.apps.repository.repository.travel_aid.TravelAidRepository
+import br.com.apps.repository.repository.user.UserReadImpl
+import br.com.apps.repository.repository.user.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -86,6 +90,7 @@ val repositoryModules = module {
     single<EmployeePayableRepository> { EmployeePayableRepository(get()) }
     single<BankAccountRepository> { BankAccountRepository(get(), get()) }
     single<TransactionRepository> { TransactionRepository(get()) }
+    single<ItemRepository> { ItemRepository(get(), get()) }
 }
 
 val writeModules = module {
@@ -101,6 +106,7 @@ val writeModules = module {
     single<LabelWriteImpl> { LabelWriteImpl(get()) }
     single<EmployeeWriteImpl> { EmployeeWriteImpl(get()) }
     single<BankAccountWriteImpl> { BankAccountWriteImpl(get()) }
+    single<ItemWriteImpl> { ItemWriteImpl(get()) }
 }
 
 val readModules = module {
@@ -123,6 +129,8 @@ val readModules = module {
     single<EmployeePayableReadImpl> { EmployeePayableReadImpl(get()) }
     single<BankAccountReadImpl> { BankAccountReadImpl(get()) }
     single<TransactionReadImpl> { TransactionReadImpl(get()) }
+    single<UserReadImpl> { UserReadImpl(get()) }
+    single<ItemReadImpl> { ItemReadImpl(get()) }
 }
 
 val fireBaseModules = module {

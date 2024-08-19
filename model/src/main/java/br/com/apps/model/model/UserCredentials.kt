@@ -1,6 +1,6 @@
 package br.com.apps.model.model
 
-import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.enums.AccessLevel
 
 data class UserCredentials(
 

@@ -23,8 +23,8 @@ class TravelDtoTest {
             isClosed = true,
             initialDate = LocalDateTime.of(2022, 1, 1, 12, 0).toDate(),
             finalDate = LocalDateTime.of(2022, 1, 15, 12, 0).toDate(),
-            initialOdometerMeasurement = 10.0,
-            finalOdometerMeasurement = 50.0,
+            initialOdometer = 10.0,
+            finalOdometer = 50.0,
         )
     }
 

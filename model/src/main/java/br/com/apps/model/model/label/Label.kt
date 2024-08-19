@@ -6,14 +6,12 @@ import br.com.apps.model.interfaces.ModelObjectInterface
 
 data class Label(
     val masterUid: String,
-    var id: String? = null,
+    var id: String,
     var name: String,
     var urlIcon: String? = null,
     var color: Int? = 0,
     val type: LabelCategory,
-    @field:JvmField
     val isDefaultLabel: Boolean,
-    @field:JvmField
     val isOperational: Boolean
 ) : ModelObjectInterface<LabelDto> {
 

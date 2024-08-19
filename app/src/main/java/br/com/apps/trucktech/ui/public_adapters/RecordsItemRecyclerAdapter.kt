@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.expressions.getDayFormatted
 import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.model.expressions.toCurrencyPtBr
-import br.com.apps.model.model.travel.Outlay
 import br.com.apps.model.model.travel.Freight
+import br.com.apps.model.model.travel.Outlay
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRecordsBinding
@@ -85,7 +85,7 @@ class RecordsItemRecyclerAdapter<T>(
         holder.apply {
             month.text = freight.loadingDate?.getMonthInPtBrAbbreviated()
             day.text = freight.loadingDate?.getDayFormatted()
-            title.text = freight._customer?.name
+            title.text = freight.getCustomerName()
             description.text = "Voce carregou para ${freight.destiny}"
             value.text = freight.value?.toCurrencyPtBr()
             isValidImg.visibility = if(freight.isValid) VISIBLE else GONE

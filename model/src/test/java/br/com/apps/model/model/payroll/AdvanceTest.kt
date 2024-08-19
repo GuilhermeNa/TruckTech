@@ -1,7 +1,7 @@
 package br.com.apps.model.model.payroll
 
 import br.com.apps.model.enums.EmployeeReceivableTicket
-import br.com.apps.model.exceptions.InvalidIdException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
 import br.com.apps.model.model.payroll.Advance.Companion.merge
 import br.com.apps.model.test_cases.sampleAdvance
 import br.com.apps.model.test_cases.sampleAdvanceDto

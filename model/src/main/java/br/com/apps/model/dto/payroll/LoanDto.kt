@@ -1,7 +1,7 @@
 package br.com.apps.model.dto.payroll
 
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.payroll.Loan
 import br.com.apps.model.util.toLocalDateTime

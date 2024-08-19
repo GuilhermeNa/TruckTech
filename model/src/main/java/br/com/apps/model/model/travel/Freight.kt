@@ -1,15 +1,20 @@
 package br.com.apps.model.model.travel
 
 import br.com.apps.model.dto.travel.FreightDto
+import br.com.apps.model.enums.EmployeePayableTicket
 import br.com.apps.model.exceptions.EmptyDataException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
 import br.com.apps.model.exceptions.null_objects.NullCustomerException
 import br.com.apps.model.expressions.toPercentValue
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.employee.Employee
+import br.com.apps.model.model.finance.payable.EmployeePayable
+import br.com.apps.model.model.finance.payable.Payable
 import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.util.ERROR_STRING
 import br.com.apps.model.util.toDate
+import java.lang.invoke.WrongMethodTypeException
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -56,14 +61,27 @@ data class Freight(
     val weight: BigDecimal,
     val loadingDate: LocalDateTime,
     val commissionPercentual: BigDecimal,
-    val isValid: Boolean,
-    private var _customer: Customer? = null
+    val isValid: Boolean
 ) : ModelObjectInterface<FreightDto> {
 
-    val customer: Customer?
-        get() = _customer
+    private var _customer: Customer? = null
+    val customer: Customer? get() = _customer
+
+    private var _payable: EmployeePayable? = null
+    val payable: Payable? get() = _payable
 
     companion object {
+        /**
+         * Extension function for list of [Freight]'s to merge with a list of [EmployeePayable]'s.
+         *
+         * Each freight in the list will have its payable updated with
+         * the corresponding from the list.
+         *
+         * @param payables A list of [EmployeePayable] objects.
+         */
+        fun List<Freight>.mergePayables(payables: List<EmployeePayable>) {
+            forEach { it.setPayableById(payables) }
+        }
 
         /**
          * Extension function for list of [Freight]'s to merge with a list of [Customer]'s.
@@ -78,7 +96,32 @@ data class Freight(
         fun List<Freight>.merge(customers: List<Customer>) {
             this.forEach { it.setCustomerById(customers) }
         }
+    }
 
+    private fun setPayableById(payables: List<EmployeePayable>) {
+        payables
+            .firstOrNull { it.parentId == id }
+            ?.let { setPayable(it) }
+    }
+
+    /**
+     * Sets the payable for the current freight.
+     *
+     * @param payable The [EmployeePayable] object to be assigned to the current freight.
+     *
+     * @throws InvalidIdException If the `parentId` of the provided `EmployeePayable` does not match the `id` of the current freight.
+     */
+    fun setPayable(payable: EmployeePayable) {
+        if (payable.parentId != id) {
+            throw InvalidIdException("Wrong payable id (${payable.parentId}) for freight id ($id)")
+
+        } else if (payable.type != EmployeePayableTicket.COMMISSION) {
+            throw WrongMethodTypeException("Wrong type: expecting (${EmployeePayableTicket.COMMISSION.name}) and received (${payable.type.name})")
+
+        } else {
+            _payable = payable
+
+        }
     }
 
     /**

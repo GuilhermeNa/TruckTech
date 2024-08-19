@@ -1,6 +1,6 @@
 package br.com.apps.repository.util
 
-import br.com.apps.model.exceptions.InvalidIdException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
 
 const val TAG_DEBUG = "debug"
 

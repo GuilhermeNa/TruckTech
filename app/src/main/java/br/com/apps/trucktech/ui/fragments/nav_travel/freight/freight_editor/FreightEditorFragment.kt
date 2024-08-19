@@ -12,6 +12,7 @@ import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
+import br.com.apps.repository.util.CONNECTION_FAILURE
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
@@ -21,6 +22,7 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.util.DeviceCapabilities
 import br.com.apps.trucktech.util.MonetaryMaskUtil
 import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
 import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceShow
@@ -198,20 +200,29 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
     }
 
     private fun save(viewDto: FreightDto) {
-        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    response.exception.printStackTrace()
-                    requireView().snackBarRed(FAILED_TO_SAVE)
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { isConnected ->
+            when (isConnected) {
+                true -> {
+                    viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
+                        when (response) {
+                            is Response.Error -> {
+                                response.exception.printStackTrace()
+                                requireView().snackBarRed(FAILED_TO_SAVE)
+                            }
+
+                            is Response.Success -> requireView().apply {
+                                snackBarGreen(SUCCESSFULLY_SAVED)
+                                popBackStack()
+                            }
+                        }
+                    }
                 }
 
-                is Response.Success -> requireView().apply {
-                    snackBarGreen(SUCCESSFULLY_SAVED)
-                    popBackStack()
+                false -> {
+                    requireView().snackBarRed(CONNECTION_FAILURE)
                 }
             }
         }
-
     }
 
     /**
@@ -253,7 +264,7 @@ class FreightEditorFragment : BaseFragmentWithToolbar() {
 
     private fun bind(freight: Freight) {
         binding.apply {
-            fragFreightEditorCustomerAc.setText(freight._customer?.name)
+            fragFreightEditorCustomerAc.setText(freight.getCustomerName())
             fragFreightEditorOrigin.setText(freight.origin)
             fragFreightEditorDestiny.setText(freight.destiny)
             fragFreightEditorCargo.setText(freight.cargo)

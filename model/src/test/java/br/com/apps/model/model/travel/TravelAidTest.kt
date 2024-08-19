@@ -1,7 +1,7 @@
 package br.com.apps.model.model.travel
 
 import br.com.apps.model.enums.EmployeeReceivableTicket
-import br.com.apps.model.exceptions.InvalidIdException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
 import br.com.apps.model.model.travel.TravelAid.Companion.merge
 import br.com.apps.model.test_cases.sampleEmployeeReceivable
 import br.com.apps.model.test_cases.sampleTravelAid

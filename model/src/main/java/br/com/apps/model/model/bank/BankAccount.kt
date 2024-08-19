@@ -2,7 +2,7 @@ package br.com.apps.model.model.bank
 
 import br.com.apps.model.dto.bank.BankAccountDto
 import br.com.apps.model.enums.PixType
-import br.com.apps.model.exceptions.InvalidTypeException
+import br.com.apps.model.exceptions.invalid.InvalidTypeException
 import br.com.apps.model.exceptions.null_objects.NullBankException
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.employee.Employee

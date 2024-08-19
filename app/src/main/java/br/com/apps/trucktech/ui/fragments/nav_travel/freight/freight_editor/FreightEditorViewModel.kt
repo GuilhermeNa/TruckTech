@@ -6,12 +6,12 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.travel.FreightDto
+import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.exceptions.null_objects.NullCustomerException
 import br.com.apps.model.exceptions.null_objects.NullFreightException
 import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.model.util.toDate
 import br.com.apps.repository.repository.customer.CustomerRepository
 import br.com.apps.repository.repository.freight.FreightRepository
@@ -159,7 +159,6 @@ class FreightEditorViewModel(
             return viewDto.also { dto ->
                 dto.id = freight.id
                 dto.loadingDate = freight.loadingDate.toDate()
-                dto.isCommissionPaid = freight.isCommissionPaid
                 dto.commissionPercentual = freight.commissionPercentual.toDouble()
                 dto.isValid = freight.isValid
             }
@@ -173,7 +172,6 @@ class FreightEditorViewModel(
                 dto.employeeId = vmData.driverId
                 dto.travelId = vmData.travelId
                 dto.loadingDate = date.value!!.toDate()
-                dto.isCommissionPaid = false
                 dto.commissionPercentual = vmData.commissionPercentual.toDouble()
                 dto.isValid = false
             }

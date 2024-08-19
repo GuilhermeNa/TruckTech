@@ -2,7 +2,6 @@ package br.com.apps.repository.repository.auth
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import br.com.apps.repository.util.Resource
 import br.com.apps.repository.util.Response
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -24,13 +23,13 @@ class AuthenticationRepository(private val fireBaseAuth: FirebaseAuth): AuthInte
     override fun authenticateNewUserWithEmailAndPassword(
         email: String,
         password: String
-    ): LiveData<Resource<String>> {
-        val liveData = MutableLiveData<Resource<String>>()
+    ): LiveData<Response<String>> {
+        val liveData = MutableLiveData<Response<String>>()
         try {
             fireBaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
                     it.user?.let { user ->
-                        liveData.value = Resource(data = user.uid)
+                        liveData.value = Response.Success(data = user.uid)
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -40,10 +39,10 @@ class AuthenticationRepository(private val fireBaseAuth: FirebaseAuth): AuthInte
                         is FirebaseAuthUserCollisionException -> "Email já cadastrado"
                         else -> "Erro desconhecido"
                     }
-                    liveData.value = Resource(data = "", error = message)
+                    liveData.value = Response.Error(exception)
                 }
         } catch (e: IllegalArgumentException) {
-            liveData.value = Resource(data = "", error = "Preencha e-mail e senha")
+            liveData.value = Response.Error(e)
         }
         return liveData
     }

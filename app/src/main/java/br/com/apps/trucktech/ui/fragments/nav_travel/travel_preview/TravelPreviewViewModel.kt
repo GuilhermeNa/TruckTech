@@ -5,9 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import br.com.apps.model.enums.AccessLevel
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.travel.Travel
-import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.util.Response
 import br.com.apps.usecase.usecase.TravelUseCase
 import kotlinx.coroutines.flow.first
@@ -53,12 +54,12 @@ class TravelPreviewViewModel(
 
                             _data.value = t
 
-                            if (t.isEmptyTravel()) {
+                            if (t.isEmpty()) {
                                 StateTP.Empty
                             } else if (t.isFinished) {
                                 StateTP.Loaded.AlreadyFinished
                             } else {
-                                if (t.isReadyToBeFinished()) StateTP.Loaded.ReadyForAuth
+                                if (t.isReadyToFinalize()) StateTP.Loaded.ReadyForAuth
                                 else StateTP.Loaded.AwaitingAuth
                             }
 
@@ -84,17 +85,21 @@ class TravelPreviewViewModel(
         setState(StateTP.Finishing)
 
         try {
-            val travel = data.value!!
-            val dto = travel.apply {
-                finalOdometerMeasurement = refuels?.last()?.odometerMeasure
-                finalDate = LocalDateTime.now().atBrZone()
-                isFinished = true
-                isClosed = travel.shouldConsiderAverage()
-                validateForSaving()
-            }.toDto()
-            useCase.setTravelFinished(vmData.permission, dto)
-            setState(StateTP.Loaded.AlreadyFinished)
-            emit(Response.Success())
+            val travel = data.value!!.run {
+                copy(
+                    finalOdometer = refuels.last().odometerMeasure,
+                    finalDate = LocalDateTime.now().atBrZone(),
+                    isFinished = true,
+                    isClosed = shouldConsiderAverage()
+                )
+            }
+            if (travel.isReadyToFinalize()) {
+                useCase.setTravelFinished(vmData.permission, travel.toDto())
+                setState(StateTP.Loaded.AlreadyFinished)
+                emit(Response.Success())
+
+            } else throw InvalidForSavingException()
+
 
         } catch (e: Exception) {
             setState(StateTP.Loaded.ReadyForAuth)

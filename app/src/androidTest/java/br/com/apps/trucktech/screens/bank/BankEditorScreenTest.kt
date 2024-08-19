@@ -3,7 +3,6 @@ package br.com.apps.trucktech.screens.bank
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import br.com.apps.model.dto.bank.BankAccountDto
-import br.com.apps.model.model.employee.EmployeeType
 import br.com.apps.repository.repository.employee.EmployeeReadImpl
 import br.com.apps.repository.repository.employee.EmployeeRepository
 import br.com.apps.repository.repository.employee.EmployeeWriteImpl
@@ -112,7 +111,7 @@ class BankEditorScreenTest : BaseInstrumentedTest() {
 
     override fun insertTestData(params: DataGenParams) = runTest {
         val teste = generateSampleData(BankAccountDto::class, params)
-        teste.forEach { repo.saveBankAccount(it, EmployeeType.DRIVER) }
+        teste.forEach { repo.save(it) }
     }
 
     override fun clearTestData() {

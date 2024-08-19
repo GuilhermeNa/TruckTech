@@ -1,6 +1,6 @@
 package br.com.apps.usecase.usecase
 
-import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.enums.AccessLevel
 
 interface CredentialsValidatorI<T> {
 

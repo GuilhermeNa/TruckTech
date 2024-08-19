@@ -6,8 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
+import br.com.apps.model.expressions.getCompleteDateInPtBr
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.model.model.travel.Outlay
 import br.com.apps.repository.util.CANCEL
+import br.com.apps.repository.util.CONNECTION_FAILURE
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.OK
@@ -15,13 +18,12 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentExpendPreviewBinding
-import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.trucktech.expressions.navigateWithSafeArgs
 import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
-import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.ui.fragments.base_fragments.BasePreviewFragment
+import br.com.apps.trucktech.util.DeviceCapabilities
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -161,15 +163,25 @@ class ExpendPreviewFragment : BasePreviewFragment() {
     }
 
     private fun deleteExpend() {
-        viewModel.delete().observe(viewLifecycleOwner) { response ->
-            when(response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
-                is Response.Success -> {
-                    requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
-                    requireView().popBackStack()
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { isConnected ->
+            when(isConnected) {
+                true -> {
+                    viewModel.delete().observe(viewLifecycleOwner) { response ->
+                        when(response) {
+                            is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
+                            is Response.Success -> {
+                                requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                                requireView().popBackStack()
+                            }
+                        }
+                    }
+                }
+                false -> {
+                    requireView().snackBarRed(CONNECTION_FAILURE)
                 }
             }
         }
+
     }
 
     /**

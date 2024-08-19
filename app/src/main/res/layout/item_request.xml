@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -16,24 +15,23 @@
         android:layout_marginTop="16dp"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/item_order_month"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="jan"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            tools:text="jan" />
 
         <TextView
             android:id="@+id/item_order_day"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="25dp"
             android:maxWidth="25dp"
-            tools:text="27"
-            android:textSize="18sp" />
+            android:minWidth="25dp"
+            android:textSize="18sp"
+            tools:text="27" />
     </LinearLayout>
 
     <androidx.cardview.widget.CardView
@@ -90,13 +88,14 @@
                         android:id="@+id/item_order_number"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        tools:text="@tools:sample/us_zipcodes"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        tools:text="@tools:sample/us_zipcodes" />
                 </LinearLayout>
 
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/item_req_value_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -114,110 +113,40 @@
                     android:id="@+id/item_order_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="R$ 3.000,00"
                     android:textColor="@color/dark_red"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    tools:text="R$ 3.000,00" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
+                android:text="@string/contains"
+                app:layout_constraintStart_toStartOf="@id/item_order_layout_ticket"
+                app:layout_constraintTop_toBottomOf="@id/item_order_layout_ticket"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/item_order_layout_ticket">
+                app:layout_constraintStart_toStartOf="@id/item_req_value_layout"
+                app:layout_constraintTop_toBottomOf="@id/item_req_value_layout"
+                app:layout_constraintEnd_toEndOf="@id/item_req_value_layout"
+                android:layout_marginTop="22dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/cost_image"
+                    android:src="@drawable/icon_cost" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:id="@+id/item_order_cost_number"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="start"
-                    android:text="@string/contains" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/icon_refuel"
-                            android:contentDescription="@string/fuel_image" />
-
-                        <TextView
-                            android:id="@+id/item_order_refuel_number"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            tools:text="1" />
-
-                        <View
-                            android:layout_width="1dp"
-                            android:background="@color/light_grey"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="8dp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/icon_cost"
-                            android:contentDescription="@string/cost_image" />
-
-                        <TextView
-                            android:id="@+id/item_order_cost_number"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            tools:text="2" />
-
-                        <View
-                            android:layout_width="1dp"
-                            android:background="@color/light_grey"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="8dp"/>
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/icon_wallet"
-                            android:contentDescription="@string/wallet_image" />
-
-                        <TextView
-                            android:id="@+id/item_order_wallet_number"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            tools:text="-" />
-                    </LinearLayout>
-
-                </LinearLayout>
+                    android:layout_marginStart="8dp"
+                    tools:text="2" />
 
             </LinearLayout>
 

@@ -94,6 +94,16 @@ interface OutlayReadInterface {
     suspend fun fetchOutlayListByDriverIdAndIsNotRefundYet(id: String, flow: Boolean = false)
             : LiveData<Response<List<Outlay>>>
 
+    /**
+     * Fetches the [Outlay] dataSet for the specified ID list.
+     *
+     * @param ids The ID list.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Outlay] list.
+     */
+    suspend fun fetchOutlayByIds(ids: List<String>, flow: Boolean = false)
+            : LiveData<Response<List<Outlay>>>
+
 }
 
 interface OutlayWriteInterface {

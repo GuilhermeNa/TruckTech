@@ -4,9 +4,9 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import br.com.apps.trucktech.databinding.FragmentDiscountBinding
 
-class DiscountState(private val binding: FragmentDiscountBinding) : DiscountFStateI {
+class DiscountState(private val binding: FragmentDiscountBinding) {
 
-    override fun showLoading() {
+    fun showLoading() {
         binding.apply {
             fragmentDiscountPanelCostHelp.layout.visibility = GONE
             fragmentDiscountPanelLoan.layout.visibility = GONE
@@ -20,31 +20,31 @@ class DiscountState(private val binding: FragmentDiscountBinding) : DiscountFSta
         }
     }
 
-    override fun showCostHelps() {
+    fun showCostHelps() {
         binding.fragmentDiscountPanelCostHelp.layout.visibility = VISIBLE
     }
 
-    override fun hideCostHelps() {
+    fun hideCostHelps() {
         binding.fragmentDiscountPanelCostHelp.layout.visibility = GONE
     }
 
-    override fun showAdvances() {
+    fun showAdvances() {
         binding.fragmentDiscountPanelAdvance.layout.visibility = VISIBLE
     }
 
-    override fun hideAdvances() {
+    fun hideAdvances() {
         binding.fragmentDiscountPanelAdvance.layout.visibility = GONE
     }
 
-    override fun showLoans() {
+    fun showLoans() {
         binding.fragmentDiscountPanelLoan.layout.visibility = VISIBLE
     }
 
-    override fun hideLoans() {
+    fun hideLoans() {
         binding.fragmentDiscountPanelLoan.layout.visibility = GONE
     }
 
-    override fun showError(e: Exception) {
+    fun showError(e: Exception) {
         binding.apply {
             fragmentDiscountPanelLoan.layout.visibility = GONE
             fragmentDiscountPanelAdvance.layout.visibility = GONE
@@ -57,7 +57,7 @@ class DiscountState(private val binding: FragmentDiscountBinding) : DiscountFSta
         }
     }
 
-    override fun showEmpty() {
+    fun showEmpty() {
         binding.apply {
             fragmentDiscountPanelCostHelp.layout.visibility = GONE
             fragmentDiscountPanelLoan.layout.visibility = GONE
@@ -71,36 +71,4 @@ class DiscountState(private val binding: FragmentDiscountBinding) : DiscountFSta
         }
     }
 
-}
-
-interface DiscountFStateI {
-
-    fun showLoading()
-
-    fun showCostHelps()
-
-    fun hideCostHelps()
-
-    fun showAdvances()
-
-    fun hideAdvances()
-
-    fun showLoans()
-
-    fun hideLoans()
-
-    fun showEmpty()
-
-    fun showError(e: Exception)
-
-
-}
-
-sealed class DiscountFState() {
-    object Loading : DiscountFState()
-    data class Loaded(val hasCostHelps: Boolean, val hasAdvances: Boolean, val hasLoans: Boolean) :
-        DiscountFState()
-
-    object Empty : DiscountFState()
-    data class Error(val error: Exception) : DiscountFState()
 }

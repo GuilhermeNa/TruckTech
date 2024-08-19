@@ -1,8 +1,5 @@
 package br.com.apps.trucktech.ui.fragments.nav_requests.requests_list
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -12,8 +9,10 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.model.request.PaymentRequest
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
+import br.com.apps.model.model.request.Request
 import br.com.apps.repository.util.CANCEL
+import br.com.apps.repository.util.CONNECTION_FAILURE
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.OK
@@ -21,9 +20,7 @@ import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRequestsListBinding
-import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.navigateTo
-import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toast
@@ -32,6 +29,7 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.private_adapter.RequestsListRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.HeaderDefaultHorizontalAdapter
+import br.com.apps.trucktech.util.DeviceCapabilities
 import br.com.apps.trucktech.util.state.State
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -81,7 +79,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initStateManager()
-        initSwipeRefresh()
         initHeaderRecyclerView()
         initFab()
     }
@@ -95,12 +92,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
             title = TOOLBAR_TITLE
         )
         configurator.bottomNavigation(hasBottomNavigation = true)
-    }
-
-    private fun initSwipeRefresh() {
-        binding.swipeRefresh.setOnRefreshListener {
-            viewModel.loadData()
-        }
     }
 
     /**
@@ -132,27 +123,13 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun showAlertDialog() {
-        fun isConnectedToInternet(): Boolean {
-            val connectivityManager =
-                requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-            val capabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-
-            return capabilities != null &&
-                    (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-
-        }
         viewModel.dialogRequested()
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Nova requisição")
             .setMessage("Você confirma a adição uma nova requisição?")
             .setPositiveButton("Ok") { _, _ ->
-                if(isConnectedToInternet()) createNewRequest()
-                else requireContext().toast("Sem conexão")
+                createNewRequest()
             }
             .setNegativeButton("Cancelar") { _, _ -> }
             .setOnDismissListener { viewModel.dialogDismissed() }
@@ -163,18 +140,27 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun createNewRequest() {
-        lifecycleScope.launch {
-            viewModel.save().asFlow().collect { response ->
-                when (response) {
-                    is Response.Error -> requireView().snackBarRed(FAILED_TO_SAVE)
-                    is Response.Success -> {
-                        response.data?.let {
-                            requireView().snackBarGreen(REQUEST_HAVE_BEEN_SAVED)
-                            requireView()
-                                .navigateTo(
-                                    RequestsListFragmentDirections
-                                        .actionRequestsListFragmentToRequestEditorFragment(it)
-                                )
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { isConnected ->
+            when (isConnected) {
+                false -> requireContext().toast("Sem conexão")
+
+                true -> {
+                    lifecycleScope.launch {
+                        viewModel.save().asFlow().collect { response ->
+                            when (response) {
+                                is Response.Error -> requireView().snackBarRed(FAILED_TO_SAVE)
+                                is Response.Success -> {
+                                    response.data?.let {
+                                        requireView()
+                                            .navigateTo(
+                                                RequestsListFragmentDirections
+                                                    .actionRequestsListFragmentToRequestEditorFragment(
+                                                        it
+                                                    )
+                                            )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -191,14 +177,12 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
      */
     private fun initStateManager() {
         viewModel.data.observe(viewLifecycleOwner) { data ->
-            binding.swipeRefresh.isRefreshing = false
-            data?.let { requests ->
-                if (adapter == null) {
-                    initRequestRecyclerView()
-                } else {
-                    adapter?.update(requests)
-                }
+            if (adapter == null) {
+                initRequestRecyclerView()
+            } else {
+                adapter?.update(data)
             }
+
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
@@ -246,7 +230,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
         }
     }
 
-    private fun createAdapters(itemsMap: Map.Entry<String, List<PaymentRequest>>) =
+    private fun createAdapters(itemsMap: Map.Entry<String, List<Request>>) =
         listOf(
             DateRecyclerAdapter(requireContext(), listOf(itemsMap.key)),
             RequestsListRecyclerAdapter(
@@ -254,7 +238,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                 itemsMap.value,
                 itemCLickListener = { requestId ->
                     requireView().navigateTo(
-                        RequestsListFragmentDirections.actionRequestsListFragmentToRequestPreviewFragment(
+                        RequestsListFragmentDirections.actionRequestsListFragmentToRequestEditorFragment(
                             requestId
                         )
                     )
@@ -263,12 +247,13 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
             )
         )
 
-    private fun initAdaptersData(dataSet: List<PaymentRequest>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
+    private fun initAdaptersData(dataSet: List<Request>): List<RecyclerView.Adapter<out RecyclerView.ViewHolder>> {
         return dataSet
             .sortedBy { it.date }
             .reversed()
             .groupBy {
-                it.date?.getMonthAndYearInPtBr() ?: throw InvalidParameterException("Date is null")
+                it.date.getMonthAndYearInPtBr()
+                    ?: throw InvalidParameterException("Date is null")
             }
             .map { createAdapters(it) }
             .flatten()
@@ -280,14 +265,14 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
         recyclerView.adapter = concatAdapter
     }
 
-    private fun showAlertDialogForDelete(request: PaymentRequest) {
+    private fun showAlertDialogForDelete(id: String) {
         viewModel.dialogRequested()
 
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle("Apagando requisição")
             .setMessage("Você realmente deseja apagar esta requisição e seus itens permanentemente?")
-            .setPositiveButton(OK) { _, _ -> deleteRequest(request) }
+            .setPositiveButton(OK) { _, _ -> deleteRequest(id) }
             .setNegativeButton(CANCEL) { _, _ -> }
             .setOnDismissListener { viewModel.dialogDismissed() }
             .create().apply {
@@ -296,30 +281,30 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
             }
     }
 
-    private fun deleteRequest(request: PaymentRequest) {
-        stateHandler?.showDeleting()
+    private fun deleteRequest(id: String) {
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { isConnected ->
+            when (isConnected) {
+                false -> {
+                    requireView().snackBarRed(CONNECTION_FAILURE)
+                }
 
-        lifecycleScope.launch {
-            viewModel.delete(request).asFlow().collect { response ->
-                when (response) {
-                    is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
-                    is Response.Success -> {
-                        stateHandler?.showDeleted()
-                        viewModel.loadData()
-                        requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                true -> {
+                    stateHandler?.showDeleting()
+                    lifecycleScope.launch {
+                        viewModel.delete(id).asFlow().collect { response ->
+                            when (response) {
+                                is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
+                                is Response.Success -> {
+                                    stateHandler?.showDeleted()
+                                    viewModel.loadData()
+                                    requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-
-    //---------------------------------------------------------------------------------------------//
-    // ON RESUME
-    //---------------------------------------------------------------------------------------------//
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.loadData()
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -328,7 +313,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.swipeRefresh.isRefreshing = false
         adapter = null
         stateHandler = null
         _binding = null

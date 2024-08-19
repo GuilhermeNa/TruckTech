@@ -8,6 +8,7 @@ import br.com.apps.model.exceptions.FinancialRecordException
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.util.DUPLICATED_ID
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDateTime
 
 private const val EMPTY_LIST = "Transaction list is empty"
@@ -38,7 +39,7 @@ abstract class FinancialRecord(
     open val parentId: String,
     open val value: BigDecimal,
     open val generationDate: LocalDateTime,
-    open val installments: Int,
+    open val installments: Int
 ) : ModelObjectInterface<FinancialRecordDto> {
 
     private val _transactions: MutableList<Transaction> = mutableListOf()
@@ -92,17 +93,40 @@ abstract class FinancialRecord(
         _transactions.removeIf { it.id == id }
     }
 
-    fun geTransactions() = _transactions.sortedBy { it.number }
+    fun getSortedTransactions() = _transactions.sortedBy { it.number }
 
     fun contains(item: Transaction) = _transactions.contains(item)
 
+    fun getInstallmentAverageValue(): BigDecimal = when {
+        value == BigDecimal.ZERO
+                || installments == 0 -> BigDecimal.ZERO.setScale(2)
+
+        else -> value.divide(BigDecimal(installments), 2, RoundingMode.HALF_EVEN)
+    }
+
     fun transactionsSize() = _transactions.size
 
+    fun getProcessedTransactionsSize(): Int {
+        validateTransactionsData()
+        return _transactions.filter { it.isPaid }.size
+    }
+
     fun validateTransactionsPayment() {
-        if (_transactions.isEmpty()) throw EmptyDataException(EMPTY_LIST)
+        validateTransactionsData()
         _transactions.forEach {
             if (!it.isPaid) throw FinancialRecordException(TRANSACTION_UNPAID)
         }
+    }
+
+    fun getNextTransaction(): Transaction? {
+        validateTransactionsData()
+        return getSortedTransactions()
+            .filter { LocalDateTime.now() >= it.dueDate }
+            .firstOrNull { it.isPaid }
+    }
+
+    private fun validateTransactionsData() {
+        if (_transactions.isEmpty()) throw EmptyDataException("There are no transactions in the list.")
     }
 
     abstract override fun toDto(): FinancialRecordDto

@@ -1,8 +1,8 @@
 package br.com.apps.repository.repository.document
 
 import androidx.lifecycle.LiveData
-import br.com.apps.model.dto.TruckDocumentDto
-import br.com.apps.model.model.TruckDocument
+import br.com.apps.model.dto.document.TruckDocumentDto
+import br.com.apps.model.model.document.TruckDocument
 import br.com.apps.model.model.fleet.Truck
 import br.com.apps.repository.util.Response
 

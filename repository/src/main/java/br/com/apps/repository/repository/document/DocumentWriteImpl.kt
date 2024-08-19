@@ -1,6 +1,6 @@
 package br.com.apps.repository.repository.document
 
-import br.com.apps.model.dto.TruckDocumentDto
+import br.com.apps.model.dto.document.TruckDocumentDto
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_DOCUMENTS
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await

@@ -1,15 +1,21 @@
 package br.com.apps.model.model.travel
 
+import br.com.apps.model.enums.EmployeePayableTicket
 import br.com.apps.model.exceptions.EmptyDataException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
 import br.com.apps.model.exceptions.null_objects.NullCustomerException
 import br.com.apps.model.model.travel.Freight.Companion.merge
+import br.com.apps.model.model.travel.Freight.Companion.mergePayables
 import br.com.apps.model.test_cases.sampleCustomer
+import br.com.apps.model.test_cases.sampleEmployeePayable
 import br.com.apps.model.test_cases.sampleFreight
 import br.com.apps.model.util.ERROR_STRING
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import java.lang.invoke.WrongMethodTypeException
 import java.math.BigDecimal
 
 class FreightTest {
@@ -105,7 +111,7 @@ class FreightTest {
     }
 
     //---------------------------------------------------------------------------------------------//
-    // merge()
+    // merge() Labels
     //---------------------------------------------------------------------------------------------//
 
     @Test
@@ -122,6 +128,134 @@ class FreightTest {
         assertThrows(Exception::class.java) {
             listOf(freight).merge(emptyList())
         }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // mergePayables()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should merge freight list to employeeReceivables`() {
+        val freights = listOf(
+            sampleFreight(),
+            sampleFreight().copy(id = "freightId2")
+        )
+        val receivables = listOf(
+            sampleEmployeePayable().copy(
+                parentId = "freightId1",
+                id = "transactionId1",
+                type = EmployeePayableTicket.COMMISSION
+            ),
+            sampleEmployeePayable().copy(
+                parentId = "freightId2",
+                id = "transactionId2",
+                type = EmployeePayableTicket.COMMISSION
+            )
+        )
+
+        freights.mergePayables(receivables)
+
+        val expected = "transactionId1"
+        val actual = freights[0].payable?.id
+        assertEquals(expected, actual)
+
+        val expectedB = "transactionId2"
+        val actualB = freights[1].payable?.id
+        assertEquals(expectedB, actualB)
+
+    }
+
+    @Test
+    fun `should fail on merging with wrong ids`() {
+        val freights = listOf(
+            sampleFreight()
+        )
+        val receivables = listOf(
+            sampleEmployeePayable().copy(
+                parentId = "wrongId",
+                id = "transactionId1",
+                type = EmployeePayableTicket.COMMISSION
+            )
+        )
+
+        freights.mergePayables(receivables)
+
+        val actual = freights[0].payable?.id
+        Assert.assertNull(actual)
+
+    }
+
+    @Test
+    fun `should throw WrongMethodTypeException when merging with outlay type`() {
+        val freights = listOf(
+            sampleFreight()
+        )
+        val payables = listOf(
+            sampleEmployeePayable().copy(
+                parentId = "freightId1",
+                id = "transactionId1",
+                type = EmployeePayableTicket.OUTLAY
+            )
+        )
+
+        assertThrows(WrongMethodTypeException::class.java) {
+            freights.mergePayables(payables)
+        }
+
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // setPayable()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should throw WrongMethodTypeException when the type is salary`() {
+        val payable = sampleEmployeePayable().copy(parentId = "freightId1", type = EmployeePayableTicket.SALARY)
+
+        assertThrows(WrongMethodTypeException::class.java) {
+            freight.setPayable(payable)
+        }
+
+    }
+
+    @Test
+    fun `should throw WrongMethodTypeException when the type is vacation`() {
+        val payable = sampleEmployeePayable().copy(parentId = "freightId1", type = EmployeePayableTicket.VACATION)
+
+        assertThrows(WrongMethodTypeException::class.java) {
+            freight.setPayable(payable)
+        }
+
+    }
+
+    @Test
+    fun `should throw WrongMethodTypeException when the type is thirteenth`() {
+        val payable = sampleEmployeePayable().copy(parentId = "freightId1", type = EmployeePayableTicket.THIRTEENTH)
+
+        assertThrows(WrongMethodTypeException::class.java) {
+            freight.setPayable(payable)
+        }
+
+    }
+
+    @Test
+    fun `should throw WrongMethodTypeException when the type is outlay`() {
+        val payable = sampleEmployeePayable().copy(parentId = "freightId1", type = EmployeePayableTicket.OUTLAY)
+
+        assertThrows(WrongMethodTypeException::class.java) {
+            freight.setPayable(payable)
+        }
+
+    }
+
+    @Test
+    fun `should throw InvalidIdException when the payable parent id is wrong`() {
+        val payable = sampleEmployeePayable().copy(parentId = "freightId2")
+
+        assertThrows(InvalidIdException::class.java) {
+            freight.setPayable(payable)
+        }
+
     }
 
 }

@@ -2,7 +2,7 @@ package br.com.apps.model.dto.bank
 
 import br.com.apps.model.enums.PixType.Companion.toPixType
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.bank.BankAccount
 import br.com.apps.model.util.toLocalDateTime

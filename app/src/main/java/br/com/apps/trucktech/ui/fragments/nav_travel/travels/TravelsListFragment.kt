@@ -14,7 +14,9 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.model.model.travel.Travel
+import br.com.apps.repository.util.CONNECTION_FAILURE
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
@@ -22,7 +24,6 @@ import br.com.apps.repository.util.SUCCESSFULLY_REMOVED
 import br.com.apps.repository.util.SUCCESSFULLY_SAVED
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentTravelsBinding
-import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.trucktech.expressions.navigateWithSafeArgs
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarOrange
@@ -31,6 +32,7 @@ import br.com.apps.trucktech.ui.activities.main.VisualComponents
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_travel.travels.private_adapters.TravelsListRecyclerAdapter
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter
+import br.com.apps.trucktech.util.DeviceCapabilities
 import br.com.apps.trucktech.util.MonetaryMaskUtil
 import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
 import br.com.apps.trucktech.util.state.State
@@ -43,7 +45,6 @@ import org.koin.core.parameter.parametersOf
 import java.security.InvalidParameterException
 
 private const val TOOLBAR_TITLE = "Viagens"
-
 
 /**
  * A simple [Fragment] subclass.
@@ -147,7 +148,7 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     private fun getLastTravelFinalOdometer(): Double? {
         val travels = mainActVM.cachedTravels.value ?: return null
         return if (travels.isNotEmpty()) {
-            travels.first().finalOdometerMeasurement?.toDouble()
+            travels.first().finalOdometer?.toDouble()
         } else {
             null
         }
@@ -185,18 +186,26 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     }
 
     private fun createNewTravel(odometerMeasurement: Double) {
-        viewModel.createAndSave(odometerMeasurement).observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    requireView().snackBarRed(FAILED_TO_SAVE)
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { isConnected ->
+            when(isConnected) {
+                true -> {
+                    viewModel.createAndSave(odometerMeasurement)
+                        .observe(viewLifecycleOwner) { response ->
+                            when (response) {
+                                is Response.Error -> requireView().snackBarRed(FAILED_TO_SAVE)
+                                is Response.Success -> requireView().snackBarGreen(
+                                    SUCCESSFULLY_SAVED
+                                )
+                            }
+                        }
+                }
+                false -> {
+                    requireView().snackBarRed(CONNECTION_FAILURE)
                 }
 
-                is Response.Success -> {
-
-                    requireView().snackBarGreen(SUCCESSFULLY_SAVED)
-                }
             }
         }
+
     }
 
     /**
@@ -345,20 +354,31 @@ class TravelsListFragment : BaseFragmentWithToolbar() {
     private fun delete(travel: Travel) {
         stateHandler?.showDeleting()
 
-        lifecycleScope.launch {
-            viewModel.delete(travel).observe(viewLifecycleOwner) { response ->
-                when (response) {
-                    is Response.Success -> {
-                        stateHandler?.showDeleted()
-                        requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
-                    }
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { isConnected ->
+            when(isConnected) {
+                true -> {
+                    lifecycleScope.launch {
+                        viewModel.delete(travel).observe(viewLifecycleOwner) { response ->
+                            when (response) {
+                                is Response.Success -> {
+                                    stateHandler?.showDeleted()
+                                    requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                                }
 
-                    is Response.Error -> {
-                        requireView().snackBarRed(FAILED_TO_REMOVE)
+                                is Response.Error -> {
+                                    requireView().snackBarRed(FAILED_TO_REMOVE)
+                                }
+                            }
+                        }
                     }
                 }
+                false -> {
+                    requireView().snackBarRed(CONNECTION_FAILURE)
+                }
             }
+
         }
+
     }
 
     //---------------------------------------------------------------------------------------------//

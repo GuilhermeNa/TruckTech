@@ -2,7 +2,7 @@ package br.com.apps.model.dto.finance.receivable
 
 import br.com.apps.model.enums.EmployeeReceivableTicket
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.model.finance.receivable.EmployeeReceivable
 import br.com.apps.model.util.toLocalDateTime
 import java.math.BigDecimal

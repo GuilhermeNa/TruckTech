@@ -6,10 +6,10 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.travel.RefuelDto
+import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.exceptions.null_objects.NullRefuelException
 import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.travel.Refuel
-import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.repository.repository.refuel.RefuelRepository
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.UNKNOWN_EXCEPTION

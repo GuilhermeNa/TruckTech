@@ -8,17 +8,15 @@ import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.model.model.travel.Outlay
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.trucktech.databinding.FragmentRefundBinding
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toBold
-import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.expressions.toUnderline
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.public_adapters.ToReceiveRecyclerAdapter
-import br.com.apps.trucktech.util.state.State
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 private const val TOOLBAR_TITLE = "Reembolsos"
 
@@ -26,8 +24,6 @@ class RefundFragment : BaseFragmentWithToolbar() {
 
     private var _binding: FragmentRefundBinding? = null
     private val binding get() = _binding!!
-
-    private val viewModel: RefundViewModel by viewModel()
     private var adapter: ToReceiveRecyclerAdapter<Outlay>? = null
 
     //---------------------------------------------------------------------------------------------//
@@ -48,8 +44,46 @@ class RefundFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initStateManager()
         initRecyclerView()
+        mainActVM.cachedOutlayToPay.observe(viewLifecycleOwner) { data ->
+            when {
+                data == null -> {
+                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                    binding.layout.visibility = View.GONE
+                    binding.layoutError.apply {
+                        layout.visibility = View.VISIBLE
+                        error.visibility = View.VISIBLE
+                        empty.visibility = View.GONE
+                    }
+                }
+
+                data.isEmpty() -> {
+                    binding.apply {
+                        layout.visibility = View.GONE
+                        layoutError.apply {
+                            layout.visibility = View.VISIBLE
+                            error.visibility = View.GONE
+                            empty.visibility = View.VISIBLE
+                        }
+                    }
+                }
+
+                else -> {
+                    bindText(data)
+                    adapter?.update(data)
+                    binding.apply {
+                        layout.visibility = View.VISIBLE
+                        layoutError.apply {
+                            layout.visibility = View.GONE
+                            error.visibility = View.GONE
+                            empty.visibility = View.GONE
+                        }
+                    }
+                }
+
+            }
+        }
+
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -62,73 +96,6 @@ class RefundFragment : BaseFragmentWithToolbar() {
             title = TOOLBAR_TITLE
         )
         configurator.bottomNavigation(hasBottomNavigation = false)
-    }
-
-    /**
-     * Initialize the state manager and observes [viewModel] data.
-     *
-     *   - Observes expendData for update the recyclerView and bind
-     */
-    private fun initStateManager() {
-        mainActVM.cachedTravels.observe(viewLifecycleOwner) { travels ->
-            travels?.let { t ->
-
-                viewModel.updateData(t).let { expends ->
-                    if (expends.isNotEmpty()) {
-                        adapter?.update(expends)
-                        bindText(expends)
-                    }
-                }
-
-            } ?: viewModel.setState(State.Error(NullPointerException()))
-        }
-
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is State.Loading -> {
-                    binding.apply {
-                        layout.visibility = View.GONE
-
-                        layoutError.apply {
-                            layout.visibility = View.GONE
-                            error.visibility = View.GONE
-                            empty.visibility = View.GONE
-                        }
-                    }
-                }
-
-                is State.Loaded -> {
-                    binding.layout.visibility = View.VISIBLE
-                    binding.layoutError.apply {
-                        layout.visibility = View.GONE
-                        error.visibility = View.GONE
-                        empty.visibility = View.GONE
-                    }
-                }
-
-                is State.Empty -> {
-                    binding.layout.visibility = View.GONE
-                    binding.layoutError.apply {
-                        layout.visibility = View.VISIBLE
-                        error.visibility = View.GONE
-                        empty.visibility = View.VISIBLE
-                    }
-                }
-
-                is State.Error -> {
-                    state.error.printStackTrace()
-                    requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                    binding.layout.visibility = View.GONE
-                    binding.layoutError.apply {
-                        layout.visibility = View.VISIBLE
-                        error.visibility = View.VISIBLE
-                        empty.visibility = View.GONE
-                    }
-                }
-
-                else -> {}
-            }
-        }
     }
 
     private fun bindText(dataSet: List<Outlay>) {
@@ -167,7 +134,7 @@ class RefundFragment : BaseFragmentWithToolbar() {
      */
     private fun initRecyclerView() {
         val recyclerView = binding.fragmentRefundRecycler
-        adapter = ToReceiveRecyclerAdapter(requireContext(), emptyList())
+        adapter = ToReceiveRecyclerAdapter(requireContext())
         recyclerView.adapter = adapter
 
         val divider = DividerItemDecoration(recyclerView.context, RecyclerView.VERTICAL)

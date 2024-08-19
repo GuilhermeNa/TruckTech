@@ -34,7 +34,7 @@ data class LabelDto(
         validateDataIntegrity()
         return Label(
             masterUid = this.masterUid!!,
-            id = this.id,
+            id = this.id!!,
             name = this.name!!,
             urlIcon = this.urlIcon,
             color = this.color,

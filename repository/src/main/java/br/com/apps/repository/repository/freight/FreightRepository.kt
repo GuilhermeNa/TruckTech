@@ -48,4 +48,9 @@ class FreightRepository(
         flow: Boolean
     ) = read.fetchFreightListByDriverIdAndPaymentStatus(id, isPaid, flow)
 
+    override suspend fun fetchFreightByIds(
+        ids: List<String>,
+        flow: Boolean
+    ) = read.fetchFreightByIds(ids, flow)
+
 }

@@ -5,11 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.travel.TravelDto
+import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.util.toDate
 import br.com.apps.repository.repository.travel.TravelRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.model.expressions.atBrZone
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.TravelUseCase
 import kotlinx.coroutines.async
@@ -62,7 +62,7 @@ class TravelsListViewModel(
                     isFinished = false,
                     initialDate = LocalDateTime.now().atBrZone().toDate(),
                     isClosed = false,
-                    initialOdometerMeasurement = odometerMeasurement
+                    initialOdometer = odometerMeasurement
                 )
 
             try {

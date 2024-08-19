@@ -12,6 +12,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.math.BigDecimal
 
 class FinancialRecordTest {
 
@@ -87,7 +88,7 @@ class FinancialRecordTest {
         assertEquals(expected, actual)
 
         val expectedB = 3
-        val actualB = payment.geTransactions().first { it.id == "transactionId1" }.number
+        val actualB = payment.getSortedTransactions().first { it.id == "transactionId1" }.number
         assertEquals(expectedB, actualB)
 
     }
@@ -157,9 +158,9 @@ class FinancialRecordTest {
         payment.addTransaction(transaction)
         payment.addTransaction(transactionC)
 
-        val itemOnPos0 = payment.geTransactions()[0]
-        val itemOnPos1 = payment.geTransactions()[1]
-        val itemOnPos2 = payment.geTransactions()[2]
+        val itemOnPos0 = payment.getSortedTransactions()[0]
+        val itemOnPos1 = payment.getSortedTransactions()[1]
+        val itemOnPos2 = payment.getSortedTransactions()[2]
 
         assertEquals(transaction, itemOnPos0)
         assertEquals(transactionB, itemOnPos1)
@@ -229,5 +230,54 @@ class FinancialRecordTest {
         payment.validateTransactionsPayment() // Não deve lançar exceção
     }
 
+    //----------------------------------------------------------------------------------------------
+    // getInstallmentAverageValue()
+    //----------------------------------------------------------------------------------------------
+
+    @Test
+    fun `should return the installment average`() {
+        val expected = BigDecimal("50.00")
+        val actual = payment.getInstallmentAverageValue()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should return zero when the value is zero`() {
+        val paymentA = payment.copy(value = BigDecimal.ZERO)
+
+        val expected = BigDecimal.ZERO.setScale(2)
+        val actual = paymentA.getInstallmentAverageValue()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should return zero when the installment is zero`() {
+        val paymentA = payment.copy(installments = 0)
+
+        val expected = BigDecimal.ZERO.setScale(2)
+        val actual = paymentA.getInstallmentAverageValue()
+
+        assertEquals(expected, actual)
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // paidTransactionsSize()
+    //----------------------------------------------------------------------------------------------
+
+    @Test
+    fun `should return the number of paid transactions`() {
+        payment.addAllTransactions(
+            listOf(
+                sampleTransaction(),
+                sampleTransaction().copy(id = "transaction2", _isPaid = true)
+            )
+        )
+
+        val expected = 1
+        val actual = payment.getProcessedTransactionsSize()
+
+        assertEquals(expected, actual)
+    }
 
 }

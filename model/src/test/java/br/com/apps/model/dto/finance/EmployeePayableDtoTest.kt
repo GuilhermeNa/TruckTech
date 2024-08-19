@@ -2,7 +2,7 @@ package br.com.apps.model.dto.finance
 
 import br.com.apps.model.dto.finance.payable.EmployeePayableDto
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.test_cases.sampleEmployeePayable
 import br.com.apps.model.test_cases.sampleEmployeePayableDto
 import org.junit.Assert.assertEquals

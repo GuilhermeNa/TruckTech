@@ -9,6 +9,7 @@ class ChangePasswordFragmentViewModel(private val useCase: AuthenticationUseCase
 
     suspend fun updatePassword(oldPass: String, newPass: String) =
         liveData(viewModelScope.coroutineContext) {
+
             emit(useCase.updatePassword(oldPass, newPass))
         }
 

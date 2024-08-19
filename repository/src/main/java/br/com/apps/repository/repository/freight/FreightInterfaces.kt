@@ -110,4 +110,14 @@ interface FreightReadInterface {
     suspend fun fetchFreightListByDriverIdAndIsNotPaidYet(id: String, flow: Boolean = false)
     : LiveData<Response<List<Freight>>>
 
+    /**
+     * Fetches the [Freight] dataSet for the specified IDs.
+     *
+     * @param ids The ID list of the [Freight]'s.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Freight] list.
+     */
+    suspend fun fetchFreightByIds(ids: List<String>, flow: Boolean = false)
+            : LiveData<Response<List<Freight>>>
+
 }

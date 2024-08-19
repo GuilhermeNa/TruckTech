@@ -18,8 +18,8 @@ class RequestReadImplTest {
     @Test
     fun `should return request list by driver ID`() = runTest {
         coEvery {
-            repository.fetchRequestListByDriverId(
-                driverId = "1",
+            repository.fetchRequestListByUid(
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -33,7 +33,7 @@ class RequestReadImplTest {
     fun `should return item list by list of request IDs`() = runTest {
         coEvery {
             repository.fetchItemListByRequests(
-                idList = listOf("1", "2"),
+                ids = listOf("1", "2"),
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -47,7 +47,7 @@ class RequestReadImplTest {
     fun `should return request by ID`() = runTest {
         coEvery {
             repository.fetchRequestById(
-                requestId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())
@@ -61,7 +61,7 @@ class RequestReadImplTest {
     fun `should return item list by request ID`() = runTest {
         coEvery {
             repository.fetchItemListByRequestId(
-                requestId = "1",
+                id = "1",
                 flow = true
             )
         }.returns(MutableLiveData())

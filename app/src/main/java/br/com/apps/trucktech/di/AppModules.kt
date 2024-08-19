@@ -9,25 +9,16 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.AuthViewModel
 import br.com.apps.trucktech.ui.fragments.login.LoginViewModel
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentListVmData
 import br.com.apps.trucktech.ui.fragments.nav_documents.documents_list.DocumentsListFragmentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.discount.DiscountViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.fines.FinesListViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.home.frag_performance.PerformanceViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.home.frag_to_receive.ReceivableViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.payment.PaymentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_home.refund.RefundViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.time_line.TimelineFragmentViewModel
 import br.com.apps.trucktech.ui.fragments.nav_home.to_receive.ToReceiveViewModel
+import br.com.apps.trucktech.ui.fragments.nav_requests.item_editor.ItemEditorViewModel
+import br.com.apps.trucktech.ui.fragments.nav_requests.item_editor.ItemEditorVmData
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.RequestEditorViewModel
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.RequestEditorVmData
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost.RequestEditorCostFragmentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost.RequestEditorCostVmData
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_refuel.RequestEditorRefuelViewModel
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_refuel.RequestEditorRefuelVmData
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_wallet.RequestEditorWalletFragmentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_wallet.RequestEditorWalletVmData
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.RequestPreviewViewModel
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.RequestPreviewVmData
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.RequestLVMData
 import br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.RequestsListViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.bank.bank_editor.BankEVmData
@@ -39,8 +30,8 @@ import br.com.apps.trucktech.ui.fragments.nav_settings.change_password.ChangePas
 import br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsViewModel
 import br.com.apps.trucktech.ui.fragments.nav_settings.settings.SettingsVmData
 import br.com.apps.trucktech.ui.fragments.nav_settings.themes.ThemeFragmentViewModel
-import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEVMData
-import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEditorViewModel
+import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.OutlayEVMData
+import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.OutlayEditorViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list.ExpendLVmData
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_list.ExpendListViewModel
 import br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_preview.ExpendPreviewViewModel
@@ -66,7 +57,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModules = module {
-    viewModel<MainActivityViewModel> { MainActivityViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel<MainActivityViewModel> { MainActivityViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel<LoginViewModel> { LoginViewModel() }
     viewModel<BankListFragmentViewModel> { (id: String) ->
         BankListFragmentViewModel(
@@ -76,8 +67,8 @@ val viewModelModules = module {
         )
     }
     viewModel<ChangePasswordFragmentViewModel> { ChangePasswordFragmentViewModel(get()) }
-    viewModel<ExpendEditorViewModel> { (vmData: ExpendEVMData) ->
-        ExpendEditorViewModel(
+    viewModel<OutlayEditorViewModel> { (vmData: OutlayEVMData) ->
+        OutlayEditorViewModel(
             vmData,
             get(),
             get(),
@@ -120,17 +111,11 @@ val viewModelModules = module {
         FreightsListViewModel(vmData, get(), get())
     }
     viewModel<AuthViewModel> { AuthViewModel(get()) }
-    viewModel<RequestEditorViewModel> { (vmData: RequestEditorVmData) -> RequestEditorViewModel(vmData, get(), get(), get()) }
-    viewModel<RequestPreviewViewModel> { (vmData: RequestPreviewVmData) ->
-        RequestPreviewViewModel(
-            vmData,
-            get(),
-            get()
-        )
-    }
+    viewModel<RequestEditorViewModel> { (vmData: RequestEditorVmData) -> RequestEditorViewModel(vmData, get(), get(), get(), get()) }
     viewModel<RequestsListViewModel> { (vmData: RequestLVMData) ->
         RequestsListViewModel(
             vmData,
+            get(),
             get(),
             get()
         )
@@ -167,33 +152,6 @@ val viewModelModules = module {
         )
     }
     viewModel<ToReceiveViewModel> { ToReceiveViewModel() }
-    viewModel<DiscountViewModel> { DiscountViewModel(get()) }
-    viewModel<PaymentViewModel> { PaymentViewModel(get()) }
-    viewModel<RefundViewModel> { RefundViewModel(get()) }
-    viewModel<RequestEditorRefuelViewModel> { (vmData: RequestEditorRefuelVmData) ->
-        RequestEditorRefuelViewModel(
-            vmData,
-            get(),
-            get(),
-            get()
-        )
-    }
-    viewModel<RequestEditorCostFragmentViewModel> { (vmData: RequestEditorCostVmData) ->
-        RequestEditorCostFragmentViewModel(
-            vmData,
-            get(),
-            get(),
-            get(),
-            get()
-        )
-    }
-    viewModel<RequestEditorWalletFragmentViewModel> { (vmData: RequestEditorWalletVmData) ->
-        RequestEditorWalletFragmentViewModel(
-            vmData,
-            get(),
-            get()
-        )
-    }
     viewModel<BankPreviewViewModel> { (vmData: BankPVmData) ->
         BankPreviewViewModel(
             vmData,
@@ -206,6 +164,7 @@ val viewModelModules = module {
     viewModel<PerformanceViewModel> { PerformanceViewModel(get()) }
     viewModel<TravelPreviewViewModel> { (vmData: TravelPreviewVmData) -> TravelPreviewViewModel(vmData, get()) }
     viewModel<ReceivableViewModel> { ReceivableViewModel() }
+    viewModel<ItemEditorViewModel> { (vmData: ItemEditorVmData) -> ItemEditorViewModel(vmData, get(), get()) }
 }
 
 val appModules = listOf(

@@ -1,11 +1,13 @@
 package br.com.apps.model.model.payroll
 
 import br.com.apps.model.enums.EmployeeReceivableTicket
-import br.com.apps.model.exceptions.InvalidIdException
+import br.com.apps.model.exceptions.EmptyDataException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
 import br.com.apps.model.model.payroll.Loan.Companion.merge
 import br.com.apps.model.test_cases.sampleEmployeeReceivable
 import br.com.apps.model.test_cases.sampleLoan
 import br.com.apps.model.test_cases.sampleLoanDto
+import br.com.apps.model.test_cases.sampleTransaction
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
@@ -121,7 +123,10 @@ class LoanTest {
 
     @Test
     fun `should set its receivable when the ids match`() {
-        val expected = sampleEmployeeReceivable().copy(parentId = "loanId1", type = EmployeeReceivableTicket.LOAN)
+        val expected = sampleEmployeeReceivable().copy(
+            parentId = "loanId1",
+            type = EmployeeReceivableTicket.LOAN
+        )
         loan.setReceivable(expected)
 
         val actual = loan.receivable
@@ -177,6 +182,48 @@ class LoanTest {
         val dto = loan.toDto()
 
         assertEquals(expected, dto)
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // getInstallmentAverageValue()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should return null when the receivable is not set`() {
+        assertNull(loan.getInstallmentAverageValue())
+    }
+
+    @Test
+    fun `should throw EmptyDataException when the transaction list is empty`() {
+        loan.setReceivable(
+            sampleEmployeeReceivable().copy(
+                parentId = "loanId1",
+                type = EmployeeReceivableTicket.LOAN
+            )
+        )
+
+        assertThrows(EmptyDataException::class.java) {
+            loan.alreadyPaidTransactions()
+        }
+
+    }
+
+    @Test
+    fun `should return the average value`() {
+        val receivable = sampleEmployeeReceivable().copy(
+            parentId = "loanId1",
+            type = EmployeeReceivableTicket.LOAN
+        )
+        receivable.addAllTransactions(listOf(
+            sampleTransaction().copy(parentId = "employeeReceivableId1", _isPaid = true),
+            sampleTransaction().copy(parentId = "employeeReceivableId1", id = "transactionId2")
+        ))
+        loan.setReceivable(receivable)
+
+        val expected = 1
+        val actual = loan.alreadyPaidTransactions()
+
+        assertEquals(expected, actual)
     }
 
 

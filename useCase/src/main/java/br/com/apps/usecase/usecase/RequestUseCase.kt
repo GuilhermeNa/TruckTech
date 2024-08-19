@@ -1,126 +1,68 @@
 package br.com.apps.usecase.usecase
 
-import br.com.apps.model.dto.request.request.RequestItemDto
-import br.com.apps.model.dto.request.request.TravelRequestDto
-import br.com.apps.model.enums.PaymentRequestStatusType
-import br.com.apps.model.model.request.PaymentRequest
-import br.com.apps.model.model.request.RequestItem
-import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.dto.request.ItemDto
+import br.com.apps.model.dto.request.RequestDto
+import br.com.apps.model.enums.AccessLevel
+import br.com.apps.model.exceptions.null_objects.NullIdException
 import br.com.apps.repository.repository.StorageRepository
-import br.com.apps.repository.repository.UserRepository
+import br.com.apps.repository.repository.item.ItemRepository
 import br.com.apps.repository.repository.request.RequestRepository
-import br.com.apps.repository.util.EMPTY_ID
-import br.com.apps.repository.util.Response
-import br.com.apps.usecase.util.awaitValue
-import kotlinx.coroutines.DelicateCoroutinesApi
+import br.com.apps.repository.repository.user.UserRepository
+import br.com.apps.repository.util.NULL_ID
+import br.com.apps.repository.util.WriteRequest
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.security.InvalidParameterException
 
 /**
  * Use case class responsible for handling business logic related to payment requests and items.
  *
- * @param repository The repository instance to interact with Firestore.
+ * @param requestRepo The repository instance to interact with Firestore.
  */
 class RequestUseCase(
-    private val repository: RequestRepository,
+    private val requestRepo: RequestRepository,
+    private val itemsRepo: ItemRepository,
+    private val storage: StorageRepository,
     private val userRepository: UserRepository,
-    private val userUseCase: UserUseCase,
-    private val storage: StorageRepository
-) : CredentialsValidatorI<TravelRequestDto> {
+) {
 
-    fun mergeRequestData(
-        requestList: List<PaymentRequest>,
-        itemList: List<RequestItem>
-    ) {
-        requestList.forEach { request ->
-            val requestId = request.id ?: throw InvalidParameterException(EMPTY_ID)
-            val items = itemList.filter { it.requestId == requestId }
-            request.itemsList?.clear()
-            request.itemsList?.addAll(items)
-        }
-    }
-
-    suspend fun createRequest(dto: TravelRequestDto, uid: String): String {
-        dto.requestNumber = userRepository.getUserRequestNumber(uid)
-        val id = repository.save(dto)
+    suspend fun createRequest(dto: RequestDto, uid: String): String {
+        // dto.requestNumber = userRepository.getUserRequestNumber(uid)
+        val id = requestRepo.save(dto)
         userRepository.updateRequestNumber(uid)
         return id
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    suspend fun delete(permission: AccessLevel, request: PaymentRequest) {
-        val id = request.id ?: throw NullPointerException(EMPTY_ID)
-        val itemsId = request.itemsList?.mapNotNull { it.id }
-        val dto = request.toDto()
-        validatePermission(permission, dto)
-        repository.delete(id, itemsId)
+    suspend fun delete(writeReq: WriteRequest<RequestDto>, items: Array<ItemDto>? = null) {
+        val dto = writeReq.data
+        val auth = writeReq.authLevel
+        val id = dto.id ?: throw NullIdException(NULL_ID)
 
-        GlobalScope.launch {
-            request.itemsList?.forEach {
-                if (it.docUrl != null) storage.deleteImage("requests/${it.id}.jpeg")
-            }
-
-            dto.encodedImage?.let {
-                storage.deleteImage("requests/${dto.id}.jpeg")
-            }
-        }
-
-    }
-
-    suspend fun save(permission: AccessLevel, dto: TravelRequestDto) {
-       dto.validateDataForDbInsertion()
-        validatePermission(permission, dto)
-        repository.save(dto)
-    }
-
-    override fun validatePermission(permission: AccessLevel, dto: TravelRequestDto) {
-        val status = dto.status?.let { PaymentRequestStatusType.valueOf(it) }
-            ?: throw InvalidParameterException("Status is null")
-
-        if (status != PaymentRequestStatusType.SENT &&
-            permission != AccessLevel.MANAGER
-        ) throw InvalidParameterException("Invalid credentials for $permission")
-
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    suspend fun deleteItem(
-        permission: AccessLevel,
-        dto: TravelRequestDto,
-        item: RequestItem
-    ) {
-        val id = dto.id ?: throw NullPointerException(EMPTY_ID)
-        validatePermission(permission, dto)
-        repository.deleteItem(id, item.id!!)
-
-        item.docUrl?.let {
-            GlobalScope.launch {
-                try {
-                    storage.deleteImage("requests/${item.id}.jpeg")
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-    }
-
-    suspend fun saveItem(permission: AccessLevel, dto: RequestItemDto): String {
-        val requestId = dto.requestId ?: throw NullPointerException(EMPTY_ID)
+        //Validate
         dto.validateDataIntegrity()
+        dto.validateWriteAccess(auth)
 
-        val response = repository.fetchRequestById(requestId).awaitValue()
-        val requestDto = when (response) {
-            is Response.Error -> throw response.exception
-            is Response.Success -> response.data ?: throw NullPointerException()
-        }.toDto()
+        //Delete objects
+        requestRepo.delete(id)
+        items?.map { it.id ?: throw NullIdException(NULL_ID) }
+            ?.toTypedArray()
+            ?.run { itemsRepo.delete(this) }
 
-        validatePermission(permission, requestDto)
-        return repository.saveItem(dto)
+        //Delete images
+        GlobalScope.launch {
+            writeReq.data.urlImage?.let { url ->
+                storage.deleteImage("requests/${url}.jpeg")
+            }
+            items?.mapNotNull { it.id }?.forEach { url ->
+                storage.deleteImage("requests/${url}.jpeg")
+            }
+        }
+
+    }
+
+    suspend fun save(access: AccessLevel, dto: RequestDto) {
+        dto.validateDataForDbInsertion()
+        dto.validateWriteAccess(access)
+        requestRepo.save(dto)
     }
 
 }
-
-
-

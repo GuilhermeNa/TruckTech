@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.trucktech.databinding.FragmentDiscountBinding
@@ -13,10 +11,7 @@ import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.AdvanceRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.CostHelpRecyclerAdapter
 import br.com.apps.trucktech.ui.fragments.nav_home.discount.private_adapters.LoanRecyclerAdapter
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Descontos"
 
@@ -26,10 +21,7 @@ class DiscountFragment : BaseFragmentWithToolbar() {
     private val binding get() = _binding!!
     private var stateHandler: DiscountState? = null
 
-    private val employeeId by lazy { mainActVM.loggedUser.driverId }
-    private val viewModel: DiscountViewModel by viewModel { parametersOf(employeeId) }
-
-    private var costHelpAdapter: CostHelpRecyclerAdapter? = null
+    private var aidAdapter: CostHelpRecyclerAdapter? = null
     private var advanceAdapter: AdvanceRecyclerAdapter? = null
     private var loanAdapter: LoanRecyclerAdapter? = null
 
@@ -77,58 +69,61 @@ class DiscountFragment : BaseFragmentWithToolbar() {
      *   - Observes loanData for update the recyclerView
      */
     private fun initStateManager() {
-        getCachedData()
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is DiscountFState.Loading -> stateHandler?.showLoading()
+        var isLoansEmpty = false
+        var isAdvancesEmpty = false
+        var isAidsEmpty = false
+        fun isEmptyData() = isLoansEmpty && isAdvancesEmpty && isAidsEmpty
 
-                is DiscountFState.Loaded -> {
-                    if (state.hasAdvances) stateHandler?.showAdvances()
-                    else stateHandler?.hideAdvances()
-
-                    if (state.hasLoans) stateHandler?.showLoans()
-                    else stateHandler?.hideLoans()
-
-                    if(state.hasCostHelps) stateHandler?.showCostHelps()
-                    else stateHandler?.hideCostHelps()
+        mainActVM.cachedLoans.value?.let { loans ->
+            when (loans.isEmpty()) {
+                true -> {
+                    stateHandler?.hideLoans()
+                    isLoansEmpty = true
                 }
 
-                is DiscountFState.Empty -> stateHandler?.showEmpty()
-
-                is DiscountFState.Error -> {
-                    state.error.printStackTrace()
-                    stateHandler?.showError(state.error)
+                false -> {
+                    stateHandler?.showLoans()
+                    loanAdapter?.update(loans)
                 }
-
             }
         }
-    }
 
-    private fun getCachedData() {
-        lifecycleScope.launch {
-            val loans = mainActVM.cachedLoans.asFlow().first() ?: emptyList()
-            val advances = mainActVM.cachedAdvances.asFlow().first() ?: emptyList()
-            val travels = mainActVM.cachedTravels.asFlow().first() ?: emptyList()
-
-            viewModel.initFragmentData(loans, advances, travels).let { data ->
-                data.apply {
-                    if(costHelps.isNotEmpty()) costHelpAdapter?.update(costHelps)
-
-                    if (advances.isNotEmpty()) advanceAdapter?.update(advances)
-
-                    if (loans.isNotEmpty()) loanAdapter?.update(loans)
-
+        mainActVM.cachedAdvances.value?.let { advances ->
+            when (advances.isEmpty()) {
+                true -> {
+                    stateHandler?.hideAdvances()
+                    isAdvancesEmpty = true
                 }
 
+                false -> {
+                    stateHandler?.showAdvances()
+                    advanceAdapter?.update(advances)
+                }
             }
-
         }
+
+        mainActVM.cachedAids.value?.let { aids ->
+            when (aids.isEmpty()) {
+                true -> {
+                    stateHandler?.hideCostHelps()
+                    isAidsEmpty = true
+                }
+
+                false -> {
+                    stateHandler?.showCostHelps()
+                    aidAdapter?.update(aids)
+                }
+            }
+        }
+
+        if (isEmptyData()) stateHandler?.showEmpty()
+
     }
 
     private fun initPanelCostHelp() {
         val recyclerView = binding.fragmentDiscountPanelCostHelp.panelCostHelpRecycler
-        costHelpAdapter = CostHelpRecyclerAdapter(requireContext())
-        recyclerView.adapter = costHelpAdapter
+        aidAdapter = CostHelpRecyclerAdapter(requireContext())
+        recyclerView.adapter = aidAdapter
     }
 
     /**
@@ -136,7 +131,7 @@ class DiscountFragment : BaseFragmentWithToolbar() {
      */
     private fun initPanelAdvance() {
         val recyclerView = binding.fragmentDiscountPanelAdvance.panelAdvanceRecycler
-        advanceAdapter = AdvanceRecyclerAdapter(requireContext(), emptyList())
+        advanceAdapter = AdvanceRecyclerAdapter(requireContext())
         recyclerView.adapter = advanceAdapter
 
         val divider = DividerItemDecoration(recyclerView.context, RecyclerView.VERTICAL)
@@ -148,7 +143,7 @@ class DiscountFragment : BaseFragmentWithToolbar() {
      */
     private fun initPanelLoan() {
         val recyclerView = binding.fragmentDiscountPanelLoan.panelLoanRecycler
-        loanAdapter = LoanRecyclerAdapter(requireContext(), emptyList())
+        loanAdapter = LoanRecyclerAdapter(requireContext())
         recyclerView.adapter = loanAdapter
     }
 
@@ -159,7 +154,7 @@ class DiscountFragment : BaseFragmentWithToolbar() {
     override fun onDestroyView() {
         super.onDestroyView()
         stateHandler = null
-        costHelpAdapter = null
+        aidAdapter = null
         advanceAdapter = null
         loanAdapter = null
         _binding = null

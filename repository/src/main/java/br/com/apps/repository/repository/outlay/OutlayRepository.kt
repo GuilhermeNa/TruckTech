@@ -57,4 +57,9 @@ class OutlayRepository(
         flow: Boolean
     ) = read.fetchOutlayListByDriverIdAndIsNotRefundYet(id, flow)
 
+    override suspend fun fetchOutlayByIds(
+        ids: List<String>,
+        flow: Boolean
+    ) = read.fetchOutlayByIds(ids, flow)
+
 }

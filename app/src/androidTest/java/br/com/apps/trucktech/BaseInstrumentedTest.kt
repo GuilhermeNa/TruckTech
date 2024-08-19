@@ -344,7 +344,7 @@ abstract class TestDataGenerator {
                 isFinished = false,
                 isClosed = false,
                 initialDate = initDate.toDate(),
-                initialOdometerMeasurement = 10000.0,
+                initialOdometer = 10000.0,
             )
         }
     }

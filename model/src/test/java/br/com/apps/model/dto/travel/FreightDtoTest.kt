@@ -1,9 +1,9 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.exceptions.AccessLevelException
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidForSavingException
-import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.test_cases.sampleFreightDto
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -266,15 +266,8 @@ class FreightDtoTest {
     fun `validatePermission() - should throw InvalidAuthLevelException when authLevel is TRAINEE`() {
         freightDto.isValid = true
         assertThrows(AccessLevelException::class.java) {
-            freightDto.validateWriteAccess(AccessLevel.TRAINEE)
+            freightDto.validateWriteAccess(AccessLevel.ASSISTANT)
         }
     }
 
-    @Test
-    fun `validatePermission() - should throw InvalidAuthLevelException when authLevel is ADMIN_ASSISTANT`() {
-        freightDto.isValid = true
-        assertThrows(AccessLevelException::class.java) {
-            freightDto.validateWriteAccess(AccessLevel.ADMIN_ASSISTANT)
-        }
-    }
 }

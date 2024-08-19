@@ -2,7 +2,8 @@ package br.com.apps.model.model.payroll
 
 import br.com.apps.model.dto.payroll.LoanDto
 import br.com.apps.model.enums.EmployeeReceivableTicket
-import br.com.apps.model.exceptions.InvalidIdException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
+import br.com.apps.model.exceptions.null_objects.NullReceivableException
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.finance.receivable.EmployeeReceivable
@@ -35,6 +36,7 @@ data class Loan(
     val receivable get() = _receivable
 
     companion object {
+
         /**
          * Extension function for list of [Loan]'s to merge with a list of [EmployeeReceivable]'s.
          *
@@ -44,10 +46,9 @@ data class Loan(
          * @param receivables A list of receivable objects.
          */
         fun List<Loan>.merge(receivables: List<EmployeeReceivable>) {
-            forEach {
-                it.setReceivableById(receivables)
-            }
+            forEach { it.setReceivableById(receivables) }
         }
+
     }
 
     private fun setReceivableById(receivables: List<EmployeeReceivable>) {
@@ -56,6 +57,21 @@ data class Loan(
         }?.let {
             setReceivable(it)
         }
+    }
+
+    fun getInstallmentAverageValue() = _receivable?.getInstallmentAverageValue()
+
+    fun alreadyPaidTransactions() = _receivable?.getProcessedTransactionsSize()
+
+    fun transactionsSize() = _receivable?.transactionsSize()
+
+    fun getNextInstalmentValue(): BigDecimal {
+        validateReceivable()
+        return receivable!!.getNextTransaction()?.value ?: BigDecimal.ZERO.setScale(2)
+    }
+
+    private fun validateReceivable() {
+        if (receivable == null) throw NullReceivableException("The receivable is null.")
     }
 
     /**
@@ -77,7 +93,6 @@ data class Loan(
 
         }
     }
-
 
     override fun toDto() = LoanDto(
         masterUid = masterUid,

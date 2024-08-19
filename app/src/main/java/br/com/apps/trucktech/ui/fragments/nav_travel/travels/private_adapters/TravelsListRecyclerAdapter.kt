@@ -101,18 +101,18 @@ class TravelsListRecyclerAdapter(
             endDate.text = travel.finalDate?.getCompleteDateInPtBr() ?: "Em Curso"
 
             freightNumber.text =
-                if (travel.getListSize(Travel.FREIGHT) > 0)
-                    travel.getListSize(Travel.FREIGHT).toString()
+                if (travel.getSizeOf(Travel.FREIGHT) > 0)
+                    travel.getSizeOf(Travel.FREIGHT).toString()
                 else "-"
 
             refuelNumber.text =
-                if (travel.getListSize(Travel.REFUEL) > 0)
-                    travel.getListSize(Travel.REFUEL).toString()
+                if (travel.getSizeOf(Travel.REFUEL) > 0)
+                    travel.getSizeOf(Travel.REFUEL).toString()
                 else "-"
 
             expendNumber.text =
-                if (travel.getListSize(Travel.OUTLAY) > 0)
-                    travel.getListSize(Travel.OUTLAY).toString()
+                if (travel.getSizeOf(Travel.OUTLAY) > 0)
+                    travel.getSizeOf(Travel.OUTLAY).toString()
                 else "-"
 
             validImage.visibility = if(travel.isFinished) VISIBLE else GONE

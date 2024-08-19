@@ -8,21 +8,25 @@ import br.com.apps.model.dto.fleet.TrailerDto
 import br.com.apps.model.dto.fleet.TruckDto
 import br.com.apps.model.dto.payroll.AdvanceDto
 import br.com.apps.model.dto.payroll.LoanDto
+import br.com.apps.model.dto.request.ItemDto
+import br.com.apps.model.dto.request.RequestDto
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.dto.travel.OutlayDto
 import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.dto.travel.TravelAidDto
 import br.com.apps.model.enums.AdvanceType
+import br.com.apps.model.enums.DocumentType
 import br.com.apps.model.enums.EmployeePayableTicket
 import br.com.apps.model.enums.EmployeeReceivableTicket
 import br.com.apps.model.enums.FleetCategory
 import br.com.apps.model.enums.LabelCategory
+import br.com.apps.model.enums.PaymentRequestStatusType
 import br.com.apps.model.enums.PixType
 import br.com.apps.model.enums.TransactionType
 import br.com.apps.model.model.Customer
-import br.com.apps.model.model.TruckDocument
 import br.com.apps.model.model.bank.Bank
 import br.com.apps.model.model.bank.BankAccount
+import br.com.apps.model.model.document.TruckDocument
 import br.com.apps.model.model.finance.Transaction
 import br.com.apps.model.model.finance.payable.EmployeePayable
 import br.com.apps.model.model.finance.receivable.EmployeeReceivable
@@ -31,6 +35,8 @@ import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.model.payroll.Advance
 import br.com.apps.model.model.payroll.Loan
+import br.com.apps.model.model.request.Item
+import br.com.apps.model.model.request.Request
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.model.travel.Outlay
 import br.com.apps.model.model.travel.Refuel
@@ -147,9 +153,9 @@ fun sampleTruckDocument(): TruckDocument = TruckDocument(
     fleetId = "fleetId1",
     labelId = "labelId2",
     urlImage = "UrlImage1",
+    type = DocumentType.TRUCK,
     expeditionDate = LocalDateTime.of(2024, 1, 1, 0, 0, 0),
     expirationDate = LocalDateTime.of(2025, 1, 1, 0, 0, 0),
-    label = sampleDocumentLabel()
 )
 
 fun sampleDocumentLabel(): Label = Label(
@@ -158,7 +164,7 @@ fun sampleDocumentLabel(): Label = Label(
     name = "Name2",
     urlIcon = "UrlIcon2",
     color = 123,
-    type = LabelCategory.DOCUMENT,
+    type = LabelCategory.TRUCK_DOCUMENT,
     isDefaultLabel = false,
     isOperational = true
 )
@@ -231,7 +237,7 @@ fun sampleEmployeePayable(): EmployeePayable = EmployeePayable(
     masterUid = "masterUid1",
     id = "employeePayableId1",
     employeeId = "employeeId1",
-    parentId = "parentId2",
+    parentId = "parentId1",
     installments = 10,
     value = BigDecimal("500.00"),
     generationDate = LocalDateTime.of(2024, 1, 1, 0, 0),
@@ -242,7 +248,7 @@ fun sampleEmployeePayable(): EmployeePayable = EmployeePayable(
 fun sampleEmployeePayableDto(): EmployeePayableDto = EmployeePayableDto(
     masterUid = "masterUid1",
     id = "employeePayableId1",
-    parentId = "parentId2",
+    parentId = "parentId1",
     employeeId = "employeeId1",
     value = 500.00,
     installments = 10,
@@ -379,7 +385,6 @@ fun sampleTravelAid(): TravelAid = TravelAid(
     isValid = false
 )
 
-
 fun sampleTravelAidDto(): TravelAidDto = TravelAidDto(
     masterUid = "masterUid1",
     id = "travelAidId1",
@@ -397,8 +402,45 @@ fun sampleTravel(): Travel = Travel(
     employeeId = "employeeId1",
     initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
     finalDate = null,
-    initialOdometerMeasurement = BigDecimal("100.00"),
-    finalOdometerMeasurement = null,
+    initialOdometer = BigDecimal("100.00"),
+    finalOdometer = null,
     isClosed = false,
     isFinished = false
 )
+
+fun sampleRequest(): Request = Request(
+    masterUid = "masterUid1",
+    id = "requestId1",
+    uid = "uid1",
+    requestNumber = 1,
+    date = LocalDateTime.of(2024, 1, 1, 0, 0),
+    status = PaymentRequestStatusType.SENT
+)
+
+fun sampleRequestDto(): RequestDto = RequestDto(
+    masterUid = "masterUid1",
+    id = "requestId1",
+    uid = "uid1",
+    requestNumber = 1,
+    date = LocalDateTime.of(2024, 1, 1, 0, 0).toDate(),
+    status = PaymentRequestStatusType.SENT.name
+)
+
+fun sampleItem(): Item = Item(
+    masterUid = "masterUid1",
+    id = "itemId1",
+    parentId = "parentId1",
+    value = BigDecimal(100.0),
+    description = "Description1",
+    isValid = false
+)
+
+fun sampleItemDto(): ItemDto = ItemDto(
+    masterUid = "masterUid1",
+    id = "itemId1",
+    parentId = "parentId1",
+    value = 100.0,
+    description = "Description1",
+    isValid = false
+)
+

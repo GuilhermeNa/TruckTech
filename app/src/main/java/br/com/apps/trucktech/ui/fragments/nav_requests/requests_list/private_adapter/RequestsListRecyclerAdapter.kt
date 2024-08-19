@@ -8,19 +8,18 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.enums.PaymentRequestStatusType
-import br.com.apps.model.enums.RequestItemType
 import br.com.apps.model.expressions.getDayFormatted
 import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
 import br.com.apps.model.expressions.toCurrencyPtBr
-import br.com.apps.model.model.request.PaymentRequest
+import br.com.apps.model.model.request.Request
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestBinding
 
 class RequestsListRecyclerAdapter(
     private val context: Context,
-    dataSet: List<PaymentRequest>,
+    dataSet: List<Request>,
     var itemCLickListener: (id: String) -> Unit = {},
-    val deleteClickListener: (request: PaymentRequest) -> Unit
+    val deleteClickListener: (id: String) -> Unit
 ) : RecyclerView.Adapter<RequestsListRecyclerAdapter.ViewHolder>() {
 
     private val dataSet = dataSet.toMutableList()
@@ -37,11 +36,9 @@ class RequestsListRecyclerAdapter(
         val day = binding.itemOrderDay
         val month = binding.itemOrderMonth
         val value = binding.itemOrderValue
-        val refuelNumber = binding.itemOrderRefuelNumber
         val costNumber = binding.itemOrderCostNumber
-        val walletNumber = binding.itemOrderWalletNumber
 
-        lateinit var request: PaymentRequest
+        lateinit var request: Request
 
         init {
             card.setOnLongClickListener {
@@ -58,7 +55,7 @@ class RequestsListRecyclerAdapter(
         override fun onMenuItemClick(item: MenuItem?): Boolean {
             item?.let {
                 when (it.itemId) {
-                    R.id.menu_delete_delete -> deleteClickListener(request)
+                    R.id.menu_delete_delete -> deleteClickListener(request.id)
                     else -> {}
                 }
             }
@@ -87,7 +84,7 @@ class RequestsListRecyclerAdapter(
         initClickListener(holder, request)
     }
 
-    private fun initClickListener(holder: ViewHolder, request: PaymentRequest) {
+    private fun initClickListener(holder: ViewHolder, request: Request) {
         holder.card.setOnClickListener {
             request.id?.let { itemCLickListener(it) }
         }
@@ -95,20 +92,18 @@ class RequestsListRecyclerAdapter(
 
     override fun getItemCount(): Int = dataSet.size
 
-    private fun bind(holder: ViewHolder, order: PaymentRequest) {
+    private fun bind(holder: ViewHolder, order: Request) {
         holder.apply {
-            month.text = order.date?.getMonthInPtBrAbbreviated()
-            day.text = order.date?.getDayFormatted()
-            orderNumber.text = order.requestNumber?.toString()
-            value.text = order.getTotalValue().toCurrencyPtBr()
-            refuelNumber.text = getNumber(order, RequestItemType.REFUEL)
-            costNumber.text = getNumber(order, RequestItemType.COST)
-            walletNumber.text = getNumber(order, RequestItemType.WALLET)
+            month.text = order.date.getMonthInPtBrAbbreviated()
+            day.text = order.date.getDayFormatted()
+            orderNumber.text = order.requestNumber.toString()
+            value.text = order.getValue().toCurrencyPtBr()
+            costNumber.text = getNumber(order)
         }
     }
 
-    private fun getNumber(order: PaymentRequest, type: RequestItemType): String {
-        val numberByType = order.getNumberOfItemsByType(type)
+    private fun getNumber(order: Request): String {
+        val numberByType = order.items.size
         return if (numberByType >= 1) {
             numberByType.toString()
         } else {
@@ -117,7 +112,7 @@ class RequestsListRecyclerAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(dataSet: List<PaymentRequest>) {
+    fun update(dataSet: List<Request>) {
         this.dataSet.clear()
         this.dataSet.addAll(dataSet)
         notifyDataSetChanged()

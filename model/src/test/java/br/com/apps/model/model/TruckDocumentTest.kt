@@ -1,11 +1,12 @@
 package br.com.apps.model.model
 
-import br.com.apps.model.util.ERROR_STRING
 import br.com.apps.model.exceptions.EmptyDataException
 import br.com.apps.model.exceptions.null_objects.NullLabelException
-import br.com.apps.model.model.TruckDocument.Companion.merge
+import br.com.apps.model.model.document.Document.Companion.merge
+import br.com.apps.model.model.document.TruckDocument
 import br.com.apps.model.test_cases.sampleDocumentLabel
 import br.com.apps.model.test_cases.sampleTruckDocument
+import br.com.apps.model.util.ERROR_STRING
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -52,14 +53,14 @@ class TruckDocumentTest {
 
     @Test
     fun `should return the label name`() {
+        val label = sampleDocumentLabel().copy(id = "labelId2" )
+        truckDocument.setLabelById(listOf(label))
         val name = truckDocument.getLabelName()
         assertEquals("Name2", name)
     }
 
     @Test
     fun `should return default error text for name when the label is null`() {
-        truckDocument.label = null
-
         val name = truckDocument.getLabelName()
 
         assertEquals(ERROR_STRING, name)
@@ -72,7 +73,6 @@ class TruckDocumentTest {
     @Test
     fun `should merge a truck document list and a label list`() {
         val label = sampleDocumentLabel()
-        truckDocument.label = null
 
         listOf(truckDocument).merge(listOf(label))
 
@@ -81,7 +81,6 @@ class TruckDocumentTest {
 
     @Test
     fun `should throw exception for merge when label list is empty`() {
-        truckDocument.label = null
         assertThrows(Exception::class.java) {
             listOf(truckDocument).merge(emptyList())
         }

@@ -2,7 +2,7 @@ package br.com.apps.model.dto.fleet
 
 import br.com.apps.model.enums.FleetCategory
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.model.fleet.Trailer
 
 /**

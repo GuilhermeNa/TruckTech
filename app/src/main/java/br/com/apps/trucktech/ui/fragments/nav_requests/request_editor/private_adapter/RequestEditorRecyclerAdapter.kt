@@ -9,16 +9,16 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.enums.RequestItemType
 import br.com.apps.model.expressions.toCurrencyPtBr
-import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.request.Item
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestSubItemBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 
 class RequestEditorRecyclerAdapter(
     val context: Context,
-    dataSet: List<RequestItem>,
+    dataSet: List<Item>,
     val itemClickListener: (itemCLickData: RequestItemClickData) -> Unit = {},
-    val deleteClickListener: (itemDto: RequestItem) -> Unit = {}
+    val deleteClickListener: (itemDto: Item) -> Unit = {}
 ) : RecyclerView.Adapter<RequestEditorRecyclerAdapter.ViewHolder>() {
 
     private val dataSet = dataSet.toMutableList()
@@ -35,7 +35,7 @@ class RequestEditorRecyclerAdapter(
         val value = binding.itemRequestItemValue
         val card = binding.itemRequestItemCard
 
-        lateinit var requestItem: RequestItem
+        lateinit var requestItem: Item
 
         init {
             card.setOnLongClickListener {
@@ -82,13 +82,13 @@ class RequestEditorRecyclerAdapter(
         initClickListener(holder, item)
     }
 
-    fun bind(holder: ViewHolder, item: RequestItem) {
+    fun bind(holder: ViewHolder, item: Item) {
         holder.apply {
             try {
                 image.loadImageThroughUrl(
-                    url = item.getImage()
+                   // url = item.getImage()
                 )
-                description.text = item.getDescription()
+                //description.text = item.getDescription()
                 value.text = item.value?.toCurrencyPtBr()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -96,21 +96,21 @@ class RequestEditorRecyclerAdapter(
         }
     }
 
-    private fun initClickListener(holder: ViewHolder, item: RequestItem) {
+    private fun initClickListener(holder: ViewHolder, item: Item) {
         holder.card.setOnClickListener {
-            if (item.id != null && item.type != null) {
+  /*          if (item.id != null && item.type != null) {
                 itemClickListener(
                     RequestItemClickData(
                         itemId = item.id!!,
                         type = item.type!!
                     )
                 )
-            }
+            }*/
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(dataSet: List<RequestItem>) {
+    fun update(dataSet: List<Item>) {
         this.dataSet.clear()
         this.dataSet.addAll(dataSet)
         notifyDataSetChanged()

@@ -35,11 +35,11 @@ class EmployeeReceivableTest {
         receivables.merge(transactions)
 
         val expected = "transactionId1"
-        val actual = receivables[0].geTransactions()[0].id
+        val actual = receivables[0].getSortedTransactions()[0].id
         assertEquals(expected, actual)
 
         val expectedB = "transactionId2"
-        val actualB = receivables[1].geTransactions()[0].id
+        val actualB = receivables[1].getSortedTransactions()[0].id
         assertEquals(expectedB, actualB)
 
     }

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.repository.util.EMPLOYEE_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_FREIGHTS
+import br.com.apps.repository.util.ID
 import br.com.apps.repository.util.IS_COMMISSION_PAID
 import br.com.apps.repository.util.IS_VALID
 import br.com.apps.repository.util.Response
@@ -124,6 +125,20 @@ class FreightReadImpl(fireStore: FirebaseFirestore) : FreightReadInterface {
             .whereEqualTo(IS_COMMISSION_PAID, false)
 
         return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toFreightList() }
+            false -> listener.onComplete { it.toFreightList() }
+        }
+    }
+
+    override suspend fun fetchFreightByIds(
+        ids: List<String>,
+        flow: Boolean
+    ): LiveData<Response<List<Freight>>> = withContext(Dispatchers.IO) {
+        ids.validateIds()?.let { error -> return@withContext MutableLiveData(error) }
+
+        val listener = collection.whereIn(ID, ids)
+
+        return@withContext when(flow) {
             true -> listener.onSnapShot { it.toFreightList() }
             false -> listener.onComplete { it.toFreightList() }
         }

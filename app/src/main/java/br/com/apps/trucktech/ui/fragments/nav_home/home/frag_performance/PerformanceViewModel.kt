@@ -2,11 +2,12 @@ package br.com.apps.trucktech.ui.fragments.nav_home.home.frag_performance
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import br.com.apps.model.model.travel.PerformanceItem
-import br.com.apps.model.model.travel.Travel
 import br.com.apps.model.expressions.getDayFormatted
-import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.model.expressions.getMonthInPtBrAbbreviated
+import br.com.apps.model.model.travel.Travel
+import br.com.apps.model.model.travel.Travel.Companion.getProfitPercent
+import br.com.apps.trucktech.expressions.getKeyByValue
+import br.com.apps.trucktech.ui.model.PerformanceItem
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.TravelUseCase
 import java.math.BigDecimal
@@ -246,12 +247,12 @@ class PerformanceViewModel(private val useCase: TravelUseCase) : ViewModel() {
         return hashMap
     }
 
-    private fun getPerformanceItems(travelList: List<Travel>): List<PerformanceItem> {
-        val averageHit = useCase.getRefuelAverage(travelList)
+    private fun getPerformanceItems(travels: List<Travel>): List<PerformanceItem> {
+        val averageHit = useCase.getRefuelAverage(travels)
         val averagePercent = averageHit.divide(averageAim, 2, RoundingMode.HALF_EVEN)
             .multiply(BigDecimal(100))
 
-        val profitHit = useCase.getProfitPercentage(travelList)
+        val profitHit = travels.getProfitPercent()
         val profitPercent = profitHit.divide(performanceAim, 2, RoundingMode.HALF_EVEN)
             .multiply(BigDecimal(100))
 

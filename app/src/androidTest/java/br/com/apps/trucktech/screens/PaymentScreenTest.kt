@@ -69,7 +69,7 @@ class PaymentScreenTest: BaseInstrumentedTest() {
             isFinished = false,
             isClosed = false,
             initialDate = LocalDateTime.of(2024, 6, 1, 1, 10).toDate(),
-            initialOdometerMeasurement = 10000.0,
+            initialOdometer = 10000.0,
         )
 
         val freight = FreightDto(
@@ -84,7 +84,6 @@ class PaymentScreenTest: BaseInstrumentedTest() {
             weight = 35000.0,
             value = 10000.0,
             loadingDate = LocalDateTime.of(2024, 6, 2, 1, 10).toDate(),
-            isCommissionPaid = false,
             commissionPercentual = 10.0,
             isValid = true
             )

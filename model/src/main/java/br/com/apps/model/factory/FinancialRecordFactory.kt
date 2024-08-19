@@ -27,9 +27,7 @@ class FinancialRecordFactory {
             is TravelAid -> fromTravelAid(params)
             is Freight -> fromFreight(params)
             is Outlay -> fromOutlay(params)
-            else -> {
-                throw InvalidClassException("This class is not registered")
-            }
+            else -> throw InvalidClassException("This class is not registered")
         }
     }
 

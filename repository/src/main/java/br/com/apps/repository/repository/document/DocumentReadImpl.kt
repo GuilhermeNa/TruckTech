@@ -2,7 +2,7 @@ package br.com.apps.repository.repository.document
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import br.com.apps.model.model.TruckDocument
+import br.com.apps.model.model.document.TruckDocument
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_DOCUMENTS
 import br.com.apps.repository.util.FLEET_ID
 import br.com.apps.repository.util.Response

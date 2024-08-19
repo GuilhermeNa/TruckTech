@@ -1,8 +1,12 @@
 package br.com.apps.model.model.travel
 
-import br.com.apps.model.exceptions.DateOrderException
-import br.com.apps.model.exceptions.EmptyDataException
-import br.com.apps.model.exceptions.OdometerOrderException
+import br.com.apps.model.exceptions.DuplicatedItemsException
+import br.com.apps.model.exceptions.invalid.InvalidDateException
+import br.com.apps.model.model.travel.Travel.Companion.AID
+import br.com.apps.model.model.travel.Travel.Companion.FREIGHT
+import br.com.apps.model.model.travel.Travel.Companion.OUTLAY
+import br.com.apps.model.model.travel.Travel.Companion.REFUEL
+import br.com.apps.model.model.travel.Travel.Companion.getProfitPercent
 import br.com.apps.model.model.travel.Travel.Companion.merge
 import br.com.apps.model.test_cases.sampleFreight
 import br.com.apps.model.test_cases.sampleOutlay
@@ -125,59 +129,243 @@ class TravelTest {
     }
 
     //---------------------------------------------------------------------------------------------//
-    // getListSize()
+    // addAllFreights()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add all freights`() {
+        travel.addAllFreights(listOf(sampleFreight()))
+
+        val expected = 1
+        val actual = travel.getSizeOf(FREIGHT)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should not repeat freights with same id`() {
+        travel.addAllFreights(
+            listOf(
+                sampleFreight(),
+                sampleFreight()
+            )
+        )
+
+        val expected = 1
+        val actual = travel.getSizeOf(FREIGHT)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should clear the previous and add all freights`() {
+        travel.addFreight(sampleFreight())
+
+        travel.addAllFreights(
+            listOf(
+                sampleFreight(),
+                sampleFreight().copy(id = "freightId2")
+            )
+        )
+
+        val expected = 2
+        val actual = travel.getSizeOf(FREIGHT)
+
+        assertEquals(expected, actual)
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // addAllRefuels()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add all refuels`() {
+        travel.addAllRefuels(listOf(sampleRefuel()))
+
+        val expected = 1
+        val actual = travel.getSizeOf(REFUEL)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should not repeat refuels with same id`() {
+        travel.addAllRefuels(
+            listOf(
+                sampleRefuel(),
+                sampleRefuel()
+            )
+        )
+
+        val expected = 1
+        val actual = travel.getSizeOf(REFUEL)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should clear the previous and add all refuels`() {
+        travel.addRefuel(sampleRefuel())
+
+        travel.addAllRefuels(
+            listOf(
+                sampleRefuel(),
+                sampleRefuel().copy(id = "refuelId2")
+            )
+        )
+
+        val expected = 2
+        val actual = travel.getSizeOf(REFUEL)
+
+        assertEquals(expected, actual)
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // addAllOutlays()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add all outlays`() {
+        travel.addAllOutlays(listOf(sampleOutlay()))
+
+        val expected = 1
+        val actual = travel.getSizeOf(OUTLAY)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should not repeat outlays with same id`() {
+        travel.addAllOutlays(
+            listOf(
+                sampleOutlay(),
+                sampleOutlay()
+            )
+        )
+
+        val expected = 1
+        val actual = travel.getSizeOf(OUTLAY)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should clear the previous and add all outlays`() {
+        travel.addOutlay(sampleOutlay())
+
+        travel.addAllOutlays(
+            listOf(
+                sampleOutlay(),
+                sampleOutlay().copy(id = "outlayId2")
+            )
+        )
+
+        val expected = 2
+        val actual = travel.getSizeOf(OUTLAY)
+
+        assertEquals(expected, actual)
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // addAllOutlays()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add all aids`() {
+        travel.addAllAids(listOf(sampleTravelAid()))
+
+        val expected = 1
+        val actual = travel.getSizeOf(AID)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should not repeat aids with same id`() {
+        travel.addAllAids(
+            listOf(
+                sampleTravelAid(),
+                sampleTravelAid()
+            )
+        )
+
+        val expected = 1
+        val actual = travel.getSizeOf(AID)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should clear the previous and add all aids`() {
+        travel.addAid(sampleTravelAid())
+
+        travel.addAllAids(
+            listOf(
+                sampleTravelAid(),
+                sampleTravelAid().copy(id = "travelAid2")
+            )
+        )
+
+        val expected = 2
+        val actual = travel.getSizeOf(AID)
+
+        assertEquals(expected, actual)
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // getSizeOf()
     //---------------------------------------------------------------------------------------------//
 
     @Test
     fun `should return the size of the list for freights`() {
         addFreights()
-        val freightSize = travel.getListSize(Travel.FREIGHT)
+        val freightSize = travel.getSizeOf(Travel.FREIGHT)
         assertEquals(2, freightSize)
     }
 
     @Test
     fun `should return the size of the list for outlay`() {
         addOutlays()
-        val expendSize = travel.getListSize(Travel.OUTLAY)
+        val expendSize = travel.getSizeOf(Travel.OUTLAY)
         assertEquals(2, expendSize)
     }
 
     @Test
     fun `should return the size of the list for refuels`() {
         addRefuels()
-        val refuelSize = travel.getListSize(Travel.REFUEL)
+        val refuelSize = travel.getSizeOf(Travel.REFUEL)
         assertEquals(2, refuelSize)
     }
 
     @Test
     fun `should return the size of the list for aids`() {
         addAids()
-        val aidSize = travel.getListSize(Travel.AID)
+        val aidSize = travel.getSizeOf(Travel.AID)
         assertEquals(2, aidSize)
     }
 
     @Test
     fun `should throw exception when the int tag is wrong for list size`() {
         assertThrows(InvalidParameterException::class.java) {
-            travel.getListSize(999)
+            travel.getSizeOf(999)
         }
     }
 
     //---------------------------------------------------------------------------------------------//
-    // getListOfIdsForList()
+    // getIdsOf()
     //---------------------------------------------------------------------------------------------//
 
     @Test
     fun `should return the freight list of ids for a selected item`() {
         addFreights()
-        val freightIds = travel.getListOfIdsForList(Travel.FREIGHT)
+        val freightIds = travel.getIdsOf(Travel.FREIGHT)
         assertEquals(listOf("freightId1", "freightId2"), freightIds)
     }
 
     @Test
     fun `should return the refuel list of ids for a selected item`() {
         addRefuels()
-        val refuelIds = travel.getListOfIdsForList(Travel.REFUEL)
+        val refuelIds = travel.getIdsOf(Travel.REFUEL)
         assertEquals(listOf("refuelId1", "refuelId2"), refuelIds)
     }
 
@@ -186,7 +374,7 @@ class TravelTest {
         addOutlays()
 
         val expected = listOf("outlayId1", "outlayId2")
-        val actual = travel.getListOfIdsForList(Travel.OUTLAY)
+        val actual = travel.getIdsOf(Travel.OUTLAY)
 
         assertEquals(expected, actual)
     }
@@ -196,7 +384,7 @@ class TravelTest {
         addAids()
 
         val expected = listOf("travelAidId1", "travelAidId2")
-        val actual = travel.getListOfIdsForList(Travel.AID)
+        val actual = travel.getIdsOf(Travel.AID)
 
         assertEquals(expected, actual)
     }
@@ -204,12 +392,12 @@ class TravelTest {
     @Test
     fun `should throw exception when the int tag is wrong for list of ids`() {
         assertThrows(InvalidParameterException::class.java) {
-            travel.getListOfIdsForList(999)
+            travel.getIdsOf(999)
         }
     }
 
     //---------------------------------------------------------------------------------------------//
-    // getCommissionValue()
+    // getCommission()
     //---------------------------------------------------------------------------------------------//
 
     @Test
@@ -217,36 +405,36 @@ class TravelTest {
         addFreights()
 
         val expected = BigDecimal("2000.00")
-        val commissionValue = travel.getCommissionValue()
+        val commissionValue = travel.getCommission()
 
         assertEquals(expected, commissionValue)
     }
 
     //---------------------------------------------------------------------------------------------//
-    // getDifferenceBetweenInitialAndFinalOdometerMeasure()
+    // getTraveledDistance()
     //---------------------------------------------------------------------------------------------//
 
     @Test
     fun `should return the difference between initial and final odometer measure`() {
         val travelA = travel.copy(
-            initialOdometerMeasurement = BigDecimal("10000.00"),
-            finalOdometerMeasurement = BigDecimal("15000.00")
+            initialOdometer = BigDecimal("10000.00"),
+            finalOdometer = BigDecimal("15000.00")
         )
 
         val expected = BigDecimal("5000.00")
-        val actual = travelA.getDifferenceBetweenInitialAndFinalOdometerMeasure()
+        val actual = travelA.getTraveledDistance()
 
         assertEquals(expected, actual)
     }
 
     @Test
     fun `should return zero when any odometer measure is null`() {
-        val difference = travel.getDifferenceBetweenInitialAndFinalOdometerMeasure()
+        val difference = travel.getTraveledDistance()
         assertEquals(BigDecimal.ZERO, difference)
     }
 
     //---------------------------------------------------------------------------------------------//
-    // getListTotalValue()
+    // getValueOf()
     //---------------------------------------------------------------------------------------------//
 
     @Test
@@ -254,7 +442,7 @@ class TravelTest {
         addFreights()
 
         val expected = BigDecimal("20000.00")
-        val actual = travel.getListTotalValue(Travel.FREIGHT)
+        val actual = travel.getValueOf(Travel.FREIGHT)
 
         assertEquals(expected, actual)
     }
@@ -264,7 +452,7 @@ class TravelTest {
         addRefuels()
 
         val expected = BigDecimal("8000.00")
-        val actual = travel.getListTotalValue(Travel.REFUEL)
+        val actual = travel.getValueOf(Travel.REFUEL)
 
         assertEquals(expected, actual)
     }
@@ -274,7 +462,7 @@ class TravelTest {
         addOutlays()
 
         val expected = BigDecimal("1000.00")
-        val expendSum = travel.getListTotalValue(Travel.OUTLAY)
+        val expendSum = travel.getValueOf(Travel.OUTLAY)
 
         assertEquals(expected, expendSum)
     }
@@ -284,7 +472,7 @@ class TravelTest {
         addAids()
 
         val expected = BigDecimal("200.00")
-        val aidSum = travel.getListTotalValue(Travel.AID)
+        val aidSum = travel.getValueOf(Travel.AID)
 
         assertEquals(expected, aidSum)
     }
@@ -292,7 +480,7 @@ class TravelTest {
     @Test
     fun `should return zero when the list is empty - Freights`() {
         val expected = BigDecimal.ZERO.setScale(2)
-        val actual = travel.getListTotalValue(Travel.FREIGHT)
+        val actual = travel.getValueOf(Travel.FREIGHT)
 
         assertEquals(expected, actual)
     }
@@ -300,28 +488,28 @@ class TravelTest {
     @Test
     fun `should return zero when the list is empty - Refuels`() {
         val expected = BigDecimal.ZERO.setScale(2)
-        val actual = travel.getListTotalValue(Travel.REFUEL)
+        val actual = travel.getValueOf(Travel.REFUEL)
         assertEquals(expected, actual)
     }
 
     @Test
     fun `should return zero when the list is empty - Expends`() {
         val expected = BigDecimal.ZERO.setScale(2)
-        val actual = travel.getListTotalValue(Travel.OUTLAY)
+        val actual = travel.getValueOf(Travel.OUTLAY)
         assertEquals(expected, actual)
     }
 
     @Test
     fun `should return zero when the list is empty - Aid`() {
         val expected = BigDecimal.ZERO.setScale(2)
-        val actual = travel.getListTotalValue(Travel.AID)
+        val actual = travel.getValueOf(Travel.AID)
         assertEquals(expected, actual)
     }
 
     @Test
     fun `should throw exception when the int tag is wrong for sum of values`() {
         assertThrows(InvalidParameterException::class.java) {
-            travel.getListTotalValue(999)
+            travel.getValueOf(999)
         }
     }
 
@@ -399,7 +587,7 @@ class TravelTest {
         travel.addRefuel(sampleRefuel().copy(id = "refuelId1", isValid = true))
         travel.addOutlay(sampleOutlay().copy(id = "outlayId1", isValid = true))
 
-        val authPercTotal = travel.getTravelAuthenticationPercent()
+        val authPercTotal = travel.getAuthPercent()
 
         assertEquals(expected, authPercTotal, 0.0)
     }
@@ -410,7 +598,7 @@ class TravelTest {
         travel.addRefuel(sampleRefuel().copy(id = "refuelId1", isValid = true))
         travel.addOutlay(sampleOutlay().copy(id = "outlayId1", isValid = true))
 
-        val authPercTotal = travel.getTravelAuthenticationPercent()
+        val authPercTotal = travel.getAuthPercent()
 
         assertEquals(expected, authPercTotal, 0.0)
     }
@@ -421,175 +609,123 @@ class TravelTest {
         travel.addFreight(sampleFreight().copy(id = "freightId1", isValid = true))
         travel.addRefuel(sampleRefuel().copy(id = "refuelId1", isValid = true))
 
-        val authPercTotal = travel.getTravelAuthenticationPercent()
+        val authPercTotal = travel.getAuthPercent()
 
         assertEquals(expected, authPercTotal, 0.0)
     }
 
     //---------------------------------------------------------------------------------------------//
-    // isReadyToBeFinished()
+    // isReadyToFinalize()
     //---------------------------------------------------------------------------------------------//
 
     @Test
-    fun `should return true when the travel fully valid`() {
-        travel.addFreight(sampleFreight().copy(id = "freightId1", isValid = true))
-        travel.addRefuel(sampleRefuel().copy(id = "refuelId1", isValid = true))
-        travel.addOutlay(sampleOutlay().copy(id = "outlayId1", isValid = true))
+    fun `should return true when travel is ready to finalize`() {
+        travel.addFreight(sampleFreight().copy(isValid = true))
+        travel.addRefuel(sampleRefuel().copy(isValid = true))
+        travel.addOutlay(sampleOutlay().copy(isValid = true))
+        travel.addAid(sampleTravelAid().copy(isValid = true))
 
-        assertTrue(travel.isReadyToBeFinished())
+        assertTrue(travel.isReadyToFinalize())
     }
 
     @Test
-    fun `should return false when the travel is not fully valid`() {
-        travel.addFreight(sampleFreight().copy(id = "freightId1", isValid = true))
-        travel.addRefuel(sampleRefuel().copy(id = "refuelId1", isValid = true))
-        travel.addOutlay(sampleOutlay().copy(id = "outlayId1", isValid = false))
+    fun `should return false when freight list is empty`() {
+        travel.addRefuel(sampleRefuel().copy(isValid = true))
+        travel.addOutlay(sampleOutlay().copy(isValid = true))
+        travel.addAid(sampleTravelAid().copy(isValid = true))
 
-        assertFalse(travel.isReadyToBeFinished())
+        assertFalse(travel.isReadyToFinalize())
     }
 
     @Test
-    fun `should return false when the travel is empty`() {
-        assertFalse(travel.isReadyToBeFinished())
+    fun `should return false when freight list is invalid`() {
+        travel.addFreight(sampleFreight().copy(isValid = false))
+        travel.addRefuel(sampleRefuel().copy(isValid = true))
+        travel.addOutlay(sampleOutlay().copy(isValid = true))
+        travel.addAid(sampleTravelAid().copy(isValid = true))
+
+        assertFalse(travel.isReadyToFinalize())
+    }
+
+    @Test
+    fun `should return false when refuel list is empty`() {
+        travel.addFreight(sampleFreight().copy(isValid = true))
+        travel.addOutlay(sampleOutlay().copy(isValid = true))
+        travel.addAid(sampleTravelAid().copy(isValid = true))
+
+        assertFalse(travel.isReadyToFinalize())
+    }
+
+    @Test
+    fun `should return false when refuel list is invalid`() {
+        travel.addFreight(sampleFreight().copy(isValid = true))
+        travel.addRefuel(sampleRefuel().copy(isValid = false))
+        travel.addOutlay(sampleOutlay().copy(isValid = true))
+        travel.addAid(sampleTravelAid().copy(isValid = true))
+
+        assertFalse(travel.isReadyToFinalize())
+    }
+
+    @Test
+    fun `should return false when outlay list is empty`() {
+        travel.addFreight(sampleFreight().copy(isValid = true))
+        travel.addRefuel(sampleRefuel().copy(isValid = true))
+        travel.addAid(sampleTravelAid().copy(isValid = true))
+
+        assertFalse(travel.isReadyToFinalize())
+    }
+
+    @Test
+    fun `should return false when outlay list is invalid`() {
+        travel.addFreight(sampleFreight().copy(isValid = true))
+        travel.addRefuel(sampleRefuel().copy(isValid = true))
+        travel.addOutlay(sampleOutlay().copy(isValid = false))
+        travel.addAid(sampleTravelAid().copy(isValid = true))
+
+        assertFalse(travel.isReadyToFinalize())
+    }
+
+    @Test
+    fun `should return false when aid list is invalid`() {
+        travel.addFreight(sampleFreight().copy(isValid = true))
+        travel.addRefuel(sampleRefuel().copy(isValid = true))
+        travel.addOutlay(sampleOutlay().copy(isValid = true))
+        travel.addAid(sampleTravelAid().copy(isValid = false))
+
+        assertFalse(travel.isReadyToFinalize())
     }
 
     //---------------------------------------------------------------------------------------------//
-    // isEmptyTravel()
+    // isEmpty()
     //---------------------------------------------------------------------------------------------//
 
     @Test
     fun `should return true when the travel has no registered itens`() {
-        assertTrue(travel.isEmptyTravel())
+        assertTrue(travel.isEmpty())
     }
 
     @Test
     fun `should return false when there is at least one freight`() {
         addFreights()
-        assertFalse(travel.isEmptyTravel())
+        assertFalse(travel.isEmpty())
     }
 
     @Test
     fun `should return false when there is at least one refuel`() {
         addRefuels()
-        assertFalse(travel.isEmptyTravel())
+        assertFalse(travel.isEmpty())
     }
 
     @Test
     fun `should return false when there is at least one outlay`() {
         addOutlays()
-        assertFalse(travel.isEmptyTravel())
+        assertFalse(travel.isEmpty())
     }
 
     @Test
     fun `should return false when there is at least one aid`() {
         addAids()
-        assertFalse(travel.isEmptyTravel())
-    }
-
-    //---------------------------------------------------------------------------------------------//
-    // validateForSaving()
-    //---------------------------------------------------------------------------------------------//
-
-    @Test
-    fun `should throw odometerOrderException when odometer measures are in wrong order`() {
-        val travelA = travel.copy(
-            initialOdometerMeasurement = BigDecimal("10.00"),
-            finalOdometerMeasurement = BigDecimal("5.00"),
-            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
-            finalDate = LocalDateTime.of(2024, 1, 2, 0, 0),
-            isFinished = true
-        ).apply {
-            addFreight(sampleFreight().copy(isValid = true))
-            addRefuel(sampleRefuel().copy(isValid = true))
-            addOutlay(sampleOutlay().copy(isValid = true))
-            addAid(sampleTravelAid().copy(isValid = true))
-        }
-
-        assertThrows(OdometerOrderException::class.java) {
-            travelA.validateForSaving()
-        }
-
-    }
-
-    @Test
-    fun `should throw dateOrderException when dates are in wrong order`() {
-        val travelA = travel.copy(
-            initialDate = LocalDateTime.of(2022, 1, 2, 0, 0),
-            finalDate = LocalDateTime.of(2022, 1, 1, 0, 0),
-            finalOdometerMeasurement = BigDecimal("200.00"),
-            isFinished = true
-        ).apply {
-            addFreight(sampleFreight().copy(isValid = true))
-            addRefuel(sampleRefuel().copy(isValid = true))
-            addOutlay(sampleOutlay().copy(isValid = true))
-            addAid(sampleTravelAid().copy(isValid = true))
-        }
-
-        assertThrows(DateOrderException::class.java) {
-            travelA.validateForSaving()
-        }
-
-    }
-
-    @Test
-    fun `should throw dateOrderException when final date is null`() {
-        val travelA = travel.copy(
-            initialDate = LocalDateTime.of(2022, 1, 2, 12, 0),
-            finalDate = null,
-            isFinished = true
-        ).apply {
-            addFreight(sampleFreight().copy(isValid = true))
-            addRefuel(sampleRefuel().copy(isValid = true))
-            addOutlay(sampleOutlay().copy(isValid = true))
-        }
-
-        assertThrows(NullPointerException::class.java) {
-            travelA.validateForSaving()
-        }
-
-    }
-
-    @Test
-    fun `should throw exception when there is any invalid freight`() {
-        addFreights()
-        assertThrows(InvalidParameterException::class.java) {
-            travel.validateForSaving()
-        }
-    }
-
-    @Test
-    fun `should throw exception when the freight list is empty`() {
-        assertThrows(EmptyDataException::class.java) {
-            travel.validateForSaving()
-        }
-    }
-
-    @Test
-    fun `should throw exception when there is any invalid refuel`() {
-        val freightA = sampleFreight().copy(isValid = true)
-        travel.addFreight(freightA)
-        addRefuels()
-
-        assertThrows(InvalidParameterException::class.java) {
-            travel.validateForSaving()
-        }
-
-    }
-
-    @Test
-    fun `should throw exception when there is any invalid outlay`() {
-        val freightA = sampleFreight().copy(isValid = true)
-        travel.addFreight(freightA)
-
-        val refuelA = sampleRefuel().copy(isValid = true)
-        travel.addRefuel(refuelA)
-
-        addOutlays()
-
-        assertThrows(InvalidParameterException::class.java) {
-            travel.validateForSaving()
-        }
-
+        assertFalse(travel.isEmpty())
     }
 
     //---------------------------------------------------------------------------------------------//
@@ -681,8 +817,8 @@ class TravelTest {
     @Test
     fun `should return the fuel average when values are good`() {
         val travelA = sampleTravel().copy(
-            initialOdometerMeasurement = BigDecimal.ZERO,
-            finalOdometerMeasurement = BigDecimal("1000.00")
+            initialOdometer = BigDecimal.ZERO,
+            finalOdometer = BigDecimal("1000.00")
         ).apply {
             addRefuel(sampleRefuel().copy(id = "refuelId1", amountLiters = BigDecimal("200.00")))
             addRefuel(sampleRefuel().copy(id = "refuelId2", amountLiters = BigDecimal("200.00")))
@@ -718,6 +854,396 @@ class TravelTest {
     @Test
     fun `should return false if the refuel list is empty`() {
         assertFalse(travel.shouldConsiderAverage())
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // addFreight()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add a freight when data is correct`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+        val freight = sampleFreight().copy(
+            loadingDate = LocalDateTime.of(2024, 1, 2, 0, 0)
+        )
+
+        travelA.addFreight(freight)
+
+        val actual = travelA.freights[0]
+
+        assertEquals(freight, actual)
+    }
+
+    @Test
+    fun `should add a freight when travel initialDate and freight loadingDate are equal`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+        val freight = sampleFreight().copy(
+            loadingDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+
+        travelA.addFreight(freight)
+
+        val actual = travelA.freights[0]
+
+        assertEquals(freight, actual)
+    }
+
+    @Test
+    fun `should add a freight when travel finalDate and freight loadingDate are equal`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+            finalDate = LocalDateTime.of(2024, 1, 10, 0, 0)
+        )
+        val freight = sampleFreight().copy(
+            loadingDate = LocalDateTime.of(2024, 1, 10, 0, 0)
+        )
+
+        travelA.addFreight(freight)
+
+        val actual = travelA.freights[0]
+
+        assertEquals(freight, actual)
+    }
+
+    @Test
+    fun `should throw InvalidDateException when freight loadingDate is before travel initialDate`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 2, 0, 0),
+        )
+        val freight = sampleFreight().copy(
+            loadingDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+
+        assertThrows(InvalidDateException::class.java) {
+            travelA.addFreight(freight)
+        }
+    }
+
+    @Test
+    fun `should throw InvalidDateException when freight loadingDate is after travel initialDate`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+            finalDate = LocalDateTime.of(2024, 1, 5, 0, 0)
+        )
+        val freight = sampleFreight().copy(
+            loadingDate = LocalDateTime.of(2024, 1, 6, 0, 0)
+        )
+
+        assertThrows(InvalidDateException::class.java) {
+            travelA.addFreight(freight)
+        }
+    }
+
+    @Test
+    fun `should throw DuplicatedItemsException when the freight id already exists in list`() {
+        val freight = sampleFreight()
+        travel.addFreight(freight)
+
+        assertThrows(DuplicatedItemsException::class.java) {
+            travel.addFreight(freight)
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // addRefuel()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add a refuel when data is correct`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+        val refuel = sampleRefuel().copy(
+            date = LocalDateTime.of(2024, 1, 2, 0, 0)
+        )
+
+        travelA.addRefuel(refuel)
+
+        val actual = travelA.refuels[0]
+
+        assertEquals(refuel, actual)
+    }
+
+    @Test
+    fun `should add a refuel when travel initialDate and refuel date are equal`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+        val refuel = sampleRefuel().copy(
+            date = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+
+        travelA.addRefuel(refuel)
+
+        val actual = travelA.refuels[0]
+
+        assertEquals(refuel, actual)
+    }
+
+    @Test
+    fun `should add a refuel when travel finalDate and refuel date are equal`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+            finalDate = LocalDateTime.of(2024, 1, 10, 0, 0)
+        )
+        val refuel = sampleRefuel().copy(
+            date = LocalDateTime.of(2024, 1, 10, 0, 0)
+        )
+
+        travelA.addRefuel(refuel)
+
+        val actual = travelA.refuels[0]
+
+        assertEquals(refuel, actual)
+    }
+
+    @Test
+    fun `should throw InvalidDateException when refuel date is before travel initialDate`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 2, 0, 0),
+        )
+        val refuel = sampleRefuel().copy(
+            date = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+
+        assertThrows(InvalidDateException::class.java) {
+            travelA.addRefuel(refuel)
+        }
+    }
+
+    @Test
+    fun `should throw InvalidDateException when refuel date is after travel initialDate`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+            finalDate = LocalDateTime.of(2024, 1, 5, 0, 0)
+        )
+        val refuel = sampleRefuel().copy(
+            date = LocalDateTime.of(2024, 1, 6, 0, 0)
+        )
+
+        assertThrows(InvalidDateException::class.java) {
+            travelA.addRefuel(refuel)
+        }
+    }
+
+    @Test
+    fun `should throw DuplicatedItemsException when the refuel id already exists in list`() {
+        val refuel = sampleRefuel()
+        travel.addRefuel(refuel)
+
+        assertThrows(DuplicatedItemsException::class.java) {
+            travel.addRefuel(refuel)
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // addOutlay()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add a outlay when data is correct`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+        val outlay = sampleOutlay().copy(
+            date = LocalDateTime.of(2024, 1, 2, 0, 0)
+        )
+
+        travelA.addOutlay(outlay)
+
+        val actual = travelA.outlays[0]
+
+        assertEquals(outlay, actual)
+    }
+
+    @Test
+    fun `should add a outlay when travel initialDate and outlay date are equal`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+        val outlay = sampleOutlay().copy(
+            date = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+
+        travelA.addOutlay(outlay)
+
+        val actual = travelA.outlays[0]
+
+        assertEquals(outlay, actual)
+    }
+
+    @Test
+    fun `should add a outlay when travel finalDate and outlay date are equal`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+            finalDate = LocalDateTime.of(2024, 1, 10, 0, 0)
+        )
+        val outlay = sampleOutlay().copy(
+            date = LocalDateTime.of(2024, 1, 10, 0, 0)
+        )
+
+        travelA.addOutlay(outlay)
+
+        val actual = travelA.outlays[0]
+
+        assertEquals(outlay, actual)
+    }
+
+    @Test
+    fun `should throw InvalidDateException when outlay date is before travel initialDate`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 2, 0, 0),
+        )
+        val outlay = sampleOutlay().copy(
+            date = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+
+        assertThrows(InvalidDateException::class.java) {
+            travelA.addOutlay(outlay)
+        }
+    }
+
+    @Test
+    fun `should throw InvalidDateException when outlay date is after travel initialDate`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+            finalDate = LocalDateTime.of(2024, 1, 5, 0, 0)
+        )
+        val outlay = sampleOutlay().copy(
+            date = LocalDateTime.of(2024, 1, 6, 0, 0)
+        )
+
+        assertThrows(InvalidDateException::class.java) {
+            travelA.addOutlay(outlay)
+        }
+    }
+
+    @Test
+    fun `should throw DuplicatedItemsException when the outlay id already exists in list`() {
+        val outlay = sampleOutlay()
+        travel.addOutlay(outlay)
+
+        assertThrows(DuplicatedItemsException::class.java) {
+            travel.addOutlay(outlay)
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // addAid()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should add a travelAid when data is correct`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+        val aid = sampleTravelAid().copy(
+            date = LocalDateTime.of(2024, 1, 2, 0, 0)
+        )
+
+        travelA.addAid(aid)
+
+        val actual = travelA.aids[0]
+
+        assertEquals(aid, actual)
+    }
+
+    @Test
+    fun `should add a travelAid when travel initialDate and travelAid date are equal`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+        val aid = sampleTravelAid().copy(
+            date = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+
+        travelA.addAid(aid)
+
+        val actual = travelA.aids[0]
+
+        assertEquals(aid, actual)
+    }
+
+    @Test
+    fun `should add a travelAid when travel finalDate and travelAid date are equal`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+            finalDate = LocalDateTime.of(2024, 1, 10, 0, 0)
+        )
+        val aid = sampleTravelAid().copy(
+            date = LocalDateTime.of(2024, 1, 10, 0, 0)
+        )
+
+        travelA.addAid(aid)
+
+        val actual = travelA.aids[0]
+
+        assertEquals(aid, actual)
+    }
+
+    @Test
+    fun `should throw InvalidDateException when travelAid date is before travel initialDate`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 2, 0, 0),
+        )
+        val aid = sampleTravelAid().copy(
+            date = LocalDateTime.of(2024, 1, 1, 0, 0)
+        )
+
+        assertThrows(InvalidDateException::class.java) {
+            travelA.addAid(aid)
+        }
+    }
+
+    @Test
+    fun `should throw InvalidDateException when travelAid loadingDate is after travel initialDate`() {
+        val travelA = sampleTravel().copy(
+            initialDate = LocalDateTime.of(2024, 1, 1, 0, 0),
+            finalDate = LocalDateTime.of(2024, 1, 5, 0, 0)
+        )
+        val aid = sampleTravelAid().copy(
+            date = LocalDateTime.of(2024, 1, 6, 0, 0)
+        )
+
+        assertThrows(InvalidDateException::class.java) {
+            travelA.addAid(aid)
+        }
+    }
+
+    @Test
+    fun `should throw DuplicatedItemsException when the travelAid id already exists in list`() {
+        val aid = sampleTravelAid()
+        travel.addAid(aid)
+
+        assertThrows(DuplicatedItemsException::class.java) {
+            travel.addAid(aid)
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // getProfitPercent()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should return the profit percent of travels`() {
+        travel.run {
+            addFreight(sampleFreight())
+            addRefuel(sampleRefuel())
+        }
+        val travelA = sampleTravel().copy(id = "travelId2").apply {
+            addFreight(sampleFreight().copy(travelId = "travelId2", value = BigDecimal("12000.00")))
+            addRefuel(sampleRefuel().copy(travelId = "travelId2", totalValue = BigDecimal("5500.00")))
+        }
+
+        val expected = BigDecimal("47.00")
+        val actual = listOf(travel, travelA).getProfitPercent()
+
+        assertEquals(expected, actual)
+
     }
 
 

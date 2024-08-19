@@ -12,6 +12,7 @@ import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.CANCEL
+import br.com.apps.repository.util.CONNECTION_FAILURE
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_REMOVE
 import br.com.apps.repository.util.OK
@@ -26,6 +27,7 @@ import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.expressions.toBold
 import br.com.apps.trucktech.expressions.toUnderline
 import br.com.apps.trucktech.ui.fragments.base_fragments.BasePreviewFragment
+import br.com.apps.trucktech.util.DeviceCapabilities
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -171,12 +173,22 @@ class RefuelPreviewFragment : BasePreviewFragment() {
     }
 
     private fun deleteRefuel() {
-        viewModel.delete().observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
-                is Response.Success -> {
-                    requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
-                    requireView().popBackStack()
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { isConnected ->
+            when (isConnected) {
+                true -> {
+                    viewModel.delete().observe(viewLifecycleOwner) { response ->
+                        when (response) {
+                            is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
+                            is Response.Success -> {
+                                requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
+                                requireView().popBackStack()
+                            }
+                        }
+                    }
+                }
+
+                false -> {
+                    requireView().snackBarRed(CONNECTION_FAILURE)
                 }
             }
         }

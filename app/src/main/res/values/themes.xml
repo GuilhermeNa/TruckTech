@@ -42,5 +42,12 @@
         <item name="ci_drawable">@drawable/selector_circle_indicator</item>
     </style>
 
+    <!-- ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| -->
+    <!-- FULL SCREEN DIALOG -->
+    <!-- ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| -->
+
+    <style name="FullScreen">
+        <item name="android:windowFullscreen">true</item>
+    </style>
 
 </resources>

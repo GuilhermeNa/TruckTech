@@ -12,11 +12,8 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.enums.RequestItemType
-import br.com.apps.model.expressions.toCurrencyPtBr
-import br.com.apps.model.model.request.RequestItem
+import br.com.apps.model.model.request.Item
 import br.com.apps.repository.util.CANCEL
-import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.OK
 import br.com.apps.repository.util.RESULT_KEY
 import br.com.apps.repository.util.Response
@@ -30,16 +27,11 @@ import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.activities.CameraActivity
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapter.RequestEditorRecyclerAdapter
-import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_dialogs.RequestEditorBottomSheet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 private const val TOOLBAR_TITLE = "Requisição"
-
-private const val DIRECTION_REFUEL = 0
-private const val DIRECTION_COST = 1
-private const val DIRECTION_WALLET = 2
 
 private const val ITEM_SUCCESSFULLY_REMOVED = "Item removido com sucesso"
 private const val FAILED_TO_REMOVE_ITEM = "Falha ao remover Item"
@@ -165,36 +157,19 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
             requireContext(),
             emptyList(),
             itemClickListener = { itemCLickData ->
-                val direction = when (itemCLickData.type) {
-                    RequestItemType.REFUEL ->
-                        RequestEditorFragmentDirections
-                            .actionRequestEditorFragmentToRequestEditorRefuelFragment(
-                                refuelId = itemCLickData.itemId,
-                                requestId = args.requestId
-                            )
-
-                    RequestItemType.COST ->
-                        RequestEditorFragmentDirections
-                            .actionRequestEditorFragmentToRequestEditorCostFragment(
-                                costId = itemCLickData.itemId,
-                                requestId = args.requestId
-                            )
-
-                    RequestItemType.WALLET ->
-                        RequestEditorFragmentDirections
-                            .actionRequestEditorFragmentToRequestEditorWalletFragment(
-                                walletId = itemCLickData.itemId,
-                                requestId = args.requestId
-                            )
-                }
-                requireView().navigateTo(direction)
+                requireView().navigateTo(
+                    RequestEditorFragmentDirections
+                        .actionRequestEditorFragmentToItemEditor(
+                            requestId = args.requestId, itemCLickData.itemId
+                        )
+                )
             },
             deleteClickListener = this::showAlertDialogForDelete
         )
         recyclerView.adapter = adapter
     }
 
-    private fun showAlertDialogForDelete(item: RequestItem) {
+    private fun showAlertDialogForDelete(item: Item) {
         viewModel.requestDarkLayer()
 
         MaterialAlertDialogBuilder(requireContext())
@@ -211,7 +186,7 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
 
     }
 
-    private fun deleteItem(item: RequestItem) {
+    private fun deleteItem(item: Item) {
         viewModel.deleteItem(item).observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE_ITEM)
@@ -228,43 +203,12 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
      */
     private fun initFab() {
         binding.fragmentRequestEditorFab.setOnClickListener {
-
-            viewModel.requestDarkLayer()
-
-            val bottomSheet = RequestEditorBottomSheet(
-                onClickListener = { result ->
-                    when (result) {
-                        DIRECTION_REFUEL -> {
-                            requireView().navigateTo(
-                                RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorRefuelFragment(
-                                    refuelId = null,
-                                    requestId = args.requestId
-                                )
-                            )
-                        }
-
-                        DIRECTION_COST -> {
-                            requireView().navigateTo(
-                                RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorCostFragment(
-                                    costId = null,
-                                    requestId = args.requestId
-                                )
-                            )
-                        }
-
-                        DIRECTION_WALLET -> {
-                            requireView().navigateTo(
-                                RequestEditorFragmentDirections.actionRequestEditorFragmentToRequestEditorWalletFragment(
-                                    walletId = null,
-                                    requestId = args.requestId
-                                )
-                            )
-                        }
-                    }
-                },
-                onDismissListener = { viewModel.dismissDarkLayer() }
+            it.navigateTo(
+                RequestEditorFragmentDirections.actionRequestEditorFragmentToItemEditor(
+                    requestId = args.requestId,
+                    itemId = null
+                )
             )
-            bottomSheet.show(childFragmentManager, RequestEditorBottomSheet.TAG)
         }
     }
 
@@ -276,17 +220,17 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
      *
      */
     private fun initStateManager() {
-        viewModel.data.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                is Response.Success -> {
-                    response.data?.let { request ->
-                        request.itemsList?.let { adapter?.update(it) }
-                        binding.boxFragRequestPreviewDescription.valueField.text =
-                            request.getTotalValue().toCurrencyPtBr()
-                    }
-                }
-            }
+        viewModel.data.observe(viewLifecycleOwner) { /*response ->*/
+            /* when (response) {
+                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
+                 is Response.Success -> {
+                     response.data?.let { request ->
+                         request.itemsList?.let { adapter?.update(it) }
+                         binding.boxFragRequestPreviewDescription.valueField.text =
+                             request.getTotalValue().toCurrencyPtBr()
+                     }
+                 }
+             }*/
         }
 
         viewModel.urlImage.observe(viewLifecycleOwner) { image ->

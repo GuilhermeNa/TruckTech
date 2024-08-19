@@ -1,12 +1,12 @@
 package br.com.apps.model.dto.travel
 
+import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.exceptions.AccessLevelException
 import br.com.apps.model.exceptions.CorruptedFileException
-import br.com.apps.model.exceptions.InvalidForSavingException
+import br.com.apps.model.exceptions.invalid.InvalidForSavingException
 import br.com.apps.model.interfaces.AccessPermissionInterface
 import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.travel.Freight
-import br.com.apps.model.model.user.AccessLevel
 import br.com.apps.model.util.ACCESS_DENIED
 import br.com.apps.model.util.toLocalDateTime
 import java.math.BigDecimal

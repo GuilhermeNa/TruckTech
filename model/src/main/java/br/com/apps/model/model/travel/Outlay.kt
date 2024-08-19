@@ -1,15 +1,19 @@
 package br.com.apps.model.model.travel
 
 import br.com.apps.model.dto.travel.OutlayDto
+import br.com.apps.model.enums.EmployeePayableTicket
 import br.com.apps.model.exceptions.EmptyDataException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
 import br.com.apps.model.exceptions.null_objects.NullLabelException
 import br.com.apps.model.interfaces.LabelInterface
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.employee.Employee
+import br.com.apps.model.model.finance.payable.EmployeePayable
 import br.com.apps.model.model.fleet.Truck
 import br.com.apps.model.model.label.Label
 import br.com.apps.model.util.ERROR_STRING
 import br.com.apps.model.util.toDate
+import java.lang.invoke.WrongMethodTypeException
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -51,14 +55,28 @@ data class Outlay(
     val description: String,
     val value: BigDecimal,
     val isPaidByEmployee: Boolean,
-    val isValid: Boolean,
-    private var _label: Label? = null,
+    val isValid: Boolean
 ) : LabelInterface, ModelObjectInterface<OutlayDto> {
 
-    val label: Label?
-        get() = _label
+    private var _label: Label? = null
+    val label get() = _label
+
+    private var _payable: EmployeePayable? = null
+    val payable get() = _payable
 
     companion object {
+
+        /**
+         * Extension function for list of [Outlay]'s to merge with a list of [EmployeePayable]'s.
+         *
+         * Each outlay in the list will have its payable updated with
+         * the corresponding from the list.
+         *
+         * @param payables A list of [EmployeePayable] objects.
+         */
+        fun List<Outlay>.mergePayables(payables: List<EmployeePayable>) {
+            forEach { it.setPayableById(payables) }
+        }
 
         /**
          * Extension function for list of [Outlay]'s to merge with a list of [Label]'s.
@@ -74,6 +92,32 @@ data class Outlay(
             this.forEach { it.setLabelById(labels) }
         }
 
+    }
+
+    private fun setPayableById(payables: List<EmployeePayable>) {
+        payables
+            .firstOrNull { it.parentId == id }
+            ?.let { setPayable(it) }
+    }
+
+    /**
+     * Sets the payable for the current outlay.
+     *
+     * @param payable The [EmployeePayable] object to be assigned to the current outlay.
+     *
+     * @throws InvalidIdException If the `parentId` of the provided `EmployeePayable` does not match the `id` of the current payable.
+     */
+    fun setPayable(payable: EmployeePayable) {
+        if (payable.parentId != id) {
+            throw InvalidIdException("Wrong payable id (${payable.parentId}) for outlay id ($id)")
+
+        } else if (payable.type != EmployeePayableTicket.OUTLAY) {
+            throw WrongMethodTypeException("Wrong type: expecting (${EmployeePayableTicket.OUTLAY.name}) and received (${payable.type.name})")
+
+        } else {
+            _payable = payable
+
+        }
     }
 
     override fun setLabelById(labels: List<Label>) {

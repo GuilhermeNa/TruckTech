@@ -148,7 +148,7 @@
         </fragment>
         <fragment
             android:id="@+id/costEditorFragment"
-            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.ExpendEditorFragment"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_travel.cost.expend_editor.OutlayEditorFragment"
             android:label="fragment_cost_editor"
             tools:layout="@layout/fragment_expend_editor" >
             <argument
@@ -281,51 +281,12 @@
             tools:layout="@layout/fragment_document" >
             <argument
                 android:name="document"
-                app:argType="br.com.apps.model.model.TruckDocument" />
+                app:argType="br.com.apps.model.model.document.TruckDocument" />
         </fragment>
     </navigation>
 
     <navigation android:id="@+id/nav_requests"
         app:startDestination="@id/requestsListFragment">
-        <fragment
-            android:id="@+id/requestEditorWalletFragment"
-            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_wallet.RequestEditorWalletFragment"
-            android:label="fragment_request_editor_wallet"
-            tools:layout="@layout/fragment_request_editor_wallet" >
-            <argument
-                android:name="walletId"
-                app:argType="string"
-                app:nullable="true" />
-            <argument
-                android:name="requestId"
-                app:argType="string" />
-        </fragment>
-        <fragment
-            android:id="@+id/requestEditorCostFragment"
-            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_cost.RequestEditorCostFragment"
-            android:label="fragment_request_editor_cost"
-            tools:layout="@layout/fragment_request_editor_cost" >
-            <argument
-                android:name="costId"
-                app:argType="string"
-                app:nullable="true" />
-            <argument
-                android:name="requestId"
-                app:argType="string" />
-        </fragment>
-        <fragment
-            android:id="@+id/requestEditorRefuelFragment"
-            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_editor_refuel.RequestEditorRefuelFragment"
-            android:label="fragment_request_editor_refuel"
-            tools:layout="@layout/fragment_request_editor_refuel" >
-            <argument
-                android:name="refuelId"
-                app:argType="string"
-                app:nullable="true" />
-            <argument
-                android:name="requestId"
-                app:argType="string" />
-        </fragment>
         <fragment
             android:id="@+id/requestsListFragment"
             android:name="br.com.apps.trucktech.ui.fragments.nav_requests.requests_list.RequestsListFragment"
@@ -334,40 +295,43 @@
             <action
                 android:id="@+id/action_requestsListFragment_to_requestEditorFragment"
                 app:destination="@id/requestEditorFragment" />
-            <action
-                android:id="@+id/action_requestsListFragment_to_requestPreviewFragment"
-                app:destination="@id/requestPreviewFragment" />
         </fragment>
         <fragment
             android:id="@+id/requestEditorFragment"
             android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.RequestEditorFragment"
             android:label="fragment_request_editor"
             tools:layout="@layout/fragment_request_editor" >
-            <action
-                android:id="@+id/action_requestEditorFragment_to_requestEditorRefuelFragment"
-                app:destination="@id/requestEditorRefuelFragment" />
-            <action
-                android:id="@+id/action_requestEditorFragment_to_requestEditorCostFragment"
-                app:destination="@id/requestEditorCostFragment" />
-            <action
-                android:id="@+id/action_requestEditorFragment_to_requestEditorWalletFragment"
-                app:destination="@id/requestEditorWalletFragment" />
             <argument
                 android:name="requestId"
                 app:argType="string" />
+            <action
+                android:id="@+id/action_requestEditorFragment_to_itemEditor"
+                app:destination="@id/itemEditor"
+                app:launchSingleTop="false"
+                app:popUpToInclusive="false" />
         </fragment>
         <fragment
-            android:id="@+id/requestPreviewFragment"
-            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.request_preview.RequestPreviewFragment"
-            android:label="fragment_request_preview"
-            tools:layout="@layout/fragment_request_preview" >
+            android:id="@+id/itemEditor"
+            android:name="br.com.apps.trucktech.ui.fragments.nav_requests.item_editor.ItemEditorFragment"
+            android:label="item_editor_fragment"
+            tools:layout="@layout/fragment_item_editor" >
             <argument
                 android:name="requestId"
                 app:argType="string" />
-            <action
-                android:id="@+id/action_requestPreviewFragment_to_requestEditorFragment"
-                app:destination="@id/requestEditorFragment" />
+            <argument
+                android:name="itemId"
+                app:argType="string"
+                app:nullable="true" />
         </fragment>
     </navigation>
 
+    <fragment
+        android:id="@+id/imageFragment"
+        android:name="br.com.apps.trucktech.ui.fragments.image.ImageFragment"
+        android:label="fragment_image"
+        tools:layout="@layout/fragment_image" />
+
+    <action
+        android:id="@+id/action_global_image_fragment"
+        app:destination="@id/imageFragment"/>
 </navigation>

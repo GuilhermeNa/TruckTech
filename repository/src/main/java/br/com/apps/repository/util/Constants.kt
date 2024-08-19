@@ -10,6 +10,8 @@ const val EMPTY_ID = "Empty id"
 
 const val MASTER_UID = "masterUid"
 
+const val USER_ID = "uid"
+
 const val INSERTION_DATE = "insertionDate"
 
 const val PARENT_ID = "parentId"
@@ -48,15 +50,13 @@ const val IS_FINISHED = "isFinished"
 
 const val LABEL_IS_OPERATIONAL = "isOperational"
 
-const val ENCODED_IMAGE = "encodedImage"
-
 const val ODOMETER_MEASURE = "odometerMeasure"
-
-const val DOC_URL = "docUrl"
 
 const val MAIN_ACCOUNT = "mainAccount"
 
 const val FLEET_TYPE = "fleetType"
+
+const val URL_IMAGE = "urlImage"
 
 //---------------------------------------------------------------------------------------------//
 // SUCCESS MESSAGES
@@ -69,6 +69,8 @@ const val SUCCESSFULLY_REMOVED = "Removido com sucesso"
 //---------------------------------------------------------------------------------------------//
 // FAILURE MESSAGES
 //---------------------------------------------------------------------------------------------//
+
+const val CONNECTION_FAILURE = "Falha na conexão"
 
 const val EMPTY_ID_EXCEPTION = "Id list cannot be empty"
 
@@ -90,9 +92,13 @@ const val EMPTY_DATASET = "DataSet vazio"
 
 const val NULL_DATE = "Date is null"
 
+const val NULL_ID = "The id is null."
+
 //---------------------------------------------------------------------------------------------//
 // FIRE BASE COLLECTIONS
 //---------------------------------------------------------------------------------------------//
+
+internal const val FIRESTORE_COLLECTION_USERS = "users"
 
 const val FIRESTORE_COLLECTION_TRAVELS = "travels"
 
@@ -124,9 +130,11 @@ internal const val FIRESTORE_COLLECTION_USER_LABELS = "labels"
 
 internal const val FIRESTORE_COLLECTION_INCOMES = "incomes"
 
+internal const val FIRESTORE_COLLECTION_ITEMS = "items"
+
 const val FIRESTORE_COLLECTION_REQUESTS = "requests"
 
-internal const val FIRESTORE_COLLECTION_ITEMS = "requestItems"
+/*internal const val FIRESTORE_COLLECTION_ITEMS = "requestItems"*/
 
 internal const val FIRESTORE_COLLECTION_DEFAULT_BANKS = "_banks"
 

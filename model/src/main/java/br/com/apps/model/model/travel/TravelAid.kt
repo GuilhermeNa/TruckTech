@@ -2,7 +2,7 @@ package br.com.apps.model.model.travel
 
 import br.com.apps.model.dto.travel.TravelAidDto
 import br.com.apps.model.enums.EmployeeReceivableTicket
-import br.com.apps.model.exceptions.InvalidIdException
+import br.com.apps.model.exceptions.invalid.InvalidIdException
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.model.employee.Employee
 import br.com.apps.model.model.finance.receivable.EmployeeReceivable

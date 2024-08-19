@@ -26,8 +26,7 @@ class LabelRepository(
         type: String,
         masterUid: String,
         flow: Boolean
-    ) =
-        read.fetchLabelListByMasterUidAndType(type, masterUid, flow)
+    ) = read.fetchLabelListByMasterUidAndType(type, masterUid, flow)
 
     override suspend fun fetchLabelById(labelId: String, flow: Boolean) =
         read.fetchLabelById(labelId, flow)

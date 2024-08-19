@@ -6,14 +6,15 @@ import br.com.apps.model.model.travel.Outlay
 import br.com.apps.repository.util.ALREADY_REFUNDED
 import br.com.apps.repository.util.EMPLOYEE_ID
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_EXPENDS
+import br.com.apps.repository.util.ID
 import br.com.apps.repository.util.IS_VALID
 import br.com.apps.repository.util.PAID_BY_EMPLOYEE
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TRAVEL_ID
 import br.com.apps.repository.util.onComplete
 import br.com.apps.repository.util.onSnapShot
-import br.com.apps.repository.util.toExpendList
 import br.com.apps.repository.util.toExpendObject
+import br.com.apps.repository.util.toOutlayList
 import br.com.apps.repository.util.validateId
 import br.com.apps.repository.util.validateIds
 import com.google.firebase.firestore.FirebaseFirestore
@@ -33,8 +34,8 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
         val listener = collection.whereEqualTo(EMPLOYEE_ID, id)
 
         return@withContext when (flow) {
-            true -> listener.onSnapShot { it.toExpendList() }
-            false -> listener.onComplete { it.toExpendList() }
+            true -> listener.onSnapShot { it.toOutlayList() }
+            false -> listener.onComplete { it.toOutlayList() }
         }
     }
 
@@ -51,8 +52,8 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
             .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
         return@withContext when (flow) {
-            true -> listener.onSnapShot { it.toExpendList() }
-            false -> listener.onComplete { it.toExpendList() }
+            true -> listener.onSnapShot { it.toOutlayList() }
+            false -> listener.onComplete { it.toOutlayList() }
         }
     }
 
@@ -69,8 +70,8 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
             .whereEqualTo(ALREADY_REFUNDED, alreadyRefunded)
 
         return@withContext when (flow) {
-            true -> listener.onSnapShot { it.toExpendList() }
-            false -> listener.onComplete { it.toExpendList() }
+            true -> listener.onSnapShot { it.toOutlayList() }
+            false -> listener.onComplete { it.toOutlayList() }
         }
     }
 
@@ -83,8 +84,8 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
         val listener = collection.whereEqualTo(TRAVEL_ID, id)
 
         return@withContext when (flow) {
-            true -> listener.onSnapShot { it.toExpendList() }
-            false -> listener.onComplete { it.toExpendList() }
+            true -> listener.onSnapShot { it.toOutlayList() }
+            false -> listener.onComplete { it.toOutlayList() }
         }
     }
 
@@ -97,8 +98,8 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
         val listener = collection.whereIn(TRAVEL_ID, ids)
 
         return@withContext when (flow) {
-            true -> listener.onSnapShot { it.toExpendList() }
-            false -> listener.onComplete { it.toExpendList() }
+            true -> listener.onSnapShot { it.toOutlayList() }
+            false -> listener.onComplete { it.toOutlayList() }
         }
     }
 
@@ -128,8 +129,22 @@ class OutlayReadImpl(fireStore: FirebaseFirestore) : OutlayReadInterface {
             .whereEqualTo(ALREADY_REFUNDED, false)
 
         return@withContext when (flow) {
-            true -> listener.onSnapShot { it.toExpendList() }
-            false -> listener.onComplete { it.toExpendList() }
+            true -> listener.onSnapShot { it.toOutlayList() }
+            false -> listener.onComplete { it.toOutlayList() }
+        }
+    }
+
+    override suspend fun fetchOutlayByIds(
+        ids: List<String>,
+        flow: Boolean
+    ): LiveData<Response<List<Outlay>>> = withContext(Dispatchers.IO) {
+        ids.validateIds()?.let { error -> return@withContext MutableLiveData(error) }
+
+        val listener = collection.whereIn(ID, ids)
+
+        return@withContext when (flow) {
+            true -> listener.onSnapShot { it.toOutlayList() }
+            false -> listener.onComplete { it.toOutlayList() }
         }
     }
 

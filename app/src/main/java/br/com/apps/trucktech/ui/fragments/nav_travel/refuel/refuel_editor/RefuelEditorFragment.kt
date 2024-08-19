@@ -14,6 +14,7 @@ import br.com.apps.model.dto.travel.RefuelDto
 import br.com.apps.model.expressions.getCompleteDateInPtBr
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.model.util.toDate
+import br.com.apps.repository.util.CONNECTION_FAILURE
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
 import br.com.apps.repository.util.FAILED_TO_SAVE
 import br.com.apps.repository.util.Response
@@ -25,6 +26,7 @@ import br.com.apps.trucktech.expressions.popBackStack
 import br.com.apps.trucktech.expressions.snackBarGreen
 import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
+import br.com.apps.trucktech.util.DeviceCapabilities
 import br.com.apps.trucktech.util.MonetaryMaskUtil
 import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
 import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceShow
@@ -205,18 +207,28 @@ class RefuelEditorFragment : BaseFragmentWithToolbar() {
     }
 
     private fun save(viewDto: RefuelDto) {
-        viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> {
-                    requireView().snackBarRed(FAILED_TO_SAVE)
-                    Log.e(TAG_DEBUG, response.exception.message.toString())
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { isConnected ->
+            when (isConnected) {
+                true -> {
+                    viewModel.save(viewDto).observe(viewLifecycleOwner) { response ->
+                        when (response) {
+                            is Response.Error -> {
+                                requireView().snackBarRed(FAILED_TO_SAVE)
+                                Log.e(TAG_DEBUG, response.exception.message.toString())
+                            }
+
+                            is Response.Success -> {
+                                requireView().snackBarGreen(SUCCESSFULLY_SAVED)
+                                requireView().popBackStack()
+                            }
+
+                        }
+                    }
                 }
 
-                is Response.Success -> {
-                    requireView().snackBarGreen(SUCCESSFULLY_SAVED)
-                    requireView().popBackStack()
+                false -> {
+                    requireView().snackBarRed(CONNECTION_FAILURE)
                 }
-
             }
         }
     }

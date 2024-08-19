@@ -5,21 +5,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.dto.request.request.TravelRequestDto
+import br.com.apps.model.dto.request.RequestDto
+import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.enums.PaymentRequestStatusType
+import br.com.apps.model.exceptions.null_objects.NullItemException
+import br.com.apps.model.exceptions.null_objects.NullRequestException
 import br.com.apps.model.expressions.atBrZone
-import br.com.apps.model.model.request.PaymentRequest
-import br.com.apps.model.model.request.RequestItem
-import br.com.apps.model.model.user.AccessLevel
+import br.com.apps.model.model.request.Item
+import br.com.apps.model.model.request.Request
+import br.com.apps.model.model.request.Request.Companion.merge
 import br.com.apps.model.util.toDate
+import br.com.apps.repository.repository.item.ItemRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
+import br.com.apps.repository.util.WriteRequest
 import br.com.apps.trucktech.expressions.getKeyByValue
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.RequestUseCase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 import java.time.LocalDateTime
@@ -32,15 +38,18 @@ private const val PROCESSED = "Processados"
 
 class RequestsListViewModel(
     private val vmData: RequestLVMData,
-    private val repository: RequestRepository,
+    private val requestRepo: RequestRepository,
+    private val itemRepo: ItemRepository,
     private val useCase: RequestUseCase,
 ) : ViewModel() {
+
+    private var fetchItemsJob: Job? = null
 
     /**
      * LiveData holding the response data of type [Response] with a list of expenditures [PaymentRequest]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<List<PaymentRequest>>()
+    private val _data = MutableLiveData<List<Request>>()
     val data get() = _data
 
     private val _state = MutableLiveData<State>()
@@ -72,47 +81,67 @@ class RequestsListViewModel(
 
     init {
         setState(State.Loading)
+        loadData()
     }
 
     fun loadData() {
+
+        suspend fun fetchRequests(complete: (requests: List<Request>) -> Unit) {
+            requestRepo.fetchRequestListByUid(vmData.uid, true)
+                .asFlow().collect { response ->
+                    when (response) {
+                        is Response.Error -> throw response.exception
+                        is Response.Success -> response.data?.let { complete(it) }
+                            ?: throw NullRequestException()
+                    }
+                }
+        }
+
+        fun CoroutineScope.fetchItems(
+            requests: List<Request>, complete: (items: List<Item>) -> Unit
+        ) {
+            fetchItemsJob?.cancel()
+
+            fetchItemsJob = launch {
+                val ids = requests.map { it.id }
+                itemRepo.fetchItemsByParentIds(ids, true)
+                    .asFlow().collect { response ->
+                        when (response) {
+                            is Response.Error -> emptyList()
+                            is Response.Success -> response.data ?: throw NullItemException()
+                        }.run { complete(this) }
+                    }
+            }
+        }
+
+        fun sendResponse(requests: List<Request>) {
+            if (requests.isEmpty()) {
+                setState(State.Empty)
+
+            } else {
+                setState(State.Loaded)
+                _data.value = requests
+            }
+        }
+
         viewModelScope.launch {
             delay(1000)
 
             try {
-                val requests = loadRequestsAwait()
-                val idList = requests.mapNotNull { it.id }
 
-                val items = loadItemsAwait(idList)
-                useCase.mergeRequestData(requests, items)
-
-                if (requests.isEmpty()) setState(State.Empty)
-                else setState(State.Loaded)
-
-                _data.value = requests
+                fetchRequests { requests ->
+                    fetchItems(requests) { items ->
+                        requests.merge(items)
+                        sendResponse(requests)
+                    }
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                _state.value = State.Error(e)
-
+                setState(State.Error(e))
             }
         }
-    }
 
-    private suspend fun loadRequestsAwait(): List<PaymentRequest> {
-        val response =
-            repository.fetchRequestListByDriverId(driverId = vmData.driverId).asFlow().first()
-        return when (response) {
-            is Response.Error -> throw response.exception
-            is Response.Success -> response.data ?: throw NullPointerException()
-        }
-    }
-
-    private suspend fun loadItemsAwait(idList: List<String>): List<RequestItem> {
-        val response = repository.fetchItemListByRequests(idList, true).asFlow().first()
-        return when (response) {
-            is Response.Error -> emptyList()
-            is Response.Success -> response.data ?: throw NullPointerException()
-        }
     }
 
     fun newHeaderSelected(headerTitle: String) {
@@ -123,7 +152,7 @@ class RequestsListViewModel(
      * Send the [PaymentRequest] to be created or updated.
      */
     suspend fun save() =
-        liveData(viewModelScope.coroutineContext) { //TODO testando este metodo
+        liveData(viewModelScope.coroutineContext) {
             try {
                 val dto = createDto()
                 val id = useCase.createRequest(dto, vmData.uid)
@@ -135,31 +164,42 @@ class RequestsListViewModel(
         }
 
     private fun createDto() =
-        TravelRequestDto(
+        RequestDto(
             masterUid = vmData.masterUid,
-            truckId = vmData.truckId,
-            driverId = vmData.driverId,
+            uid = vmData.uid,
             date = LocalDateTime.now().atBrZone().toDate(),
-            status = PaymentRequestStatusType.SENT.description,
+            status = PaymentRequestStatusType.SENT.name,
+            requestNumber = 1
         )
 
     /**
      * Delete an item
      */
-    suspend fun delete(request: PaymentRequest) =
+    suspend fun delete(id: String) =
         liveData<Response<Unit>>((viewModelScope.coroutineContext)) {
             try {
-                useCase.delete(vmData.permission, request)
+                useCase.delete(
+                    writeReq = WriteRequest(
+                        vmData.permission,
+                        (_data.value)!!.first { it.id == id }.toDto()
+                    ),
+                    items = (_data.value)!!
+                        .first { it.id == id }.items
+                        .map { it.toDto() }
+                        .toTypedArray()
+                )
                 emit(Response.Success())
+
             } catch (e: Exception) {
                 emit(Response.Error(e))
+
             }
         }
 
     /**
      * Filter Data by header choise
      */
-    fun filterDataByHeader(): List<PaymentRequest>? {
+    fun filterDataByHeader(): List<Request>? {
         val dataSet = data.value
         return if (headerPos != null && dataSet != null) {
             when (headerPos) {

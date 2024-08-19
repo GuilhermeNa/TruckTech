@@ -8,14 +8,16 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.databinding.FragmentReceivableBinding
 import br.com.apps.trucktech.expressions.navigateTo
-import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentForMainAct
 import br.com.apps.trucktech.ui.fragments.nav_home.home.HomeFragmentDirections
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 private const val TO_RECEIVE_BOX_DESCRIPTION =
     "Este é o resumo do seu saldo a receber, clique em 'detalhes' para saber mais."
@@ -50,37 +52,59 @@ class ReceivableFragment : BaseFragmentForMainAct() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initStateManager()
-    }
 
-    private fun initStateManager() {
-        if (viewModel.isFirstBoot) launchFirstBoot()
-        else launchAfterFirstBoot()
-    }
-
-    private fun launchAfterFirstBoot() {
-        mainActVM.cachedTravels.observe(viewLifecycleOwner) {
-            viewModel.updateData(it, mainActVM.getAdvances(), mainActVM.getLoans())
-                .run { bind(this) }
+        when (viewModel.isFirstBoot) {
+            true -> launchFirstBoot()
+            false -> launch()
         }
 
-        mainActVM.cachedAdvances.observe(viewLifecycleOwner) {
-            viewModel.updateData(mainActVM.getTravels(), it, mainActVM.getLoans())
-                .run { bind(this) }
-        }
-
-        mainActVM.cachedLoans.observe(viewLifecycleOwner) {
-            viewModel.updateData(mainActVM.getTravels(), mainActVM.getAdvances(), it)
-                .run { bind(this) }
-        }
     }
+
 
     private fun launchFirstBoot() {
         lifecycleScope.launch {
-            val travels = mainActVM.cachedTravels.asFlow().first()
-            val loans = mainActVM.cachedLoans.asFlow().first()
-            val advances = mainActVM.cachedAdvances.asFlow().first()
-            viewModel.initFragmentData(travels, loans, advances)?.run {
+            viewModel.processData(
+                mainActVM.cachedLoans.asFlow().first(),
+                mainActVM.cachedAdvances.asFlow().first(),
+                mainActVM.cachedOutlayToPay.asFlow().first(),
+                mainActVM.cachedFreightToPay.asFlow().first()
+            )?.run {
+                viewModel.setFirstBoot()
+                bind(this)
+            }
+        }
+    }
+
+    private fun launch() {
+        mainActVM.cachedFreightToPay.observe(viewLifecycleOwner) {
+            viewModel.processData(
+                loans = mainActVM.getLoans(),
+                advances = mainActVM.getAdvances(),
+                outlays = mainActVM.getOutlays(),
+                freights = it
+            )?.run {
+                bind(this)
+            }
+        }
+
+        mainActVM.cachedAdvances.observe(viewLifecycleOwner) {
+            viewModel.processData(
+                loans = mainActVM.getLoans(),
+                advances = it,
+                outlays = mainActVM.getOutlays(),
+                freights = mainActVM.getFreights()
+            )?.run {
+                bind(this)
+            }
+        }
+
+        mainActVM.cachedLoans.observe(viewLifecycleOwner) {
+            viewModel.processData(
+                loans = it,
+                advances = mainActVM.getAdvances(),
+                outlays = mainActVM.getOutlays(),
+                freights = mainActVM.getFreights()
+            )?.run {
                 bind(this)
             }
         }
@@ -88,21 +112,17 @@ class ReceivableFragment : BaseFragmentForMainAct() {
 
     private fun bind(data: ReceivableFData) {
         binding.apply {
-            panelToReceiveValue.text = data.calculateLiquidReceivable().toCurrencyPtBr()
+            panelToReceiveValue.text = data.liquid.toCurrencyPtBr()
 
-            val commissionPercent = data.calculateCommissionPercent()
-            val expendPercent = data.calculateExpendPercent()
-            val discountPercent = data.calculateDiscountPercent()
-
-            panelToReceiveProgressBar.progress = expendPercent + commissionPercent
-            panelToReceiveProgressBar.secondaryProgress = commissionPercent
-            panelToReceivePercentualCommission.text = "$commissionPercent%"
-            panelToReceivePercentualRefund.text = "$expendPercent%"
+            panelToReceiveProgressBar.progress = data.outlayPerc + data.commissionPerc
+            panelToReceiveProgressBar.secondaryProgress = data.commissionPerc
+            panelToReceivePercentualCommission.text = "${data.commissionPerc}%"
+            panelToReceivePercentualRefund.text = "${data.outlayPerc}%"
             panelToReceiveLayoutPercentualExpend.run {
-                if (expendPercent > 0) {
+                if (data.outlayPerc > 0) {
                     this.visibility = View.VISIBLE
                     val myParam = this.layoutParams as ConstraintLayout.LayoutParams
-                    val bias = viewModel.toFloat(commissionPercent)
+                    val bias = toFloat(data.commissionPerc)
                     myParam.horizontalBias = bias
                     this.layoutParams = myParam
                 } else {
@@ -110,26 +130,32 @@ class ReceivableFragment : BaseFragmentForMainAct() {
                 }
             }
 
-            if (discountPercent > 0) {
+            if (data.discountPerc > 0) {
                 panelToReceiveLayoutPercentualDiscount.visibility = View.VISIBLE
-                panelToReceivePercentualDiscounts.text = "${discountPercent}%"
+                panelToReceivePercentualDiscounts.text = "${data.discountPerc}%"
                 panelToReceiveNegativeBar.run {
                     val myParam = this.layoutParams as ConstraintLayout.LayoutParams
-                    val percentWidth = viewModel.toFloat(discountPercent)
+                    val percentWidth = toFloat(data.discountPerc)
                     myParam.matchConstraintPercentWidth = percentWidth
                     this.layoutParams = myParam
                     visibility = View.VISIBLE
                 }
             }
 
-            panelToReceiveNumberOfFreights.text = data.getFreightAmount()
-            panelToReceiveNumberOfExpends.text = data.getExpendAmount()
-            panelToReceiveNumberOfDiscounts.text = data.getDiscountAmount()
+            panelToReceiveNumberOfFreights.text = data.commissionSize
+            panelToReceiveNumberOfExpends.text = data.outlaySize
+            panelToReceiveNumberOfDiscounts.text = data.discountSize
             panelToReceiveDescription.text = TO_RECEIVE_BOX_DESCRIPTION
             panelToReceiveButton.setOnClickListener {
                 it.navigateTo(HomeFragmentDirections.actionHomeFragmentToToReceiveFragment())
             }
         }
+    }
+
+    private fun toFloat(commissionPercent: Int): Float {
+        return BigDecimal(commissionPercent)
+            .divide(BigDecimal(100), 2, RoundingMode.HALF_EVEN)
+            .toFloat()
     }
 
 //---------------------------------------------------------------------------------------------//
