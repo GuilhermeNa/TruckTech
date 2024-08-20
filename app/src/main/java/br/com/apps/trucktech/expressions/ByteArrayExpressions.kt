@@ -5,7 +5,10 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.util.Base64
 import android.widget.ImageView
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
 fun Bitmap.encodeBitmap(): String {
     val stream = ByteArrayOutputStream()
@@ -28,4 +31,21 @@ fun Bitmap.getByteArray(): ByteArray {
 fun ImageView.getByteArray(): ByteArray {
     val bitmap = (this.drawable as BitmapDrawable).bitmap
     return bitmap.getByteArray()
+}
+
+fun ByteArray.compressByteArray(): ByteArray {
+    ByteArrayOutputStream().use { byteStream ->
+        GZIPOutputStream(byteStream).use { gzipStream ->
+            gzipStream.write(this)
+        }
+        return byteStream.toByteArray()
+    }
+}
+
+fun ByteArray.decompressByteArray(): ByteArray {
+    ByteArrayInputStream(this).use { byteStream ->
+        GZIPInputStream(byteStream).use { gzipStream ->
+            return gzipStream.readBytes()
+        }
+    }
 }

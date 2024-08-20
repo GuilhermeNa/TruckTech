@@ -26,10 +26,12 @@ import br.com.apps.trucktech.ui.activities.CameraActivity
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.image.ImageFragment
 import br.com.apps.trucktech.util.DeviceCapabilities
+import br.com.apps.trucktech.util.MonetaryMaskUtil
 import br.com.apps.trucktech.util.state.State
 import coil.load
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import java.io.File
 import java.security.InvalidParameterException
 
 private const val TOOLBAR_TITLE_EDITING = "Editando Item"
@@ -66,9 +68,12 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
     private fun processActivityLauncherResult(data: Intent) {
         try {
 
-            val ba = data.getByteArrayExtra(RESULT_KEY)
-            ba?.run {
-                viewModel.setUrlImage(this)
+            data.getStringExtra(RESULT_KEY)?.let { filePath ->
+                val file = File(filePath)
+                if (file.exists()) {
+                    viewModel.setUrlImage(file.readBytes())
+                    file.delete()
+                }
             }
 
         } catch (e: Exception) {
@@ -162,7 +167,7 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
     }
 
     private fun initTextWatcher() {
-        // binding.fragIeEdtxtValue.addTextChangedListener(MonetaryMaskUtil(binding.fragIeEdtxtValue))
+        binding.fragIeEdtxtValue.addTextChangedListener(MonetaryMaskUtil(binding.fragIeEdtxtValue))
     }
 
     override fun initMenuClickListeners(toolbar: Toolbar) {
@@ -256,9 +261,9 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
         }
     }
 
-//---------------------------------------------------------------------------------------------//
-// ON DESTROY VIEW
-//---------------------------------------------------------------------------------------------//
+    //---------------------------------------------------------------------------------------------//
+    // ON DESTROY VIEW
+    //---------------------------------------------------------------------------------------------//
 
     override fun onDestroyView() {
         super.onDestroyView()

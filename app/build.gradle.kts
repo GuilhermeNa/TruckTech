@@ -63,17 +63,13 @@ android {
 
 dependencies {
 
-    val navVersion = "2.7.7"
-    val lifecycleVersion = "2.7.0"
-    val coilVersion = "2.4.0"
-    val testCoroutinesVersion = "1.8.1"
-
     // My Modules
     implementation(project(mapOf("path" to ":model")))
     implementation(project(mapOf("path" to ":useCase")))
     implementation(project(mapOf("path" to ":repository")))
 
     //Test && Debug
+    val testCoroutinesVersion = "1.8.1"
     implementation("com.squareup.leakcanary:leakcanary-android:2.12")
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.8")
@@ -81,8 +77,7 @@ dependencies {
     testImplementation("androidx.arch.core:core-testing:2.1.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("io.mockk:mockk-android:1.13.11")
-    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$testCoroutinesVersion")
-    //androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$testCoroutinesVersion")
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.6.1") {
         exclude(module = "protobuf-lite")
     }
@@ -98,6 +93,8 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx")
 
     // Native
+    val navVersion = "2.7.7"
+    val lifecycleVersion = "2.7.0"
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -117,6 +114,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
 
     // View utilities
+    val coilVersion = "2.4.0"
     implementation("io.coil-kt:coil:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     implementation("de.hdodenhof:circleimageview:3.1.0")
@@ -130,11 +128,11 @@ dependencies {
     implementation("io.insert-koin:koin-android:3.4.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
-    // CameraX core library using the camera2 implementation
+   /* // CameraX core library using the camera2 implementation
     val cameraxVersion = "1.4.0-alpha05"
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
-    implementation("androidx.camera:camera-extensions:$cameraxVersion")
+    implementation("androidx.camera:camera-extensions:$cameraxVersion")*/
 
 }
