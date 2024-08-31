@@ -2,35 +2,40 @@ package br.com.apps.trucktech.ui.fragments.nav_travel.freight.freight_editor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.travel.FreightDto
 import br.com.apps.model.enums.AccessLevel
-import br.com.apps.model.exceptions.null_objects.NullCustomerException
-import br.com.apps.model.exceptions.null_objects.NullFreightException
 import br.com.apps.model.expressions.atBrZone
 import br.com.apps.model.model.Customer
 import br.com.apps.model.model.travel.Freight
 import br.com.apps.model.util.toDate
-import br.com.apps.repository.repository.customer.CustomerRepository
+import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.freight.FreightRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.util.UNKNOWN_EXCEPTION
 import br.com.apps.repository.util.WriteRequest
+import br.com.apps.trucktech.service.CustomerService
+import br.com.apps.trucktech.service.FreightService
+import br.com.apps.trucktech.util.image.Image
+import br.com.apps.trucktech.util.image.ImageUseCase
 import br.com.apps.usecase.usecase.FreightUseCase
-import kotlinx.coroutines.flow.first
+import br.com.apps.usecase.util.buildFreightStoragePath
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+@OptIn(DelicateCoroutinesApi::class)
 class FreightEditorViewModel(
     private val vmData: FreightEVMData,
-    private val repository: FreightRepository,
-    private val customerRepository: CustomerRepository,
     private val useCase: FreightUseCase,
+    private val fService: FreightService,
+    private val cService: CustomerService,
+    private val storage: StorageRepository,
+    private val fRepository: FreightRepository
 ) : ViewModel() {
 
     private var isEditing: Boolean = vmData.freightId?.let { true } ?: false
@@ -50,6 +55,12 @@ class FreightEditorViewModel(
      */
     private val _data = MutableLiveData<FreightEFData>()
     val data get() = _data
+
+    private val _invoiceImage = MutableLiveData<Image?>()
+    val invoiceImage get() = _invoiceImage
+
+    private val _ticketImage = MutableLiveData<Image?>()
+    val ticketImage get() = _ticketImage
 
     //---------------------------------------------------------------------------------------------//
     // -
@@ -75,9 +86,9 @@ class FreightEditorViewModel(
     private fun loadData() {
         viewModelScope.launch {
             try {
-                customers = loadCustomers()
+                customers = cService.fetchCustomersByMasterUid(vmData.masterUid)
 
-                val nFreight = vmData.freightId?.let { loadFreight(it) }
+                val nFreight = vmData.freightId?.let { fService.fetchFreightById(it) }
 
                 sendResponse(nFreight)
 
@@ -88,33 +99,19 @@ class FreightEditorViewModel(
         }
     }
 
-    private suspend fun loadCustomers(): List<Customer> {
-        val response =
-            customerRepository.fetchCustomerListByMasterUid(vmData.masterUid).asFlow().first()
-        return when (response) {
-            is Response.Error -> throw response.exception
-            is Response.Success -> response.data ?: throw NullCustomerException(UNKNOWN_EXCEPTION)
-        }
-    }
-
-    private suspend fun loadFreight(freightId: String): Freight {
-        val response = repository.fetchFreightById(freightId).asFlow().first()
-        return when (response) {
-            is Response.Error -> throw response.exception
-            is Response.Success -> response.data
-                ?: throw NullFreightException(UNKNOWN_EXCEPTION)
-        }
-    }
-
     private fun sendResponse(freight: Freight?) {
-        if (freight == null) {
+        val data = if (freight == null) {
             setDate(LocalDateTime.now().atBrZone())
             FreightEFData(customerList = customers)
         } else {
             freight.setCustomerById(customers)
+            freight.urlInvoice?.run { setInvoice(this) }
+            freight.urlTicket?.run { setTicket(this) }
             setDate(freight.loadingDate)
-            setFragmentData(FreightEFData(customerList = customers, freight = freight))
+            FreightEFData(customerList = customers, freight = freight)
         }
+
+        setFragmentData(data)
     }
 
     /**
@@ -137,7 +134,67 @@ class FreightEditorViewModel(
                     authLevel = vmData.permissionLevel,
                     data = generateDto(viewDto)
                 )
-                useCase.save(writeReq)
+
+                ImageUseCase.checkDirection(
+                    isEditing = isEditing,
+                    image = _invoiceImage.value,
+                    hasPreviousImg = _data.value?.freight?.urlInvoice != null
+                ).let { dir ->
+                    when (dir) {
+                        ImageUseCase.ADDING_WITH_IMAGE -> {
+                            writeReq.data.isUpdatingInvoice = true
+                            val id = useCase.save(writeReq)
+                            GlobalScope.launch {
+                                val url =
+                                    storage.postImage(invoiceImage.value!!.byteArray!!, buildFreightStoragePath(id))
+                                fRepository.updateInvoiceUrl(id, url)
+                            }
+                        }
+
+                        ImageUseCase.ADDING_WITHOUT_IMAGE -> {
+                            writeReq.data.isUpdatingInvoice = false
+                            useCase.save(writeReq)
+                        }
+
+                        ImageUseCase.EDITING_AND_REPLACING_IMAGE -> {
+                            writeReq.data.isUpdatingInvoice = true
+                            val id = useCase.save(writeReq)
+                            GlobalScope.launch {
+                                val url =
+                                    storage.postImage(invoiceImage.value!!.byteArray!!, buildFreightStoragePath(id))
+                                fRepository.updateInvoiceUrl(id, url)
+                            }
+                        }
+
+                        ImageUseCase.EDITING_WITHOUT_NEW_IMAGE -> {
+                            writeReq.data.isUpdatingInvoice = false
+                            useCase.save(writeReq)
+                        }
+
+                        ImageUseCase.EDITING_AND_REMOVING_IMAGE -> {
+                            writeReq.data.isUpdatingInvoice = false
+                            writeReq.data.urlInvoice = null
+                            val idToDelete = useCase.save(writeReq)
+                            GlobalScope.launch {
+                                storage.deleteImage(buildFreightStoragePath(idToDelete))
+                            }
+                        }
+
+                        ImageUseCase.EDITING_AND_INSERTING_FIRST_IMAGE -> {
+                            writeReq.data.isUpdatingInvoice = true
+                            val id = useCase.save(writeReq)
+                            GlobalScope.launch {
+                                val url =
+                                    storage.postImage(invoiceImage.value!!.byteArray!!, buildFreightStoragePath(id))
+                                fRepository.updateInvoiceUrl(id, url)
+                            }
+                        }
+
+                        else -> throw NullPointerException()
+
+                    }
+                }
+
                 emit(Response.Success())
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -151,6 +208,7 @@ class FreightEditorViewModel(
             viewDto.truckId = vmData.truckId
             viewDto.employeeId = vmData.driverId
             viewDto.travelId = vmData.travelId
+            viewDto.isUpdatingTicket = false
         }
 
         fun whenEditing(): FreightDto {
@@ -183,19 +241,67 @@ class FreightEditorViewModel(
     }
 
     fun validateCustomer(customer: String): Boolean {
-        var isValid = true
+        return try {
+            if (customer.isEmpty()) return false
 
-        if (customer.isEmpty()) isValid = false
+            val customers = data.value!!.customerList.map { it.name }
+            if (!customers.contains(customer)) return false
 
-        val customers = data.value!!.customerList.map { it.name }
-        if (!customers.contains(customer)) isValid = false
+            true
 
-        return isValid
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+
     }
 
     fun getCustomerId(customer: String): String {
-        return data.value!!.customerList.first { it.name == customer }.id!!
+        return data.value!!.customerList.first { it.name == customer }.id
     }
+
+    private fun setInvoice(img: Any?) {
+        _invoiceImage.value = try {
+            when (img) {
+                is ByteArray -> Image(byteArray = img)
+                is String -> Image(url = img)
+                else -> null
+            }
+        } catch (e: Exception) {
+            null
+        }
+
+    }
+
+    private fun setTicket(img: Any?) {
+        _ticketImage.value = try {
+            when (img) {
+                is ByteArray -> Image(byteArray = img)
+                is String -> Image(url = img)
+                else -> null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        fService.close()
+        cService.close()
+    }
+
+    fun setTicketByteArray(ba: ByteArray?) {
+        setTicket(ba)
+    }
+
+    fun setInvoiceByteArray(ba: ByteArray?) {
+        setInvoice(ba)
+    }
+
+    fun getInvoiceImage() = _invoiceImage.value?.getData()
+
+    fun getTicketImage() = _ticketImage.value?.getData()
 
 }
 

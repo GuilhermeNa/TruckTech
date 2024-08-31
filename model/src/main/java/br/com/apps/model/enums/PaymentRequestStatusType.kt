@@ -1,6 +1,6 @@
 package br.com.apps.model.enums
 
-enum class PaymentRequestStatusType {
+enum class   PaymentRequestStatusType {
     SENT, APPROVED,
     DENIED, PROCESSED;
 }

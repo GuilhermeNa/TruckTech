@@ -1,36 +1,49 @@
 package br.com.apps.model.dto.request
 
+import br.com.apps.model.enums.AccessLevel
+import br.com.apps.model.exceptions.AccessLevelException
 import br.com.apps.model.exceptions.CorruptedFileException
 import br.com.apps.model.exceptions.invalid.InvalidForSavingException
+import br.com.apps.model.interfaces.AccessPermissionInterface
 import br.com.apps.model.interfaces.DtoObjectInterface
 import br.com.apps.model.model.request.Item
+import br.com.apps.model.util.ACCESS_DENIED
+import br.com.apps.model.util.toLocalDateTime
+import java.util.Date
 
 data class ItemDto(
-    val masterUid: String? = null,
+    var masterUid: String? = null,
     var id: String? = null,
-    val parentId: String? = null,
+    var parentId: String? = null,
     val value: Double? = null,
     val description: String? = null,
-    val urlImage: String? = null,
-    val isValid: Boolean? = null
-): DtoObjectInterface<Item> {
+    var urlImage: String? = null,
+    var isValid: Boolean? = null,
+    var isUpdating: Boolean? = null,
+    var date: Date? = null
+) : DtoObjectInterface<Item>,
+    AccessPermissionInterface {
 
     override fun validateDataIntegrity() {
-        if(masterUid == null ||
+        if (masterUid == null ||
             id == null ||
             parentId == null ||
             value == null ||
             description == null ||
-            isValid == null
+            isValid == null ||
+            isUpdating == null ||
+            date == null
         ) throw CorruptedFileException("ItemDto data is corrupted: ($this)")
     }
 
     override fun validateDataForDbInsertion() {
-        if(masterUid == null ||
+        if (masterUid == null ||
             parentId == null ||
             value == null ||
             description == null ||
-            isValid == null
+            isValid == null ||
+            isUpdating == null ||
+            date == null
         ) throw InvalidForSavingException("ItemDto data is invalid: ($this)")
     }
 
@@ -40,11 +53,25 @@ data class ItemDto(
             masterUid = masterUid!!,
             id = id!!,
             parentId = parentId!!,
-            value = value!!.toBigDecimal(),
+            value = value!!.toBigDecimal().setScale(2),
             description = description!!,
+            isValid = isValid!!,
             urlImage = urlImage,
-            isValid = isValid!!
+            isUpdating = isUpdating!!,
+            date = date!!.toLocalDateTime()
         )
+    }
+
+    override fun validateWriteAccess(access: AccessLevel?) {
+        if (access == null) throw NullPointerException()
+
+        isValid?.let {
+            if (it) throw AccessLevelException(ACCESS_DENIED)
+        } ?: throw NullPointerException()
+    }
+
+    override fun validateReadAccess() {
+        TODO("Not yet implemented")
     }
 
 }

@@ -8,9 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
+import br.com.apps.repository.util.KEY_ID
 import br.com.apps.trucktech.databinding.FragmentRecordsBinding
 import br.com.apps.trucktech.expressions.navigateTo
-import br.com.apps.trucktech.ui.KEY_ID
 import br.com.apps.trucktech.ui.PAGE_COST
 import br.com.apps.trucktech.ui.PAGE_FREIGHT
 import br.com.apps.trucktech.ui.PAGE_REFUEL

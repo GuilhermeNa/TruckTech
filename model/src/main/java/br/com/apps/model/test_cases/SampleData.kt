@@ -95,6 +95,8 @@ fun sampleFreight(): Freight = Freight(
     loadingDate = LocalDateTime.of(2024, 1, 1, 0, 0, 0),
     commissionPercentual = BigDecimal("10.0"),
     isValid = false,
+    isUpdatingInvoice = false,
+    isUpdatingTicket = false
 )
 
 fun sampleFreightDto(): FreightDto = FreightDto(
@@ -414,7 +416,8 @@ fun sampleRequest(): Request = Request(
     uid = "uid1",
     requestNumber = 1,
     date = LocalDateTime.of(2024, 1, 1, 0, 0),
-    status = PaymentRequestStatusType.SENT
+    status = PaymentRequestStatusType.SENT,
+    isUpdating = false
 )
 
 fun sampleRequestDto(): RequestDto = RequestDto(
@@ -432,7 +435,9 @@ fun sampleItem(): Item = Item(
     parentId = "parentId1",
     value = BigDecimal(100.0),
     description = "Description1",
-    isValid = false
+    isValid = false,
+    isUpdating = false,
+    date = LocalDateTime.of(2024,1,1,0,0)
 )
 
 fun sampleItemDto(): ItemDto = ItemDto(

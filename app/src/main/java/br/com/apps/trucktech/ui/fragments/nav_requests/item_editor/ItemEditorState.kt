@@ -59,25 +59,32 @@ class ItemEditorState(
     }
 
     fun showImage() {
-        binding.run {
-            if (fragIeLayoutImg.visibility != VISIBLE) {
-                lifecycle.launch {
-                    fragIeLayoutImg.run {
-                        visibility = VISIBLE
-                        animation = AnimationUtils.loadAnimation(
-                            binding.root.context,
-                            R.anim.slide_in_from_bottom
-                        )
-                    }
-                    fragIeBadgeMenu.run {
-                        delay(200)
-                        visibility = VISIBLE
-                        animation = AnimationUtils.loadAnimation(
-                            binding.root.context,
-                            R.anim.slide_in_from_right
-                        )
-                    }
-                }
+        fun showImageView() {
+            binding.fragIeLayoutImg.run {
+                visibility = VISIBLE
+                animation = AnimationUtils.loadAnimation(
+                    binding.root.context,
+                    R.anim.slide_in_from_left
+                )
+            }
+        }
+
+        fun showBadgeLayout() {
+            binding.fragIeBadgeMenu.run {
+                visibility = VISIBLE
+                animation = AnimationUtils.loadAnimation(
+                    binding.root.context,
+                    R.anim.slide_in_from_right
+                )
+            }
+        }
+
+        if (binding.fragIeLayoutImg.visibility != VISIBLE) {
+            lifecycle.launch {
+                delay(450)
+                showImageView()
+                delay(200)
+                showBadgeLayout()
             }
         }
     }

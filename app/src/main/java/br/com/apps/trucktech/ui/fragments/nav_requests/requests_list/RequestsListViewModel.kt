@@ -2,29 +2,20 @@ package br.com.apps.trucktech.ui.fragments.nav_requests.requests_list
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import br.com.apps.model.dto.request.RequestDto
 import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.enums.PaymentRequestStatusType
-import br.com.apps.model.exceptions.null_objects.NullItemException
-import br.com.apps.model.exceptions.null_objects.NullRequestException
 import br.com.apps.model.expressions.atBrZone
-import br.com.apps.model.model.request.Item
 import br.com.apps.model.model.request.Request
-import br.com.apps.model.model.request.Request.Companion.merge
 import br.com.apps.model.util.toDate
-import br.com.apps.repository.repository.item.ItemRepository
-import br.com.apps.repository.repository.request.RequestRepository
-import br.com.apps.repository.util.EMPTY_DATASET
 import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
 import br.com.apps.trucktech.expressions.getKeyByValue
+import br.com.apps.trucktech.service.RequestService
 import br.com.apps.trucktech.util.state.State
 import br.com.apps.usecase.usecase.RequestUseCase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
@@ -38,12 +29,9 @@ private const val PROCESSED = "Processados"
 
 class RequestsListViewModel(
     private val vmData: RequestLVMData,
-    private val requestRepo: RequestRepository,
-    private val itemRepo: ItemRepository,
     private val useCase: RequestUseCase,
+    private val service: RequestService
 ) : ViewModel() {
-
-    private var fetchItemsJob: Job? = null
 
     /**
      * LiveData holding the response data of type [Response] with a list of expenditures [PaymentRequest]
@@ -80,68 +68,33 @@ class RequestsListViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        setState(State.Loading)
-        loadData()
+        viewModelScope.launch {
+            setState(State.Loading)
+            delay(1000)
+            fetchData()
+        }
     }
 
-    fun loadData() {
+    private fun fetchData() = try {
+        service.fetchRequestsByUser(vmData.uid, ::sendResponse)
 
-        suspend fun fetchRequests(complete: (requests: List<Request>) -> Unit) {
-            requestRepo.fetchRequestListByUid(vmData.uid, true)
-                .asFlow().collect { response ->
-                    when (response) {
-                        is Response.Error -> throw response.exception
-                        is Response.Success -> response.data?.let { complete(it) }
-                            ?: throw NullRequestException()
-                    }
-                }
-        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        setState(State.Error(e))
+    }
 
-        fun CoroutineScope.fetchItems(
-            requests: List<Request>, complete: (items: List<Item>) -> Unit
-        ) {
-            fetchItemsJob?.cancel()
-
-            fetchItemsJob = launch {
-                val ids = requests.map { it.id }
-                itemRepo.fetchItemsByParentIds(ids, true)
-                    .asFlow().collect { response ->
-                        when (response) {
-                            is Response.Error -> emptyList()
-                            is Response.Success -> response.data ?: throw NullItemException()
-                        }.run { complete(this) }
-                    }
-            }
-        }
-
-        fun sendResponse(requests: List<Request>) {
-            if (requests.isEmpty()) {
+    private fun sendResponse(requests: List<Request>) {
+        when {
+            requests.isEmpty() -> {
+                setData(emptyList())
                 setState(State.Empty)
+            }
 
-            } else {
+            else -> {
+                setData(requests)
                 setState(State.Loaded)
-                _data.value = requests
             }
         }
-
-        viewModelScope.launch {
-            delay(1000)
-
-            try {
-
-                fetchRequests { requests ->
-                    fetchItems(requests) { items ->
-                        requests.merge(items)
-                        sendResponse(requests)
-                    }
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                setState(State.Error(e))
-            }
-        }
-
     }
 
     fun newHeaderSelected(headerTitle: String) {
@@ -151,17 +104,16 @@ class RequestsListViewModel(
     /**
      * Send the [PaymentRequest] to be created or updated.
      */
-    suspend fun save() =
-        liveData(viewModelScope.coroutineContext) {
-            try {
-                val dto = createDto()
-                val id = useCase.createRequest(dto, vmData.uid)
-                emit(Response.Success(id))
-            } catch (e: Exception) {
-                e.printStackTrace()
-                emit(Response.Error(e))
-            }
+    suspend fun save() = liveData(viewModelScope.coroutineContext) {
+        try {
+            val dto = createDto()
+            val id = useCase.createRequest(dto, vmData.uid)
+            emit(Response.Success(id))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Response.Error(e))
         }
+    }
 
     private fun createDto() =
         RequestDto(
@@ -169,7 +121,7 @@ class RequestsListViewModel(
             uid = vmData.uid,
             date = LocalDateTime.now().atBrZone().toDate(),
             status = PaymentRequestStatusType.SENT.name,
-            requestNumber = 1
+            isUpdating = false
         )
 
     /**
@@ -178,21 +130,21 @@ class RequestsListViewModel(
     suspend fun delete(id: String) =
         liveData<Response<Unit>>((viewModelScope.coroutineContext)) {
             try {
-                useCase.delete(
-                    writeReq = WriteRequest(
-                        vmData.permission,
-                        (_data.value)!!.first { it.id == id }.toDto()
-                    ),
-                    items = (_data.value)!!
-                        .first { it.id == id }.items
-                        .map { it.toDto() }
-                        .toTypedArray()
+                val writeReq = WriteRequest(
+                    vmData.permission,
+                    (_data.value)!!.first { it.id == id }.toDto()
                 )
+                val items = (_data.value)!!
+                    .first { it.id == id }.items
+                    .map { it.toDto() }
+                    .toTypedArray()
+
+                useCase.delete(writeReq, items)
                 emit(Response.Success())
 
             } catch (e: Exception) {
                 emit(Response.Error(e))
-
+                e.printStackTrace()
             }
         }
 
@@ -241,7 +193,7 @@ class RequestsListViewModel(
                 else -> throw InvalidParameterException("RequestListViewModel, filterDataByHeader: Invalid header position $headerPos")
             }
         } else {
-            _state.value = State.Error(NullPointerException(EMPTY_DATASET))
+            _state.value = State.Error(NullPointerException("Dataset is null"))
             dataSet
         }
     }
@@ -255,7 +207,16 @@ class RequestsListViewModel(
     }
 
     private fun setState(state: State) {
-        _state.value = state
+        _state.postValue(state)
+    }
+
+    private fun setData(reqs: List<Request>) {
+        _data.postValue(reqs)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        service.close()
     }
 
 }
@@ -267,3 +228,5 @@ data class RequestLVMData(
     val driverId: String,
     val permission: AccessLevel
 )
+
+

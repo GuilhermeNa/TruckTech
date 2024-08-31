@@ -4,6 +4,9 @@ import br.com.apps.repository.di.fireBaseModules
 import br.com.apps.repository.di.readModules
 import br.com.apps.repository.di.repositoryModules
 import br.com.apps.repository.di.writeModules
+import br.com.apps.trucktech.service.CustomerService
+import br.com.apps.trucktech.service.FreightService
+import br.com.apps.trucktech.service.RequestService
 import br.com.apps.trucktech.ui.activities.main.MainActivityViewModel
 import br.com.apps.trucktech.ui.fragments.base_fragments.AuthViewModel
 import br.com.apps.trucktech.ui.fragments.login.LoginViewModel
@@ -57,7 +60,24 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModules = module {
-    viewModel<MainActivityViewModel> { MainActivityViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel<MainActivityViewModel> {
+        MainActivityViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel<LoginViewModel> { LoginViewModel() }
     viewModel<BankListFragmentViewModel> { (id: String) ->
         BankListFragmentViewModel(
@@ -82,7 +102,13 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<ExpendListViewModel> { (vmData: ExpendLVmData) -> ExpendListViewModel(vmData, get(), get()) }
+    viewModel<ExpendListViewModel> { (vmData: ExpendLVmData) ->
+        ExpendListViewModel(
+            vmData,
+            get(),
+            get()
+        )
+    }
     viewModel<DocumentsListFragmentViewModel> { (vmData: DocumentListVmData) ->
         DocumentsListFragmentViewModel(
             vmData,
@@ -94,6 +120,8 @@ val viewModelModules = module {
     viewModel<FreightEditorViewModel> { (vmData: FreightEVMData) ->
         FreightEditorViewModel(
             vmData,
+            get(),
+            get(),
             get(),
             get(),
             get()
@@ -111,13 +139,20 @@ val viewModelModules = module {
         FreightsListViewModel(vmData, get(), get())
     }
     viewModel<AuthViewModel> { AuthViewModel(get()) }
-    viewModel<RequestEditorViewModel> { (vmData: RequestEditorVmData) -> RequestEditorViewModel(vmData, get(), get(), get(), get()) }
+    viewModel<RequestEditorViewModel> { (vmData: RequestEditorVmData) ->
+        RequestEditorViewModel(
+            vmData,
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel<RequestsListViewModel> { (vmData: RequestLVMData) ->
         RequestsListViewModel(
             vmData,
             get(),
             get(),
-            get()
         )
     }
     viewModel<RecordsViewModel> { RecordsViewModel(get()) }
@@ -159,16 +194,42 @@ val viewModelModules = module {
             get()
         )
     }
-    viewModel<BankEditorViewModel> { (vmData: BankEVmData) -> BankEditorViewModel(vmData, get(), get(), get()) }
+    viewModel<BankEditorViewModel> { (vmData: BankEVmData) ->
+        BankEditorViewModel(
+            vmData,
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel<HomeViewModel> { HomeViewModel() }
     viewModel<PerformanceViewModel> { PerformanceViewModel(get()) }
-    viewModel<TravelPreviewViewModel> { (vmData: TravelPreviewVmData) -> TravelPreviewViewModel(vmData, get()) }
+    viewModel<TravelPreviewViewModel> { (vmData: TravelPreviewVmData) ->
+        TravelPreviewViewModel(
+            vmData,
+            get()
+        )
+    }
     viewModel<ReceivableViewModel> { ReceivableViewModel() }
-    viewModel<ItemEditorViewModel> { (vmData: ItemEditorVmData) -> ItemEditorViewModel(vmData, get(), get()) }
+    viewModel<ItemEditorViewModel> { (vmData: ItemEditorVmData) ->
+        ItemEditorViewModel(
+            vmData,
+            get(),
+            get(),
+            get()
+        )
+    }
+}
+
+val serviceModules = module {
+    factory <RequestService> { RequestService(get(), get()) }
+    factory <FreightService> { FreightService(get()) }
+    factory <CustomerService> { CustomerService(get()) }
 }
 
 val appModules = listOf(
     viewModelModules,
+    serviceModules,
     useCaseModules,
     repositoryModules,
     fireBaseModules,

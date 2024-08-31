@@ -4,6 +4,7 @@ import br.com.apps.model.dto.request.RequestDto
 import br.com.apps.model.enums.PaymentRequestStatusType
 import br.com.apps.model.exceptions.DuplicatedItemsException
 import br.com.apps.model.exceptions.invalid.InvalidIdException
+import br.com.apps.model.exceptions.null_objects.NullItemException
 import br.com.apps.model.interfaces.ModelObjectInterface
 import br.com.apps.model.util.DUPLICATED_ID
 import br.com.apps.model.util.toDate
@@ -16,6 +17,7 @@ data class Request(
     val requestNumber: Long,
     val date: LocalDateTime,
     val urlImage: String? = null,
+    val isUpdating: Boolean,
     val status: PaymentRequestStatusType
 ) : ModelObjectInterface<RequestDto> {
 
@@ -53,7 +55,11 @@ data class Request(
         urlImage = urlImage,
         requestNumber = requestNumber,
         date = date.toDate(),
-        status = status.name
+        status = status.name,
+        isUpdating = isUpdating
     )
+
+    fun getItemById(itemId: String): Item = _items.firstOrNull() { it.id == itemId} ?: throw NullItemException()
+
 
 }

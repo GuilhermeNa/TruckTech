@@ -16,7 +16,9 @@ interface RequestWriteInterface {
      * @param id The ID of the document to which the encoded image will be updated.
      * @param url The encoded image in String to be updated in the document.
      */
-    suspend fun updateUrlImage(id: String, url: String)
+    suspend fun updateUrlImage(id: String, url: String?)
+
+    suspend fun setUpdatingStatus(id: String, isUpdating: Boolean)
 
     /**
      * Saves the [TravelRequestDto] data in Firestore.

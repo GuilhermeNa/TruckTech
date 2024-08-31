@@ -3,7 +3,6 @@ package br.com.apps.trucktech.ui.fragments.nav_requests.request_editor
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -12,26 +11,31 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.model.request.Item
+import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.repository.util.CANCEL
+import br.com.apps.repository.util.CONNECTION_FAILURE
+import br.com.apps.repository.util.KEY_RESULT
 import br.com.apps.repository.util.OK
-import br.com.apps.repository.util.RESULT_KEY
 import br.com.apps.repository.util.Response
-import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRequestEditorBinding
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.navigateTo
 import br.com.apps.trucktech.expressions.snackBarOrange
 import br.com.apps.trucktech.expressions.snackBarRed
+import br.com.apps.trucktech.expressions.toast
 import br.com.apps.trucktech.ui.activities.CameraActivity
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.nav_requests.request_editor.private_adapter.RequestEditorRecyclerAdapter
+import br.com.apps.trucktech.util.DeviceCapabilities
+import br.com.apps.trucktech.util.state.DataEvent
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import java.io.File
 
 private const val TOOLBAR_TITLE = "Requisição"
+private const val LOADING_IMAGE = "Carregando imagem..."
 
 private const val ITEM_SUCCESSFULLY_REMOVED = "Item removido com sucesso"
 private const val FAILED_TO_REMOVE_ITEM = "Falha ao remover Item"
@@ -52,12 +56,10 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
 
     private var adapter: RequestEditorRecyclerAdapter? = null
     private val activityResultLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                 val data = result.data!!
-                processActivityLauncherResult(data)
+                processCameraActivityResult(data)
             }
         }
 
@@ -65,19 +67,22 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
     // ON CREATE VIEW
     //---------------------------------------------------------------------------------------------//
 
-    private fun processActivityLauncherResult(data: Intent) {
+    private fun processCameraActivityResult(data: Intent) {
         try {
-
-            val ba = data.getByteArrayExtra(RESULT_KEY)
-            ba?.run {
-                viewModel.imageHaveBeenLoaded(this)
+            data.getStringExtra(KEY_RESULT)?.let { filePath ->
+                val file = File(filePath)
+                if (file.exists()) {
+                    DeviceCapabilities.hasNetworkConnection(requireContext()).let { hasConnection ->
+                        when(hasConnection) {
+                            true -> viewModel.imageHaveBeenLoaded(file.readBytes())
+                            false -> requireView().snackBarRed(CONNECTION_FAILURE)
+                        }
+                    }
+                    file.delete()
+                }
             }
-
         } catch (e: Exception) {
-            Log.e(
-                TAG_DEBUG,
-                "RequestEditorFragment, processActivityLauncherResult: ${e.message.toString()}"
-            )
+            e.printStackTrace()
         }
     }
 
@@ -125,7 +130,7 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
         binding.boxFragRequestPreviewDescription.apply {
             driverField.text = mainActVM.loggedUser.name
             plateField.text = mainActVM.loggedUser.truck.plate
-            valueField.text = "-"
+            valueField.text = viewModel.request?.run { getValue().toCurrencyPtBr() } ?: "-"
         }
     }
 
@@ -155,28 +160,31 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
         val recyclerView = binding.fragmentRequestEditorRecycler
         adapter = RequestEditorRecyclerAdapter(
             requireContext(),
-            emptyList(),
-            itemClickListener = { itemCLickData ->
-                requireView().navigateTo(
-                    RequestEditorFragmentDirections
-                        .actionRequestEditorFragmentToItemEditor(
-                            requestId = args.requestId, itemCLickData.itemId
-                        )
-                )
+            viewModel.getItems(),
+            itemClickListener = { itemId ->
+                when {
+                    itemId.isBlank() -> requireContext().toast(LOADING_IMAGE)
+                    else -> requireView().navigateTo(
+                        RequestEditorFragmentDirections
+                            .actionRequestEditorFragmentToItemEditor(
+                                requestId = args.requestId, itemId
+                            )
+                    )
+                }
             },
             deleteClickListener = this::showAlertDialogForDelete
         )
         recyclerView.adapter = adapter
     }
 
-    private fun showAlertDialogForDelete(item: Item) {
+    private fun showAlertDialogForDelete(itemId: String) {
         viewModel.requestDarkLayer()
 
         MaterialAlertDialogBuilder(requireContext())
             .setIcon(R.drawable.icon_delete)
             .setTitle("Apagando item")
             .setMessage("Você realmente deseja apagar este item permanentemente?")
-            .setPositiveButton(OK) { _, _ -> deleteItem(item) }
+            .setPositiveButton(OK) { _, _ -> deleteItem(itemId) }
             .setNegativeButton(CANCEL) { _, _ -> }
             .setOnDismissListener { viewModel.dismissDarkLayer() }
             .create().apply {
@@ -186,12 +194,18 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
 
     }
 
-    private fun deleteItem(item: Item) {
-        viewModel.deleteItem(item).observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE_ITEM)
-
-                is Response.Success -> requireView().snackBarOrange(ITEM_SUCCESSFULLY_REMOVED)
+    private fun deleteItem(itemId: String) {
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { hasConnection ->
+            when (hasConnection) {
+                true -> viewModel.deleteItem(itemId).observe(viewLifecycleOwner) { response ->
+                    when (response) {
+                        is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE_ITEM)
+                        is Response.Success -> requireView().snackBarOrange(
+                            ITEM_SUCCESSFULLY_REMOVED
+                        )
+                    }
+                }
+                false -> requireView().snackBarRed(CONNECTION_FAILURE)
             }
         }
     }
@@ -220,27 +234,28 @@ class RequestEditorFragment : BaseFragmentWithToolbar() {
      *
      */
     private fun initStateManager() {
-        viewModel.data.observe(viewLifecycleOwner) { /*response ->*/
-            /* when (response) {
-                 is Response.Error -> requireView().snackBarRed(FAILED_TO_LOAD_DATA)
-                 is Response.Success -> {
-                     response.data?.let { request ->
-                         request.itemsList?.let { adapter?.update(it) }
-                         binding.boxFragRequestPreviewDescription.valueField.text =
-                             request.getTotalValue().toCurrencyPtBr()
-                     }
-                 }
-             }*/
+        viewModel.dataEvent.observe(viewLifecycleOwner) { event ->
+            when (event) {
+                is DataEvent.Initialize -> adapter?.initialize(event.data)
+                is DataEvent.Insert -> {
+                    binding.fragmentRequestEditorRecycler.smoothScrollToPosition(0)
+                    adapter?.insert(event.item)
+                }
+                is DataEvent.Update -> adapter?.update(event.item)
+                is DataEvent.Remove -> adapter?.remove(event.item)
+            }
+            binding.boxFragRequestPreviewDescription.valueField.text =
+                viewModel.request?.getValue()?.toCurrencyPtBr()
         }
 
-        viewModel.urlImage.observe(viewLifecycleOwner) { image ->
-
-            binding.boxFragRequestEditorPayment.apply {
-                panelAddPixLayoutWaitingUpload.visibility = GONE
-                panelAddPixLayoutAlreadyUploaded.visibility = VISIBLE
-                panelAddPixImage.loadImageThroughUrl(image)
+        viewModel.image.observe(viewLifecycleOwner) { image ->
+            image?.run {
+                binding.boxFragRequestEditorPayment.apply {
+                    panelAddPixLayoutWaitingUpload.visibility = GONE
+                    panelAddPixLayoutAlreadyUploaded.visibility = VISIBLE
+                    panelAddPixImage.loadImageThroughUrl(getData())
+                }
             }
-
         }
 
         viewModel.darkLayer.observe(viewLifecycleOwner) { isRequested ->

@@ -16,6 +16,8 @@ const val INSERTION_DATE = "insertionDate"
 
 const val PARENT_ID = "parentId"
 
+const val DATE = "date"
+
 const val TYPE = "type"
 
 const val DRIVER_ID = "driverId"
@@ -35,6 +37,8 @@ const val IS_RECEIVED = "isReceived"
 const val IS_PAID = "isPaid"
 
 const val REQUEST_ID = "requestId"
+
+const val LAST_REQUEST = "lastRequest"
 
 const val PAID_BY_EMPLOYEE = "isPaidByEmployee"
 
@@ -57,6 +61,12 @@ const val MAIN_ACCOUNT = "mainAccount"
 const val FLEET_TYPE = "fleetType"
 
 const val URL_IMAGE = "urlImage"
+
+const val IS_UPDATING_INVOICE = "updatingInvoice"
+
+const val URL_INVOICE = "urlInvoice"
+
+const val IS_UPDATING = "updating"
 
 //---------------------------------------------------------------------------------------------//
 // SUCCESS MESSAGES
@@ -163,5 +173,8 @@ const val CANCEL = "Cancelar"
 // KEYS
 //---------------------------------------------------------------------------------------------//
 
-const val RESULT_KEY = "result_key"
+const val KEY_RESULT = "key_result"
 
+const val KEY_ID = "key_id"
+
+const val KEY_ITEM_ID = "key_item_id"

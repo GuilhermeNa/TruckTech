@@ -4,24 +4,26 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.MenuItem
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
-import br.com.apps.model.enums.RequestItemType
 import br.com.apps.model.expressions.toCurrencyPtBr
 import br.com.apps.model.model.request.Item
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ItemRequestSubItemBinding
+import br.com.apps.trucktech.expressions.loadGif
 import br.com.apps.trucktech.expressions.loadImageThroughUrl
 
 class RequestEditorRecyclerAdapter(
     val context: Context,
-    dataSet: List<Item>,
-    val itemClickListener: (itemCLickData: RequestItemClickData) -> Unit = {},
-    val deleteClickListener: (itemDto: Item) -> Unit = {}
+    receivedData: List<Item>,
+    val itemClickListener: (itemId: String) -> Unit = {},
+    val deleteClickListener: (itemId: String) -> Unit = {}
 ) : RecyclerView.Adapter<RequestEditorRecyclerAdapter.ViewHolder>() {
 
-    private val dataSet = dataSet.toMutableList()
+    private val dataSet = receivedData.toMutableList()
 
     //--------------------------------------------------------------------------------------------//
     //  VIEW HOLDER
@@ -34,24 +36,27 @@ class RequestEditorRecyclerAdapter(
         val description = binding.itemRequestItemDescription
         val value = binding.itemRequestItemValue
         val card = binding.itemRequestItemCard
+        val gif = binding.itemReqGif
 
-        lateinit var requestItem: Item
+        lateinit var item: Item
 
         init {
-            card.setOnLongClickListener {
-                PopupMenu(context, itemView).apply {
-                    menuInflater.inflate(R.menu.menu_delete, menu)
-                    setOnMenuItemClickListener(this@ViewHolder)
-                }.show()
-                true
-            }
+                card.setOnLongClickListener {
+                    if (!item.isUpdating) {
+                        PopupMenu(context, itemView).apply {
+                            menuInflater.inflate(R.menu.menu_delete, menu)
+                            setOnMenuItemClickListener(this@ViewHolder)
+                        }.show()
+                    }
+                    true
+                }
         }
 
         override fun onMenuItemClick(item: MenuItem?): Boolean {
             item?.let {
                 when (it.itemId) {
                     R.id.menu_delete_delete -> {
-                      deleteClickListener(requestItem)
+                        deleteClickListener(this.item.id)
                     }
 
                     else -> {}
@@ -77,7 +82,7 @@ class RequestEditorRecyclerAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = dataSet[position]
-        holder.requestItem = item
+        holder.item = item
         bind(holder, item)
         initClickListener(holder, item)
     }
@@ -85,11 +90,23 @@ class RequestEditorRecyclerAdapter(
     fun bind(holder: ViewHolder, item: Item) {
         holder.apply {
             try {
-                image.loadImageThroughUrl(
-                   // url = item.getImage()
-                )
-                //description.text = item.getDescription()
-                value.text = item.value?.toCurrencyPtBr()
+
+                when (item.isUpdating) {
+                    true -> {
+                        image.visibility = GONE
+                        gif.visibility = VISIBLE
+                        gif.loadGif(R.drawable.gif_sending, context)
+                    }
+
+                    false -> {
+                        gif.visibility = GONE
+                        image.visibility = VISIBLE
+                        image.loadImageThroughUrl(item.urlImage)
+                    }
+                }
+
+                description.text = item.description
+                value.text = item.value.toCurrencyPtBr()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -98,19 +115,16 @@ class RequestEditorRecyclerAdapter(
 
     private fun initClickListener(holder: ViewHolder, item: Item) {
         holder.card.setOnClickListener {
-  /*          if (item.id != null && item.type != null) {
-                itemClickListener(
-                    RequestItemClickData(
-                        itemId = item.id!!,
-                        type = item.type!!
-                    )
-                )
-            }*/
+            when (item.isUpdating) {
+                true -> itemClickListener("")
+                false -> itemClickListener(item.id)
+            }
+
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(dataSet: List<Item>) {
+    fun initialize(dataSet: List<Item>) {
         this.dataSet.clear()
         this.dataSet.addAll(dataSet)
         notifyDataSetChanged()
@@ -118,9 +132,29 @@ class RequestEditorRecyclerAdapter(
 
     override fun getItemCount(): Int = dataSet.size
 
-}
+    fun insert(items: List<Item>) {
+        items.forEach {
+            dataSet.add(0, it)
+            notifyItemInserted(0)
+        }
+    }
 
-class RequestItemClickData(
-    val itemId: String,
-    val type: RequestItemType
-)
+    fun remove(items: List<Item>) {
+        items.forEach { item ->
+            val itemToRemove = dataSet.first { it.id == item.id }
+            val pos = dataSet.indexOf(itemToRemove)
+            dataSet.removeAt(pos)
+            notifyItemRemoved(pos)
+        }
+    }
+
+    fun update(items: List<Item>) {
+        items.forEach { item ->
+            val itemToUpdate = dataSet.first { it.id == item.id }
+            val pos = dataSet.indexOf(itemToUpdate)
+            dataSet[pos] = item
+            notifyItemChanged(pos)
+        }
+    }
+
+}

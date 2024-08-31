@@ -1,3 +1,3 @@
 package br.com.apps.model.exceptions
 
-class EmptyIdException(message: String): Exception(message)
+class EmptyIdException(message: String? = null): Exception(message)

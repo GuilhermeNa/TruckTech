@@ -1,6 +1,6 @@
 package br.com.apps.trucktech.ui
 
-const val KEY_ID = "key_id"
+
 
 const val PAGE_FREIGHT = "Frete"
 const val PAGE_REFUEL = "Abastecimento"

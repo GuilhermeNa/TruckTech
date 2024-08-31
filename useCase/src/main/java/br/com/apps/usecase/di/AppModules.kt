@@ -28,7 +28,7 @@ val useCaseModules = module {
     single<OutlayUseCase> { OutlayUseCase(get()) }
     single<FineUseCase> { FineUseCase(get()) }
     single<FleetUseCase> { FleetUseCase(get()) }
-    single<FreightUseCase> { FreightUseCase(get()) }
+    single<FreightUseCase> { FreightUseCase(get(), get()) }
     single<LabelUseCase> { LabelUseCase(get()) }
     single<RequestUseCase> { RequestUseCase(get(), get(), get(), get()) }
     single<TimeLineUseCase> { TimeLineUseCase() }
@@ -40,5 +40,5 @@ val useCaseModules = module {
     single<CustomerUseCase> { CustomerUseCase(get()) }
     single<TravelAidUseCase> { TravelAidUseCase(get()) }
     single<BankAccountUseCase> { BankAccountUseCase(get()) }
-    single<ItemUseCase> { ItemUseCase(get()) }
+    single<ItemUseCase> { ItemUseCase(get(), get()) }
 }

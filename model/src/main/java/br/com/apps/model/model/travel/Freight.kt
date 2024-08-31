@@ -61,7 +61,12 @@ data class Freight(
     val weight: BigDecimal,
     val loadingDate: LocalDateTime,
     val commissionPercentual: BigDecimal,
-    val isValid: Boolean
+    val isValid: Boolean,
+    val isUpdatingInvoice: Boolean,
+    val urlInvoice: String? = null,
+    val isUpdatingTicket: Boolean,
+    val urlTicket: String? = null
+
 ) : ModelObjectInterface<FreightDto> {
 
     private var _customer: Customer? = null
@@ -190,7 +195,11 @@ data class Freight(
         value = value.toDouble(),
         loadingDate = loadingDate.toDate(),
         commissionPercentual = commissionPercentual.toDouble(),
-        isValid = isValid
+        isValid = isValid,
+        isUpdatingInvoice = isUpdatingInvoice,
+        urlInvoice = urlInvoice,
+        isUpdatingTicket = isUpdatingTicket,
+        urlTicket = urlTicket
     )
 
 }

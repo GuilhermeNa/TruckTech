@@ -2,7 +2,9 @@ package br.com.apps.model.model.request
 
 import br.com.apps.model.dto.request.ItemDto
 import br.com.apps.model.interfaces.ModelObjectInterface
+import br.com.apps.model.util.toDate
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 data class Item(
     val masterUid: String,
@@ -10,8 +12,10 @@ data class Item(
     val parentId: String,
     val value: BigDecimal,
     val description: String,
+    val isValid: Boolean,
     val urlImage: String? = null,
-    val isValid: Boolean
+    val isUpdating: Boolean,
+    val date: LocalDateTime
 ): ModelObjectInterface<ItemDto> {
 
     override fun toDto(): ItemDto = ItemDto(
@@ -20,8 +24,10 @@ data class Item(
         parentId = parentId,
         value = value.toDouble(),
         description = description,
+        isValid = isValid,
         urlImage = urlImage,
-        isValid = isValid
+        isUpdating = isUpdating,
+        date = date.toDate()
     )
 
 }

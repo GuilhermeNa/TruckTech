@@ -13,7 +13,7 @@ interface UserReadInterface {
 
     suspend fun updateRequestNumber(uid: String)
 
-    suspend fun getUserRequestNumber(uid: String): Int
+    suspend fun getUserRequestNumber(uid: String): Long
 
 }
 

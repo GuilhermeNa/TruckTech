@@ -18,7 +18,7 @@ interface FreightWriteInterface {
      *
      * @param dto The [FreightDto] object to be saved.
      */
-    suspend fun save(dto: FreightDto)
+    suspend fun save(dto: FreightDto): String
 
     /**
      * Deletes an [Freight] document from the database based on the specified ID.
@@ -26,6 +26,8 @@ interface FreightWriteInterface {
      * @param freightId The ID of the document to be deleted.
      */
     suspend fun delete(freightId: String?)
+
+    suspend fun updateInvoiceUrl(id: String, url: String)
 
 }
 

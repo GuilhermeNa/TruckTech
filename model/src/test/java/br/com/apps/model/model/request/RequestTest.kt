@@ -2,6 +2,7 @@ package br.com.apps.model.model.request
 
 import br.com.apps.model.exceptions.DuplicatedItemsException
 import br.com.apps.model.exceptions.invalid.InvalidIdException
+import br.com.apps.model.exceptions.null_objects.NullItemException
 import br.com.apps.model.model.request.Request.Companion.merge
 import br.com.apps.model.test_cases.sampleItem
 import br.com.apps.model.test_cases.sampleRequest
@@ -145,6 +146,36 @@ class RequestTest {
         val expectedA = "itemId2"
         val actualA = requests[1].items[0].id
         assertEquals(expectedA, actualA)
+
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    // getItemById()
+    //---------------------------------------------------------------------------------------------//
+
+    @Test
+    fun `should return the item by its id`() {
+        request.addAll(listOf(
+                sampleItem().copy(id = "itemId1", parentId = "requestId1"),
+                sampleItem().copy(id = "itemId2", parentId = "requestId1")
+            ))
+
+        val expected = sampleItem().copy(id = "itemId1", parentId = "requestId1")
+        val actual = request.getItemById("itemId1")
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should throw NullItemException when the list dont contains the item with the id `() {
+        request.addAll(listOf(
+            sampleItem().copy(id = "itemId1", parentId = "requestId1"),
+            sampleItem().copy(id = "itemId2", parentId = "requestId1")
+        ))
+
+        assertThrows(NullItemException::class.java) {
+            request.getItemById("itemId3")
+        }
 
     }
 

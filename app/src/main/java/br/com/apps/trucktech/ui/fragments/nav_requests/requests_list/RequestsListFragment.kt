@@ -86,9 +86,9 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
         configurator.toolbar(
             hasToolbar = true,
-            toolbar = binding.fragmentRequestsListToolbar.toolbar,
+            toolbar = binding.fragRlToolbar.toolbar,
             menuId = null,
-            toolbarTextView = binding.fragmentRequestsListToolbar.toolbarText,
+            toolbarTextView = binding.fragRlToolbar.toolbarText,
             title = TOOLBAR_TITLE
         )
         configurator.bottomNavigation(hasBottomNavigation = true)
@@ -98,7 +98,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
      * Header Recycler is configured here
      */
     private fun initHeaderRecyclerView() {
-        val recyclerView = binding.fragmentRequestsListHeaderRecycler
+        val recyclerView = binding.fragRlRecyclerHeader
         val adapter = HeaderDefaultHorizontalAdapter(
             context = requireContext(),
             dataSet = viewModel.headerItemsMap,
@@ -117,14 +117,13 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
      *  2. If the dialog response is positive, sends the request to the viewModel for creation.
      */
     private fun initFab() {
-        binding.fragmentRequestsListFab.setOnClickListener {
+        binding.fragRlFab.setOnClickListener {
             showAlertDialog()
         }
     }
 
     private fun showAlertDialog() {
         viewModel.dialogRequested()
-
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Nova requisição")
             .setMessage("Você confirma a adição uma nova requisição?")
@@ -177,12 +176,13 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
      */
     private fun initStateManager() {
         viewModel.data.observe(viewLifecycleOwner) { data ->
-            if (adapter == null) {
-                initRequestRecyclerView()
-            } else {
-                adapter?.update(data)
+            if(data.isNotEmpty()) {
+                if (adapter == null) {
+                    initRequestRecyclerView()
+                } else {
+                    adapter?.update(data)
+                }
             }
-
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
@@ -200,12 +200,12 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
         viewModel.dialog.observe(viewLifecycleOwner) { dialog ->
             when (dialog) {
                 true -> {
-                    binding.fragRequestListDarkLayer.visibility = View.VISIBLE
+                    binding.fragRlDarkLayer.visibility = View.VISIBLE
                     mainActVM.setComponents(VisualComponents(hasBottomNavigation = false))
                 }
 
                 false -> {
-                    binding.fragRequestListDarkLayer.visibility = View.GONE
+                    binding.fragRlDarkLayer.visibility = View.GONE
                     mainActVM.setComponents(VisualComponents(hasBottomNavigation = true))
                 }
             }
@@ -261,7 +261,7 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
 
     private fun initConcatAdapter(adapters: List<RecyclerView.Adapter<out RecyclerView.ViewHolder>>) {
         val concatAdapter = ConcatAdapter(adapters)
-        val recyclerView = binding.fragmentRequestsListRecycler
+        val recyclerView = binding.fragRlRecyclerBoddy
         recyclerView.adapter = concatAdapter
     }
 
@@ -296,7 +296,6 @@ class RequestsListFragment : BaseFragmentWithToolbar() {
                                 is Response.Error -> requireView().snackBarRed(FAILED_TO_REMOVE)
                                 is Response.Success -> {
                                     stateHandler?.showDeleted()
-                                    viewModel.loadData()
                                     requireView().snackBarOrange(SUCCESSFULLY_REMOVED)
                                 }
                             }

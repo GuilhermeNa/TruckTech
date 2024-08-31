@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import br.com.apps.model.dto.request.RequestDto
 import br.com.apps.model.enums.AccessLevel
 import br.com.apps.model.exceptions.null_objects.NullItemException
 import br.com.apps.model.exceptions.null_objects.NullRequestException
@@ -15,29 +14,39 @@ import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.item.ItemRepository
 import br.com.apps.repository.repository.request.RequestRepository
 import br.com.apps.repository.util.Response
-import br.com.apps.usecase.usecase.RequestUseCase
+import br.com.apps.repository.util.WriteRequest
+import br.com.apps.trucktech.util.SingleLiveEvent
+import br.com.apps.trucktech.util.image.Image
+import br.com.apps.trucktech.util.state.DataEvent
+import br.com.apps.usecase.usecase.ItemUseCase
+import br.com.apps.usecase.util.buildRequestStoragePath
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class RequestEditorViewModel(
     private val vmData: RequestEditorVmData,
     private val requestRepo: RequestRepository,
     private val itemRepo: ItemRepository,
-    private val useCase: RequestUseCase,
+    private val itemUseCase: ItemUseCase,
     private val storage: StorageRepository
 ) : ViewModel() {
 
-    private val _urlImage = MutableLiveData<Any>()
-    val urlImage get() = _urlImage
+    private var isFirstBoot = true
+
+    private val _image = MutableLiveData<Image?>()
+    val image get() = _image
+
+    private lateinit var _request: Request
+    val request get() = if (::_request.isInitialized) _request else null
 
     /**
-     * LiveData holding the response data of type [Response] with a [PaymentRequest]
+     * LiveData holding the response data of type [Response] with a [DataEvent]
      * to be displayed on screen.
      */
-    private val _data = MutableLiveData<Response<Request>>()
-    val data get() = _data
+    private val _dataEvent = SingleLiveEvent<DataEvent<List<Item>>>()
+    val dataEvent get() = _dataEvent
 
     /**
      * LiveData with a dark layer state, used when dialogs and bottom sheets are requested.
@@ -50,54 +59,91 @@ class RequestEditorViewModel(
     //---------------------------------------------------------------------------------------------//
 
     init {
-        /* loadData { request, items ->
-             request.addAll(items)
-             sendResponse(request)
-         }*/
         loadData()
     }
 
     private fun loadData() {
         viewModelScope.launch {
+            try {
+                _request = loadRequest()
 
-            combine(
-                requestRepo.fetchRequestById(vmData.requestId, true).asFlow(),
-                itemRepo.fetchItemsByParentId(vmData.requestId, true).asFlow()
-            ) { requestResponse, itemResponse ->
-                val request = when (requestResponse) {
-                    is Response.Error -> throw requestResponse.exception
-                    is Response.Success -> requestResponse.data ?: throw NullRequestException()
-                }
-                val items = when (itemResponse) {
-                    is Response.Error -> throw itemResponse.exception
-                    is Response.Success -> itemResponse.data ?: throw NullItemException()
+                loadItemsFlow { newItems ->
+                    val oldItems = request!!.items.toList()
+                    _request.addAll(newItems)
+                    setNewDataEvent(getDataEvent(oldItems = oldItems, newItems = newItems))
                 }
 
-                request.addAll(items)
-                sendResponse(request)
-
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
 
-    private fun sendResponse(request: Request) {
-        if (_urlImage.value == null) {
-            request.urlImage?.let { _urlImage.value = it }
+    private suspend fun loadRequest(): Request {
+        val response = requestRepo.fetchRequestById(vmData.requestId, true)
+            .asFlow().first()
+        return when (response) {
+            is Response.Error -> throw response.exception
+            is Response.Success -> response.data?.apply {
+                urlImage?.let { url -> setImage(url) }
+            } ?: throw NullRequestException()
         }
-        _data.value = Response.Success(request)
     }
 
-    fun deleteItem(item: Item) =
-        liveData<Response<Unit>>(viewModelScope.coroutineContext) {
-            /*      try {
-                      val dto = getRequestDto()
-                      useCase.deleteItem(vmData.permission, dto, item)
-                      emit(Response.Success())
+    private suspend fun loadItemsFlow(complete: (List<Item>) -> Unit) {
+        itemRepo.fetchItemsByParentIdAndDateDesc(vmData.requestId, true).asFlow()
+            .collect { response ->
+                when (response) {
+                    is Response.Error -> throw response.exception
+                    is Response.Success -> complete(response.data ?: throw NullItemException())
+                }
+            }
+    }
 
-                  } catch (e: Exception) {
-                      e.printStackTrace()
-                      emit(Response.Error(e))
-                  }*/
+    private fun getDataEvent(oldItems: List<Item>, newItems: List<Item>): DataEvent<List<Item>> {
+        return if (isFirstBoot) {
+            isFirstBoot = false
+            DataEvent.Initialize(data = newItems)
+
+        } else {
+            val addedItems = newItems.filter { newItem ->
+                newItem.id !in oldItems.map { oldItems -> oldItems.id }
+            }
+            val removedItems = oldItems.filter {
+                it.id !in newItems.map { newItem -> newItem.id }
+            }
+            val editedItems = newItems.filter { newItem ->
+                oldItems.find { it.id == newItem.id }
+                    ?.let { oldItem -> oldItem != newItem } == true
+            }
+
+            when {
+                addedItems.isNotEmpty() -> DataEvent.Insert(item = addedItems)
+                removedItems.isNotEmpty() -> DataEvent.Remove(item = removedItems)
+                else -> DataEvent.Update(item = editedItems)
+            }
+        }
+
+    }
+
+    private fun setNewDataEvent(newDataEvent: DataEvent<List<Item>>) {
+        _dataEvent.value = newDataEvent
+    }
+
+    fun deleteItem(itemId: String) =
+        liveData<Response<Unit>>(viewModelScope.coroutineContext) {
+            try {
+                val writeReq = WriteRequest(
+                    authLevel = vmData.permission,
+                    data = _request.getItemById(itemId).toDto()
+                )
+                itemUseCase.delete(writeReq)
+                emit(Response.Success())
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emit(Response.Error(e))
+            }
         }
 
     /**
@@ -114,25 +160,34 @@ class RequestEditorViewModel(
         _darkLayer.value = false
     }
 
-    fun imageHaveBeenLoaded(image: ByteArray) {
-        _urlImage.value = image
+    fun imageHaveBeenLoaded(ba: ByteArray) {
+        setImage(ba)
         saveEncodedImage()
+    }
+
+    private fun setImage(image: Any) {
+        _image.value = when(image) {
+            is String -> Image(url = image)
+            else-> Image(byteArray = image as ByteArray)
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun saveEncodedImage() {
-        val dto = getRequestDto()
-        val ba = _urlImage.value as ByteArray
+        val dto = _request.toDto()
+        val ba = _image.value!!.byteArray!!
 
         GlobalScope.launch {
-            val url = storage.postImage(ba, "requests/${dto.id}.jpeg")
+            requestRepo.setUpdatingStatus(dto.id!!, true)
+            val url = storage.postImage(ba, buildRequestStoragePath(dto.id!!))
             requestRepo.updateUrlImage(dto.id!!, url)
         }
 
     }
 
-    private fun getRequestDto(): RequestDto {
-        return (data.value as Response.Success).data!!.toDto()
+    fun getItems(): List<Item> {
+        return if (::_request.isInitialized) _request.items
+        else emptyList()
     }
 
 }
@@ -141,3 +196,4 @@ data class RequestEditorVmData(
     val requestId: String,
     val permission: AccessLevel
 )
+

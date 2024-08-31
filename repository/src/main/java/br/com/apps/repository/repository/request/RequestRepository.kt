@@ -16,8 +16,10 @@ class RequestRepository(
     override suspend fun delete(id: String) =
         write.delete(id)
 
-    override suspend fun updateUrlImage(id: String, url: String) =
+    override suspend fun updateUrlImage(id: String, url: String?) =
         write.updateUrlImage(id, url)
+
+    override suspend fun setUpdatingStatus(id: String, isUpdating: Boolean) = write.setUpdatingStatus(id, isUpdating)
 
     //---------------------------------------------------------------------------------------------//
     // READ

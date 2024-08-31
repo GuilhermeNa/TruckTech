@@ -1,23 +1,25 @@
 package br.com.apps.trucktech.expressions
 
 import android.graphics.Color
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import com.google.android.material.snackbar.Snackbar
 
-fun View.navigateTo(direction: NavDirections){
+fun View.navigateTo(direction: NavDirections) {
     val navController = Navigation.findNavController(this)
     navController.navigate(direction)
 }
 
-fun View.navigateWithSafeArgs(direction: NavDirections){
+fun View.navigateWithSafeArgs(direction: NavDirections) {
     val navController = Navigation.findNavController(this)
     navController.navigate(direction)
 }
 
-fun View.popBackStack(){
+fun View.popBackStack() {
     val navController = Navigation.findNavController(this)
     navController.popBackStack()
 }
@@ -42,6 +44,21 @@ fun View.snackBarOrange(text: String) {
         .setTextColor(Color.parseColor("#FFFFFF"))
         .show()
 }
+
+fun View.snackBarTop(text: String) {
+    val snack = Snackbar.make(this, text, Snackbar.LENGTH_INDEFINITE)
+    snack.run {
+        setBackgroundTint(Color.parseColor("#016794"))
+        setAction("CANCEL") { snack.dismiss() }
+    }
+
+    val params = this.layoutParams as FrameLayout.LayoutParams
+    params.gravity = Gravity.TOP
+    params.height = ViewGroup.LayoutParams.WRAP_CONTENT
+    snack.view.layoutParams = params;
+    snack.show();
+}
+
 
 fun View.snackBarRedTop(text: String) {
     val snackBar = Snackbar.make(this, text, Snackbar.LENGTH_SHORT)

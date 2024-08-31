@@ -12,11 +12,11 @@ import androidx.recyclerview.widget.RecyclerView
 import br.com.apps.model.expressions.getMonthAndYearInPtBr
 import br.com.apps.model.model.travel.Refuel
 import br.com.apps.repository.util.FAILED_TO_LOAD_DATA
+import br.com.apps.repository.util.KEY_ID
 import br.com.apps.repository.util.NULL_DATE
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.databinding.FragmentRefuelsListBinding
 import br.com.apps.trucktech.expressions.snackBarRed
-import br.com.apps.trucktech.ui.KEY_ID
 import br.com.apps.trucktech.ui.PAGE_REFUEL
 import br.com.apps.trucktech.ui.fragments.nav_travel.records.RecordsViewModel
 import br.com.apps.trucktech.ui.public_adapters.DateRecyclerAdapter

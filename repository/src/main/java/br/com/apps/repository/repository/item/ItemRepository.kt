@@ -5,8 +5,26 @@ import br.com.apps.model.dto.request.ItemDto
 import br.com.apps.model.model.request.Item
 import br.com.apps.repository.util.Response
 
-class ItemRepository(private val read: ItemReadImpl, private val write: ItemWriteImpl) :
-    ItemRepositoryInterface {
+class ItemRepository(
+    private val read: ItemReadImpl,
+    private val write: ItemWriteImpl
+) : ItemRepositoryInterface {
+
+    //---------------------------------------------------------------------------------------------//
+    // WRITE
+    //---------------------------------------------------------------------------------------------//
+
+    override suspend fun save(dto: ItemDto) = write.save(dto)
+
+    override suspend fun delete(id: String) = write.delete(id)
+
+    override suspend fun delete(ids: Array<String>) = write.delete(ids)
+
+    override suspend fun updateUrl(id: String, url: String?) = write.updateUrl(id, url)
+
+    //---------------------------------------------------------------------------------------------//
+    // READ
+    //---------------------------------------------------------------------------------------------//
 
     override suspend fun fetchItemById(
         id: String, flow: Boolean
@@ -22,10 +40,9 @@ class ItemRepository(private val read: ItemReadImpl, private val write: ItemWrit
         flow: Boolean
     ): LiveData<Response<List<Item>>> = read.fetchItemsByParentIds(ids, flow)
 
-    override suspend fun save(dto: ItemDto) = write.save(dto)
-
-    override suspend fun delete(id: String) = write.delete(id)
-
-    override suspend fun delete(ids: Array<String>) = write.delete(ids)
+    override suspend fun fetchItemsByParentIdAndDateDesc(
+        id: String,
+        flow: Boolean
+    ): LiveData<Response<List<Item>>> =read.fetchItemsByParentIdAndDateDesc(id, flow)
 
 }

@@ -1,10 +1,13 @@
 package br.com.apps.trucktech.util
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.view.View
 import android.view.ViewTreeObserver
+import androidx.core.content.ContextCompat
 
 object DeviceCapabilities {
 
@@ -20,7 +23,6 @@ object DeviceCapabilities {
                         capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
                         capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
     }
-
 
     fun softKeyboardListener(root: View?, height: Int, complete: (isOpen: Boolean) -> Unit) =
         object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -41,5 +43,14 @@ object DeviceCapabilities {
             }
         }
 
+    fun checkCameraPermission(context: Context, hasPermission: (Boolean) -> Unit) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            hasPermission(false)
+        } else {
+            hasPermission(true)
+        }
+    }
 
 }

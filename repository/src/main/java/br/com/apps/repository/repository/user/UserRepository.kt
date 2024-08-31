@@ -2,7 +2,7 @@ package br.com.apps.repository.repository.user
 
 class UserRepository(private val read: UserReadImpl): UserInterface {
 
-    override suspend fun getUserRequestNumber(uid: String): Int = read.getUserRequestNumber(uid)
+    override suspend fun getUserRequestNumber(uid: String) = read.getUserRequestNumber(uid)
 
     override suspend fun updateRequestNumber(uid: String) = read.updateRequestNumber(uid)
 

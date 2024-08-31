@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -17,14 +16,14 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import br.com.apps.repository.util.RESULT_KEY
+import br.com.apps.repository.util.KEY_RESULT
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.ActivityCameraBinding
 import br.com.apps.trucktech.expressions.getByteArray
 import br.com.apps.trucktech.expressions.toast
+import br.com.apps.trucktech.util.DeviceCapabilities
 import br.com.apps.trucktech.util.TempFile
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
@@ -40,7 +39,7 @@ private const val CAMERA = "Câmera"
 
 private const val GALLERY = "Galeria"
 
-private const val REQUEST_CAMERA_PERMISSION = 1
+const val REQUEST_CAMERA_PERMISSION = 1
 
 class CameraActivity : AppCompatActivity() {
 
@@ -62,6 +61,50 @@ class CameraActivity : AppCompatActivity() {
             else finish()
         }
 
+    /**
+     * Process the result when it came from a camera.
+     */
+    private fun processCameraResult() {
+        try {
+
+            val bitmap = contentResolver.openInputStream(photoUri).use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
+            val byteArray = bitmap.getByteArray()
+            setActivityResult(byteArray)
+
+        } catch (e: Exception) {
+            Log.e(TAG_DEBUG, "CameraActivity, processCameraResult: ${e.message.toString()}")
+        }
+    }
+
+    private fun setActivityResult(ba: ByteArray) {
+        val filePath = TempFile.create(this, ba, KEY_RESULT)
+
+        val intent = Intent()
+        intent.putExtra(KEY_RESULT, filePath)
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+    }
+
+    /**
+     * Process the result when it came from gallery.
+     * @param result The activity result containing the data.
+     */
+    private fun processGalleryResult(result: ActivityResult) {
+        try {
+
+            val uriImage = result.data!!.data
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uriImage)
+            val byteArray = bitmap.getByteArray()
+            setActivityResult(byteArray)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e(TAG_DEBUG, "CameraActivity, processGalleryResult: ${e.message.toString()}")
+        }
+    }
+
     //---------------------------------------------------------------------------------------------//
     // ON CREATED
     //---------------------------------------------------------------------------------------------//
@@ -70,16 +113,7 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        showAlertDialog()
-    }
 
-    /**
-     * Shows an alert dialog with options to choose the image origin.
-     *
-     * - Camera
-     * - Gallery
-     */
-    private fun showAlertDialog() {
         var hasNoInteraction = true
 
         MaterialAlertDialogBuilder(this)
@@ -88,7 +122,7 @@ class CameraActivity : AppCompatActivity() {
             .setMessage(IMAGE_ORIGIN_MESSAGE)
             .setPositiveButton(CAMERA) { _, _ ->
                 hasNoInteraction = false
-                checkPermission()
+                tryToLaunchCamera()
             }
             .setNegativeButton(GALLERY) { _, _ ->
                 hasNoInteraction = false
@@ -99,36 +133,24 @@ class CameraActivity : AppCompatActivity() {
                 window?.setGravity(Gravity.CENTER)
                 show()
             }
+
     }
 
-    private fun checkPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CAMERA),
-                REQUEST_CAMERA_PERMISSION
-            )
-        } else {
-            launchCamera()
-        }
-    }
+    /**
+     * Attempts to launch the camera intent to capture an image. A temporary file is created to
+     * store the image with the desired resolution and quality. Once the image is captured, the
+     * path to this temporary file is returned as an activity result.
+     */
+    private fun tryToLaunchCamera() {
+        DeviceCapabilities.checkCameraPermission(this) { hasPermission ->
+            when (hasPermission) {
+                true -> launchCamera()
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                launchCamera()
-            } else {
-                toast("Permissão negada")
-                finish()
+                else -> ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.CAMERA),
+                    REQUEST_CAMERA_PERMISSION
+                )
             }
         }
     }
@@ -156,27 +178,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun launchGallery() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "image/*"
-        galleryActivityResultLauncher.launch(intent)
-    }
-
-    /**
-     * Process the result when it came from a camera.
-     */
-    private fun processCameraResult() {
-        try {
-
-            val bitmap = extractBitmapFromUri()
-            val byteArray = bitmap.getByteArray()
-            setActivityResult(byteArray)
-
-        } catch (e: Exception) {
-            Log.e(TAG_DEBUG, "CameraActivity, processCameraResult: ${e.message.toString()}")
-        }
-    }
-
     @SuppressLint("SimpleDateFormat")
     private fun createImageFile(): File {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
@@ -191,41 +192,29 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun extractBitmapFromUri(): Bitmap {
-        return contentResolver.openInputStream(photoUri).use { inputStream ->
-            BitmapFactory.decodeStream(inputStream)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                launchCamera()
+            } else {
+                toast("Permissão negada")
+                finish()
+            }
         }
-    }
-
-    private fun setActivityResult(ba: ByteArray) {
-        val filePath = TempFile.create(this, ba, RESULT_KEY)
-
-        val intent = Intent()
-        intent.putExtra(RESULT_KEY, filePath)
-        setResult(Activity.RESULT_OK, intent)
-        finish()
     }
 
     /**
-     * Process the result when it came from gallery.
-     * @param result The activity result containing the data.
+     * Launches an intent to open the device's gallery and allow the user to select an image.
      */
-    private fun processGalleryResult(result: ActivityResult) {
-        try {
-
-            val bitmap = extractBitmapResultFromGallery(result)
-            val byteArray = bitmap.getByteArray()
-            setActivityResult(byteArray)
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Log.e(TAG_DEBUG, "CameraActivity, processGalleryResult: ${e.message.toString()}")
-        }
-    }
-
-    private fun extractBitmapResultFromGallery(result: ActivityResult): Bitmap {
-        val uriImage = result.data!!.data
-        return MediaStore.Images.Media.getBitmap(contentResolver, uriImage)
+    private fun launchGallery() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*"
+        galleryActivityResultLauncher.launch(intent)
     }
 
 }

@@ -29,4 +29,11 @@ class StorageRepository(private val fireStorage: FirebaseStorage) {
         reference.delete().await()
     }
 
+    suspend fun deleteImages(paths: List<String>) {
+        paths.forEach {
+            val reference = fireStorage.reference.child(it)
+            reference.delete().await()
+        }
+    }
+
 }

@@ -11,6 +11,7 @@ import br.com.apps.repository.util.onComplete
 import br.com.apps.repository.util.onSnapShot
 import br.com.apps.repository.util.toRequestList
 import br.com.apps.repository.util.toRequestObject
+import br.com.apps.repository.util.validateId
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,8 +39,7 @@ class RequestReadImpl(fireStore: FirebaseFirestore) : RequestReadInterface {
         id: String,
         flow: Boolean
     ): LiveData<Response<Request>> = withContext(Dispatchers.IO) {
-        if (id.isEmpty())
-            return@withContext MutableLiveData(Response.Error(EmptyDataException("Id cannot be empty")))
+        id.validateId()?.let { error -> return@withContext MutableLiveData(error) }
 
         val listener = collection.document(id)
 

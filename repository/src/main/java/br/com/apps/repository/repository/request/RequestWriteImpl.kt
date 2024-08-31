@@ -5,6 +5,7 @@ import br.com.apps.model.exceptions.EmptyIdException
 import br.com.apps.repository.util.EMPTY_ID
 import br.com.apps.repository.util.EMPTY_ID_EXCEPTION
 import br.com.apps.repository.util.FIRESTORE_COLLECTION_REQUESTS
+import br.com.apps.repository.util.IS_UPDATING
 import br.com.apps.repository.util.URL_IMAGE
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
@@ -43,8 +44,23 @@ class RequestWriteImpl(fireStore: FirebaseFirestore) : RequestWriteInterface {
         }
     }
 
-    override suspend fun updateUrlImage(id: String, url: String) {
-        collection.document(id).update(URL_IMAGE, url)
+    override suspend fun updateUrlImage(id: String, url: String?) {
+        withContext(Dispatchers.IO) {
+            if(id.isEmpty()) throw NullPointerException()
+
+            val updates = mutableMapOf<String, Any?>(
+                Pair(URL_IMAGE, url),
+                Pair(IS_UPDATING, false)
+            )
+
+            collection.document(id).update(updates)
+        }
+    }
+
+    override suspend fun setUpdatingStatus(id: String, isUpdating: Boolean) {
+        withContext(Dispatchers.IO) {
+            collection.document(id).update(IS_UPDATING, isUpdating)
+        }
     }
 
 }

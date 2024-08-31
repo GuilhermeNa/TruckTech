@@ -26,6 +26,7 @@ class MonetaryMaskUtil(editText: EditText) : TextWatcher {
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
     override fun afterTextChanged(s: Editable?) {
+        if(s!!.isEmpty()) return
         val editText = editTextWeakRef.get() ?: return
         editText.removeTextChangedListener(this)
 
@@ -38,7 +39,6 @@ class MonetaryMaskUtil(editText: EditText) : TextWatcher {
         editText.setText(cleanString)
         editText.setSelection(cleanString.length)
         editText.addTextChangedListener(this)
-
     }
 
     private fun parseToBigDecimal(value: String): BigDecimal? {

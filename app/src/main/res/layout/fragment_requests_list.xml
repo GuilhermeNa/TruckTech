@@ -8,15 +8,19 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <include
-            android:id="@+id/fragment_requests_list_toolbar"
+            android:id="@+id/frag_rl_toolbar"
             layout="@layout/layout_toolbar" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fragment_requests_list_header_recycler"
+            android:id="@+id/frag_rl_recycler_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipToPadding="false"
@@ -27,53 +31,61 @@
             tools:listitem="@layout/item_header_horizontal" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/frag_rl_coordinator"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/fragment_requests_list_recycler"
+            <FrameLayout
+                android:id="@+id/frag_rl_frame"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="80dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_request" />
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/frag_rl_recycler_boddy"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="80dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_request" />
+            </FrameLayout>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fragment_requests_list_fab"
+                android:id="@+id/frag_rl_fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:contentDescription="@string/add_a_new_order"
                 android:src="@drawable/icon_add"
-                app:layout_anchor="@id/fragment_requests_list_recycler"
+                app:layout_anchor="@id/frag_rl_frame"
                 app:layout_anchorGravity="bottom|right|end"
                 app:layout_behavior=".ui.behaviors.ScrollAwareFab" />
+
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     </LinearLayout>
 
     <View
-        android:id="@+id/frag_request_list_dark_layer"
+        android:id="@+id/frag_rl_dark_layer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black_layer"
         android:visibility="gone" />
 
     <include
-        android:id="@+id/frag_requests_box_error"
+        android:id="@+id/frag_rl_box_error"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         layout="@layout/box_error"/>
 
     <include
-        android:id="@+id/box_loading"
+        android:id="@+id/frag_rl_box_loading"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         layout="@layout/box_loading"/>
 
     <include
-        android:id="@+id/box_gif"
+        android:id="@+id/frag_rl_box_gif"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         layout="@layout/box_gif"

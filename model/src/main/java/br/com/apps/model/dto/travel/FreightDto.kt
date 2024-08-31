@@ -37,8 +37,13 @@ data class FreightDto(
     var weight: Double? = null,
     var loadingDate: Date? = null,
     var commissionPercentual: Double? = null,
-    @field:JvmField var isValid: Boolean? = null
-) : DtoObjectInterface<Freight>, AccessPermissionInterface {
+    @field:JvmField var isValid: Boolean? = null,
+    var isUpdatingInvoice: Boolean? = null,
+    var urlInvoice: String? = null,
+    var isUpdatingTicket: Boolean? = null,
+    val urlTicket: String? = null,
+
+    ) : DtoObjectInterface<Freight>, AccessPermissionInterface {
 
     override fun validateDataIntegrity() {
         if (masterUid == null ||
@@ -54,7 +59,9 @@ data class FreightDto(
             weight == null ||
             loadingDate == null ||
             commissionPercentual == null ||
-            isValid == null
+            isValid == null ||
+            isUpdatingInvoice == null ||
+            isUpdatingTicket == null
         ) throw CorruptedFileException("FreightDto data is corrupted: ($this)")
     }
 
@@ -71,7 +78,9 @@ data class FreightDto(
             value == null ||
             loadingDate == null ||
             commissionPercentual == null ||
-            isValid == null
+            isValid == null ||
+            isUpdatingInvoice == null ||
+            isUpdatingTicket == null
         ) throw InvalidForSavingException("FreightDto data is invalid: ($this)")
     }
 
@@ -91,14 +100,18 @@ data class FreightDto(
             value = value!!.toBigDecimal(),
             loadingDate = loadingDate!!.toLocalDateTime(),
             commissionPercentual = commissionPercentual?.let { BigDecimal(it) }!!,
-            isValid = isValid!!
+            isValid = isValid!!,
+            isUpdatingInvoice = isUpdatingInvoice!!,
+            urlInvoice = urlInvoice,
+            isUpdatingTicket = isUpdatingTicket!!,
+            urlTicket = urlTicket
         )
     }
 
     override fun validateWriteAccess(access: AccessLevel?) {
         if (access == null) throw NullPointerException()
         isValid?.let {
-            throw AccessLevelException(ACCESS_DENIED)
+            if(it) throw AccessLevelException(ACCESS_DENIED)
         } ?: throw NullPointerException()
     }
 

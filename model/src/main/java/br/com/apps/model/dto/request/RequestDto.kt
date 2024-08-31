@@ -17,7 +17,8 @@ data class RequestDto(
     var id: String? = null,
     val uid: String? = null,
     val urlImage: String? = null,
-    val requestNumber: Long? = null,
+    var isUpdating: Boolean? = null,
+    var requestNumber: Long? = null,
     val date: Date? = null,
     val status: String? = null,
 ) : DtoObjectInterface<Request>, AccessPermissionInterface {
@@ -28,7 +29,8 @@ data class RequestDto(
             uid == null ||
             requestNumber == null ||
             date == null ||
-            status == null
+            status == null ||
+            isUpdating == null
         ) throw CorruptedFileException("RequestDto data is corrupted: ($this)")
     }
 
@@ -37,7 +39,8 @@ data class RequestDto(
             uid == null ||
             requestNumber == null ||
             date == null ||
-            status == null
+            status == null ||
+            isUpdating == null
         ) throw InvalidForSavingException("RequestDto data is invalid: ($this)")
     }
 
@@ -50,7 +53,8 @@ data class RequestDto(
             urlImage = urlImage,
             requestNumber = requestNumber!!,
             date = date!!.toLocalDateTime(),
-            status = PaymentRequestStatusType.valueOf(status!!)
+            status = PaymentRequestStatusType.valueOf(status!!),
+            isUpdating = isUpdating!!
         )
     }
 
@@ -59,6 +63,8 @@ data class RequestDto(
         if (status != PaymentRequestStatusType.SENT.name &&
             access != AccessLevel.MANAGER
         ) throw AccessLevelException(ACCESS_DENIED)
+
+
     }
 
     override fun validateReadAccess() {

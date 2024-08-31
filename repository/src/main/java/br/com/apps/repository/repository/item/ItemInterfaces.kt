@@ -36,6 +36,15 @@ interface ItemReadInterface {
      */
     suspend fun fetchItemsByParentIds(ids: List<String>, flow: Boolean = false): LiveData<Response<List<Item>>>
 
+    /**
+     * Fetches the [Item] dataSet for the specified ID in descending order filtered by its Date.
+     *
+     * @param id The ID of the parent.
+     * @param flow If the user wants to keep observing the data.
+     * @return A [Response] with the [Item] list.
+     */
+    suspend fun fetchItemsByParentIdAndDateDesc(id: String, flow: Boolean = false): LiveData<Response<List<Item>>>
+
 }
 
 interface ItemWriteInterface {
@@ -47,7 +56,7 @@ interface ItemWriteInterface {
      *
      * @param dto The [ItemDto] object to be saved.
      */
-    suspend fun save(dto: ItemDto)
+    suspend fun save(dto: ItemDto): String
 
     /**
      * Deletes an [Item] document from the database based on the specified ID.
@@ -57,5 +66,7 @@ interface ItemWriteInterface {
     suspend fun delete(id: String)
 
     suspend fun delete(ids: Array<String>)
+
+    suspend fun updateUrl(id: String, url: String?)
 
 }

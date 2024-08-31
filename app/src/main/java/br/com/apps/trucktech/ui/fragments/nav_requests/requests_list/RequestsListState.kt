@@ -9,49 +9,39 @@ import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentRequestsListBinding
 import br.com.apps.trucktech.expressions.loadGif
-import br.com.apps.trucktech.util.state.StateI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class RequestsListState(
     private val binding: FragmentRequestsListBinding,
-    private val lifecycleScope: LifecycleCoroutineScope
-) : StateI {
+    private val scope: LifecycleCoroutineScope
+) {
 
-    override fun showLoading() {
+    fun showLoading() {
         binding.apply {
-            boxGif.loadingGif.loadGif(R.drawable.gif_request, binding.root.context)
-            fragRequestsBoxError.layout.visibility = GONE
-            fragmentRequestsListToolbar.toolbar.visibility = GONE
-            fragmentRequestsListHeaderRecycler.visibility = GONE
-            fragmentRequestsListRecycler.visibility = GONE
-            fragmentRequestsListFab.visibility = GONE
+            fragRlBoxGif.loadingGif.loadGif(R.drawable.gif_request, binding.root.context)
+            fragRlBoxError.layout.visibility = GONE
+            fragRlToolbar.toolbar.visibility = GONE
+            fragRlRecyclerHeader.visibility = GONE
+            fragRlRecyclerBoddy.visibility = GONE
+            fragRlFab.visibility = GONE
         }
     }
 
-    override fun showLoaded() {
-        binding.fragRequestsBoxError.apply {
-            if (layout.visibility == VISIBLE) {
-                layout.visibility = GONE
-                empty.visibility = GONE
-                error.visibility = GONE
-            }
-        }
+    fun showLoaded() = scope.launch {
+        binding.run {
 
-        lifecycleScope.launch {
-            delay(250)
-
-            binding.fragmentRequestsListHeaderRecycler.apply {
-                if (visibility == GONE) {
-                    visibility = VISIBLE
-                    animation =
-                        AnimationUtils.loadAnimation(binding.root.context, R.anim.slide_in_from_top)
+            fragRlBoxError.run {
+                if (layout.visibility == VISIBLE) {
+                    layout.visibility = GONE
+                    empty.visibility = GONE
+                    error.visibility = GONE
                 }
             }
 
             delay(250)
 
-            binding.fragmentRequestsListRecycler.apply {
+            fragRlRecyclerBoddy.run {
                 if (visibility == GONE) {
                     val layoutAnim = AnimationUtils.loadLayoutAnimation(
                         binding.root.context,
@@ -61,85 +51,79 @@ class RequestsListState(
                     layoutAnimation = layoutAnim
                 }
             }
-        }
-
-    }
-
-    override fun showEmpty() {
-        binding.apply {
-            if (fragmentRequestsListHeaderRecycler.visibility == VISIBLE) {
-                fragmentRequestsListHeaderRecycler.visibility = GONE
-            }
-
-            lifecycleScope.launch {
-                fragRequestsBoxError.apply {
-                    if (layout.visibility == GONE) {
-                        delay(250)
-                        empty.visibility = VISIBLE
-                        error.visibility = GONE
-                        layout.apply {
-                            visibility = VISIBLE
-                            animation = AnimationUtils.loadAnimation(
-                                binding.root.context,
-                                R.anim.fade_in_and_shrink
-                            )
-                        }
-                    } else {
-                        empty.visibility = VISIBLE
-                        error.visibility = GONE
-                    }
-                }
-            }
 
         }
     }
 
-    override fun showError(e: Exception) {
+    fun showEmpty() = scope.launch {
         binding.apply {
-            if (fragmentRequestsListHeaderRecycler.visibility == VISIBLE) {
-                fragmentRequestsListHeaderRecycler.visibility = GONE
-            }
 
-            lifecycleScope.launch {
-                fragRequestsBoxError.apply {
-                    if (layout.visibility == GONE) {
-                        delay(250)
-                        error.visibility = VISIBLE
-                        empty.visibility = GONE
-                        layout.apply {
-                            visibility = VISIBLE
-                            animation = AnimationUtils.loadAnimation(
-                                binding.root.context,
-                                R.anim.fade_in_and_shrink
-                            )
-                        }
-                    } else {
-                        error.visibility = VISIBLE
-                        empty.visibility = GONE
-                    }
+            fragRlRecyclerBoddy.run {
+                if(visibility == VISIBLE) {
+                    visibility = GONE
                 }
             }
 
+            delay(250)
+
+            fragRlBoxError.run {
+                if (layout.visibility == GONE) {
+
+                    empty.visibility = VISIBLE
+                    error.visibility = GONE
+                    layout.apply {
+                        visibility = VISIBLE
+                        animation = AnimationUtils.loadAnimation(
+                            binding.root.context,
+                            R.anim.fade_in_and_shrink
+                        )
+                    }
+                } else {
+                    empty.visibility = VISIBLE
+                    error.visibility = GONE
+                }
+            }
+        }
+    }
+
+    fun showError(e: Exception) = scope.launch {
+        binding.fragRlBoxError.run {
+            if (layout.visibility == GONE) {
+                delay(250)
+                error.visibility = VISIBLE
+                empty.visibility = GONE
+                layout.apply {
+                    visibility = VISIBLE
+                    animation = AnimationUtils.loadAnimation(
+                        binding.root.context,
+                        R.anim.fade_in_and_shrink
+                    )
+                }
+            } else {
+                error.visibility = VISIBLE
+                empty.visibility = GONE
+            }
         }
         Log.e(TAG_DEBUG, e.message.toString())
         e.printStackTrace()
     }
 
     fun showDeleting() {
-        binding.boxLoading.apply {
+        binding.fragRlBoxLoading.run {
             layout.visibility = VISIBLE
         }
     }
 
     fun showDeleted() {
-        binding.boxLoading.apply {
+        binding.fragRlBoxLoading.apply {
             layout.visibility = GONE
         }
     }
 
-    fun showAfterLoading() {
-        binding.apply {
-            boxGif.layout.apply {
+    fun showAfterLoading() = scope.launch {
+        binding.run {
+
+            fragRlBoxGif.layout.run {
                 if (visibility == VISIBLE) {
                     visibility = GONE
                     animation =
@@ -150,30 +134,40 @@ class RequestsListState(
                 }
             }
 
-            lifecycleScope.launch {
-                delay(250)
+            delay(450)
 
-                fragmentRequestsListFab.apply {
-                    if (visibility == GONE) {
-                        visibility = VISIBLE
-                        animation =
-                            AnimationUtils.loadAnimation(
-                                binding.root.context,
-                                R.anim.slide_in_from_bottom
-                            )
-                    }
+            fragRlToolbar.toolbar.apply {
+                if (visibility == GONE) {
+                    visibility = VISIBLE
+                    animation = AnimationUtils.loadAnimation(
+                        binding.root.context,
+                        R.anim.slide_in_from_top
+                    )
                 }
+            }
 
-                fragmentRequestsListToolbar.toolbar.apply {
-                    if (visibility == GONE) {
-                        visibility = VISIBLE
-                        animation = AnimationUtils.loadAnimation(
+            delay(100)
+
+            fragRlRecyclerHeader.run {
+                if (visibility == GONE) {
+                    visibility = VISIBLE
+                    animation =
+                        AnimationUtils.loadAnimation(
                             binding.root.context,
                             R.anim.slide_in_from_top
                         )
-                    }
                 }
+            }
 
+            fragRlFab.apply {
+                if (visibility == GONE) {
+                    visibility = VISIBLE
+                    animation =
+                        AnimationUtils.loadAnimation(
+                            binding.root.context,
+                            R.anim.slide_in_from_bottom
+                        )
+                }
             }
 
         }

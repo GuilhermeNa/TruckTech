@@ -152,5 +152,8 @@
     <string name="add_image">Adicionar imagem</string>
     <string name="sign">R$</string>
     <string name="back">Voltar</string>
+    <string name="loading_image">Carregando imagem...</string>
+    <string name="invoice">Nota</string>
+    <string name="ticket">Ticket descarga</string>
 
 </resources>

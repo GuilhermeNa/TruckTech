@@ -1,12 +1,15 @@
 package br.com.apps.usecase.usecase
 
 import br.com.apps.model.dto.travel.FreightDto
+import br.com.apps.repository.repository.StorageRepository
 import br.com.apps.repository.repository.freight.FreightRepository
-import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.WriteRequest
-import br.com.apps.repository.util.validateAndProcess
+import br.com.apps.usecase.util.buildFreightStoragePath
 
-class FreightUseCase(private val fRepository: FreightRepository) {
+class FreightUseCase(
+    private val fRepository: FreightRepository,
+    private val storage: StorageRepository
+) {
 
     /**
      * Saves a freight DTO to the repository.
@@ -16,19 +19,14 @@ class FreightUseCase(private val fRepository: FreightRepository) {
      * @throws InvalidAuthLevelException if the permission validation fails (Response.Error).
      * @throws NullPointerException if there is any null field.
      */
-    suspend fun save(writeReq: WriteRequest<FreightDto>) {
+    suspend fun save(writeReq: WriteRequest<FreightDto>): String {
         val dto = writeReq.data
         val auth = writeReq.authLevel
 
-        validateAndProcess(
-            validatePermission = { dto.validateWriteAccess(auth) },
-            validateData = { dto.validateDataForDbInsertion() }
-        ).let { response ->
-            when (response) {
-                is Response.Error -> throw response.exception
-                is Response.Success -> fRepository.save(dto)
-            }
-        }
+        dto.validateWriteAccess(auth)
+        dto.validateDataForDbInsertion()
+
+        return fRepository.save(dto)
     }
 
     /**
@@ -39,16 +37,16 @@ class FreightUseCase(private val fRepository: FreightRepository) {
      * @throws InvalidAuthLevelException if the permission validation fails (Response.Error).
      */
     suspend fun delete(writeReq: WriteRequest<FreightDto>) {
-        val dto = writeReq.data
-        val auth = writeReq.authLevel
+        writeReq.data.let { dto ->
+            dto.validateWriteAccess(writeReq.authLevel)
+            dto.validateDataIntegrity()
 
-        validateAndProcess(
-            validatePermission = { dto.validateWriteAccess(auth) }
-        ).let { response ->
-            when (response) {
-                is Response.Error -> throw response.exception
-                is Response.Success -> fRepository.delete(dto.id)
+            dto.urlInvoice?.run {
+                val path = buildFreightStoragePath(dto.id!!)
+                storage.deleteImage(path)
             }
+
+            fRepository.delete(dto.id!!)
         }
     }
 

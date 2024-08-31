@@ -14,25 +14,31 @@ import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
-import br.com.apps.model.expressions.toCurrencyPtBr
+import br.com.apps.model.dto.request.ItemDto
 import br.com.apps.model.model.request.Item
-import br.com.apps.repository.util.RESULT_KEY
+import br.com.apps.repository.util.CONNECTION_FAILURE
+import br.com.apps.repository.util.FAILED_TO_SAVE
+import br.com.apps.repository.util.KEY_RESULT
+import br.com.apps.repository.util.Response
 import br.com.apps.repository.util.TAG_DEBUG
 import br.com.apps.trucktech.R
 import br.com.apps.trucktech.databinding.FragmentItemEditorBinding
 import br.com.apps.trucktech.expressions.hideKeyboard
+import br.com.apps.trucktech.expressions.loadImageThroughUrl
 import br.com.apps.trucktech.expressions.popBackStack
+import br.com.apps.trucktech.expressions.snackBarRed
 import br.com.apps.trucktech.ui.activities.CameraActivity
 import br.com.apps.trucktech.ui.fragments.base_fragments.BaseFragmentWithToolbar
 import br.com.apps.trucktech.ui.fragments.image.ImageFragment
 import br.com.apps.trucktech.util.DeviceCapabilities
 import br.com.apps.trucktech.util.MonetaryMaskUtil
+import br.com.apps.trucktech.util.MonetaryMaskUtil.Companion.formatPriceSave
 import br.com.apps.trucktech.util.state.State
-import coil.load
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import java.io.File
 import java.security.InvalidParameterException
+
 
 private const val TOOLBAR_TITLE_EDITING = "Editando Item"
 private const val TOOLBAR_TITLE_CREATING = "Adicionando Item"
@@ -48,9 +54,10 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
     private val args: ItemEditorFragmentArgs by navArgs()
     private val vmData by lazy {
         ItemEditorVmData(
+            masterUid = mainActVM.loggedUser.masterUid,
             requestId = args.requestId,
             itemId = args.itemId,
-            access = mainActVM.loggedUser.accessLevel
+            accessLevel = mainActVM.loggedUser.accessLevel
         )
     }
     private val viewModel: ItemEditorViewModel by viewModel { parametersOf(vmData) }
@@ -67,11 +74,10 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
 
     private fun processActivityLauncherResult(data: Intent) {
         try {
-
-            data.getStringExtra(RESULT_KEY)?.let { filePath ->
+            data.getStringExtra(KEY_RESULT)?.let { filePath ->
                 val file = File(filePath)
                 if (file.exists()) {
-                    viewModel.setUrlImage(file.readBytes())
+                    viewModel.setBaImage(file.readBytes())
                     file.delete()
                 }
             }
@@ -103,8 +109,8 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initStateManager()
         initTextWatcher()
+        initStateManager()
         initOnTouchListener()
         initFab()
         initImgButtons()
@@ -113,29 +119,26 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
     private fun initImgButtons() {
         binding.run {
             fragIeBadgeMenuShow.setOnClickListener {
-                val bundle = Bundle()
+                viewModel.getImageData()?.let { imgData ->
+                    val bundle = Bundle()
+                    when (imgData) {
+                        is ByteArray -> bundle.putByteArray(
+                            ImageFragment.ARG_URL_IMAGE,
+                            imgData
+                        )
 
-                when (viewModel.urlImage.value) {
-                    is ByteArray -> bundle.putByteArray(
-                        ImageFragment.ARG_URL_IMAGE,
-                        viewModel.urlImage.value as ByteArray
-                    )
-
-                    is String -> bundle.putString(
-                        ImageFragment.ARG_URL_IMAGE,
-                        viewModel.urlImage.value as String
-                    )
+                        is String -> bundle.putString(
+                            ImageFragment.ARG_URL_IMAGE,
+                            imgData
+                        )
+                    }
+                    Navigation.findNavController(it)
+                        .navigate(R.id.action_global_image_fragment, bundle)
                 }
-
-                Navigation.findNavController(it).navigate(
-                    R.id.action_global_image_fragment,
-                    bundle
-                )
-
             }
 
             fragIeBadgeMenuDelete.setOnClickListener {
-                viewModel.setUrlImage(null)
+                viewModel.userDeleteTheImage()
             }
 
         }
@@ -161,8 +164,6 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
                 hideKeyboard()
                 true
             }
-
-
         }
     }
 
@@ -175,7 +176,7 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.menu_editor_save -> {
-                    //TODO
+                    tryToSave()
                     true
                 }
 
@@ -184,8 +185,47 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
         }
     }
 
-    private fun save() {
+    private fun tryToSave() {
+        binding.run {
 
+            val description = fragIeEdtxtDescription.text.toString()
+            val value = fragIeEdtxtValue.text.toString()
+
+            var isReadyToSave = true
+            if (description.isEmpty()) {
+                isReadyToSave = false
+                fragIeEdtxtDescription.error = "Preencha a descrição"
+            }
+            if (value.isEmpty()) {
+                isReadyToSave = false
+                fragIeEdtxtValue.error = "Preencha o valor"
+            }
+
+            if (isReadyToSave) {
+                val dto = ItemDto(
+                    description = description,
+                    value = value.formatPriceSave().toDouble()
+                )
+                save(dto)
+            }
+
+        }
+    }
+
+    private fun save(dto: ItemDto) {
+        DeviceCapabilities.hasNetworkConnection(requireContext()).let { hasConnection ->
+            when (hasConnection) {
+                true -> viewModel.save(dto).observe(viewLifecycleOwner) { response ->
+                    when (response) {
+                        is Response.Error -> requireView().snackBarRed(FAILED_TO_SAVE)
+                        is Response.Success -> requireView().popBackStack()
+                    }
+                }
+
+                false -> requireView().snackBarRed(CONNECTION_FAILURE)
+
+            }
+        }
     }
 
     override fun configureBaseFragment(configurator: BaseFragmentConfigurator) {
@@ -219,20 +259,19 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
             }
         }
 
-        viewModel.data.observe(viewLifecycleOwner) { data ->
-            bind(data)
-        }
+        viewModel.data.observe(viewLifecycleOwner) { bind(it) }
 
-        viewModel.urlImage.observe(viewLifecycleOwner) { urlImage ->
-            if (urlImage == null) {
+        viewModel.image.observe(viewLifecycleOwner) { image ->
+            if (image == null) {
                 stateHandler?.hideImage()
                 stateHandler?.setFabIconPhoto()
             } else {
-                binding.fragIeImg.load(urlImage)
-                stateHandler?.showImage()
-                stateHandler?.setFabIconRefresh()
+                image.getData()?.let { imgData ->
+                    binding.fragIeImg.loadImageThroughUrl(imgData)
+                    stateHandler?.setFabIconRefresh()
+                    stateHandler?.showImage()
+                }
             }
-
         }
 
     }
@@ -257,7 +296,7 @@ class ItemEditorFragment : BaseFragmentWithToolbar() {
     private fun bind(item: Item) {
         binding.apply {
             fragIeEdtxtDescription.setText(item.description)
-            fragIeEdtxtValue.setText(item.value.toCurrencyPtBr())
+            fragIeEdtxtValue.setText(item.value.toPlainString())
         }
     }
 
